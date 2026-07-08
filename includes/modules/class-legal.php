@@ -50,6 +50,42 @@ class CMP_Legal {
 	}
 
 	public static function register() {
-		// Shortcodes + privacy guide added in Task 4.
+		add_shortcode( 'cmp_privacy_link', array( __CLASS__, 'sc_privacy' ) );
+		add_shortcode( 'cmp_terms_link', array( __CLASS__, 'sc_terms' ) );
+		add_shortcode( 'cmp_cookie_settings_link', array( __CLASS__, 'sc_cookie_settings' ) );
+		add_action( 'admin_init', array( __CLASS__, 'privacy_guide' ) );
+	}
+
+	private static function page_link( $key, $fallback_label ) {
+		$s   = CMP_Consent::get_settings();
+		$pid = (int) ( isset( $s[ $key ] ) ? $s[ $key ] : 0 );
+		if ( $pid && 'publish' === get_post_status( $pid ) ) {
+			return '<a href="' . esc_url( (string) get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a>';
+		}
+		return esc_html( $fallback_label );
+	}
+
+	public static function sc_privacy() {
+		return self::page_link( 'privacy_page_id', __( 'Politica de confidențialitate', 'consent-manager-pro' ) );
+	}
+
+	public static function sc_terms() {
+		return self::page_link( 'terms_page_id', __( 'Termeni și condiții', 'consent-manager-pro' ) );
+	}
+
+	public static function sc_cookie_settings() {
+		$label = esc_html__( 'Setări cookie-uri', 'consent-manager-pro' );
+		return '<button type="button" class="cmp-cookie-settings-link" onclick="if(window.CMP){CMP.openPreferences();}return false;">' . $label . '</button>';
+	}
+
+	public static function privacy_guide() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$table = self::cookie_table_html( CMP_Consent::get_categories() );
+		wp_add_privacy_policy_content(
+			'Consent Manager Pro',
+			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
+		);
 	}
 }
