@@ -12,3 +12,21 @@ $h2 = CMP_Audit::hash_ip( '1.2.3.4', 'salt' );
 cmp_assert_eq( $h1, $h2, 'ip hash deterministic' );
 cmp_assert_eq( strlen( $h1 ), 64, 'ip hash is sha256 (64 hex chars)' );
 cmp_assert( $h1 !== CMP_Audit::hash_ip( '1.2.3.4', 'other' ), 'different salt => different hash' );
+
+// CSV/JSON export and prune.
+$rows = array(
+	array( 'id' => 1, 'ts' => '2026-01-01 10:00:00', 'decision' => 'accepted_all', 'categories' => 'necessary,statistics', 'lang' => 'ro', 'ip_hash' => 'abc', 'ua_hash' => 'def', 'url' => 'https://x/', 'version' => '1' ),
+);
+$csv = CMP_Audit::to_csv( $rows );
+cmp_assert( strpos( $csv, "\xEF\xBB\xBF" ) === 0, 'CSV starts with UTF-8 BOM' );
+cmp_assert( strpos( $csv, 'decision' ) !== false, 'CSV has header row' );
+cmp_assert( strpos( $csv, 'accepted_all' ) !== false, 'CSV has data row' );
+
+$json = CMP_Audit::to_json( $rows );
+$back = json_decode( $json, true );
+cmp_assert_eq( $back[0]['decision'], 'accepted_all', 'JSON round-trips decision' );
+
+// Prune threshold: 13 months before 2026-02-01 12:00:00 UTC.
+$now = gmmktime( 12, 0, 0, 2, 1, 2026 );
+$threshold = CMP_Audit::prune_before_date( 13, $now );
+cmp_assert_eq( $threshold, '2025-01-01 12:00:00', '13-month prune threshold computed' );

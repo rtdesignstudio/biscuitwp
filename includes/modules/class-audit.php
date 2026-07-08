@@ -88,4 +88,37 @@ class CMP_Audit {
 			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 	}
+
+	public static function to_csv( array $rows ) {
+		$cols = array( 'id', 'ts', 'decision', 'categories', 'lang', 'ip_hash', 'ua_hash', 'url', 'version' );
+		$out  = "\xEF\xBB\xBF"; // UTF-8 BOM
+		$out .= implode( ',', $cols ) . "\r\n";
+		foreach ( $rows as $r ) {
+			$line = array();
+			foreach ( $cols as $c ) {
+				$val    = isset( $r[ $c ] ) ? (string) $r[ $c ] : '';
+				$line[] = '"' . str_replace( '"', '""', $val ) . '"';
+			}
+			$out .= implode( ',', $line ) . "\r\n";
+		}
+		return $out;
+	}
+
+	public static function to_json( array $rows ) {
+		return json_encode( array_values( $rows ) );
+	}
+
+	public static function prune_before_date( $retention_months, $now_ts ) {
+		$threshold = strtotime( '-' . (int) $retention_months . ' months', (int) $now_ts );
+		return gmdate( 'Y-m-d H:i:s', $threshold );
+	}
+
+	public static function cron_prune() {
+		global $wpdb;
+		$settings = get_option( 'cmp_settings', array() );
+		$months   = isset( $settings['retention_months'] ) ? (int) $settings['retention_months'] : 13;
+		$table    = $wpdb->prefix . 'cmp_consent_log';
+		$before   = self::prune_before_date( $months, current_time( 'timestamp', true ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE ts < %s", $before ) );
+	}
 }
