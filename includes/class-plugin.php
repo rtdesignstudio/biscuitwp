@@ -36,6 +36,17 @@ class CMP_Plugin {
 		}
 	}
 
+	/**
+	 * Asset version = file mtime (busts cache on every change), CMP_VERSION as fallback.
+	 *
+	 * @param string $relative Path relative to the plugin root, e.g. "assets/css/banner.css".
+	 * @return string
+	 */
+	public static function asset_ver( $relative ) {
+		$mtime = @filemtime( CMP_PATH . ltrim( $relative, '/' ) );
+		return $mtime ? (string) $mtime : CMP_VERSION;
+	}
+
 	public static function activate() {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		CMP_Installer::install();
