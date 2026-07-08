@@ -28,6 +28,60 @@ class CMP_Sanitizer {
 		);
 	}
 
+	public static function categories( array $input ) {
+		$allowed_signals = array(
+			'analytics_storage', 'ad_storage', 'ad_user_data', 'ad_personalization',
+			'functionality_storage', 'personalization_storage', 'security_storage',
+		);
+		$out = array();
+		foreach ( $input as $cat ) {
+			if ( ! is_array( $cat ) ) {
+				continue;
+			}
+			$slug = isset( $cat['slug'] ) ? self::slug( $cat['slug'] ) : '';
+			if ( '' === $slug ) {
+				continue;
+			}
+			$signals = array();
+			foreach ( (array) ( isset( $cat['gtag_signals'] ) ? $cat['gtag_signals'] : array() ) as $sig ) {
+				$sig = (string) $sig;
+				if ( in_array( $sig, $allowed_signals, true ) && ! in_array( $sig, $signals, true ) ) {
+					$signals[] = $sig;
+				}
+			}
+			$cookies = array();
+			foreach ( (array) ( isset( $cat['cookies'] ) ? $cat['cookies'] : array() ) as $ck ) {
+				if ( ! is_array( $ck ) || empty( $ck['name'] ) ) {
+					continue;
+				}
+				$cookies[] = array(
+					'name'     => self::text( isset( $ck['name'] ) ? $ck['name'] : '' ),
+					'provider' => self::text( isset( $ck['provider'] ) ? $ck['provider'] : '' ),
+					'duration' => self::text( isset( $ck['duration'] ) ? $ck['duration'] : '' ),
+					'purpose'  => self::text( isset( $ck['purpose'] ) ? $ck['purpose'] : '' ),
+				);
+			}
+			$out[] = array(
+				'slug'         => $slug,
+				'label'        => self::text( isset( $cat['label'] ) ? $cat['label'] : '' ),
+				'description'  => self::text( isset( $cat['description'] ) ? $cat['description'] : '' ),
+				'required'     => ! empty( $cat['required'] ),
+				'gtag_signals' => $signals,
+				'cookies'      => $cookies,
+			);
+		}
+		return $out;
+	}
+
+	private static function slug( $value ) {
+		$value = strtolower( (string) $value );
+		return preg_replace( '/[^a-z0-9_]/', '', $value );
+	}
+
+	private static function text( $value ) {
+		return trim( strip_tags( (string) $value ) );
+	}
+
 	private static function pos_int( array $input, $key ) {
 		$v = isset( $input[ $key ] ) && is_numeric( $input[ $key ] ) ? (int) $input[ $key ] : 0;
 		return $v >= 0 ? $v : 0;
