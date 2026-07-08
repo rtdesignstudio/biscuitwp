@@ -16,6 +16,13 @@ class CMP_Sanitizer {
 		$ver = isset( $input['policy_version'] ) ? trim( (string) $input['policy_version'] ) : '';
 		$ret = isset( $input['retention_months'] ) ? (int) $input['retention_months'] : 0;
 
+		$text_keys = array( 'title', 'intro', 'accept', 'reject', 'prefs', 'save', 'prefs_title' );
+		$texts_in  = isset( $input['texts'] ) && is_array( $input['texts'] ) ? $input['texts'] : array();
+		$texts     = array();
+		foreach ( $text_keys as $tk ) {
+			$texts[ $tk ] = isset( $texts_in[ $tk ] ) ? trim( strip_tags( (string) $texts_in[ $tk ] ) ) : '';
+		}
+
 		return array(
 			'position'         => in_array( $pos, $positions, true ) ? $pos : 'bottom',
 			'layout'           => in_array( $lay, $layouts, true ) ? $lay : 'detailed',
@@ -25,6 +32,7 @@ class CMP_Sanitizer {
 			'privacy_page_id'  => self::pos_int( $input, 'privacy_page_id' ),
 			'terms_page_id'    => self::pos_int( $input, 'terms_page_id' ),
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),
+			'texts'            => $texts,
 		);
 	}
 

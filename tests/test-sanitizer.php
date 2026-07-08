@@ -40,3 +40,17 @@ cmp_assert_eq( $c[0]['label'], 'Statistici', 'label stripped of tags and trimmed
 cmp_assert_eq( $c[0]['required'], false, 'required coerced to bool false' );
 cmp_assert_eq( $c[0]['gtag_signals'], array( 'analytics_storage' ), 'unknown signal removed' );
 cmp_assert_eq( $c[0]['cookies'][0]['name'], '_ga', 'cookie name kept' );
+
+$st = CMP_Sanitizer::settings( array(
+	'position' => 'bottom',
+	'texts'    => array(
+		'title'   => '  <b>Titlu</b>  ',
+		'accept'  => 'Accept tot',
+		'evilkey' => 'nope',
+	),
+) );
+cmp_assert( isset( $st['texts'] ), 'settings returns texts array' );
+cmp_assert_eq( $st['texts']['title'], 'Titlu', 'text stripped + trimmed' );
+cmp_assert_eq( $st['texts']['accept'], 'Accept tot', 'known text key kept' );
+cmp_assert( ! isset( $st['texts']['evilkey'] ), 'unknown text key dropped' );
+cmp_assert( array_key_exists( 'reject', $st['texts'] ), 'all known text keys present (empty string if unset)' );

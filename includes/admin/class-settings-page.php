@@ -49,6 +49,33 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Retenție log (luni)', 'consent-manager-pro' ); ?></th>
 						<td><input type="number" min="1" name="cmp[retention_months]" value="<?php echo esc_attr( $s['retention_months'] ); ?>" class="small-text"></td>
 					</tr>
+					<?php
+					$cmp_texts = isset( $s['texts'] ) && is_array( $s['texts'] ) ? $s['texts'] : array();
+					$cmp_field = function ( $key ) use ( $cmp_texts ) {
+						return isset( $cmp_texts[ $key ] ) ? $cmp_texts[ $key ] : '';
+					};
+					$cmp_text_fields = array(
+						'title'       => __( 'Titlu banner', 'consent-manager-pro' ),
+						'intro'       => __( 'Text introductiv', 'consent-manager-pro' ),
+						'accept'      => __( 'Buton „Acceptă tot"', 'consent-manager-pro' ),
+						'reject'      => __( 'Buton „Doar necesare"', 'consent-manager-pro' ),
+						'prefs'       => __( 'Buton „Gestionează"', 'consent-manager-pro' ),
+						'save'        => __( 'Buton „Confirmă selecția"', 'consent-manager-pro' ),
+						'prefs_title' => __( 'Titlu preferințe', 'consent-manager-pro' ),
+					);
+					?>
+					<?php foreach ( $cmp_text_fields as $tk => $tlabel ) : ?>
+						<tr>
+							<th scope="row"><?php echo esc_html( $tlabel ); ?></th>
+							<td>
+								<?php if ( 'intro' === $tk ) : ?>
+									<textarea name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" class="large-text" rows="2" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>"><?php echo esc_textarea( $cmp_field( $tk ) ); ?></textarea>
+								<?php else : ?>
+									<input type="text" class="regular-text" name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" value="<?php echo esc_attr( $cmp_field( $tk ) ); ?>" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>">
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Pagină Confidențialitate', 'consent-manager-pro' ); ?></th>
 						<td><?php wp_dropdown_pages( array( 'name' => 'cmp[privacy_page_id]', 'selected' => $s['privacy_page_id'], 'show_option_none' => __( '— niciuna —', 'consent-manager-pro' ), 'option_none_value' => 0 ) ); ?></td>
