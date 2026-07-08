@@ -89,6 +89,7 @@
 
 	function togglePrefs() {
 		var prefs = banner.querySelector('[data-cmp-prefs]');
+		if (!prefs) { return; }
 		var saveBtn = banner.querySelector('[data-cmp-action="save"]');
 		var open = prefs.hidden;
 		prefs.hidden = !open;
@@ -107,7 +108,8 @@
 			else if (action === 'save') {
 				var sel = selectedFromUI();
 				var all = D.categories.length;
-				var decision = sel.length >= all ? 'accepted_all' : (sel.length <= requiredSlugs().length ? 'rejected_all' : 'partial');
+				var reqCount = requiredSlugs().length;
+				var decision = sel.length >= all ? 'accepted_all' : (sel.length <= reqCount ? 'rejected_all' : 'partial');
 				save(sel, decision);
 			}
 		});
