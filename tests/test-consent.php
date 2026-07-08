@@ -22,3 +22,19 @@ cmp_assert_eq( $r['marketing'], false, 'partial: marketing denied' );
 $r = CMP_Consent::evaluate( $cookie, $cats, '2' );
 cmp_assert_eq( $r['statistics'], false, 'stale version: statistics denied' );
 cmp_assert_eq( $r['necessary'], true, 'stale version: necessary still allowed' );
+
+$cats2 = array(
+	array( 'slug' => 'necessary', 'required' => true, 'gtag_signals' => array( 'security_storage' ) ),
+	array( 'slug' => 'statistics', 'required' => false, 'gtag_signals' => array( 'analytics_storage' ) ),
+	array( 'slug' => 'marketing', 'required' => false, 'gtag_signals' => array( 'ad_storage' ) ),
+);
+
+$d = CMP_Consent::build_default_signals( $cats2 );
+cmp_assert_eq( $d['security_storage'], 'granted', 'default: security_storage granted (required)' );
+cmp_assert_eq( $d['analytics_storage'], 'denied', 'default: analytics_storage denied' );
+cmp_assert_eq( $d['ad_storage'], 'denied', 'default: ad_storage denied' );
+
+$u = CMP_Consent::build_update_signals( $cats2, array( 'statistics' ) );
+cmp_assert_eq( $u['analytics_storage'], 'granted', 'update: analytics granted when statistics accepted' );
+cmp_assert_eq( $u['ad_storage'], 'denied', 'update: ad_storage denied when marketing not accepted' );
+cmp_assert_eq( $u['security_storage'], 'granted', 'update: security_storage always granted (required)' );

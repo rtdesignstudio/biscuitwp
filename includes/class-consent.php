@@ -44,6 +44,38 @@ class CMP_Consent {
 		return isset( $s['policy_version'] ) ? (string) $s['policy_version'] : '1';
 	}
 
+	public static function build_default_signals( array $categories ) {
+		return self::map_signals(
+			$categories,
+			function ( $cat ) {
+				return ! empty( $cat['required'] );
+			}
+		);
+	}
+
+	public static function build_update_signals( array $categories, array $accepted ) {
+		return self::map_signals(
+			$categories,
+			function ( $cat ) use ( $accepted ) {
+				return ! empty( $cat['required'] ) || in_array( $cat['slug'], $accepted, true );
+			}
+		);
+	}
+
+	private static function map_signals( array $categories, $is_granted ) {
+		$signals = array();
+		foreach ( $categories as $cat ) {
+			$granted = (bool) call_user_func( $is_granted, $cat );
+			foreach ( (array) ( isset( $cat['gtag_signals'] ) ? $cat['gtag_signals'] : array() ) as $sig ) {
+				// Granted wins if any category grants the signal.
+				if ( ! isset( $signals[ $sig ] ) || $granted ) {
+					$signals[ $sig ] = $granted ? 'granted' : 'denied';
+				}
+			}
+		}
+		return $signals;
+	}
+
 	private static function read_cookie() {
 		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
 			return null;
