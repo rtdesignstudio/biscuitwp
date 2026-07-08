@@ -39,7 +39,7 @@ class CMP_Admin {
 	}
 
 	public function assets( $hook ) {
-		if ( false === strpos( (string) $hook, self::SLUG ) ) {
+		if ( false === strpos( (string) $hook, 'cmp-' ) ) {
 			return;
 		}
 		wp_enqueue_style( 'cmp-admin', CMP_URL . 'assets/css/admin.css', array(), CMP_VERSION );

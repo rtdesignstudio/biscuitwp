@@ -99,7 +99,7 @@ class CMP_Audit_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE " . self::table_name() );
+		$wpdb->query( 'TRUNCATE TABLE `' . self::table_name() . '`' );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-audit', 'purged' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
