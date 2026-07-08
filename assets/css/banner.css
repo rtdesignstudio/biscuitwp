@@ -50,7 +50,7 @@ body.cmp-has-banner { overflow: hidden; }
 	padding: 28px 32px;
 	width: 100%;
 	max-width: 720px;
-	margin: auto;
+	margin-inline: auto; /* horizontal centering only; vertical position via align-items */
 }
 
 .cmp__title {
