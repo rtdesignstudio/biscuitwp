@@ -23,6 +23,32 @@ class CMP_Legal {
 		return is_readable( $path ) ? (string) file_get_contents( $path ) : '';
 	}
 
+	public static function cookie_table_html( array $categories ) {
+		$rows = '';
+		foreach ( $categories as $cat ) {
+			$cat_label = isset( $cat['label'] ) ? $cat['label'] : ( isset( $cat['slug'] ) ? $cat['slug'] : '' );
+			foreach ( (array) ( isset( $cat['cookies'] ) ? $cat['cookies'] : array() ) as $ck ) {
+				$rows .= '<tr>'
+					. '<td>' . self::esc( isset( $ck['name'] ) ? $ck['name'] : '' ) . '</td>'
+					. '<td>' . self::esc( isset( $ck['provider'] ) ? $ck['provider'] : '' ) . '</td>'
+					. '<td>' . self::esc( isset( $ck['duration'] ) ? $ck['duration'] : '' ) . '</td>'
+					. '<td>' . self::esc( isset( $ck['purpose'] ) ? $ck['purpose'] : '' ) . '</td>'
+					. '<td>' . self::esc( $cat_label ) . '</td>'
+					. '</tr>';
+			}
+		}
+		if ( '' === $rows ) {
+			return '<p>Nu au fost definite cookie-uri.</p>';
+		}
+		return '<table><thead><tr>'
+			. '<th>Nume</th><th>Furnizor</th><th>Durată</th><th>Scop</th><th>Categorie</th>'
+			. '</tr></thead><tbody>' . $rows . '</tbody></table>';
+	}
+
+	private static function esc( $value ) {
+		return htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' );
+	}
+
 	public static function register() {
 		// Shortcodes + privacy guide added in Task 4.
 	}
