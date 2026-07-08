@@ -26,6 +26,8 @@ class CMP_Plugin {
 
 		new CMP_Banner();
 		CMP_Audit::register();
+		require_once CMP_PATH . 'includes/modules/class-legal.php';
+		CMP_Legal::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
