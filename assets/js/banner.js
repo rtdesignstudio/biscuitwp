@@ -53,14 +53,27 @@
 	}
 
 	function selectedFromUI() {
-		var boxes = banner.querySelectorAll('[data-cmp-cat]');
-		var out = [];
-		boxes.forEach(function (b) { if (b.checked) { out.push(b.value); } });
+		// Required categories have no toggle in the DOM — always include them.
+		var out = requiredSlugs();
+		banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) {
+			if (b.checked && out.indexOf(b.value) === -1) { out.push(b.value); }
+		});
 		return out;
 	}
 
-	function show() { if (banner) { banner.hidden = false; trapFocus(true); } }
-	function hide() { if (banner) { banner.hidden = true; trapFocus(false); } }
+	function show() {
+		if (!banner) { return; }
+		banner.hidden = false;
+		document.body.classList.add('cmp-has-banner');
+		trapFocus(true);
+	}
+	function hide() {
+		if (!banner) { return; }
+		banner.hidden = true;
+		document.body.classList.remove('cmp-has-banner');
+		closePrefs();
+		trapFocus(false);
+	}
 
 	// --- Focus trap (WCAG 2.1 AA) ---
 	var lastFocus = null;
@@ -87,14 +100,9 @@
 		}
 	}
 
-	function togglePrefs() {
-		var prefs = banner.querySelector('[data-cmp-prefs]');
-		if (!prefs) { return; }
-		var saveBtn = banner.querySelector('[data-cmp-action="save"]');
-		var open = prefs.hidden;
-		prefs.hidden = !open;
-		if (saveBtn) { saveBtn.hidden = !open; }
-	}
+	function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
+	function openPrefs() { var m = modal(); if (m) { m.classList.add('is-prefs-open'); } }
+	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 	function bind() {
 		if (!banner) { return; }
@@ -104,7 +112,8 @@
 			var action = btn.getAttribute('data-cmp-action');
 			if (action === 'accept') { save(D.categories.map(function (c) { return c.slug; }), 'accepted_all'); }
 			else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); }
-			else if (action === 'prefs') { togglePrefs(); }
+			else if (action === 'prefs') { openPrefs(); }
+			else if (action === 'back') { closePrefs(); }
 			else if (action === 'save') {
 				var sel = selectedFromUI();
 				var all = D.categories.length;
@@ -125,7 +134,7 @@
 			return (c.categories || []).indexOf(slug) !== -1;
 		},
 		getConsent: function () { return readCookie(); },
-		openPreferences: function () { show(); togglePrefs(); }
+		openPreferences: function () { show(); openPrefs(); }
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
