@@ -38,3 +38,8 @@ $u = CMP_Consent::build_update_signals( $cats2, array( 'statistics' ) );
 cmp_assert_eq( $u['analytics_storage'], 'granted', 'update: analytics granted when statistics accepted' );
 cmp_assert_eq( $u['ad_storage'], 'denied', 'update: ad_storage denied when marketing not accepted' );
 cmp_assert_eq( $u['security_storage'], 'granted', 'update: security_storage always granted (required)' );
+
+cmp_assert_eq( CMP_Consent::should_autoreject( array( 'DNT' => '1' ) ), true, 'DNT=1 => autoreject' );
+cmp_assert_eq( CMP_Consent::should_autoreject( array( 'Sec-GPC' => '1' ) ), true, 'GPC=1 => autoreject' );
+cmp_assert_eq( CMP_Consent::should_autoreject( array( 'DNT' => '0' ) ), false, 'DNT=0 => no autoreject' );
+cmp_assert_eq( CMP_Consent::should_autoreject( array() ), false, 'no headers => no autoreject' );
