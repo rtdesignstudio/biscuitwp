@@ -1,75 +1,75 @@
 # Consent Manager Pro
 
-Plugin WordPress pentru consimțământ cookie conform GDPR, generare pagini legale și registru de consimțăminte. Theme-agnostic, fără jQuery, fără dependențe externe.
+WordPress plugin for GDPR cookie consent, legal page generation and a consent audit log. Theme-agnostic, no jQuery, no external dependencies.
 
-- **Autor:** Sergiu Pascaru — [rt.md](https://rt.md)
-- **Licență:** GPL-2.0-or-later
-- **Necesită:** WordPress ~6.x, PHP 7.4+
+- **Author:** Sergiu Pascaru — [rt.md](https://rt.md)
+- **License:** GPL-2.0-or-later
+- **Requires:** WordPress ~6.x, PHP 7.4+
 
-## Ce face
+## What it does
 
-- **Banner de consimțământ** — modal centrat cu overlay + blur, scroll blocat până la decizie. Poziție/preset configurabile, texte editabile din admin.
-- **Google Consent Mode v2** nativ — emite `gtag('consent', 'default'/'update', …)` din maparea categorie → semnale, înainte ca Site Kit/GTM să tragă tag-urile.
-- **Categorii dinamice** — N categorii (Necesare/Statistici/Marketing implicit), fiecare cu cookies (nume/furnizor/durată/scop) și semnale Consent Mode.
-- **Registru consimțăminte (audit GDPR)** — logare cu dedup 24h, hash SHA256 IP + salt, retenție pe cron, export CSV (BOM) / JSON, purge.
-- **Wizard pagini legale** — generează Politica de confidențialitate / Termeni și condiții / Politica de cookie-uri ca pagini WP; integrare cu pagina oficială de confidențialitate WordPress și Privacy Policy Guide.
-- **DNT / GPC** — respectă `Do-Not-Track` / `Sec-GPC`: refuză automat cookie-urile opționale fără a mai afișa banner-ul.
-- **Multilingv** — WPML / Polylang (traducere stringuri + duplicare pagini legale) + i18n nativ (`.pot`).
+- **Consent banner** — centered modal with a full-page blurred overlay, scroll locked until the visitor decides. Configurable position/preset, texts editable from the admin.
+- **Google Consent Mode v2** (native) — emits `gtag('consent', 'default'/'update', …)` from the category → signals mapping, before Site Kit/GTM fire their tags.
+- **Dynamic categories** — N categories (Necessary/Statistics/Marketing by default), each with cookies (name/provider/duration/purpose) and Consent Mode signals.
+- **Consent audit log (GDPR)** — logging with 24h dedup, SHA-256 IP hash + salt, cron-based retention, CSV (BOM) / JSON export, purge.
+- **Legal pages wizard** — generates Privacy Policy / Terms & Conditions / Cookie Policy as WP pages; integrates with the native WordPress privacy policy page and the Privacy Policy Guide.
+- **DNT / GPC** — honors `Do-Not-Track` / `Sec-GPC`: automatically rejects optional cookies without showing the banner.
+- **Multilingual** — WPML / Polylang (string translation + legal page duplication) plus native i18n (`.pot`).
 
-## Instalare
+## Installation
 
-Copiază folderul `consent-manager-pro/` în `wp-content/plugins/` și activează-l din **Plugins**. Tabelul de audit și categoriile implicite se creează la activare.
+Copy the `consent-manager-pro/` folder into `wp-content/plugins/` and activate it from **Plugins**. The audit table and the default categories are created on activation.
 
-Configurare în **WP Admin → Consent Manager** (link „Setări" direct în lista de plugin-uri).
+Configure under **WP Admin → Consent Manager** (a "Settings" link is also shown directly in the plugins list).
 
-## Configurare
+## Configuration
 
-- **Setări** — poziție banner, preset, versiune politică, retenție log, mapare pagini legale, **texte banner**.
-- **Categorii** — CRUD categorii + cookies + semnale Consent Mode.
-- **Registru consimțăminte** — listă filtrabilă, sumar, export, purge.
-- **Pagini legale** — wizard de generare.
+- **Settings** — banner position, preset, policy version, log retention, legal page mapping, **banner texts**.
+- **Categories** — CRUD for categories + cookies + Consent Mode signals.
+- **Consent log** — filterable list, summary, export, purge.
+- **Legal pages** — generation wizard.
 
-> **Versiune politică:** incrementeaz-o când schimbi ce cookie-uri/scopuri folosești — cookie-urile de consimțământ mai vechi devin expirate și banner-ul reapare pentru reconfirmare (cerință GDPR la schimbarea scopului).
+> **Policy version:** bump it whenever you change which cookies/purposes you use — older consent cookies become stale and the banner reappears for re-confirmation (a GDPR requirement when the purpose changes).
 
-## API pentru dezvoltatori
+## Developer API
 
 ### PHP
 
 ```php
-CMP_Consent::is_allowed( 'statistics' );  // bool — gating server-side
-CMP_Consent::get_categories();            // categoriile configurate
-CMP_Consent::get_consent();               // decizia curentă sau null
+CMP_Consent::is_allowed( 'statistics' );  // bool — server-side gating
+CMP_Consent::get_categories();            // configured categories
+CMP_Consent::get_consent();               // current decision or null
 
-do_action( 'cmp_consent_updated', $categories, $decision );  // la logare
-do_action( 'cmp_legal_page_created', $post_id, $type );      // după generare pagină legală
+do_action( 'cmp_consent_updated', $categories, $decision );  // on logging
+do_action( 'cmp_legal_page_created', $post_id, $type );      // after a legal page is generated
 apply_filters( 'cmp_render_banner', $html );
 ```
 
 ### JavaScript
 
 ```js
-CMP.isAllowed('statistics');   // bool, din cookie
-CMP.getConsent();              // obiectul de consimțământ
-CMP.openPreferences();         // deschide panoul de preferințe
+CMP.isAllowed('statistics');   // bool, from the cookie
+CMP.getConsent();              // the consent object
+CMP.openPreferences();         // open the preferences panel
 document.addEventListener('cmp:consent', e => e.detail.categories);
 ```
 
-### Shortcode-uri
+### Shortcodes
 
 ```
-[cmp_privacy_link]           Link către Politica de confidențialitate
-[cmp_terms_link]             Link către Termeni și condiții
-[cmp_cookie_settings_link]   Buton „Setări cookie-uri" (redeschide preferințele)
+[cmp_privacy_link]           Link to the Privacy Policy
+[cmp_terms_link]             Link to the Terms & Conditions
+[cmp_cookie_settings_link]   "Cookie settings" button (reopens preferences)
 ```
 
-## Dezvoltare
+## Development
 
-Logica pură (evaluare consimțământ, semnale, sanitizare, audit, i18n, legal) are teste PHP standalone, fără PHPUnit/Composer:
+The pure logic (consent evaluation, signals, sanitization, audit, i18n, legal) has standalone PHP tests, with no PHPUnit/Composer:
 
 ```bash
 php tests/run.php
 ```
 
-## Licență
+## License
 
 GPL-2.0-or-later.
