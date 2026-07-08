@@ -24,6 +24,20 @@ class CMP_Admin {
 
 		require_once CMP_PATH . 'includes/admin/class-legal-page.php';
 		add_action( 'admin_post_cmp_generate_legal', array( 'CMP_Legal_Page', 'generate' ) );
+
+		add_filter( 'plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'action_links' ) );
+	}
+
+	/**
+	 * Add a "Setări" link to the plugin row on the Plugins screen.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public function action_links( $links ) {
+		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ) . '">' . esc_html__( 'Setări', 'consent-manager-pro' ) . '</a>';
+		array_unshift( $links, $settings );
+		return $links;
 	}
 
 	public function menu() {
