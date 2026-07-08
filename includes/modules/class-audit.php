@@ -15,4 +15,77 @@ class CMP_Audit {
 			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', self::CRON_HOOK );
 		}
 	}
+
+	public static function should_dedup( $last_ts, $now_ts, $window_seconds ) {
+		if ( null === $last_ts ) {
+			return false;
+		}
+		return ( $now_ts - (int) $last_ts ) < (int) $window_seconds;
+	}
+
+	public static function hash_ip( $ip, $salt ) {
+		return hash( 'sha256', (string) $ip . '|' . (string) $salt );
+	}
+
+	private static function client_ip() {
+		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+	}
+
+	public static function ajax_log() {
+		if ( ! check_ajax_referer( 'cmp_log_consent', 'nonce', false ) ) {
+			wp_send_json_error( 'bad_nonce', 400 );
+		}
+		$decisions  = array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' );
+		$decision   = isset( $_POST['decision'] ) ? sanitize_text_field( wp_unslash( $_POST['decision'] ) ) : '';
+		if ( ! in_array( $decision, $decisions, true ) ) {
+			wp_send_json_error( 'bad_decision', 400 );
+		}
+		$categories = isset( $_POST['categories'] ) ? wp_unslash( $_POST['categories'] ) : '[]';
+		$decoded    = json_decode( $categories, true );
+		$cats_csv   = is_array( $decoded ) ? implode( ',', array_map( 'sanitize_key', $decoded ) ) : '';
+		$version    = isset( $_POST['version'] ) ? sanitize_text_field( wp_unslash( $_POST['version'] ) ) : CMP_Consent::current_version();
+
+		self::record( array(
+			'decision'   => $decision,
+			'categories' => $cats_csv,
+			'lang'       => substr( (string) get_locale(), 0, 8 ),
+			'url'        => isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
+			'version'    => $version,
+		) );
+		wp_send_json_success();
+	}
+
+	public static function record( array $row ) {
+		global $wpdb;
+		$table   = $wpdb->prefix . 'cmp_consent_log';
+		$now     = current_time( 'timestamp', true );
+		$ip_hash = self::hash_ip( self::client_ip(), wp_salt( 'auth' ) );
+		$ua      = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
+		$ua_hash = md5( $ua );
+
+		// Dedup: same (ip_hash, decision) within 24h.
+		$last = $wpdb->get_var( $wpdb->prepare(
+			"SELECT UNIX_TIMESTAMP(ts) FROM {$table} WHERE ip_hash = %s AND decision = %s ORDER BY ts DESC LIMIT 1",
+			$ip_hash,
+			$row['decision']
+		) );
+		if ( self::should_dedup( null !== $last ? (int) $last : null, $now, DAY_IN_SECONDS ) ) {
+			return;
+		}
+
+		$wpdb->insert(
+			$table,
+			array(
+				'ts'         => gmdate( 'Y-m-d H:i:s', $now ),
+				'decision'   => $row['decision'],
+				'categories' => $row['categories'],
+				'lang'       => $row['lang'],
+				'ip_hash'    => $ip_hash,
+				'ua_hash'    => $ua_hash,
+				'url'        => $row['url'],
+				'version'    => $row['version'],
+			),
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+		);
+	}
 }
