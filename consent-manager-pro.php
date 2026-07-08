@@ -1,9 +1,12 @@
 <?php
 /**
  * Plugin Name: Consent Manager Pro
- * Description: Cookie consent, legal pages & GDPR audit trail. Theme-agnostic, no jQuery.
+ * Plugin URI: https://github.com/rtgit003/consent-manager-pro
+ * Description: Afișează un banner de consimțământ pentru cookie-uri conform GDPR, generează paginile legale (Politica de confidențialitate, Termeni și condiții, Politica de cookie-uri) și păstrează un registru al consimțămintelor. Configurare rapidă și suport multilingv.
  * Version: 0.1.0
  * Requires PHP: 7.4
+ * Author: Sergiu Pascaru
+ * Author URI: https://rt.md
  * License: GPL-2.0-or-later
  * Text Domain: consent-manager-pro
  */
