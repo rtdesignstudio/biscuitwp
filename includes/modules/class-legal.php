@@ -54,6 +54,7 @@ class CMP_Legal {
 		add_shortcode( 'cmp_terms_link', array( __CLASS__, 'sc_terms' ) );
 		add_shortcode( 'cmp_cookie_settings_link', array( __CLASS__, 'sc_cookie_settings' ) );
 		add_action( 'admin_init', array( __CLASS__, 'privacy_guide' ) );
+		add_action( 'cmp_legal_page_created', array( __CLASS__, 'on_page_created' ), 10, 2 );
 	}
 
 	private static function page_link( $key, $fallback_label ) {
@@ -87,5 +88,102 @@ class CMP_Legal {
 			'Consent Manager Pro',
 			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
 		);
+	}
+
+	public static function on_page_created( $post_id, $type ) {
+		$post_id = (int) $post_id;
+		if ( ! $post_id ) {
+			return;
+		}
+
+		// Polylang.
+		if ( function_exists( 'pll_set_post_language' ) && function_exists( 'pll_save_post_translations' ) && function_exists( 'pll_languages_list' ) && function_exists( 'pll_default_language' ) ) {
+			self::duplicate_polylang( $post_id );
+			return;
+		}
+
+		// WPML.
+		if ( defined( 'ICL_SITEPRESS_VERSION' ) && function_exists( 'icl_object_id' ) ) {
+			self::duplicate_wpml( $post_id );
+		}
+	}
+
+	private static function duplicate_polylang( $source_id ) {
+		$default = pll_default_language();
+		if ( ! $default ) {
+			return;
+		}
+		pll_set_post_language( $source_id, $default );
+
+		$translations = array( $default => $source_id );
+		$source       = get_post( $source_id );
+		foreach ( (array) pll_languages_list() as $lang ) {
+			if ( $lang === $default ) {
+				continue;
+			}
+			// Skip if a translation already exists.
+			if ( function_exists( 'pll_get_post' ) && pll_get_post( $source_id, $lang ) ) {
+				$translations[ $lang ] = (int) pll_get_post( $source_id, $lang );
+				continue;
+			}
+			$copy_id = wp_insert_post( array(
+				'post_title'   => $source->post_title,
+				'post_content' => $source->post_content,
+				'post_status'  => 'draft',
+				'post_type'    => 'page',
+			) );
+			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
+				pll_set_post_language( $copy_id, $lang );
+				$translations[ $lang ] = (int) $copy_id;
+			}
+		}
+		pll_save_post_translations( $translations );
+	}
+
+	private static function duplicate_wpml( $source_id ) {
+		global $sitepress;
+		$default = apply_filters( 'wpml_default_language', null );
+		$info    = apply_filters( 'wpml_element_language_details', null, array( 'element_id' => $source_id, 'element_type' => 'post_page' ) );
+		$trid    = ( $info && isset( $info->trid ) ) ? $info->trid : null;
+
+		// Ensure the source is registered in the default language.
+		do_action( 'wpml_set_element_language_details', array(
+			'element_id'           => $source_id,
+			'element_type'         => 'post_page',
+			'trid'                 => $trid,
+			'language_code'        => $default,
+			'source_language_code' => null,
+		) );
+
+		$langs = apply_filters( 'wpml_active_languages', null );
+		if ( ! is_array( $langs ) ) {
+			return;
+		}
+		$source = get_post( $source_id );
+		$trid   = $trid ? $trid : apply_filters( 'wpml_element_trid', null, $source_id, 'post_page' );
+		foreach ( $langs as $code => $lang ) {
+			if ( $code === $default ) {
+				continue;
+			}
+			$existing = apply_filters( 'wpml_object_id', $source_id, 'page', false, $code );
+			if ( $existing && (int) $existing !== $source_id ) {
+				continue; // translation already exists
+			}
+			$copy_id = wp_insert_post( array(
+				'post_title'   => $source->post_title,
+				'post_content' => $source->post_content,
+				'post_status'  => 'draft',
+				'post_type'    => 'page',
+			) );
+			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
+				do_action( 'wpml_set_element_language_details', array(
+					'element_id'           => $copy_id,
+					'element_type'         => 'post_page',
+					'trid'                 => $trid,
+					'language_code'        => $code,
+					'source_language_code' => $default,
+				) );
+			}
+		}
 	}
 }
