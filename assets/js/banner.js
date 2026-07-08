@@ -140,6 +140,12 @@
 	document.addEventListener('DOMContentLoaded', function () {
 		bind();
 		var c = readCookie();
-		if (!c || String(c.v) !== String(D.version)) { show(); }
+		if (c && String(c.v) === String(D.version)) { return; }
+		if (D.autoReject) {
+			// Global Privacy Control / Do-Not-Track: record refusal without prompting.
+			save(requiredSlugs(), 'rejected_all');
+		} else {
+			show();
+		}
 	});
 })();
