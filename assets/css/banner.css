@@ -35,6 +35,11 @@
 }
 .cmp[hidden] { display: none; }
 
+/* Banner position (vertical anchor of the modal within the overlay). */
+.cmp--pos-bottom { align-items: flex-end; }
+.cmp--pos-top { align-items: flex-start; }
+.cmp--pos-modal-center { align-items: center; }
+
 /* Scroll lock while the banner is open (class added by JS). */
 body.cmp-has-banner { overflow: hidden; }
 

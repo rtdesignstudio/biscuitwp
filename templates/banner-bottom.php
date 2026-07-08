@@ -21,7 +21,8 @@ $cmp_text = function ( $key, $default ) use ( $cmp_t ) {
 $cmp_privacy_id  = isset( $settings['privacy_page_id'] ) ? (int) $settings['privacy_page_id'] : 0;
 $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 ?>
-<div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?>" data-cmp hidden>
+<?php $cmp_position = isset( $settings['position'] ) ? $settings['position'] : 'modal-center'; ?>
+<div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?> cmp--pos-<?php echo esc_attr( $cmp_position ); ?>" data-cmp hidden>
 	<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" data-cmp-modal>
 
 		<!-- View 1: main message + actions -->
