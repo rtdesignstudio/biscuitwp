@@ -1,0 +1,405 @@
+# Copyright (C) 2026 Sergiu Pascaru
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Consent Manager Pro 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-pro\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-07-08T09:24:47+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: consent-manager-pro\n"
+
+#. Plugin Name of the plugin
+#: consent-manager-pro.php
+msgid "Consent Manager Pro"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: consent-manager-pro.php
+msgid "https://github.com/rtgit003/consent-manager-pro"
+msgstr ""
+
+#. Description of the plugin
+#: consent-manager-pro.php
+msgid "Afișează un banner de consimțământ pentru cookie-uri conform GDPR, generează paginile legale (Politica de confidențialitate, Termeni și condiții, Politica de cookie-uri) și păstrează un registru al consimțămintelor. Configurare rapidă și suport multilingv."
+msgstr ""
+
+#. Author of the plugin
+#: consent-manager-pro.php
+msgid "Sergiu Pascaru"
+msgstr ""
+
+#. Author URI of the plugin
+#: consent-manager-pro.php
+msgid "https://rt.md"
+msgstr ""
+
+#: includes/admin/class-admin.php:31
+#: includes/admin/class-admin.php:32
+msgid "Consent Manager"
+msgstr ""
+
+#: includes/admin/class-admin.php:39
+msgid "Setări"
+msgstr ""
+
+#: includes/admin/class-admin.php:40
+#: includes/admin/class-audit-list-table.php:15
+msgid "Categorii"
+msgstr ""
+
+#: includes/admin/class-admin.php:41
+#: includes/admin/class-audit-page.php:30
+msgid "Registru consimțăminte"
+msgstr ""
+
+#: includes/admin/class-admin.php:42
+msgid "Pagini legale"
+msgstr ""
+
+#: includes/admin/class-audit-list-table.php:13
+msgid "Dată"
+msgstr ""
+
+#: includes/admin/class-audit-list-table.php:14
+msgid "Decizie"
+msgstr ""
+
+#: includes/admin/class-audit-list-table.php:16
+msgid "Limbă"
+msgstr ""
+
+#: includes/admin/class-audit-list-table.php:17
+msgid "Versiune"
+msgstr ""
+
+#: includes/admin/class-audit-list-table.php:18
+msgid "URL"
+msgstr ""
+
+#. translators: 1: accepted, 2: rejected, 3: partial
+#: includes/admin/class-audit-page.php:35
+msgid "Acceptat tot: %1$d · Doar necesare: %2$d · Parțial: %3$d"
+msgstr ""
+
+#. translators: %d — retention in months
+#: includes/admin/class-audit-page.php:50
+msgid "Retenție: %d luni (înregistrările mai vechi sunt șterse automat)."
+msgstr ""
+
+#: includes/admin/class-audit-page.php:59
+msgid "Toate deciziile"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:68
+msgid "Filtrează"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:77
+msgid "Export CSV"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:78
+msgid "Export JSON"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:80
+msgid "Ștergi definitiv tot registrul?"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:83
+msgid "Golește registrul"
+msgstr ""
+
+#: includes/admin/class-audit-page.php:91
+#: includes/admin/class-audit-page.php:112
+#: includes/admin/class-categories-page.php:114
+#: includes/admin/class-legal-page.php:115
+#: includes/admin/class-settings-page.php:100
+msgid "Acțiune neautorizată."
+msgstr ""
+
+#: includes/admin/class-categories-page.php:20
+msgid "Consent Manager — Categorii"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:22
+msgid "Categorii salvate."
+msgstr ""
+
+#: includes/admin/class-categories-page.php:32
+msgid "+ Adaugă categorie"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:33
+msgid "Salvează categoriile"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:53
+msgid "Categorie"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:54
+msgid "Șterge"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:57
+msgid "Slug"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:61
+msgid "Etichetă"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:65
+msgid "Descriere"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:69
+msgid "Obligatorie (mereu activă)"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:72
+msgid "Google Consent Mode signals"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:78
+msgid "Cookies"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:81
+msgid "Nume"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:82
+msgid "Furnizor"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:83
+msgid "Durată"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:84
+msgid "Scop"
+msgstr ""
+
+#: includes/admin/class-categories-page.php:93
+msgid "+ Adaugă cookie"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:10
+#: includes/modules/class-legal.php:70
+#: templates/banner-bottom.php:33
+msgid "Politica de confidențialitate"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:11
+#: includes/modules/class-legal.php:74
+msgid "Termeni și condiții"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:12
+msgid "Politica de cookie-uri"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:55
+msgid "Consent Manager — Pagini legale"
+msgstr ""
+
+#. translators: %s — edit link
+#: includes/admin/class-legal-page.php:62
+msgid "Pagină generată ca ciornă. %s"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:63
+msgid "Editează pagina"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:69
+msgid "Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare."
+msgstr ""
+
+#: includes/admin/class-legal-page.php:75
+msgid "Denumire operator"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:77
+msgid "Email contact"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:79
+msgid "Responsabil date (DPO)"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:81
+msgid "Jurisdicție"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:83
+msgid "Tip document"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:89
+msgid "Confidențialitate oficială"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:90
+msgid "Setează ca pagina oficială de confidențialitate WordPress (doar pentru tipul „Confidențialitate\")."
+msgstr ""
+
+#: includes/admin/class-legal-page.php:92
+msgid "Generează pagina"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:95
+msgid "Pagini configurate"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:104
+msgid "— neconfigurată —"
+msgstr ""
+
+#: includes/admin/class-legal-page.php:119
+msgid "Tip document invalid."
+msgstr ""
+
+#: includes/admin/class-legal-page.php:156
+msgid "Nu am putut crea pagina."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:17
+msgid "Consent Manager — Setări"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:19
+msgid "Setări salvate."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:26
+msgid "Poziție banner"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:34
+msgid "Preset design"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:42
+msgid "Versiune politică"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:45
+msgid "Incrementează pentru a re-afișa banner-ul tuturor vizitatorilor."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:49
+msgid "Retenție log (luni)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:58
+msgid "Titlu banner"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:59
+msgid "Text introductiv"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:60
+msgid "Buton „Acceptă tot\""
+msgstr ""
+
+#: includes/admin/class-settings-page.php:61
+msgid "Buton „Doar necesare\""
+msgstr ""
+
+#: includes/admin/class-settings-page.php:62
+msgid "Buton „Gestionează\""
+msgstr ""
+
+#: includes/admin/class-settings-page.php:63
+msgid "Buton „Confirmă selecția\""
+msgstr ""
+
+#: includes/admin/class-settings-page.php:64
+msgid "Titlu preferințe"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:72
+#: includes/admin/class-settings-page.php:74
+msgid "(implicit)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:80
+msgid "Pagină Confidențialitate"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:81
+#: includes/admin/class-settings-page.php:85
+#: includes/admin/class-settings-page.php:89
+msgid "— niciuna —"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:84
+msgid "Pagină Termeni"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:88
+msgid "Pagină Cookies"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:92
+msgid "Salvează setările"
+msgstr ""
+
+#: includes/modules/class-legal.php:78
+msgid "Setări cookie-uri"
+msgstr ""
+
+#: includes/modules/class-legal.php:89
+msgid "Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:"
+msgstr ""
+
+#: templates/banner-bottom.php:29
+msgid "Informații despre cookie-uri"
+msgstr ""
+
+#: templates/banner-bottom.php:31
+msgid "Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul dumneavoastră, cookie-uri de analiză pentru a-l îmbunătăți. Puteți accepta sau refuza cookie-urile opționale."
+msgstr ""
+
+#: templates/banner-bottom.php:37
+msgid "Gestionează cookie-urile"
+msgstr ""
+
+#: templates/banner-bottom.php:39
+#: templates/banner-bottom.php:84
+msgid "Doar cele necesare"
+msgstr ""
+
+#: templates/banner-bottom.php:40
+msgid "Permite tot"
+msgstr ""
+
+#: templates/banner-bottom.php:47
+msgid "Alege ce cookie-uri accepți"
+msgstr ""
+
+#: templates/banner-bottom.php:48
+msgid "Înapoi"
+msgstr ""
+
+#: templates/banner-bottom.php:64
+msgid "Obligatoriu"
+msgstr ""
+
+#: templates/banner-bottom.php:70
+msgid "Activat permanent"
+msgstr ""
+
+#: templates/banner-bottom.php:85
+msgid "Confirmă selecția"
+msgstr ""
