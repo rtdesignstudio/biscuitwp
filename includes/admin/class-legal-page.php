@@ -110,7 +110,12 @@ class CMP_Legal_Page {
 		$key      = self::settings_key( $type );
 		$existing = (int) ( isset( $settings[ $key ] ) ? $settings[ $key ] : 0 );
 
-		if ( $existing && get_post( $existing ) ) {
+		$existing_ok = false;
+		if ( $existing ) {
+			$existing_post = get_post( $existing );
+			$existing_ok   = ( $existing_post && 'page' === $existing_post->post_type && 'trash' !== $existing_post->post_status );
+		}
+		if ( $existing_ok ) {
 			$post_id = wp_update_post( array(
 				'ID'           => $existing,
 				'post_content' => $content,
