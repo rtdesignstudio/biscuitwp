@@ -18,6 +18,33 @@ class CMP_Legal_Page {
 		return isset( $map[ $type ] ) ? $map[ $type ] : '';
 	}
 
+	public static function build_content( $type, array $meta ) {
+		$vars = array(
+			'site_name'      => get_bloginfo( 'name' ),
+			'company'        => isset( $meta['company'] ) ? $meta['company'] : get_bloginfo( 'name' ),
+			'contact_email'  => isset( $meta['contact_email'] ) ? $meta['contact_email'] : get_bloginfo( 'admin_email' ),
+			'dpo'            => isset( $meta['dpo'] ) ? $meta['dpo'] : '',
+			'jurisdiction'   => isset( $meta['jurisdiction'] ) ? $meta['jurisdiction'] : '',
+			'effective_date' => date_i18n( get_option( 'date_format' ) ),
+			'cookie_table'   => 'cookie' === $type ? CMP_Legal::cookie_table_html( CMP_Consent::get_categories() ) : '',
+		);
+		return CMP_Legal::fill_template( CMP_Legal::load_template( $type ), $vars );
+	}
+
+	public static function regenerate_cookie_page() {
+		$settings = CMP_Consent::get_settings();
+		$pid      = (int) ( isset( $settings['cookie_page_id'] ) ? $settings['cookie_page_id'] : 0 );
+		if ( ! $pid ) {
+			return;
+		}
+		$post = get_post( $pid );
+		if ( ! $post || 'page' !== $post->post_type || 'trash' === $post->post_status ) {
+			return;
+		}
+		$meta = isset( $settings['legal_meta'] ) && is_array( $settings['legal_meta'] ) ? $settings['legal_meta'] : array();
+		wp_update_post( array( 'ID' => $pid, 'post_content' => self::build_content( 'cookie', $meta ) ) );
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -92,17 +119,13 @@ class CMP_Legal_Page {
 			wp_die( esc_html__( 'Tip document invalid.', 'consent-manager-pro' ) );
 		}
 
-		$vars = array(
-			'site_name'      => get_bloginfo( 'name' ),
-			'company'        => isset( $_POST['company'] ) ? sanitize_text_field( wp_unslash( $_POST['company'] ) ) : get_bloginfo( 'name' ),
-			'contact_email'  => isset( $_POST['contact_email'] ) ? sanitize_email( wp_unslash( $_POST['contact_email'] ) ) : get_bloginfo( 'admin_email' ),
-			'dpo'            => isset( $_POST['dpo'] ) ? sanitize_text_field( wp_unslash( $_POST['dpo'] ) ) : '',
-			'jurisdiction'   => isset( $_POST['jurisdiction'] ) ? sanitize_text_field( wp_unslash( $_POST['jurisdiction'] ) ) : '',
-			'effective_date' => date_i18n( get_option( 'date_format' ) ),
-			'cookie_table'   => 'cookie' === $type ? CMP_Legal::cookie_table_html( CMP_Consent::get_categories() ) : '',
+		$meta = array(
+			'company'       => isset( $_POST['company'] ) ? sanitize_text_field( wp_unslash( $_POST['company'] ) ) : get_bloginfo( 'name' ),
+			'contact_email' => isset( $_POST['contact_email'] ) ? sanitize_email( wp_unslash( $_POST['contact_email'] ) ) : get_bloginfo( 'admin_email' ),
+			'dpo'           => isset( $_POST['dpo'] ) ? sanitize_text_field( wp_unslash( $_POST['dpo'] ) ) : '',
+			'jurisdiction'  => isset( $_POST['jurisdiction'] ) ? sanitize_text_field( wp_unslash( $_POST['jurisdiction'] ) ) : '',
 		);
-
-		$content = CMP_Legal::fill_template( CMP_Legal::load_template( $type ), $vars );
+		$content = self::build_content( $type, $meta );
 		$labels  = self::labels();
 		$title   = $labels[ $type ];
 
@@ -134,6 +157,7 @@ class CMP_Legal_Page {
 		}
 
 		$settings[ $key ] = (int) $post_id;
+		$settings['legal_meta'] = $meta;
 		update_option( 'cmp_settings', $settings );
 
 		if ( 'privacy' === $type && ! empty( $_POST['set_official'] ) ) {
