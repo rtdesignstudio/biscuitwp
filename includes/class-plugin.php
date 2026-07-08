@@ -28,6 +28,8 @@ class CMP_Plugin {
 		CMP_Audit::register();
 		require_once CMP_PATH . 'includes/modules/class-legal.php';
 		CMP_Legal::register();
+		require_once CMP_PATH . 'includes/modules/class-i18n.php';
+		CMP_I18n::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
