@@ -20,10 +20,16 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		require_once CMP_PATH . 'includes/class-consent.php';
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
+		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
 		load_plugin_textdomain( 'consent-manager-pro', false, dirname( plugin_basename( CMP_PATH ) ) . '/languages' );
 
 		new CMP_Banner();
+		CMP_Audit::register();
+		if ( is_admin() ) {
+			require_once CMP_PATH . 'includes/admin/class-admin.php';
+			new CMP_Admin();
+		}
 	}
 
 	public static function activate() {
