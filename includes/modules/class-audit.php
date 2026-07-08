@@ -42,7 +42,12 @@ class CMP_Audit {
 		}
 		$categories = isset( $_POST['categories'] ) ? wp_unslash( $_POST['categories'] ) : '[]';
 		$decoded    = json_decode( $categories, true );
-		$cats_csv   = is_array( $decoded ) ? implode( ',', array_map( 'sanitize_key', $decoded ) ) : '';
+		$valid_slugs = wp_list_pluck( CMP_Consent::get_categories(), 'slug' );
+		$cats_csv    = '';
+		if ( is_array( $decoded ) ) {
+			$clean    = array_intersect( array_map( 'sanitize_key', $decoded ), $valid_slugs );
+			$cats_csv = implode( ',', array_values( $clean ) );
+		}
 		$version    = isset( $_POST['version'] ) ? sanitize_text_field( wp_unslash( $_POST['version'] ) ) : CMP_Consent::current_version();
 
 		self::record( array(
@@ -96,7 +101,10 @@ class CMP_Audit {
 		foreach ( $rows as $r ) {
 			$line = array();
 			foreach ( $cols as $c ) {
-				$val    = isset( $r[ $c ] ) ? (string) $r[ $c ] : '';
+				$val = isset( $r[ $c ] ) ? (string) $r[ $c ] : '';
+				if ( '' !== $val && strpos( '=+-@', $val[0] ) !== false ) {
+					$val = "'" . $val;
+				}
 				$line[] = '"' . str_replace( '"', '""', $val ) . '"';
 			}
 			$out .= implode( ',', $line ) . "\r\n";

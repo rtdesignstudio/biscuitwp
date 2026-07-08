@@ -39,6 +39,19 @@ class CMP_Audit_Page {
 				);
 				?>
 			</p>
+			<?php
+			$cmp_settings  = get_option( 'cmp_settings', array() );
+			$cmp_retention = isset( $cmp_settings['retention_months'] ) ? (int) $cmp_settings['retention_months'] : 13;
+			?>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: %d — retention in months */
+					esc_html__( 'Retenție: %d luni (înregistrările mai vechi sunt șterse automat).', 'consent-manager-pro' ),
+					$cmp_retention
+				);
+				?>
+			</p>
 
 			<form method="get">
 				<input type="hidden" name="page" value="cmp-audit">
