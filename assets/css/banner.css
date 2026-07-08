@@ -1,4 +1,5 @@
 .cmp {
+	all: revert;
 	--cmp-bg: #ffffff;
 	--cmp-text: #1f2933;
 	--cmp-primary: #2563eb;
