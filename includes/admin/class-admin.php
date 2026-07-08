@@ -9,9 +9,30 @@ class CMP_Admin {
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
+
+		require_once CMP_PATH . 'includes/class-sanitizer.php';
+		require_once CMP_PATH . 'includes/admin/class-settings-page.php';
+		add_action( 'admin_post_cmp_save_settings', array( 'CMP_Settings_Page', 'save' ) );
 	}
 
 	public function menu() {
-		// Populated in Task 2.
+		add_menu_page(
+			__( 'Consent Manager', 'consent-manager-pro' ),
+			__( 'Consent Manager', 'consent-manager-pro' ),
+			'manage_options',
+			self::SLUG,
+			array( 'CMP_Settings_Page', 'render' ),
+			'dashicons-shield',
+			80
+		);
+		add_submenu_page( self::SLUG, __( 'Setări', 'consent-manager-pro' ), __( 'Setări', 'consent-manager-pro' ), 'manage_options', self::SLUG, array( 'CMP_Settings_Page', 'render' ) );
+	}
+
+	public function assets( $hook ) {
+		if ( false === strpos( (string) $hook, self::SLUG ) ) {
+			return;
+		}
+		wp_enqueue_style( 'cmp-admin', CMP_URL . 'assets/css/admin.css', array(), CMP_VERSION );
 	}
 }

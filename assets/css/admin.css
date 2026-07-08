@@ -1,0 +1,7 @@
+.cmp-admin .form-table th { width: 220px; }
+.cmp-admin .cmp-cat-row { border: 1px solid #dcdcde; border-radius: 6px; padding: 12px 16px; margin: 0 0 12px; background: #fff; }
+.cmp-admin .cmp-cat-row__head { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.cmp-admin .cmp-signals label { display: inline-block; margin: 0 12px 6px 0; }
+.cmp-admin .cmp-cookies table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.cmp-admin .cmp-cookies th, .cmp-admin .cmp-cookies td { text-align: left; padding: 4px 6px; }
+.cmp-admin .button-link-delete { color: #b32d2e; }
