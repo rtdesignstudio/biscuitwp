@@ -113,7 +113,9 @@ class CMP_Legal {
 		if ( ! $default ) {
 			return;
 		}
-		pll_set_post_language( $source_id, $default );
+		if ( ! ( function_exists( 'pll_get_post_language' ) && pll_get_post_language( $source_id ) ) ) {
+			pll_set_post_language( $source_id, $default );
+		}
 
 		$translations = array( $default => $source_id );
 		$source       = get_post( $source_id );
@@ -131,7 +133,7 @@ class CMP_Legal {
 				'post_content' => $source->post_content,
 				'post_status'  => 'draft',
 				'post_type'    => 'page',
-			) );
+			), true );
 			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
 				pll_set_post_language( $copy_id, $lang );
 				$translations[ $lang ] = (int) $copy_id;
@@ -141,10 +143,8 @@ class CMP_Legal {
 	}
 
 	private static function duplicate_wpml( $source_id ) {
-		global $sitepress;
 		$default = apply_filters( 'wpml_default_language', null );
-		$info    = apply_filters( 'wpml_element_language_details', null, array( 'element_id' => $source_id, 'element_type' => 'post_page' ) );
-		$trid    = ( $info && isset( $info->trid ) ) ? $info->trid : null;
+		$trid    = apply_filters( 'wpml_element_trid', null, $source_id, 'post_page' );
 
 		// Ensure the source is registered in the default language.
 		do_action( 'wpml_set_element_language_details', array(
@@ -160,7 +160,6 @@ class CMP_Legal {
 			return;
 		}
 		$source = get_post( $source_id );
-		$trid   = $trid ? $trid : apply_filters( 'wpml_element_trid', null, $source_id, 'post_page' );
 		foreach ( $langs as $code => $lang ) {
 			if ( $code === $default ) {
 				continue;
@@ -174,7 +173,7 @@ class CMP_Legal {
 				'post_content' => $source->post_content,
 				'post_status'  => 'draft',
 				'post_type'    => 'page',
-			) );
+			), true );
 			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
 				do_action( 'wpml_set_element_language_details', array(
 					'element_id'           => $copy_id,
