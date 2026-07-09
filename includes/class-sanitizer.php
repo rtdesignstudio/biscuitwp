@@ -9,6 +9,8 @@ class CMP_Sanitizer {
 		$positions = array( 'bottom', 'top', 'modal-center' );
 		$layouts   = array( 'compact', 'detailed' );
 		$presets   = array( 'neutral', 'warm', 'dark', 'egov' );
+		$modes = array( 'pro', 'light' );
+		$mode  = isset( $input['mode'] ) ? (string) $input['mode'] : '';
 
 		$pos = isset( $input['position'] ) ? (string) $input['position'] : '';
 		$lay = isset( $input['layout'] ) ? (string) $input['layout'] : '';
@@ -27,6 +29,7 @@ class CMP_Sanitizer {
 			'position'         => in_array( $pos, $positions, true ) ? $pos : 'bottom',
 			'layout'           => in_array( $lay, $layouts, true ) ? $lay : 'detailed',
 			'preset'           => in_array( $pre, $presets, true ) ? $pre : 'neutral',
+			'mode'             => in_array( $mode, $modes, true ) ? $mode : 'pro',
 			'policy_version'   => '' !== $ver ? $ver : '1',
 			'retention_months' => $ret >= 1 ? $ret : 13,
 			'privacy_page_id'  => self::pos_int( $input, 'privacy_page_id' ),

@@ -54,3 +54,10 @@ cmp_assert_eq( $st['texts']['title'], 'Titlu', 'text stripped + trimmed' );
 cmp_assert_eq( $st['texts']['accept'], 'Accept tot', 'known text key kept' );
 cmp_assert( ! isset( $st['texts']['evilkey'] ), 'unknown text key dropped' );
 cmp_assert( array_key_exists( 'reject', $st['texts'] ), 'all known text keys present (empty string if unset)' );
+
+$m1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'mode' => 'light' ) );
+cmp_assert_eq( $m1['mode'], 'light', 'valid mode light kept' );
+$m2 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'mode' => 'hacker' ) );
+cmp_assert_eq( $m2['mode'], 'pro', 'invalid mode falls back to pro' );
+$m3 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
+cmp_assert_eq( $m3['mode'], 'pro', 'missing mode defaults to pro' );
