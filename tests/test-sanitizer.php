@@ -61,3 +61,7 @@ $m2 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'mode' => 'hacker'
 cmp_assert_eq( $m2['mode'], 'pro', 'invalid mode falls back to pro' );
 $m3 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
 cmp_assert_eq( $m3['mode'], 'pro', 'missing mode defaults to pro' );
+
+$lt = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'texts' => array( 'light_intro' => '  <i>Notice</i> light  ' ) ) );
+cmp_assert( array_key_exists( 'light_intro', $lt['texts'] ), 'light_intro key present in texts' );
+cmp_assert_eq( $lt['texts']['light_intro'], 'Notice light', 'light_intro stripped + trimmed' );

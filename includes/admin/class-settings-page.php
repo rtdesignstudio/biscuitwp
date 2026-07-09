@@ -33,7 +33,7 @@ class CMP_Settings_Page {
 							<p class="description"><?php esc_html_e( 'Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
-					<tr>
+					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Poziție banner', 'consent-manager-pro' ); ?></th>
 						<td><select name="cmp[position]">
 							<?php foreach ( $positions as $k => $lbl ) : ?>
@@ -66,20 +66,22 @@ class CMP_Settings_Page {
 						return isset( $cmp_texts[ $key ] ) ? $cmp_texts[ $key ] : '';
 					};
 					$cmp_text_fields = array(
-						'title'       => __( 'Titlu banner', 'consent-manager-pro' ),
-						'intro'       => __( 'Text introductiv', 'consent-manager-pro' ),
-						'accept'      => __( 'Buton „Acceptă tot"', 'consent-manager-pro' ),
-						'reject'      => __( 'Buton „Doar necesare"', 'consent-manager-pro' ),
-						'prefs'       => __( 'Buton „Gestionează"', 'consent-manager-pro' ),
-						'save'        => __( 'Buton „Confirmă selecția"', 'consent-manager-pro' ),
-						'prefs_title' => __( 'Titlu preferințe', 'consent-manager-pro' ),
+						'title'       => array( __( 'Titlu banner', 'consent-manager-pro' ), 'pro' ),
+						'intro'       => array( __( 'Text introductiv', 'consent-manager-pro' ), 'pro' ),
+						'light_intro' => array( __( 'Text notice (Light)', 'consent-manager-pro' ), 'light' ),
+						'accept'      => array( __( 'Buton „Accept"', 'consent-manager-pro' ), '' ),
+						'reject'      => array( __( 'Buton „Doar necesare"', 'consent-manager-pro' ), 'pro' ),
+						'prefs'       => array( __( 'Buton „Gestionează"', 'consent-manager-pro' ), 'pro' ),
+						'save'        => array( __( 'Buton „Confirmă selecția"', 'consent-manager-pro' ), 'pro' ),
+						'prefs_title' => array( __( 'Titlu preferințe', 'consent-manager-pro' ), 'pro' ),
 					);
 					?>
-					<?php foreach ( $cmp_text_fields as $tk => $tlabel ) : ?>
-						<tr>
+					<?php foreach ( $cmp_text_fields as $tk => $tf ) : ?>
+						<?php list( $tlabel, $tmode ) = $tf; ?>
+						<tr<?php echo $tmode ? ' data-cmp-mode="' . esc_attr( $tmode ) . '"' : ''; ?>>
 							<th scope="row"><?php echo esc_html( $tlabel ); ?></th>
 							<td>
-								<?php if ( 'intro' === $tk ) : ?>
+								<?php if ( 'intro' === $tk || 'light_intro' === $tk ) : ?>
 									<textarea name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" class="large-text" rows="2" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>"><?php echo esc_textarea( $cmp_field( $tk ) ); ?></textarea>
 								<?php else : ?>
 									<input type="text" class="regular-text" name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" value="<?php echo esc_attr( $cmp_field( $tk ) ); ?>" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>">

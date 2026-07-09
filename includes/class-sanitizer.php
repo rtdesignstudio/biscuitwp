@@ -18,7 +18,7 @@ class CMP_Sanitizer {
 		$ver = isset( $input['policy_version'] ) ? trim( (string) $input['policy_version'] ) : '';
 		$ret = isset( $input['retention_months'] ) ? (int) $input['retention_months'] : 0;
 
-		$text_keys = array( 'title', 'intro', 'accept', 'reject', 'prefs', 'save', 'prefs_title' );
+		$text_keys = array( 'title', 'intro', 'light_intro', 'accept', 'reject', 'prefs', 'save', 'prefs_title' );
 		$texts_in  = isset( $input['texts'] ) && is_array( $input['texts'] ) ? $input['texts'] : array();
 		$texts     = array();
 		foreach ( $text_keys as $tk ) {

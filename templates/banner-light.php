@@ -11,15 +11,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$cmp_t = isset( $settings['texts'] ) && is_array( $settings['texts'] ) ? $settings['texts'] : array();
+$cmp_text = function ( $key, $default ) use ( $cmp_t ) {
+	$stored = isset( $cmp_t[ $key ] ) ? $cmp_t[ $key ] : '';
+	return CMP_I18n::text( 'banner_' . $key, $stored, $default );
+};
+
 $cmp_privacy_id  = isset( $settings['privacy_page_id'] ) ? (int) $settings['privacy_page_id'] : 0;
 $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 ?>
 <div class="cmp-light cmp--<?php echo esc_attr( $preset ); ?>" data-cmp-light hidden role="region" aria-label="<?php esc_attr_e( 'Informații cookie', 'consent-manager-pro' ); ?>">
 	<p class="cmp-light__text">
-		<?php echo esc_html( CMP_I18n::translate( 'cmp_light_intro', __( 'Acest site folosește doar cookie-uri esențiale pentru funcționare.', 'consent-manager-pro' ) ) ); ?>
+		<?php echo esc_html( $cmp_text( 'light_intro', __( 'Acest site folosește doar cookie-uri esențiale pentru funcționare.', 'consent-manager-pro' ) ) ); ?>
 		<?php if ( $cmp_privacy_url ) : ?>
 			<a class="cmp-light__link" href="<?php echo esc_url( $cmp_privacy_url ); ?>"><?php esc_html_e( 'Politica de confidențialitate', 'consent-manager-pro' ); ?></a>.
 		<?php endif; ?>
 	</p>
-	<button type="button" class="cmp-light__btn" data-cmp-light-dismiss><?php echo esc_html( CMP_I18n::translate( 'cmp_light_ok', __( 'Am înțeles', 'consent-manager-pro' ) ) ); ?></button>
+	<button type="button" class="cmp-light__btn" data-cmp-light-dismiss><?php echo esc_html( $cmp_text( 'accept', __( 'Am înțeles', 'consent-manager-pro' ) ) ); ?></button>
 </div>

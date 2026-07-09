@@ -51,8 +51,24 @@
 		}
 	}
 
+	// Settings page: show/hide rows tagged with data-cmp-mode based on the
+	// selected display mode. Rows without the attribute are always visible.
+	function initSettingsMode() {
+		var sel = document.querySelector('select[name="cmp[mode]"]');
+		if (!sel) { return; }
+		function apply() {
+			var mode = sel.value;
+			document.querySelectorAll('[data-cmp-mode]').forEach(function (el) {
+				el.style.display = (el.getAttribute('data-cmp-mode') === mode) ? '' : 'none';
+			});
+		}
+		sel.addEventListener('change', apply);
+		apply();
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		var page = document.querySelector('.cmp-admin');
 		if (page) { page.addEventListener('click', onClick); }
+		initSettingsMode();
 	});
 })();
