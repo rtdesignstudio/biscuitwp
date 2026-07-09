@@ -23,6 +23,17 @@ class CMP_Settings_Page {
 				<?php wp_nonce_field( 'cmp_save_settings' ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
+						<th scope="row"><?php esc_html_e( 'Mod afișare', 'consent-manager-pro' ); ?></th>
+						<td>
+							<?php $cmp_mode = isset( $s['mode'] ) ? $s['mode'] : 'pro'; ?>
+							<select name="cmp[mode]">
+								<option value="pro" <?php selected( $cmp_mode, 'pro' ); ?>><?php esc_html_e( 'Pro — banner cu consimțământ granular', 'consent-manager-pro' ); ?></option>
+								<option value="light" <?php selected( $cmp_mode, 'light' ); ?>><?php esc_html_e( 'Light — bară informativă, fără cookie-uri', 'consent-manager-pro' ); ?></option>
+							</select>
+							<p class="description"><?php esc_html_e( 'Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
+					<tr>
 						<th scope="row"><?php esc_html_e( 'Poziție banner', 'consent-manager-pro' ); ?></th>
 						<td><select name="cmp[position]">
 							<?php foreach ( $positions as $k => $lbl ) : ?>
