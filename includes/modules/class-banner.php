@@ -36,6 +36,8 @@ class CMP_Banner {
 	}
 
 	public function enqueue() {
+		$cmp_settings = CMP_Consent::get_settings();
+
 		wp_enqueue_style( 'cmp-banner', CMP_URL . 'assets/css/banner.css', array(), CMP_Plugin::asset_ver( 'assets/css/banner.css' ) );
 		wp_enqueue_script( 'cmp-banner', CMP_URL . 'assets/js/banner.js', array(), CMP_Plugin::asset_ver( 'assets/js/banner.js' ), true );
 
@@ -45,6 +47,7 @@ class CMP_Banner {
 			array(
 				'categories' => CMP_Consent::get_categories(),
 				'version'    => CMP_Consent::current_version(),
+				'mode'       => isset( $cmp_settings['mode'] ) ? $cmp_settings['mode'] : 'pro',
 				'cookieName' => CMP_Consent::COOKIE,
 				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 				'nonce'      => wp_create_nonce( 'cmp_log_consent' ),
@@ -60,6 +63,12 @@ class CMP_Banner {
 		$settings   = CMP_Consent::get_settings();
 		$categories = CMP_Consent::get_categories();
 		$preset     = isset( $settings['preset'] ) ? $settings['preset'] : 'neutral';
+		$mode       = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+
+		if ( 'light' === $mode ) {
+			include CMP_PATH . 'templates/banner-light.php';
+			return;
+		}
 		include CMP_PATH . 'templates/banner-bottom.php';
 	}
 }

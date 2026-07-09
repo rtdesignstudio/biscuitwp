@@ -124,6 +124,20 @@
 		});
 	}
 
+	function initLight() {
+		var bar = document.querySelector('[data-cmp-light]');
+		if (!bar) { return; }
+		try { if (localStorage.getItem('cmp_light_dismissed')) { return; } } catch (e) {}
+		bar.hidden = false;
+		var btn = bar.querySelector('[data-cmp-light-dismiss]');
+		if (btn) {
+			btn.addEventListener('click', function () {
+				try { localStorage.setItem('cmp_light_dismissed', '1'); } catch (e) {}
+				bar.hidden = true;
+			});
+		}
+	}
+
 	// --- Public API ---
 	window.CMP = {
 		isAllowed: function (slug) {
@@ -138,6 +152,7 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
+		if (D.mode === 'light') { initLight(); return; }
 		bind();
 		var c = readCookie();
 		if (c && String(c.v) === String(D.version)) { return; }
