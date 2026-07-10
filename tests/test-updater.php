@@ -38,9 +38,9 @@ cmp_assert_eq( CMP_Updater::build_update( $release, '0.2.0' ), null, 'equal vers
 cmp_assert_eq( CMP_Updater::build_update( array( 'tag_name' => 'v9.9.9' ), '0.1.0' ), null, 'missing urls => null' );
 cmp_assert_eq( CMP_Updater::build_update( array(), '0.1.0' ), null, 'empty release => null' );
 
-// Proxy URL/key resolution (default empty; wp-config override).
-cmp_assert_eq( CMP_Updater::proxy_url(), '', 'proxy_url empty by default' );
-cmp_assert_eq( CMP_Updater::proxy_key(), '', 'proxy_key empty by default' );
+// Proxy URL/key resolution (baked-in constants; wp-config override tested below).
+cmp_assert_eq( CMP_Updater::proxy_url(), 'https://rt.md/cmp-update', 'proxy_url from baked constant' );
+cmp_assert_eq( CMP_Updater::proxy_key(), '16befd065cfff99d43ccc75215faeeb8fea8049f050445cf', 'proxy_key from baked constant' );
 
 // release_from_proxy builds the download package URL from proxy_url + key.
 $r = CMP_Updater::release_from_proxy( array( 'version' => '0.1.2' ), 'https://rt.md/u/cmp-update.php', 'secret' );

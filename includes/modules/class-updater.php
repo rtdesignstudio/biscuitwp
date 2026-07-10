@@ -14,8 +14,8 @@ class CMP_Updater {
 	const SLUG = 'consent-manager-pro';
 
 	const CACHE_KEY = 'cmp_latest_release';
-	const PROXY_URL = '';
-	const PROXY_KEY = '';
+	const PROXY_URL = 'https://rt.md/cmp-update';
+	const PROXY_KEY = '16befd065cfff99d43ccc75215faeeb8fea8049f050445cf';
 
 	public static function register() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check' ) );
