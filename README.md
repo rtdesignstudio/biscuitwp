@@ -62,6 +62,15 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 [cmp_cookie_settings_link]   "Cookie settings" button (reopens preferences)
 ```
 
+## Updates & releases
+
+Sites update straight from this repo's GitHub Releases (no wordpress.org):
+
+1. Define a fine-grained, read-only token on each site: `define( 'CMP_GITHUB_TOKEN', '...' );` in `wp-config.php` (or paste it in Settings → GitHub token).
+2. Updates then show up natively under **Plugins / Dashboard → Updates**; the plugin row also has a **Check for updates** link.
+
+To publish a new version: bump `Version:` and `CMP_VERSION` in `consent-manager-pro.php`, commit, then run `./bin/release.sh X.Y.Z` (requires the `gh` CLI).
+
 ## Development
 
 The pure logic (consent evaluation, signals, sanitization, audit, i18n, legal) has standalone PHP tests, with no PHPUnit/Composer:
