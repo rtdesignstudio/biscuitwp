@@ -26,7 +26,7 @@ fi
 # 3. Build a clean zip (runtime files only).
 rm -rf dist && mkdir -p "dist/$SLUG"
 rsync -a --exclude 'docs' --exclude 'tests' --exclude 'bin' --exclude 'dist' \
-	--exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
+	--exclude 'proxy' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
 	./ "dist/$SLUG/"
 ( cd dist && zip -qr "$SLUG.zip" "$SLUG" )
 echo "Built dist/$SLUG.zip"

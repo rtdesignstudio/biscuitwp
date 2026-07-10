@@ -71,6 +71,16 @@ Sites update straight from this repo's GitHub Releases (no wordpress.org):
 
 To publish a new version: bump `Version:` and `CMP_VERSION` in `consent-manager-pro.php`, commit, then run `./bin/release.sh X.Y.Z` (requires the `gh` CLI).
 
+### Update proxy (optional, for many client sites)
+
+To avoid putting a GitHub token on every site, deploy the relay in `proxy/cmp-update.php` on your own server (e.g. rt.md) and let the plugin talk to it instead of GitHub:
+
+1. On the server: upload `proxy/cmp-update.php`, copy `proxy/config.sample.php` to `config.php` (kept out of the web root or via the `CMP_PROXY_CONFIG` env var), and fill in the GitHub token + a shared key.
+2. In the plugin: set `CMP_Updater::PROXY_URL` to the proxy URL and `CMP_Updater::PROXY_KEY` to the same shared key (or define `CMP_UPDATE_PROXY` / `CMP_UPDATE_KEY` per site). Commit and release.
+3. Client sites then need **no token at all** — the proxy holds the single token and 302-redirects downloads to GitHub's signed CDN URL.
+
+The `proxy/` folder is excluded from the plugin zip, so it never ships to sites.
+
 ## Development
 
 The pure logic (consent evaluation, signals, sanitization, audit, i18n, legal) has standalone PHP tests, with no PHPUnit/Composer:
