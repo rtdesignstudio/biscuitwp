@@ -138,7 +138,9 @@ class CMP_Updater {
 		return $transient;
 	}
 
-	/** Download our package with the auth header (private repo assets/zipballs). */
+	/** Download our package: ask GitHub with the token but do NOT follow its
+	 * redirect with the token — GitHub 302s to a signed host, which we then
+	 * fetch without any auth header (prevents leaking the token cross-host). */
 	public static function authenticated_download( $reply, $package, $upgrader ) {
 		if ( false !== $reply ) {
 			return $reply;
@@ -153,25 +155,57 @@ class CMP_Updater {
 			return $reply;
 		}
 
-		$tmp      = wp_tempnam( 'cmp-update' );
-		$response = wp_remote_get(
+		// Step 1: request the asset WITHOUT following redirects, so the Bearer
+		// token is only ever sent to api.github.com.
+		$auth = wp_remote_get(
 			$package,
 			array(
-				'timeout'  => 300,
-				'stream'   => true,
-				'filename' => $tmp,
-				'headers'  => array(
+				'timeout'     => 30,
+				'redirection' => 0,
+				'headers'     => array(
 					'Authorization' => 'Bearer ' . self::token(),
 					'Accept'        => 'application/octet-stream',
 				),
 			)
 		);
-
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			@unlink( $tmp );
+		if ( is_wp_error( $auth ) ) {
 			return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
 		}
-		return $tmp;
+		$code     = (int) wp_remote_retrieve_response_code( $auth );
+		$location = wp_remote_retrieve_header( $auth, 'location' );
+		$tmp      = wp_tempnam( 'cmp-update' );
+
+		// Step 2a: follow GitHub's redirect to the signed URL WITHOUT the token.
+		if ( in_array( $code, array( 301, 302, 303, 307, 308 ), true ) && $location ) {
+			$response = wp_remote_get(
+				$location,
+				array(
+					'timeout'  => 300,
+					'stream'   => true,
+					'filename' => $tmp,
+				)
+			);
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				if ( file_exists( $tmp ) ) {
+					unlink( $tmp );
+				}
+				return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
+			}
+			return $tmp;
+		}
+
+		// Step 2b: rare direct 200 from api.github.com — the body is the package.
+		if ( 200 === $code ) {
+			$body = wp_remote_retrieve_body( $auth );
+			if ( '' !== $body && false !== file_put_contents( $tmp, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				return $tmp;
+			}
+		}
+
+		if ( file_exists( $tmp ) ) {
+			unlink( $tmp );
+		}
+		return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
 	}
 
 	/** GitHub zips extract as <slug>-<tag>/ or <owner>-<repo>-<sha>/ — rename to the plugin folder. */
