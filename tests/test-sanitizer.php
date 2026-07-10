@@ -65,3 +65,8 @@ cmp_assert_eq( $m3['mode'], 'pro', 'missing mode defaults to pro' );
 $lt = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'texts' => array( 'light_intro' => '  <i>Notice</i> light  ' ) ) );
 cmp_assert( array_key_exists( 'light_intro', $lt['texts'] ), 'light_intro key present in texts' );
 cmp_assert_eq( $lt['texts']['light_intro'], 'Notice light', 'light_intro stripped + trimmed' );
+
+$tk = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'github_token' => "  ghp_abc<script>123  " ) );
+cmp_assert_eq( $tk['github_token'], 'ghp_abc123', 'github_token stripped + trimmed' );
+$tk2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
+cmp_assert_eq( $tk2['github_token'], '', 'missing github_token => empty string' );

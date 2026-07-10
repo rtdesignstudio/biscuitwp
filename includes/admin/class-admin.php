@@ -25,6 +25,9 @@ class CMP_Admin {
 		require_once CMP_PATH . 'includes/admin/class-legal-page.php';
 		add_action( 'admin_post_cmp_generate_legal', array( 'CMP_Legal_Page', 'generate' ) );
 
+		add_action( 'admin_post_cmp_check_updates', array( $this, 'check_updates' ) );
+		add_action( 'admin_notices', array( $this, 'update_check_notice' ) );
+
 		add_filter( 'plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'action_links' ) );
 	}
 
@@ -37,6 +40,8 @@ class CMP_Admin {
 	public function action_links( $links ) {
 		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ) . '">' . esc_html__( 'Setări', 'consent-manager-pro' ) . '</a>';
 		array_unshift( $links, $settings );
+		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'consent-manager-pro' ) . '</a>';
+		array_splice( $links, 1, 0, array( $check ) );
 		return $links;
 	}
 
@@ -62,5 +67,41 @@ class CMP_Admin {
 		}
 		wp_enqueue_style( 'cmp-admin', CMP_URL . 'assets/css/admin.css', array(), CMP_Plugin::asset_ver( 'assets/css/admin.css' ) );
 		wp_enqueue_script( 'cmp-admin', CMP_URL . 'assets/js/admin.js', array(), CMP_Plugin::asset_ver( 'assets/js/admin.js' ), true );
+	}
+
+	/** Manual update check: clear caches, re-check, report via notice on the Plugins screen. */
+	public function check_updates() {
+		if ( ! current_user_can( 'update_plugins' ) || ! check_admin_referer( 'cmp_check_updates' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+		delete_transient( CMP_Updater::CACHE_KEY );
+		delete_site_transient( 'update_plugins' );
+		wp_update_plugins();
+
+		$updates   = get_site_transient( 'update_plugins' );
+		$available = isset( $updates->response[ CMP_Updater::FILE ] ) ? $updates->response[ CMP_Updater::FILE ]->new_version : '';
+
+		wp_safe_redirect( add_query_arg( array( 'cmp_up' => $available ? $available : 'latest' ), admin_url( 'plugins.php' ) ) );
+		exit;
+	}
+
+	public function update_check_notice() {
+		if ( empty( $_GET['cmp_up'] ) || ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+		$v = sanitize_text_field( wp_unslash( $_GET['cmp_up'] ) );
+		if ( 'latest' === $v ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf(
+				/* translators: %s — current plugin version */
+				__( 'Consent Manager Pro: ai ultima versiune (%s).', 'consent-manager-pro' ),
+				CMP_VERSION
+			) ) . '</p></div>';
+		} else {
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf(
+				/* translators: %s — new version number */
+				__( 'Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now" din lista de mai jos.', 'consent-manager-pro' ),
+				$v
+			) ) . '</p></div>';
+		}
 	}
 }
