@@ -14,6 +14,8 @@ class CMP_Updater {
 	const SLUG = 'consent-manager-pro';
 
 	const CACHE_KEY = 'cmp_latest_release';
+	const PROXY_URL = '';
+	const PROXY_KEY = '';
 
 	public static function register() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check' ) );
@@ -59,6 +61,35 @@ class CMP_Updater {
 		return $update;
 	}
 
+	public static function proxy_url() {
+		if ( defined( 'CMP_UPDATE_PROXY' ) && CMP_UPDATE_PROXY ) {
+			return (string) CMP_UPDATE_PROXY;
+		}
+		return self::PROXY_URL;
+	}
+
+	public static function proxy_key() {
+		if ( defined( 'CMP_UPDATE_KEY' ) && CMP_UPDATE_KEY ) {
+			return (string) CMP_UPDATE_KEY;
+		}
+		return self::PROXY_KEY;
+	}
+
+	/** Pure: shape the proxy {version} payload into a release array. package = proxy download URL. */
+	public static function release_from_proxy( $json, $proxy_url, $proxy_key ) {
+		if ( ! is_array( $json ) || empty( $json['version'] ) ) {
+			return null;
+		}
+		$sep     = ( false === strpos( (string) $proxy_url, '?' ) ) ? '?' : '&';
+		$package = (string) $proxy_url . $sep . 'action=download&key=' . rawurlencode( (string) $proxy_key );
+		return array(
+			'tag_name'    => (string) $json['version'],
+			'html_url'    => (string) $proxy_url,
+			'zipball_url' => $package,
+			'assets'      => array(),
+		);
+	}
+
 	public static function token() {
 		if ( defined( 'CMP_GITHUB_TOKEN' ) && CMP_GITHUB_TOKEN ) {
 			return (string) CMP_GITHUB_TOKEN;
@@ -69,6 +100,11 @@ class CMP_Updater {
 
 	/** Query GitHub for the latest release (cached). Null when unavailable. */
 	public static function fetch_release( $force = false ) {
+		$cmp_proxy = self::proxy_url();
+		if ( '' !== $cmp_proxy ) {
+			return self::fetch_release_proxy( $cmp_proxy, $force );
+		}
+
 		if ( '' === self::token() ) {
 			return null;
 		}
@@ -114,6 +150,34 @@ class CMP_Updater {
 		);
 		if ( ! empty( $body['assets'][0]['url'] ) ) {
 			$release['assets'][] = array( 'url' => $body['assets'][0]['url'] );
+		}
+		set_transient( self::CACHE_KEY, $release, 6 * HOUR_IN_SECONDS );
+		return $release;
+	}
+
+	private static function fetch_release_proxy( $proxy, $force ) {
+		if ( ! $force ) {
+			$cached = get_transient( self::CACHE_KEY );
+			if ( 'none' === $cached ) {
+				return null;
+			}
+			if ( is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$url      = $proxy . ( false === strpos( $proxy, '?' ) ? '?' : '&' ) . 'action=version&key=' . rawurlencode( self::proxy_key() );
+		$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			set_transient( self::CACHE_KEY, 'none', HOUR_IN_SECONDS );
+			return null;
+		}
+
+		$json    = json_decode( wp_remote_retrieve_body( $response ), true );
+		$release = self::release_from_proxy( $json, $proxy, self::proxy_key() );
+		if ( null === $release ) {
+			set_transient( self::CACHE_KEY, 'none', HOUR_IN_SECONDS );
+			return null;
 		}
 		set_transient( self::CACHE_KEY, $release, 6 * HOUR_IN_SECONDS );
 		return $release;

@@ -37,3 +37,26 @@ cmp_assert_eq( $u2->package, 'https://api.github.com/repos/rtgit003/consent-mana
 cmp_assert_eq( CMP_Updater::build_update( $release, '0.2.0' ), null, 'equal version => null' );
 cmp_assert_eq( CMP_Updater::build_update( array( 'tag_name' => 'v9.9.9' ), '0.1.0' ), null, 'missing urls => null' );
 cmp_assert_eq( CMP_Updater::build_update( array(), '0.1.0' ), null, 'empty release => null' );
+
+// Proxy URL/key resolution (default empty; wp-config override).
+cmp_assert_eq( CMP_Updater::proxy_url(), '', 'proxy_url empty by default' );
+cmp_assert_eq( CMP_Updater::proxy_key(), '', 'proxy_key empty by default' );
+
+// release_from_proxy builds the download package URL from proxy_url + key.
+$r = CMP_Updater::release_from_proxy( array( 'version' => '0.1.2' ), 'https://rt.md/u/cmp-update.php', 'secret' );
+cmp_assert_eq( $r['tag_name'], '0.1.2', 'proxy version -> tag_name' );
+cmp_assert_eq( $r['zipball_url'], 'https://rt.md/u/cmp-update.php?action=download&key=secret', 'package uses ? separator' );
+$r2 = CMP_Updater::release_from_proxy( array( 'version' => '0.1.2' ), 'https://rt.md/u/?x=1', 'secret' );
+cmp_assert_eq( $r2['zipball_url'], 'https://rt.md/u/?x=1&action=download&key=secret', 'package uses & separator when url already has query' );
+cmp_assert_eq( CMP_Updater::release_from_proxy( array(), 'u', 'k' ), null, 'missing version -> null' );
+cmp_assert_eq( CMP_Updater::release_from_proxy( 'x', 'u', 'k' ), null, 'non-array -> null' );
+
+// build_update consumes the proxy-shaped release.
+$u = CMP_Updater::build_update( CMP_Updater::release_from_proxy( array( 'version' => '0.1.2' ), 'https://rt.md/u/', 'k' ), '0.1.0' );
+cmp_assert_eq( $u->package, 'https://rt.md/u/?action=download&key=k', 'proxy package flows into build_update' );
+
+// wp-config override wins (define is plain PHP; keep this LAST — constants persist).
+define( 'CMP_UPDATE_PROXY', 'https://rt.md/u/' );
+define( 'CMP_UPDATE_KEY', 'k2' );
+cmp_assert_eq( CMP_Updater::proxy_url(), 'https://rt.md/u/', 'proxy_url from wp-config override' );
+cmp_assert_eq( CMP_Updater::proxy_key(), 'k2', 'proxy_key from wp-config override' );
