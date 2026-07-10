@@ -143,7 +143,13 @@ class CMP_Updater {
 		if ( false !== $reply ) {
 			return $reply;
 		}
-		if ( ! is_string( $package ) || false === strpos( $package, 'api.github.com/repos/' . self::REPO ) ) {
+		if ( ! is_string( $package ) ) {
+			return $reply;
+		}
+		$parts = wp_parse_url( $package );
+		$host  = isset( $parts['host'] ) ? $parts['host'] : '';
+		$path  = isset( $parts['path'] ) ? $parts['path'] : '';
+		if ( 'api.github.com' !== $host || 0 !== strpos( $path, '/repos/' . self::REPO . '/' ) ) {
 			return $reply;
 		}
 
@@ -184,6 +190,9 @@ class CMP_Updater {
 			return $source;
 		}
 		$new_source = trailingslashit( dirname( untrailingslashit( $source ) ) ) . self::SLUG . '/';
+		if ( $wp_filesystem && $wp_filesystem->exists( untrailingslashit( $new_source ) ) ) {
+			$wp_filesystem->delete( untrailingslashit( $new_source ), true );
+		}
 		if ( $wp_filesystem && $wp_filesystem->move( untrailingslashit( $source ), untrailingslashit( $new_source ) ) ) {
 			return $new_source;
 		}
