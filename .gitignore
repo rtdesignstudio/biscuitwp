@@ -4,3 +4,4 @@ vendor/
 *.log
 .superpowers/
 dist/
+proxy/config.php
