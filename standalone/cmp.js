@@ -45,7 +45,10 @@
 					prefs_title: 'Alege ce cookie-uri accepți',
 					save: 'Confirmă selecția',
 					badge: 'Obligatoriu',
-					locked: 'Activat permanent'
+					locked: 'Activat permanent',
+					privacy: 'Politica de confidențialitate',
+					back: 'Înapoi',
+					dialogLabel: 'Informații despre cookie-uri'
 				}
 			},
 			ru: {
@@ -72,7 +75,10 @@
 					prefs_title: 'Выберите, какие cookie принять',
 					save: 'Подтвердить выбор',
 					badge: 'Обязательно',
-					locked: 'Всегда включено'
+					locked: 'Всегда включено',
+					privacy: 'Политика конфиденциальности',
+					back: 'Назад',
+					dialogLabel: 'Информация о файлах cookie'
 				}
 			},
 			en: {
@@ -99,7 +105,10 @@
 					prefs_title: 'Choose which cookies to accept',
 					save: 'Confirm selection',
 					badge: 'Required',
-					locked: 'Always active'
+					locked: 'Always active',
+					privacy: 'Privacy policy',
+					back: 'Back',
+					dialogLabel: 'Cookie information'
 				}
 			}
 		}
@@ -161,7 +170,7 @@
 			preset: typeof raw.preset === 'string' ? raw.preset : 'default',
 			position: typeof raw.position === 'string' ? raw.position : 'modal-center',
 			lang: lang,
-			privacyUrl: typeof raw.privacyUrl === 'string' ? raw.privacyUrl : '',
+			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
 			categories: categories,
 			texts: texts
@@ -187,7 +196,8 @@
 		var optional = (cats || []).filter(function (c) { return !c.required; });
 		var selectedOptional = optional.filter(function (c) { return selected.indexOf(c.slug) !== -1; });
 
-		if (optional.length > 0 && selectedOptional.length === optional.length) {
+		// No optional categories: nothing to reject, so consent is "all".
+		if (optional.length === 0 || selectedOptional.length === optional.length) {
 			return 'accepted_all';
 		}
 		if (selectedOptional.length === 0) {
@@ -219,6 +229,20 @@
 			.replace(/'/g, '&#39;');
 	}
 
+	// Allow only safe href schemes (relative, http(s), mailto). Blocks
+	// javascript:/data: etc. — escapeHtml alone would not, since those carry
+	// no HTML-special characters. Mirrors WordPress esc_url() intent.
+	function safeUrl(u) {
+		if (typeof u !== 'string') { return ''; }
+		var v = u.replace(/[\t\n\r]/g, '').replace(/^\s+/, '');
+		if (v === '') { return ''; }
+		if (/^(?:https?:|mailto:)/i.test(v)) { return v; }
+		// Relative URLs / fragments / query — no scheme, and not a scheme-relative
+		// or protocol-looking prefix.
+		if (/^[a-z][a-z0-9+.-]*:/i.test(v)) { return ''; }
+		return v;
+	}
+
 	if (typeof document !== 'undefined') {
 
 		var COOKIE_NAME = 'cmp_consent';
@@ -233,7 +257,7 @@
 
 			var privacyLink = '';
 			if (cfg.privacyUrl) {
-				privacyLink = ' <a class="cmp__link" href="' + escapeHtml(cfg.privacyUrl) + '">' + escapeHtml(cfg.texts.privacy || 'Privacy policy') + '</a>.';
+				privacyLink = ' <a class="cmp__link" href="' + escapeHtml(cfg.privacyUrl) + '">' + escapeHtml(cfg.texts.privacy) + '</a>.';
 			}
 
 			var catsHtml = '';
@@ -276,7 +300,7 @@
 				'<div class="cmp__prefs" data-cmp-view="prefs">' +
 				'<div class="cmp__prefs-header">' +
 				'<h2 class="cmp__title">' + escapeHtml(cfg.texts.prefs_title) + '</h2>' +
-				'<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="Back">' +
+				'<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="' + escapeHtml(cfg.texts.back) + '">' +
 				'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
 				'</button>' +
 				'</div>' +
@@ -298,11 +322,11 @@
 			root.setAttribute('data-cmp-light', '');
 			root.hidden = true;
 			root.setAttribute('role', 'region');
-			root.setAttribute('aria-label', 'Cookie information');
+			root.setAttribute('aria-label', cfg.texts.dialogLabel);
 
 			var privacyLink = '';
 			if (cfg.privacyUrl) {
-				privacyLink = ' <a class="cmp-light__link" href="' + escapeHtml(cfg.privacyUrl) + '">' + escapeHtml(cfg.texts.privacy || 'Privacy policy') + '</a>.';
+				privacyLink = ' <a class="cmp-light__link" href="' + escapeHtml(cfg.privacyUrl) + '">' + escapeHtml(cfg.texts.privacy) + '</a>.';
 			}
 
 			root.innerHTML =
@@ -533,6 +557,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();
