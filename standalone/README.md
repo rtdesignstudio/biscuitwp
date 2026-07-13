@@ -67,8 +67,8 @@ All keys are **optional**. Defaults are applied if not specified.
 |-----|------|---------|-------------|
 | `mode` | string | `"pro"` | `"pro"` (full consent form) or `"light"` (compact banner) |
 | `preset` | string | `"default"` | Preset theme: `"neutral"`, `"warm"`, `"dark"`, `"egov"`, `"default"` |
-| `position` | string | `"bottom"` | Modal position: `"modal-center"`, `"bottom"`, `"top"` |
-| `lang` | string | `"en"` | Language: `"ro"` (Romanian), `"ru"` (Russian), `"en"` (English) |
+| `position` | string | `"modal-center"` | Modal position: `"modal-center"`, `"bottom"`, `"top"` |
+| `lang` | string | `"ro"` | Language: `"ro"` (Romanian), `"ru"` (Russian), `"en"` (English) |
 | `site` | string | — | Optional site label shown in the banner |
 | `categories` | array | `["necessary", "statistics", "marketing"]` | Consent categories to offer. `"necessary"` is always required and locked. |
 | `privacyUrl` | string | — | URL to privacy/cookie policy. URLs starting with `javascript:` or `data:` are stripped for security. |
@@ -107,7 +107,7 @@ window.CMP_CONFIG = {
    <script type="text/plain"
            data-cmp-block="statistics"
            data-cmp-enc="1"
-           data-cmp-src="aHR0cHM6Ly93d3cuZ29vZ2xldGFnbWFuYWdlci5jb20vZ3RhZy9qcz9pZD9HLERFTU8="></script>
+           data-cmp-src="aHR0cHM6Ly93d3cuZ29vZ2xldGFnbWFuYWdlci5jb20vZ3RhZy9qcz9pZD1HLERFTU8="></script>
    ```
 
 **Option B: Plain URL** (for trusted/internal trackers)
@@ -173,11 +173,13 @@ Any element with `data-cmp-settings` or class `cmp-reopen` will open the prefere
 
 The consent state is stored in a browser cookie named **`cmp_consent`**.
 
-**Format:** JSON object, httpOnly (in production), Secure (HTTPS only).
+**Format:** URL-encoded JSON, `SameSite=Lax`, 180-day `max-age`. The cookie
+must be readable by JavaScript (the bundle reads it via `document.cookie`), so it
+is **not** `httpOnly`.
 
-**Example:**
+**Example (decoded):**
 ```
-cmp_consent={"necessary":true,"statistics":true,"marketing":false,"timestamp":"2024-01-15T10:30:00Z"}
+cmp_consent={"v":"1","categories":["necessary","statistics"],"decision":"partial","ts":1783952681}
 ```
 
 ---
@@ -187,12 +189,12 @@ cmp_consent={"necessary":true,"statistics":true,"marketing":false,"timestamp":"2
 ### Security
 - **URL encoding:** External tracker URLs in `data-cmp-src` should be base64-encoded to obfuscate them from casual inspection.
 - **Privacy URL validation:** URLs starting with `javascript:` or `data:` schemes are stripped to prevent XSS.
-- **httpOnly cookie:** In production, ensure `cmp_consent` is set with httpOnly flag to prevent client-side tampering.
+- **Consent cookie is client-readable** (not `httpOnly`) by design — the bundle reads it via `document.cookie` to restore the visitor's choice. It stores only the consent decision, no sensitive data.
 
 ### Performance
 - The `defer` attribute on `<script src="cmp.js">` ensures the bundle loads after DOM parsing.
 - Marked tracker scripts (`type="text/plain"`) are not executed by the browser; CMP injects them on consent.
-- The bundle is ~21KB (cmp.js) + ~8KB (cmp.css), minified.
+- The bundle ships unminified (readable source); minification/CDN packaging is deferred to a later phase.
 
 ### Browser Support
 Modern browsers (Chrome, Firefox, Safari, Edge) with ES6 support. Requires `localStorage` and `fetch` for full functionality.
