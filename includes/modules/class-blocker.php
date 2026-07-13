@@ -69,13 +69,34 @@ class CMP_Blocker {
 		}
 	}
 
-	/** Pure: neutralize GA/GTM <script> tags. */
+	/** Pure: neutralize GA/GTM <script> tags and drop GA/GTM resource-hint <link> tags. */
 	public static function rewrite( $html ) {
-		return (string) preg_replace_callback(
+		$html = (string) $html;
+		$html = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
 			array( __CLASS__, 'rewrite_tag' ),
-			(string) $html
+			$html
 		);
+		$html = preg_replace_callback(
+			'/<link\b[^>]*>/i',
+			array( __CLASS__, 'strip_link' ),
+			$html
+		);
+		return (string) $html;
+	}
+
+	/** Pure: drop a GA/GTM dns-prefetch / preconnect <link> hint (added directly to wp_head). */
+	private static function strip_link( $m ) {
+		$tag = $m[0];
+		if ( ! preg_match( '/rel\s*=\s*["\'](?:dns-prefetch|preconnect)["\']/i', $tag ) ) {
+			return $tag;
+		}
+		foreach ( self::HOSTS as $host ) {
+			if ( false !== stripos( $tag, $host ) ) {
+				return '';
+			}
+		}
+		return $tag;
 	}
 
 	private static function rewrite_tag( $m ) {

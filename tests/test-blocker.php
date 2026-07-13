@@ -61,3 +61,11 @@ $hints = array(
 $kept = CMP_Blocker::strip_hints( $hints, CMP_Blocker::HOSTS );
 cmp_assert_eq( count( $kept ), 1, 'only the non-Google hint remains' );
 cmp_assert_eq( $kept[0], 'https://fonts.gstatic.com', 'non-Google hint preserved' );
+
+// rewrite() removes a directly-emitted GA dns-prefetch <link>, keeps other links.
+$links = "<link rel='dns-prefetch' href='//www.googletagmanager.com' />\n<link rel='dns-prefetch' href='//fonts.googleapis.com' />\n<link rel='stylesheet' href='//www.googletagmanager.com/x.css' />";
+$outl = CMP_Blocker::rewrite( $links );
+cmp_assert( strpos( $outl, 'googletagmanager.com' ) === false || strpos( $outl, 'x.css' ) !== false, 'GA dns-prefetch hint removed' );
+cmp_assert( strpos( $outl, "href='//www.googletagmanager.com' /" ) === false, 'the GA dns-prefetch link is gone' );
+cmp_assert( strpos( $outl, 'fonts.googleapis.com' ) !== false, 'non-Google dns-prefetch kept' );
+cmp_assert( strpos( $outl, 'x.css' ) !== false, 'non-hint link (stylesheet) kept even if Google host' );
