@@ -28,7 +28,7 @@ class CMP_Banner {
 			'wait_for_update'         => 500,
 		);
 		$signals = array_merge( $defaults, $signals );
-		echo "<script>\n";
+		echo "<script data-cmp-keep>\n";
 		echo "window.dataLayer = window.dataLayer || [];\n";
 		echo "function gtag(){dataLayer.push(arguments);}\n";
 		echo 'gtag("consent","default",' . wp_json_encode( $signals ) . ");\n";

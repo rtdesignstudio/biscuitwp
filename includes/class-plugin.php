@@ -32,6 +32,8 @@ class CMP_Plugin {
 		CMP_I18n::register();
 		require_once CMP_PATH . 'includes/modules/class-updater.php';
 		CMP_Updater::register();
+		require_once CMP_PATH . 'includes/modules/class-blocker.php';
+		CMP_Blocker::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
