@@ -117,7 +117,7 @@ class CMP_Blocker {
 		return $html;
 	}
 
-	/** Pure: neutralize GA/GTM <script> tags and drop GA/GTM resource-hint <link> tags. */
+	/** Pure: neutralize tracker <script> tags, drop tracker <noscript> blocks and resource-hint <link> tags. */
 	public static function rewrite( $html ) {
 		$html = (string) $html;
 		$html = preg_replace_callback(
@@ -125,6 +125,7 @@ class CMP_Blocker {
 			array( __CLASS__, 'rewrite_tag' ),
 			$html
 		);
+		$html = self::strip_tracker_noscript( (string) $html, self::TRACKER_HOSTS );
 		return self::strip_hint_links( (string) $html, self::TRACKER_HOSTS );
 	}
 
@@ -143,6 +144,24 @@ class CMP_Blocker {
 					}
 				}
 				return $tag;
+			},
+			(string) $html
+		);
+	}
+
+	/** Pure: remove <noscript> blocks whose content references a tracker host.
+	 * A <noscript> only renders without JS, where no consent is possible, so the
+	 * compliant outcome is to not load the tracker at all (no re-injection). */
+	public static function strip_tracker_noscript( $html, array $hosts ) {
+		return (string) preg_replace_callback(
+			'/<noscript\b[^>]*>.*?<\/noscript>/is',
+			function ( $m ) use ( $hosts ) {
+				foreach ( $hosts as $host ) {
+					if ( false !== stripos( $m[0], $host ) ) {
+						return '';
+					}
+				}
+				return $m[0];
 			},
 			(string) $html
 		);
@@ -183,6 +202,16 @@ class CMP_Blocker {
 			if ( '' === $category && ! empty( $rule['gtm'] )
 				&& false !== strpos( $body, 'GTM-' ) && false !== strpos( $body, 'dataLayer' ) ) {
 				$category = $rule['cat'];
+			}
+			// Inline loaders that reference a tracker host in the body (e.g. an
+			// SDK injected via js.src) but do not call fbq()/gtag('config').
+			if ( '' === $category ) {
+				foreach ( $rule['hosts'] as $host ) {
+					if ( false !== stripos( $body, $host ) ) {
+						$category = $rule['cat'];
+						break;
+					}
+				}
 			}
 			if ( '' !== $category ) {
 				break;

@@ -79,6 +79,32 @@ cmp_assert( strpos( CMP_Blocker::rewrite( $ga ), 'data-cmp-block="statistics"' )
 $fbstr = '<script>var note = "call fbq later";</script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $fbstr ), $fbstr, 'bare fbq mention not blocked' );
 
+// Inline FB SDK loader (host in body, no fbq) → blocked as marketing, host hidden.
+$fbsdk = "<script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];js=d.createElement(s);js.id=id;js.src='https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js';fjs.parentNode.insertBefore(js,fjs);}(document,'script','facebook-jssdk'));</script>";
+$fbs   = CMP_Blocker::rewrite( $fbsdk );
+cmp_assert( strpos( $fbs, 'type="text/plain"' ) !== false, 'inline FB SDK loader blocked' );
+cmp_assert( strpos( $fbs, 'data-cmp-block="marketing"' ) !== false, 'inline FB SDK tagged marketing' );
+cmp_assert( strpos( $fbs, 'connect.facebook.net' ) === false, 'FB host hidden from source' );
+
+// Inline GA loader (host in body, no gtag config / dataLayer) → blocked as statistics.
+$gaload = '<script>var u="https://www.googletagmanager.com/gtag/js";var e=document.createElement("script");e.src=u;document.head.appendChild(e);</script>';
+$gal    = CMP_Blocker::rewrite( $gaload );
+cmp_assert( strpos( $gal, 'data-cmp-block="statistics"' ) !== false, 'inline GA loader tagged statistics' );
+cmp_assert( strpos( $gal, 'googletagmanager.com' ) === false, 'GA host hidden from inline loader' );
+
+// strip_tracker_noscript removes a GTM ns.html noscript (even with data-litespeed-src), keeps unrelated.
+$ns  = '<noscript><iframe data-litespeed-src="https://www.googletagmanager.com/ns.html?id=GTM-X" height="0"></iframe></noscript><noscript>Please enable JS</noscript>';
+$nso = CMP_Blocker::strip_tracker_noscript( $ns, CMP_Blocker::TRACKER_HOSTS );
+cmp_assert( strpos( $nso, 'googletagmanager.com' ) === false, 'GTM noscript iframe removed' );
+cmp_assert( strpos( $nso, 'Please enable JS' ) !== false, 'unrelated noscript kept' );
+
+// rewrite() end-to-end also strips the tracker noscript.
+cmp_assert( strpos( CMP_Blocker::rewrite( $ns ), 'googletagmanager.com' ) === false, 'rewrite() strips tracker noscript' );
+
+// Our own Consent Mode keep-script stays byte-for-byte untouched through rewrite().
+$keepcm = '<script data-cmp-keep>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("consent","default",{"analytics_storage":"denied"})</script>';
+cmp_assert_eq( CMP_Blocker::rewrite( $keepcm ), $keepcm, 'data-cmp-keep Consent Mode script untouched' );
+
 // strip_hints removes GA/GTM resource hints (string + array forms) but keeps others.
 $hints = array(
 	'//www.googletagmanager.com',
