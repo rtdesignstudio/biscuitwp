@@ -23,6 +23,9 @@ cmp_assert_eq( $u->package, 'https://api.github.com/repos/rtgit003/consent-manag
 cmp_assert_eq( $u->plugin, 'consent-manager-pro/consent-manager-pro.php', 'plugin basename set' );
 cmp_assert_eq( $u->slug, 'consent-manager-pro', 'slug set' );
 
+// file(): without WordPress loaded, falls back to the slug default.
+cmp_assert_eq( CMP_Updater::file(), 'consent-manager-pro/consent-manager-pro.php', 'file() falls back to slug default without WP' );
+
 // build_update: no asset => zipball fallback.
 $release2 = array(
 	'tag_name'    => 'v0.2.0',

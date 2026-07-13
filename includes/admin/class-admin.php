@@ -79,7 +79,7 @@ class CMP_Admin {
 		wp_update_plugins();
 
 		$updates   = get_site_transient( 'update_plugins' );
-		$available = isset( $updates->response[ CMP_Updater::FILE ] ) ? $updates->response[ CMP_Updater::FILE ]->new_version : '';
+		$available = isset( $updates->response[ CMP_Updater::file() ] ) ? $updates->response[ CMP_Updater::file() ]->new_version : '';
 
 		wp_safe_redirect( add_query_arg( array( 'cmp_up' => $available ? $available : 'latest' ), admin_url( 'plugins.php' ) ) );
 		exit;

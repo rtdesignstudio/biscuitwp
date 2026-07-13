@@ -3,7 +3,7 @@
  * Plugin Name: Consent Manager Pro
  * Plugin URI: https://github.com/rtgit003/consent-manager-pro
  * Description: Displays a GDPR-compliant cookie consent banner, generates the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent audit log. Quick to configure, multilingual-ready.
- * Version: 0.1.11
+ * Version: 0.1.12
  * Requires PHP: 7.4
  * Author: Sergiu Pascaru
  * Author URI: https://rt.md
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CMP_VERSION', '0.1.11' );
+define( 'CMP_VERSION', '0.1.12' );
 define( 'CMP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CMP_URL', plugin_dir_url( __FILE__ ) );
 

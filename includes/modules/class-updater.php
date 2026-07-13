@@ -10,8 +10,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CMP_Updater {
 
 	const REPO = 'rtgit003/consent-manager-pro';
-	const FILE = 'consent-manager-pro/consent-manager-pro.php';
 	const SLUG = 'consent-manager-pro';
+
+	/**
+	 * The plugin's basename ("<folder>/consent-manager-pro.php"), computed from
+	 * where the plugin actually lives so updates work no matter what the install
+	 * folder is named. Falls back to the slug default when WordPress isn't loaded
+	 * (standalone tests).
+	 */
+	public static function file() {
+		if ( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) ) {
+			return plugin_basename( CMP_PATH . 'consent-manager-pro.php' );
+		}
+		return self::SLUG . '/consent-manager-pro.php';
+	}
 
 	const CACHE_KEY = 'cmp_latest_release';
 	const PROXY_URL = 'https://rt.md/cmp-update';
@@ -54,7 +66,7 @@ class CMP_Updater {
 
 		$update              = new stdClass();
 		$update->slug        = self::SLUG;
-		$update->plugin      = self::FILE;
+		$update->plugin      = self::file();
 		$update->new_version = ltrim( $tag, 'vV' );
 		$update->url         = isset( $release['html_url'] ) ? (string) $release['html_url'] : 'https://github.com/' . self::REPO;
 		$update->package     = $package;
@@ -197,7 +209,7 @@ class CMP_Updater {
 			if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
 				$transient->response = array();
 			}
-			$transient->response[ self::FILE ] = $update;
+			$transient->response[ self::file() ] = $update;
 		}
 		return $transient;
 	}
@@ -272,22 +284,25 @@ class CMP_Updater {
 		return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
 	}
 
-	/** GitHub zips extract as <slug>-<tag>/ or <owner>-<repo>-<sha>/ — rename to the plugin folder. */
+	/** GitHub zips extract as <slug>-<tag>/ or <owner>-<repo>-<sha>/ — rename to the real install folder. */
 	public static function fix_source_dir( $source, $remote_source, $upgrader, $hook_extra ) {
 		if ( ! is_string( $source ) || is_wp_error( $source ) ) {
 			return $source;
 		}
 		$plugin = isset( $hook_extra['plugin'] ) ? $hook_extra['plugin'] : '';
-		if ( self::FILE !== $plugin ) {
+		if ( self::file() !== $plugin ) {
 			return $source;
 		}
 
 		global $wp_filesystem;
+		// Rename the extracted dir to whatever the plugin's install folder is
+		// actually called, so WordPress replaces it in place.
+		$target   = basename( dirname( $plugin ) );
 		$basename = basename( untrailingslashit( $source ) );
-		if ( self::SLUG === $basename ) {
+		if ( $target === $basename ) {
 			return $source;
 		}
-		$new_source = trailingslashit( dirname( untrailingslashit( $source ) ) ) . self::SLUG . '/';
+		$new_source = trailingslashit( dirname( untrailingslashit( $source ) ) ) . $target . '/';
 		if ( $wp_filesystem && $wp_filesystem->exists( untrailingslashit( $new_source ) ) ) {
 			$wp_filesystem->delete( untrailingslashit( $new_source ), true );
 		}
