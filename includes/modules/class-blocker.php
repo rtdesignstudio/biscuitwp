@@ -9,20 +9,35 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CMP_Blocker {
 
-	const HOSTS   = array( 'googletagmanager.com', 'google-analytics.com' );
-	const INLINE  = array( "gtag('config'", 'gtag("config"', "ga('create'" );
+	const HOSTS      = array( 'googletagmanager.com', 'google-analytics.com' );
+	const FONT_HOSTS = array( 'fonts.googleapis.com', 'fonts.gstatic.com' );
+	const INLINE     = array( "gtag('config'", 'gtag("config"', "ga('create'" );
 
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
 		add_filter( 'wp_resource_hints', array( __CLASS__, 'filter_hints' ), 10, 2 );
 	}
 
-	/** Remove GA/GTM dns-prefetch / preconnect resource hints while blocking is active. */
+	/** Remove GA/GTM (blocking) and/or Google Fonts (localizing) resource hints. */
 	public static function filter_hints( $urls, $relation_type ) {
-		if ( ! is_array( $urls ) || ! self::should_run() ) {
+		if ( ! is_array( $urls ) ) {
 			return $urls;
 		}
-		return self::strip_hints( $urls, self::HOSTS );
+		$s = CMP_Consent::get_settings();
+		if ( 'pro' !== ( isset( $s['mode'] ) ? $s['mode'] : 'pro' ) ) {
+			return $urls;
+		}
+		$hosts = array();
+		if ( ! empty( $s['block_scripts'] ) ) {
+			$hosts = array_merge( $hosts, self::HOSTS );
+		}
+		if ( ! empty( $s['localize_fonts'] ) ) {
+			$hosts = array_merge( $hosts, self::FONT_HOSTS );
+		}
+		if ( empty( $hosts ) ) {
+			return $urls;
+		}
+		return self::strip_hints( $urls, $hosts );
 	}
 
 	/** Pure: drop resource-hint entries (string or ['href'=>…]) whose URL matches a host. */
@@ -79,6 +94,7 @@ class CMP_Blocker {
 		}
 		if ( ! empty( $s['localize_fonts'] ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
+			$html = self::strip_hint_links( $html, self::FONT_HOSTS );
 		}
 		return $html;
 	}
@@ -91,26 +107,27 @@ class CMP_Blocker {
 			array( __CLASS__, 'rewrite_tag' ),
 			$html
 		);
-		$html = preg_replace_callback(
-			'/<link\b[^>]*>/i',
-			array( __CLASS__, 'strip_link' ),
-			$html
-		);
-		return (string) $html;
+		return self::strip_hint_links( (string) $html, self::HOSTS );
 	}
 
-	/** Pure: drop a GA/GTM dns-prefetch / preconnect <link> hint (added directly to wp_head). */
-	private static function strip_link( $m ) {
-		$tag = $m[0];
-		if ( ! preg_match( '/rel\s*=\s*["\'](?:dns-prefetch|preconnect)["\']/i', $tag ) ) {
-			return $tag;
-		}
-		foreach ( self::HOSTS as $host ) {
-			if ( false !== stripos( $tag, $host ) ) {
-				return '';
-			}
-		}
-		return $tag;
+	/** Pure: drop dns-prefetch / preconnect <link> hints whose href matches one of $hosts. */
+	public static function strip_hint_links( $html, array $hosts ) {
+		return (string) preg_replace_callback(
+			'/<link\b[^>]*>/i',
+			function ( $m ) use ( $hosts ) {
+				$tag = $m[0];
+				if ( ! preg_match( '/rel\s*=\s*["\'](?:dns-prefetch|preconnect)["\']/i', $tag ) ) {
+					return $tag;
+				}
+				foreach ( $hosts as $host ) {
+					if ( false !== stripos( $tag, $host ) ) {
+						return '';
+					}
+				}
+				return $tag;
+			},
+			(string) $html
+		);
 	}
 
 	private static function rewrite_tag( $m ) {

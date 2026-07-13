@@ -69,3 +69,10 @@ cmp_assert( strpos( $outl, 'googletagmanager.com' ) === false || strpos( $outl, 
 cmp_assert( strpos( $outl, "href='//www.googletagmanager.com' /" ) === false, 'the GA dns-prefetch link is gone' );
 cmp_assert( strpos( $outl, 'fonts.googleapis.com' ) !== false, 'non-Google dns-prefetch kept' );
 cmp_assert( strpos( $outl, 'x.css' ) !== false, 'non-hint link (stylesheet) kept even if Google host' );
+
+// strip_hint_links with FONT_HOSTS removes the font dns-prefetch, keeps unrelated + stylesheet.
+$fh  = "<link rel='dns-prefetch' href='//fonts.googleapis.com' /><link rel='dns-prefetch' href='//example.com' /><link rel='stylesheet' href='//fonts.googleapis.com/x.css' />";
+$sfh = CMP_Blocker::strip_hint_links( $fh, CMP_Blocker::FONT_HOSTS );
+cmp_assert( strpos( $sfh, "dns-prefetch' href='//fonts.googleapis.com'" ) === false, 'font dns-prefetch hint removed' );
+cmp_assert( strpos( $sfh, 'example.com' ) !== false, 'unrelated dns-prefetch kept' );
+cmp_assert( strpos( $sfh, 'x.css' ) !== false, 'font stylesheet link (not a hint) kept' );
