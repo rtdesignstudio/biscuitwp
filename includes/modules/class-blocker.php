@@ -9,9 +9,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CMP_Blocker {
 
-	const HOSTS      = array( 'googletagmanager.com', 'google-analytics.com' );
 	const FONT_HOSTS = array( 'fonts.googleapis.com', 'fonts.gstatic.com' );
-	const INLINE     = array( "gtag('config'", 'gtag("config"', "ga('create'" );
+
+	// All tracker hosts across every rule — used for resource-hint stripping.
+	const TRACKER_HOSTS = array( 'googletagmanager.com', 'google-analytics.com', 'connect.facebook.net' );
+
+	// Ordered blocking rules. First match wins; its 'cat' becomes data-cmp-block.
+	// 'gtm' => container special-case (body has both 'GTM-' and 'dataLayer').
+	const RULES = array(
+		array(
+			'cat'    => 'statistics',
+			'hosts'  => array( 'googletagmanager.com', 'google-analytics.com' ),
+			'inline' => array( "gtag('config'", 'gtag("config"', "ga('create'" ),
+			'gtm'    => true,
+		),
+		array(
+			'cat'    => 'marketing',
+			'hosts'  => array( 'connect.facebook.net' ),
+			'inline' => array( "fbq('init'", 'fbq("init"', "fbq('track'", 'fbq("track"' ),
+			'gtm'    => false,
+		),
+	);
 
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
@@ -29,7 +47,7 @@ class CMP_Blocker {
 		}
 		$hosts = array();
 		if ( ! empty( $s['block_scripts'] ) ) {
-			$hosts = array_merge( $hosts, self::HOSTS );
+			$hosts = array_merge( $hosts, self::TRACKER_HOSTS );
 		}
 		if ( ! empty( $s['localize_fonts'] ) ) {
 			$hosts = array_merge( $hosts, self::FONT_HOSTS );
@@ -107,7 +125,7 @@ class CMP_Blocker {
 			array( __CLASS__, 'rewrite_tag' ),
 			$html
 		);
-		return self::strip_hint_links( (string) $html, self::HOSTS );
+		return self::strip_hint_links( (string) $html, self::TRACKER_HOSTS );
 	}
 
 	/** Pure: drop dns-prefetch / preconnect <link> hints whose href matches one of $hosts. */
@@ -144,27 +162,33 @@ class CMP_Blocker {
 			$src = $sm[1];
 		}
 
-		$is_target = false;
-		if ( '' !== $src ) {
-			foreach ( self::HOSTS as $host ) {
-				if ( false !== stripos( $src, $host ) ) {
-					$is_target = true;
-					break;
+		$category = '';
+		foreach ( self::RULES as $rule ) {
+			if ( '' !== $src ) {
+				foreach ( $rule['hosts'] as $host ) {
+					if ( false !== stripos( $src, $host ) ) {
+						$category = $rule['cat'];
+						break;
+					}
 				}
 			}
-		}
-		if ( ! $is_target ) {
-			foreach ( self::INLINE as $needle ) {
-				if ( false !== strpos( $body, $needle ) ) {
-					$is_target = true;
-					break;
+			if ( '' === $category ) {
+				foreach ( $rule['inline'] as $needle ) {
+					if ( false !== strpos( $body, $needle ) ) {
+						$category = $rule['cat'];
+						break;
+					}
 				}
 			}
+			if ( '' === $category && ! empty( $rule['gtm'] )
+				&& false !== strpos( $body, 'GTM-' ) && false !== strpos( $body, 'dataLayer' ) ) {
+				$category = $rule['cat'];
+			}
+			if ( '' !== $category ) {
+				break;
+			}
 		}
-		if ( ! $is_target && false !== strpos( $body, 'GTM-' ) && false !== strpos( $body, 'dataLayer' ) ) {
-			$is_target = true;
-		}
-		if ( ! $is_target ) {
+		if ( '' === $category ) {
 			return $m[0];
 		}
 
@@ -181,6 +205,6 @@ class CMP_Blocker {
 		} else {
 			$enc = ' data-cmp-enc="1" data-cmp-body="' . base64_encode( $body ) . '"';
 		}
-		return '<script type="text/plain" data-cmp-block="statistics"' . $enc . $keep . '></script>';
+		return '<script type="text/plain" data-cmp-block="' . $category . '"' . $enc . $keep . '></script>';
 	}
 }

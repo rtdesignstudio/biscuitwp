@@ -52,13 +52,40 @@ cmp_assert( strpos( $outd, 'data-src="foo"' ) !== false, 'unrelated data-src pre
 $promo = '<script>var code = "GTM-2026 promo";</script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $promo ), $promo, 'GTM- substring without dataLayer not blocked' );
 
+// Meta Pixel external loader → blocked as marketing, host hidden.
+$fbext = '<script src="https://connect.facebook.net/en_US/fbevents.js" async></script>';
+$fbo   = CMP_Blocker::rewrite( $fbext );
+cmp_assert( strpos( $fbo, 'type="text/plain"' ) !== false, 'Meta external becomes text/plain' );
+cmp_assert( strpos( $fbo, 'data-cmp-block="marketing"' ) !== false, 'Meta external tagged marketing' );
+cmp_assert( strpos( $fbo, 'connect.facebook.net' ) === false, 'Meta host hidden from source' );
+cmp_assert( preg_match( '/data-cmp-src="([^"]+)"/', $fbo, $fem ) && base64_decode( $fem[1] ) === 'https://connect.facebook.net/en_US/fbevents.js', 'Meta src base64-decodes to URL' );
+
+// Meta Pixel inline init → blocked as marketing, body hidden.
+$fbinit = "<script>fbq('init','123456789');fbq('track','PageView');</script>";
+$fbi    = CMP_Blocker::rewrite( $fbinit );
+cmp_assert( strpos( $fbi, 'type="text/plain"' ) !== false, 'Meta inline becomes text/plain' );
+cmp_assert( strpos( $fbi, 'data-cmp-block="marketing"' ) !== false, 'Meta inline tagged marketing' );
+cmp_assert( strpos( $fbi, "fbq('init'" ) === false, 'Meta inline body not in cleartext' );
+
+// Meta inline with only track() also blocked.
+$fbtrack = '<script>fbq("track","Lead");</script>';
+cmp_assert( strpos( CMP_Blocker::rewrite( $fbtrack ), 'data-cmp-block="marketing"' ) !== false, 'Meta track() blocked as marketing' );
+
+// GA still tagged statistics (regression).
+$ga = '<script src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>';
+cmp_assert( strpos( CMP_Blocker::rewrite( $ga ), 'data-cmp-block="statistics"' ) !== false, 'GA stays statistics' );
+
+// False-positive guard: "fbq" mentioned in a string but not init/track → not blocked.
+$fbstr = '<script>var note = "call fbq later";</script>';
+cmp_assert_eq( CMP_Blocker::rewrite( $fbstr ), $fbstr, 'bare fbq mention not blocked' );
+
 // strip_hints removes GA/GTM resource hints (string + array forms) but keeps others.
 $hints = array(
 	'//www.googletagmanager.com',
 	'https://fonts.gstatic.com',
 	array( 'href' => 'https://www.google-analytics.com', 'crossorigin' ),
 );
-$kept = CMP_Blocker::strip_hints( $hints, CMP_Blocker::HOSTS );
+$kept = CMP_Blocker::strip_hints( $hints, CMP_Blocker::TRACKER_HOSTS );
 cmp_assert_eq( count( $kept ), 1, 'only the non-Google hint remains' );
 cmp_assert_eq( $kept[0], 'https://fonts.gstatic.com', 'non-Google hint preserved' );
 
@@ -76,3 +103,9 @@ $sfh = CMP_Blocker::strip_hint_links( $fh, CMP_Blocker::FONT_HOSTS );
 cmp_assert( strpos( $sfh, "dns-prefetch' href='//fonts.googleapis.com'" ) === false, 'font dns-prefetch hint removed' );
 cmp_assert( strpos( $sfh, 'example.com' ) !== false, 'unrelated dns-prefetch kept' );
 cmp_assert( strpos( $sfh, 'x.css' ) !== false, 'font stylesheet link (not a hint) kept' );
+
+// A Meta dns-prefetch hint is stripped by TRACKER_HOSTS.
+$fbhints = array( '//connect.facebook.net', 'https://example.com' );
+$fbkept  = CMP_Blocker::strip_hints( $fbhints, CMP_Blocker::TRACKER_HOSTS );
+cmp_assert_eq( count( $fbkept ), 1, 'Meta hint stripped, unrelated kept' );
+cmp_assert_eq( $fbkept[0], 'https://example.com', 'unrelated hint preserved' );
