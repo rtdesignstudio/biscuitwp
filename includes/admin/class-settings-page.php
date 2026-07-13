@@ -82,6 +82,7 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Retenție log (luni)', 'consent-manager-pro' ); ?></th>
 						<td><input type="number" min="1" name="cmp[retention_months]" value="<?php echo esc_attr( $s['retention_months'] ); ?>" class="small-text"></td>
 					</tr>
+					<?php if ( '' === CMP_Updater::proxy_url() ) : // Token doar in modul direct-GitHub; ascuns cand exista proxy de update. ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Token GitHub (update-uri)', 'consent-manager-pro' ); ?></th>
 						<td>
@@ -96,6 +97,7 @@ class CMP_Settings_Page {
 							<p class="description"><?php esc_html_e( 'Fine-grained token, read-only pe repo-ul plugin-ului. Recomandat: define( \'CMP_GITHUB_TOKEN\', \'...\' ) în wp-config.php în loc de acest câmp. Fără token, verificarea de update-uri e dezactivată.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
+					<?php endif; ?>
 					<?php
 					$cmp_texts = isset( $s['texts'] ) && is_array( $s['texts'] ) ? $s['texts'] : array();
 					$cmp_field = function ( $key ) use ( $cmp_texts ) {
