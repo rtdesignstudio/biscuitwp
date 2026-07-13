@@ -145,8 +145,13 @@
 			var cat = old.getAttribute('data-cmp-block');
 			if (!cat || accepted.indexOf(cat) === -1) { return; }
 			var s = document.createElement('script');
+			var enc = old.hasAttribute('data-cmp-enc');
 			var src = old.getAttribute('data-cmp-src');
-			if (src) { s.src = src; } else { s.text = old.textContent; }
+			var body = old.getAttribute('data-cmp-body');
+			function dec(v) { try { return enc ? atob(v) : v; } catch (e) { return v; } }
+			if (src) { s.src = dec(src); }
+			else if (body) { s.text = dec(body); }
+			else { s.text = old.textContent; }
 			if (old.hasAttribute('async')) { s.async = true; }
 			if (old.hasAttribute('defer')) { s.defer = true; }
 			if (old.id) { s.id = old.id; }

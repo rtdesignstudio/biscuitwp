@@ -59,10 +59,15 @@ class CMP_Blocker {
 			return $m[0];
 		}
 
-		$is_target = false;
+		$src = '';
 		if ( preg_match( '/(?:^|\s)src\s*=\s*["\']([^"\']+)["\']/i', $attrs, $sm ) ) {
+			$src = $sm[1];
+		}
+
+		$is_target = false;
+		if ( '' !== $src ) {
 			foreach ( self::HOSTS as $host ) {
-				if ( false !== stripos( $sm[1], $host ) ) {
+				if ( false !== stripos( $src, $host ) ) {
 					$is_target = true;
 					break;
 				}
@@ -83,10 +88,19 @@ class CMP_Blocker {
 			return $m[0];
 		}
 
-		$new_attrs = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', $attrs );
-		$new_attrs = preg_replace( '/(^|\s)src(\s*=)/i', '$1data-cmp-src$2', $new_attrs );
-		$new_attrs = trim( preg_replace( '/\s+/', ' ', $new_attrs ) );
-		$prefix    = '' === $new_attrs ? '' : ' ' . $new_attrs;
-		return '<script type="text/plain" data-cmp-block="statistics"' . $prefix . '>' . $body . '</script>';
+		// Keep the other attributes (id, async, defer, …) but drop type + src.
+		$keep = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', $attrs );
+		$keep = preg_replace( '/(^|\s)src\s*=\s*["\'][^"\']*["\']/i', '$1', $keep );
+		$keep = trim( preg_replace( '/\s+/', ' ', $keep ) );
+		$keep = '' === $keep ? '' : ' ' . $keep;
+
+		// Obfuscate: store the URL / inline body base64-encoded so the tracker
+		// domain string never appears in the page source before consent.
+		if ( '' !== $src ) {
+			$enc = ' data-cmp-enc="1" data-cmp-src="' . base64_encode( $src ) . '"';
+		} else {
+			$enc = ' data-cmp-enc="1" data-cmp-body="' . base64_encode( $body ) . '"';
+		}
+		return '<script type="text/plain" data-cmp-block="statistics"' . $enc . $keep . '></script>';
 	}
 }

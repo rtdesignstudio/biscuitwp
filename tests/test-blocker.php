@@ -8,16 +8,22 @@ cmp_assert( strpos( $out, 'type="text/plain"' ) !== false, 'external GA becomes 
 cmp_assert( strpos( $out, 'data-cmp-src=' ) !== false, 'src moved to data-cmp-src' );
 cmp_assert( strpos( $out, 'data-cmp-block="statistics"' ) !== false, 'data-cmp-block added' );
 cmp_assert( ! preg_match( '/\ssrc\s*=/', $out ), 'no executable src remains' );
+cmp_assert( strpos( $out, 'data-cmp-enc' ) !== false, 'data-cmp-enc marker present' );
+cmp_assert( strpos( $out, 'googletagmanager.com' ) === false, 'raw tracker domain hidden from source' );
+cmp_assert( preg_match( '/data-cmp-src="([^"]+)"/', $out, $em ) && base64_decode( $em[1] ) === 'https://www.googletagmanager.com/gtag/js?id=G-X', 'data-cmp-src base64-decodes to the URL' );
 
-// Inline gtag config is neutralized, body preserved.
+// Inline gtag config is neutralized, body base64-hidden (not in cleartext).
 $inl = "<script>gtag('config','G-X');</script>";
 $out2 = CMP_Blocker::rewrite( $inl );
 cmp_assert( strpos( $out2, 'type="text/plain"' ) !== false, 'inline config becomes text/plain' );
-cmp_assert( strpos( $out2, "gtag('config','G-X')" ) !== false, 'inline body preserved' );
+cmp_assert( strpos( $out2, "gtag('config'" ) === false, 'inline body not left in cleartext' );
+cmp_assert( preg_match( '/data-cmp-body="([^"]+)"/', $out2, $bm ) && base64_decode( $bm[1] ) === "gtag('config','G-X');", 'inline body base64-decodes to the original' );
 
-// GTM inline container init is neutralized.
+// GTM inline container init is neutralized and its id hidden.
 $gtm = "<script>(function(w,d,s,l,i){})(window,'dataLayer','GTM-ABCD');</script>";
-cmp_assert( strpos( CMP_Blocker::rewrite( $gtm ), 'type="text/plain"' ) !== false, 'GTM inline blocked' );
+$outg = CMP_Blocker::rewrite( $gtm );
+cmp_assert( strpos( $outg, 'type="text/plain"' ) !== false, 'GTM inline blocked' );
+cmp_assert( strpos( $outg, 'GTM-ABCD' ) === false, 'GTM id hidden from source' );
 
 // Our own Consent Mode script (data-cmp-keep) is untouched.
 $keep = '<script data-cmp-keep>gtag("consent","default",{})</script>';
