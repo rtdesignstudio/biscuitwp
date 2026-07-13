@@ -1,0 +1,291 @@
+/* Consent Manager Pro — full-page overlay + centered modal (egov design system).
+ * Theme-agnostic: everything scoped under .cmp with custom properties. The
+ * overlay blocks the page (blur + scrim) and scroll is locked via the
+ * body.cmp-has-banner class (added by banner.js) until the user decides. */
+
+.cmp, .cmp-light {
+	--cmp-primary: #0058d2;
+	--cmp-primary-hover: #003e96;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #001b35;
+	--cmp-muted: #475467;
+	--cmp-bg: #ffffff;
+	--cmp-panel: #f4f6f8;
+	--cmp-border: #d0d5dd;
+	--cmp-radius: 12px;
+	--cmp-scrim: rgba(0, 27, 53, 0.55);
+	--cmp-hover: #f2f4f7;
+	--cmp-outline-hover: #eaf2ff;
+}
+.cmp {
+	position: fixed;
+	inset: 0;
+	z-index: 2147483600; /* above admin bar, sticky menus, anything */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	overflow-y: auto;
+	background: var(--cmp-scrim);
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+	color: var(--cmp-dark);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+.cmp[hidden] { display: none; }
+
+/* Banner position (vertical anchor of the modal within the overlay). */
+.cmp--pos-bottom { align-items: flex-end; }
+.cmp--pos-top { align-items: flex-start; }
+.cmp--pos-modal-center { align-items: center; }
+
+/* Scroll lock while the banner is open (class added by JS). */
+body.cmp-has-banner { overflow: hidden; }
+
+.cmp__modal {
+	background: var(--cmp-bg);
+	border-radius: var(--cmp-radius);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+	padding: 28px 32px;
+	width: 100%;
+	max-width: 720px;
+	margin-inline: auto; /* horizontal centering only; vertical position via align-items */
+}
+
+.cmp__title {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 0 0 12px;
+	color: var(--cmp-dark);
+}
+
+.cmp__text {
+	font-size: 14px;
+	line-height: 1.55;
+	margin: 0 0 24px;
+	color: var(--cmp-muted);
+}
+.cmp__link { color: var(--cmp-primary); text-decoration: underline; }
+
+/* View switching: prefs hidden until modal has .is-prefs-open. */
+.cmp__prefs { display: none; }
+.cmp__modal.is-prefs-open .cmp__main { display: none; }
+.cmp__modal.is-prefs-open .cmp__prefs { display: block; }
+
+/* Action rows */
+.cmp__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cmp__spacer { flex: 1 1 auto; }
+.cmp__prefs-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+
+.cmp__btn {
+	appearance: none;
+	border: 1px solid transparent;
+	background: transparent;
+	border-radius: 8px;
+	padding: 12px 22px;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.cmp__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+
+.cmp__btn--ghost { color: var(--cmp-dark); border-color: var(--cmp-dark); background: var(--cmp-bg); }
+.cmp__btn--ghost:hover { background: var(--cmp-hover); }
+
+.cmp__btn--outline { color: var(--cmp-primary); border-color: var(--cmp-primary); background: var(--cmp-bg); }
+.cmp__btn--outline:hover { background: var(--cmp-outline-hover); }
+
+.cmp__btn--primary { color: var(--cmp-primary-text); background: var(--cmp-primary); border-color: var(--cmp-primary); }
+.cmp__btn--primary:hover { background: var(--cmp-primary-hover); border-color: var(--cmp-primary-hover); }
+
+/* Preferences header + back button */
+.cmp__prefs-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+.cmp__collapse {
+	appearance: none;
+	border: 1px solid var(--cmp-border);
+	background: var(--cmp-bg);
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: var(--cmp-muted);
+	transition: background-color 150ms ease;
+}
+.cmp__collapse:hover { background: var(--cmp-hover); }
+.cmp__collapse svg { width: 18px; height: 18px; }
+
+/* ---- Design presets (override custom properties; neutral = base above) ---- */
+.cmp--egov {
+	--cmp-primary: #003e96;
+	--cmp-primary-hover: #00285f;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #001b35;
+	--cmp-muted: #475467;
+	--cmp-bg: #ffffff;
+	--cmp-panel: #eef3fb;
+	--cmp-border: #cdd7e6;
+	--cmp-hover: #e7eefb;
+	--cmp-outline-hover: #e0eaff;
+	--cmp-scrim: rgba(0, 27, 53, 0.6);
+}
+
+.cmp--warm {
+	--cmp-primary: #2f7d4f;
+	--cmp-primary-hover: #235e3c;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #2c2417;
+	--cmp-muted: #6b5d47;
+	--cmp-bg: #fbf9f4;
+	--cmp-panel: #f2ede1;
+	--cmp-border: #ded3bf;
+	--cmp-hover: #efe8d8;
+	--cmp-outline-hover: #e6f2ea;
+	--cmp-scrim: rgba(44, 36, 23, 0.5);
+}
+
+.cmp--dark {
+	--cmp-primary: #5b9bff;
+	--cmp-primary-hover: #3f80e6;
+	--cmp-primary-text: #0b1017;
+	--cmp-dark: #f2f4f7;
+	--cmp-muted: #aab4c2;
+	--cmp-bg: #1e242e;
+	--cmp-panel: #28303b;
+	--cmp-border: #3a434f;
+	--cmp-hover: #2f3946;
+	--cmp-outline-hover: #263043;
+	--cmp-scrim: rgba(0, 0, 0, 0.6);
+}
+.cmp--dark .cmp__modal { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+
+/* Category list */
+.cmp__cats {
+	background: var(--cmp-panel);
+	border-radius: 10px;
+	padding: 8px 24px;
+	margin-bottom: 20px;
+}
+.cmp__cat {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 0;
+}
+.cmp__cat + .cmp__cat { border-top: 1px solid var(--cmp-border); }
+
+.cmp__cat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.cmp__cat-label { font-size: 15px; font-weight: 700; color: var(--cmp-dark); }
+.cmp__cat-badge {
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--cmp-primary);
+	border: 1px solid var(--cmp-primary);
+	border-radius: 6px;
+	padding: 2px 8px;
+	line-height: 1.4;
+}
+.cmp__cat-desc { font-size: 13px; line-height: 1.55; color: var(--cmp-muted); max-width: 520px; }
+
+.cmp__cat-locked { width: 28px; height: 28px; color: var(--cmp-primary); display: flex; align-items: center; justify-content: center; }
+.cmp__cat-locked svg { width: 24px; height: 24px; }
+
+/* Toggle switch */
+.cmp__toggle { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+.cmp__toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cmp__toggle-slider {
+	position: absolute;
+	inset: 0;
+	background: var(--cmp-border);
+	border-radius: 26px;
+	cursor: pointer;
+	transition: background-color 180ms ease;
+}
+.cmp__toggle-slider::before {
+	content: "";
+	position: absolute;
+	left: 3px;
+	top: 3px;
+	width: 20px;
+	height: 20px;
+	background: #ffffff;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+	transition: transform 180ms ease;
+}
+.cmp__toggle input:checked + .cmp__toggle-slider { background: var(--cmp-primary); }
+.cmp__toggle input:checked + .cmp__toggle-slider::before { transform: translateX(22px); }
+.cmp__toggle input:focus-visible + .cmp__toggle-slider { box-shadow: 0 0 0 3px rgba(0, 88, 210, 0.25); }
+
+/* Mobile */
+@media (max-width: 575px) {
+	.cmp { padding: 0; align-items: flex-end; }
+	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; }
+	.cmp__title { font-size: 19px; }
+	.cmp__actions { flex-direction: column; align-items: stretch; }
+	.cmp__actions .cmp__btn { width: 100%; text-align: center; }
+	.cmp__spacer { display: none; }
+	.cmp__prefs-actions { flex-direction: column; }
+	.cmp__prefs-actions .cmp__btn { width: 100%; }
+}
+
+/* ---- Light mode: small floating card, bottom-left corner (non-blocking) ---- */
+.cmp-light {
+	position: fixed;
+	left: 24px;
+	right: auto;
+	bottom: 24px;
+	z-index: 2147483600;
+	max-width: 380px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 18px 20px;
+	background: var(--cmp-bg);
+	color: var(--cmp-dark);
+	border: 1px solid var(--cmp-border);
+	border-radius: 16px;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+.cmp-light[hidden] { display: none; }
+.cmp-light__text { margin: 0; color: var(--cmp-muted); }
+.cmp-light__link { color: var(--cmp-primary); text-decoration: underline; }
+.cmp-light__btn {
+	appearance: none;
+	border: 1px solid var(--cmp-primary);
+	background: var(--cmp-primary);
+	color: var(--cmp-primary-text);
+	border-radius: 999px;
+	padding: 10px 26px;
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+.cmp-light__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+
+/* On small screens the card stretches near full width. */
+@media (max-width: 575px) {
+	.cmp-light { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+}
