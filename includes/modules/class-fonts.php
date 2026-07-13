@@ -72,4 +72,100 @@ class CMP_Fonts {
 			(string) $html
 		);
 	}
+
+	const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+	public static function register() {
+		add_action( 'admin_post_cmp_localize_fonts', array( __CLASS__, 'localize' ) );
+		add_action( 'admin_post_cmp_clear_fonts', array( __CLASS__, 'clear' ) );
+	}
+
+	public static function map() {
+		$m = get_option( self::MAP_KEY, array() );
+		return is_array( $m ) ? $m : array();
+	}
+
+	public static function dir() {
+		$up = wp_upload_dir();
+		return trailingslashit( $up['basedir'] ) . self::SUBDIR;
+	}
+
+	public static function url() {
+		$up = wp_upload_dir();
+		return trailingslashit( $up['baseurl'] ) . self::SUBDIR;
+	}
+
+	/** GET a URL with a modern browser UA (so Google serves woff2). Returns body or ''. */
+	private static function fetch( $url ) {
+		$res = wp_remote_get( $url, array( 'timeout' => 20, 'headers' => array( 'User-Agent' => self::UA ) ) );
+		if ( is_wp_error( $res ) || 200 !== wp_remote_retrieve_response_code( $res ) ) {
+			return '';
+		}
+		return (string) wp_remote_retrieve_body( $res );
+	}
+
+	/** Admin action: scan the homepage, download Google Fonts locally, build the map. */
+	public static function localize() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_localize_fonts' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+
+		$home = self::fetch( home_url( '/' ) );
+		$links = self::extract_font_links( $home );
+
+		$dir = self::dir();
+		wp_mkdir_p( $dir );
+		$map   = array();
+		$count = 0;
+
+		foreach ( $links as $google_url ) {
+			$css = self::fetch( $google_url );
+			if ( '' === $css ) {
+				continue;
+			}
+			$woff2   = self::parse_woff2_urls( $css );
+			$url_map = array();
+			foreach ( $woff2 as $remote ) {
+				$body = self::fetch( $remote );
+				if ( '' === $body ) {
+					continue;
+				}
+				$fname = md5( $remote ) . '.woff2';
+				if ( false !== file_put_contents( $dir . '/' . $fname, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+					$url_map[ $remote ] = self::url() . '/' . $fname;
+				}
+			}
+			if ( empty( $url_map ) ) {
+				continue;
+			}
+			$local_css = self::localize_css( $css, $url_map );
+			$css_name  = md5( $google_url ) . '.css';
+			if ( false !== file_put_contents( $dir . '/' . $css_name, $local_css ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				$map[ $google_url ] = self::url() . '/' . $css_name;
+				$count++;
+			}
+		}
+
+		update_option( self::MAP_KEY, $map );
+		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'cmp_fonts' => (int) $count ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	/** Admin action: delete the localized files and clear the map. */
+	public static function clear() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_clear_fonts' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+		$dir = self::dir();
+		if ( is_dir( $dir ) ) {
+			foreach ( (array) glob( $dir . '/*' ) as $f ) {
+				if ( is_file( $f ) ) {
+					@unlink( $f ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				}
+			}
+		}
+		delete_option( self::MAP_KEY );
+		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'cmp_fonts_cleared' => 1 ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
 }

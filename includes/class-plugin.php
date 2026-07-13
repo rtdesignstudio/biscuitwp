@@ -34,6 +34,8 @@ class CMP_Plugin {
 		CMP_Updater::register();
 		require_once CMP_PATH . 'includes/modules/class-blocker.php';
 		CMP_Blocker::register();
+		require_once CMP_PATH . 'includes/modules/class-fonts.php';
+		CMP_Fonts::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
