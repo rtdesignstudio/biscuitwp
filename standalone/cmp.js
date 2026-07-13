@@ -110,7 +110,22 @@
 
 		var lang = KNOWN_LANGS.indexOf(raw.lang) !== -1 ? raw.lang : 'ro';
 		var mode = raw.mode === 'light' ? 'light' : 'pro';
-		var texts = CMP_DEFAULTS.i18n[lang].texts;
+
+		// Fresh object: per-language defaults with any config.texts overriding,
+		// so callers/renderers never mutate the shared CMP_DEFAULTS.
+		var texts = {};
+		var defaultTexts = CMP_DEFAULTS.i18n[lang].texts;
+		var k;
+		for (k in defaultTexts) {
+			if (Object.prototype.hasOwnProperty.call(defaultTexts, k)) { texts[k] = defaultTexts[k]; }
+		}
+		if (raw.texts && typeof raw.texts === 'object') {
+			for (k in raw.texts) {
+				if (Object.prototype.hasOwnProperty.call(raw.texts, k) && typeof raw.texts[k] === 'string') {
+					texts[k] = raw.texts[k];
+				}
+			}
+		}
 
 		var requestedSlugs = [];
 		if (Array.isArray(raw.categories)) {

@@ -30,6 +30,13 @@ eq(cmp.decisionFor(['necessary', 'statistics', 'marketing'], cats), 'accepted_al
 eq(cmp.decisionFor(['necessary'], cats), 'rejected_all', 'only required -> rejected_all');
 eq(cmp.decisionFor(['necessary', 'statistics'], cats), 'partial', 'some -> partial');
 
+// texts: config overrides win, defaults fill the rest, shared defaults stay unmutated
+var ct = cmp.normalizeConfig({ lang: 'en', texts: { accept: 'Allow all now' } });
+eq(ct.texts.accept, 'Allow all now', 'config.texts overrides the default');
+ok(typeof ct.texts.reject === 'string' && ct.texts.reject.length > 0, 'non-overridden text falls back to default');
+ct.texts.accept = 'MUTATED';
+eq(cmp.normalizeConfig({ lang: 'en' }).texts.accept, cmp.CMP_DEFAULTS.i18n.en.texts.accept, 'mutating a returned texts does not corrupt defaults');
+
 // cookie serialize/parse
 var s = cmp.serializeConsent({ v: '1', categories: ['necessary'], decision: 'rejected_all', ts: 5 });
 eq(cmp.parseConsent(s).decision, 'rejected_all', 'roundtrip decision');
