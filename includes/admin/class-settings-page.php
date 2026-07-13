@@ -49,6 +49,13 @@ class CMP_Settings_Page {
 							<?php endforeach; ?>
 						</select></td>
 					</tr>
+					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Blocare scripturi tracking', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[block_scripts]" value="1" <?php checked( ! empty( $s['block_scripts'] ) ); ?>> <?php esc_html_e( 'Blochează Google Analytics / Tag Manager până la consimțământ', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Împiedică încărcarea scripturilor GA/GTM înainte de Accept (blocare efectivă, nu doar Consent Mode). Testează pe site după activare. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Versiune politică', 'consent-manager-pro' ); ?></th>
 						<td>

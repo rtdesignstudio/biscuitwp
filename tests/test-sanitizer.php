@@ -70,3 +70,8 @@ $tk = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'github_token' => 
 cmp_assert_eq( $tk['github_token'], 'ghp_abc123', 'github_token stripped + trimmed' );
 $tk2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
 cmp_assert_eq( $tk2['github_token'], '', 'missing github_token => empty string' );
+
+$bs1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'block_scripts' => '1' ) );
+cmp_assert_eq( $bs1['block_scripts'], true, 'block_scripts truthy -> true' );
+$bs2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
+cmp_assert_eq( $bs2['block_scripts'], false, 'block_scripts missing -> false' );

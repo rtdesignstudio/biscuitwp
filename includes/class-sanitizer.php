@@ -36,6 +36,7 @@ class CMP_Sanitizer {
 			'terms_page_id'    => self::pos_int( $input, 'terms_page_id' ),
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),
 			'github_token'     => isset( $input['github_token'] ) ? trim( strip_tags( (string) $input['github_token'] ) ) : '',
+			'block_scripts'    => ! empty( $input['block_scripts'] ),
 			'texts'            => $texts,
 		);
 	}
