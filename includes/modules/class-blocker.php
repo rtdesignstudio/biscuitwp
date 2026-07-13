@@ -14,6 +14,34 @@ class CMP_Blocker {
 
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
+		add_filter( 'wp_resource_hints', array( __CLASS__, 'filter_hints' ), 10, 2 );
+	}
+
+	/** Remove GA/GTM dns-prefetch / preconnect resource hints while blocking is active. */
+	public static function filter_hints( $urls, $relation_type ) {
+		if ( ! is_array( $urls ) || ! self::should_run() ) {
+			return $urls;
+		}
+		return self::strip_hints( $urls, self::HOSTS );
+	}
+
+	/** Pure: drop resource-hint entries (string or ['href'=>…]) whose URL matches a host. */
+	public static function strip_hints( array $urls, array $hosts ) {
+		$out = array();
+		foreach ( $urls as $u ) {
+			$href = is_array( $u ) ? ( isset( $u['href'] ) ? (string) $u['href'] : '' ) : (string) $u;
+			$skip = false;
+			foreach ( $hosts as $host ) {
+				if ( '' !== $href && false !== stripos( $href, $host ) ) {
+					$skip = true;
+					break;
+				}
+			}
+			if ( ! $skip ) {
+				$out[] = $u;
+			}
+		}
+		return $out;
 	}
 
 	public static function should_run() {

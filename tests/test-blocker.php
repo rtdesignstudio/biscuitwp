@@ -51,3 +51,13 @@ cmp_assert( strpos( $outd, 'data-src="foo"' ) !== false, 'unrelated data-src pre
 // A benign inline script containing "GTM-" but not dataLayer is NOT blocked.
 $promo = '<script>var code = "GTM-2026 promo";</script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $promo ), $promo, 'GTM- substring without dataLayer not blocked' );
+
+// strip_hints removes GA/GTM resource hints (string + array forms) but keeps others.
+$hints = array(
+	'//www.googletagmanager.com',
+	'https://fonts.gstatic.com',
+	array( 'href' => 'https://www.google-analytics.com', 'crossorigin' ),
+);
+$kept = CMP_Blocker::strip_hints( $hints, CMP_Blocker::HOSTS );
+cmp_assert_eq( count( $kept ), 1, 'only the non-Google hint remains' );
+cmp_assert_eq( $kept[0], 'https://fonts.gstatic.com', 'non-Google hint preserved' );
