@@ -126,6 +126,9 @@ class CMP_Fonts {
 			$woff2   = self::parse_woff2_urls( $css );
 			$url_map = array();
 			foreach ( $woff2 as $remote ) {
+				if ( false === stripos( $remote, 'fonts.gstatic.com' ) ) {
+					continue;
+				}
 				$body = self::fetch( $remote );
 				if ( '' === $body ) {
 					continue;
@@ -146,7 +149,7 @@ class CMP_Fonts {
 			}
 		}
 
-		update_option( self::MAP_KEY, $map );
+		update_option( self::MAP_KEY, array_merge( self::map(), $map ) );
 		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'cmp_fonts' => (int) $count ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

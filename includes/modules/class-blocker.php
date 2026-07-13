@@ -78,7 +78,6 @@ class CMP_Blocker {
 			$html = self::rewrite( $html );
 		}
 		if ( ! empty( $s['localize_fonts'] ) ) {
-			require_once __DIR__ . '/class-fonts.php';
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
 		}
 		return $html;
