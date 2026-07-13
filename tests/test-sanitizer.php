@@ -75,3 +75,8 @@ $bs1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'block_scripts' =
 cmp_assert_eq( $bs1['block_scripts'], true, 'block_scripts truthy -> true' );
 $bs2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
 cmp_assert_eq( $bs2['block_scripts'], false, 'block_scripts missing -> false' );
+
+$lf1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'localize_fonts' => '1' ) );
+cmp_assert_eq( $lf1['localize_fonts'], true, 'localize_fonts truthy -> true' );
+$lf2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
+cmp_assert_eq( $lf2['localize_fonts'], false, 'localize_fonts missing -> false' );
