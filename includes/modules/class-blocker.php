@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CMP_Blocker {
 
 	const HOSTS   = array( 'googletagmanager.com', 'google-analytics.com' );
-	const INLINE  = array( "gtag('config'", 'gtag("config"', 'GTM-', "ga('create'" );
+	const INLINE  = array( "gtag('config'", 'gtag("config"', "ga('create'" );
 
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
@@ -60,7 +60,7 @@ class CMP_Blocker {
 		}
 
 		$is_target = false;
-		if ( preg_match( '/\bsrc\s*=\s*["\']([^"\']+)["\']/i', $attrs, $sm ) ) {
+		if ( preg_match( '/(?:^|\s)src\s*=\s*["\']([^"\']+)["\']/i', $attrs, $sm ) ) {
 			foreach ( self::HOSTS as $host ) {
 				if ( false !== stripos( $sm[1], $host ) ) {
 					$is_target = true;
@@ -76,12 +76,15 @@ class CMP_Blocker {
 				}
 			}
 		}
+		if ( ! $is_target && false !== strpos( $body, 'GTM-' ) && false !== strpos( $body, 'dataLayer' ) ) {
+			$is_target = true;
+		}
 		if ( ! $is_target ) {
 			return $m[0];
 		}
 
 		$new_attrs = preg_replace( '/\btype\s*=\s*["\'][^"\']*["\']/i', '', $attrs );
-		$new_attrs = preg_replace( '/\bsrc\s*=/i', 'data-cmp-src=', $new_attrs );
+		$new_attrs = preg_replace( '/(^|\s)src(\s*=)/i', '$1data-cmp-src$2', $new_attrs );
 		$new_attrs = trim( preg_replace( '/\s+/', ' ', $new_attrs ) );
 		$prefix    = '' === $new_attrs ? '' : ' ' . $new_attrs;
 		return '<script type="text/plain" data-cmp-block="statistics"' . $prefix . '>' . $body . '</script>';

@@ -34,3 +34,14 @@ cmp_assert_eq( CMP_Blocker::rewrite( $neutral ), $neutral, 'neutral script untou
 // A non-Google external script is untouched.
 $other = '<script src="https://example.com/app.js"></script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $other ), $other, 'non-Google external untouched' );
+
+// data-src decoy before the real GTM src must NOT hide it (still blocked).
+$decoy = '<script data-src="foo" src="https://www.googletagmanager.com/gtag/js"></script>';
+$outd = CMP_Blocker::rewrite( $decoy );
+cmp_assert( strpos( $outd, 'type="text/plain"' ) !== false, 'decoy data-src does not hide real GTM src' );
+cmp_assert( strpos( $outd, 'data-data-cmp-src' ) === false, 'no malformed double attribute' );
+cmp_assert( strpos( $outd, 'data-src="foo"' ) !== false, 'unrelated data-src preserved' );
+
+// A benign inline script containing "GTM-" but not dataLayer is NOT blocked.
+$promo = '<script>var code = "GTM-2026 promo";</script>';
+cmp_assert_eq( CMP_Blocker::rewrite( $promo ), $promo, 'GTM- substring without dataLayer not blocked' );
