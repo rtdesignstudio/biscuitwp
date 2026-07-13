@@ -83,7 +83,7 @@ class CMP_Blocker {
 			return $m[0];
 		}
 
-		$new_attrs = preg_replace( '/\btype\s*=\s*["\'][^"\']*["\']/i', '', $attrs );
+		$new_attrs = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', $attrs );
 		$new_attrs = preg_replace( '/(^|\s)src(\s*=)/i', '$1data-cmp-src$2', $new_attrs );
 		$new_attrs = trim( preg_replace( '/\s+/', ' ', $new_attrs ) );
 		$prefix    = '' === $new_attrs ? '' : ' ' . $new_attrs;

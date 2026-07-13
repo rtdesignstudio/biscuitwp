@@ -150,6 +150,11 @@
 			if (old.hasAttribute('async')) { s.async = true; }
 			if (old.hasAttribute('defer')) { s.defer = true; }
 			if (old.id) { s.id = old.id; }
+			var nonce = old.nonce || old.getAttribute('nonce');
+			if (nonce) { s.setAttribute('nonce', nonce); }
+			['crossorigin', 'integrity', 'referrerpolicy'].forEach(function (a) {
+				if (old.hasAttribute(a)) { s.setAttribute(a, old.getAttribute(a)); }
+			});
 			old.parentNode.insertBefore(s, old.nextSibling);
 			old.removeAttribute('data-cmp-block'); // deselect so it won't be re-injected
 		});
