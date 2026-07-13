@@ -47,6 +47,7 @@
 		var data = { v: D.version, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 		writeCookie(data);
 		pushConsent(accepted);
+		unblockScripts(accepted);
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 		logConsent({ categories: accepted, decision: decision });
 		hide();
@@ -138,6 +139,22 @@
 		}
 	}
 
+	function unblockScripts(accepted) {
+		var blocked = document.querySelectorAll('script[type="text/plain"][data-cmp-block]');
+		blocked.forEach(function (old) {
+			var cat = old.getAttribute('data-cmp-block');
+			if (!cat || accepted.indexOf(cat) === -1) { return; }
+			var s = document.createElement('script');
+			var src = old.getAttribute('data-cmp-src');
+			if (src) { s.src = src; } else { s.text = old.textContent; }
+			if (old.hasAttribute('async')) { s.async = true; }
+			if (old.hasAttribute('defer')) { s.defer = true; }
+			if (old.id) { s.id = old.id; }
+			old.parentNode.insertBefore(s, old.nextSibling);
+			old.removeAttribute('data-cmp-block'); // deselect so it won't be re-injected
+		});
+	}
+
 	// --- Public API ---
 	window.CMP = {
 		isAllowed: function (slug) {
@@ -155,7 +172,10 @@
 		if (D.mode === 'light') { initLight(); return; }
 		bind();
 		var c = readCookie();
-		if (c && String(c.v) === String(D.version)) { return; }
+		if (c && String(c.v) === String(D.version)) {
+			unblockScripts(c.categories || []);
+			return;
+		}
 		if (D.autoReject) {
 			// Global Privacy Control / Do-Not-Track: record refusal without prompting.
 			save(requiredSlugs(), 'rejected_all');
