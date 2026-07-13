@@ -57,16 +57,31 @@ class CMP_Blocker {
 		if ( function_exists( 'is_feed' ) && is_feed() ) {
 			return false;
 		}
-		$s    = CMP_Consent::get_settings();
-		$on   = ! empty( $s['block_scripts'] );
-		$mode = isset( $s['mode'] ) ? $s['mode'] : 'pro';
-		return $on && 'pro' === $mode;
+		$s     = CMP_Consent::get_settings();
+		$block = ! empty( $s['block_scripts'] );
+		$fonts = ! empty( $s['localize_fonts'] );
+		$mode  = isset( $s['mode'] ) ? $s['mode'] : 'pro';
+		return ( $block || $fonts ) && 'pro' === $mode;
 	}
 
 	public static function maybe_start() {
 		if ( self::should_run() ) {
-			ob_start( array( __CLASS__, 'rewrite' ) );
+			ob_start( array( __CLASS__, 'apply' ) );
 		}
+	}
+
+	/** Output-buffer callback: apply the enabled rewrites (scripts and/or fonts). */
+	public static function apply( $html ) {
+		$s    = CMP_Consent::get_settings();
+		$html = (string) $html;
+		if ( ! empty( $s['block_scripts'] ) ) {
+			$html = self::rewrite( $html );
+		}
+		if ( ! empty( $s['localize_fonts'] ) ) {
+			require_once __DIR__ . '/class-fonts.php';
+			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
+		}
+		return $html;
 	}
 
 	/** Pure: neutralize GA/GTM <script> tags and drop GA/GTM resource-hint <link> tags. */

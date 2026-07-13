@@ -56,6 +56,21 @@ class CMP_Settings_Page {
 							<p class="description"><?php esc_html_e( 'Împiedică încărcarea scripturilor GA/GTM înainte de Accept (blocare efectivă, nu doar Consent Mode). Testează pe site după activare. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
+					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Localizare Google Fonts', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[localize_fonts]" value="1" <?php checked( ! empty( $s['localize_fonts'] ) ); ?>> <?php esc_html_e( 'Servește Google Fonts local (fără request la Google)', 'consent-manager-pro' ); ?></label>
+							<p class="description">
+								<?php esc_html_e( 'După activare (și Salvează), apasă „Localizează fonturile" de mai jos ca să descarci fonturile de pe homepage. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?>
+								<?php
+								$cmp_fmap = get_option( CMP_Fonts::MAP_KEY, array() );
+								if ( is_array( $cmp_fmap ) && $cmp_fmap ) {
+									echo ' ' . esc_html( sprintf( /* translators: %d — count */ __( '(%d fonturi localizate)', 'consent-manager-pro' ), count( $cmp_fmap ) ) );
+								}
+								?>
+							</p>
+						</td>
+					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Versiune politică', 'consent-manager-pro' ); ?></th>
 						<td>
@@ -124,6 +139,25 @@ class CMP_Settings_Page {
 					</tr>
 				</table>
 				<?php submit_button( __( 'Salvează setările', 'consent-manager-pro' ) ); ?>
+			</form>
+
+			<h2><?php esc_html_e( 'Google Fonts', 'consent-manager-pro' ); ?></h2>
+			<?php if ( isset( $_GET['cmp_fonts'] ) ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( /* translators: %d — count */ __( 'Localizate %d fonturi.', 'consent-manager-pro' ), (int) $_GET['cmp_fonts'] ) ); ?></p></div>
+			<?php endif; ?>
+			<?php if ( isset( $_GET['cmp_fonts_cleared'] ) ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Fonturi localizate șterse.', 'consent-manager-pro' ); ?></p></div>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Descarcă fonturile Google folosite pe homepage și servește-le local. Activează întâi opțiunea „Localizare Google Fonts" de mai sus și salvează.', 'consent-manager-pro' ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+				<input type="hidden" name="action" value="cmp_localize_fonts">
+				<?php wp_nonce_field( 'cmp_localize_fonts' ); ?>
+				<button type="submit" class="button button-primary"><?php esc_html_e( 'Localizează fonturile', 'consent-manager-pro' ); ?></button>
+			</form>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+				<input type="hidden" name="action" value="cmp_clear_fonts">
+				<?php wp_nonce_field( 'cmp_clear_fonts' ); ?>
+				<button type="submit" class="button"><?php esc_html_e( 'Șterge fonturile localizate', 'consent-manager-pro' ); ?></button>
 			</form>
 		</div>
 		<?php
