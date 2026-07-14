@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMP — Generator marcaje tracker</title>
+<style>
+  :root { --bg:#f6f5f1; --card:#fff; --ink:#1c2b2d; --muted:#5d6b6d; --line:#e3e0d8; --accent:#0a6b53; --accent-ink:#fff; --code:#0f1b1c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:760px; margin:0 auto; padding:32px 20px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:18px; }
+  label { display:block; font-weight:600; margin:14px 0 6px; }
+  label:first-child { margin-top:0; }
+  input[type=text], textarea, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font:inherit; background:#fbfbf9; color:var(--ink); }
+  textarea { min-height:90px; font-family:ui-monospace,Menlo,monospace; font-size:13px; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:200px; }
+  .radio { display:flex; gap:8px; margin:8px 0; }
+  .radio button { flex:1; padding:9px; border:1px solid var(--line); border-radius:9px; background:#fbfbf9; cursor:pointer; font:inherit; }
+  .radio button[aria-pressed=true] { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .check { display:flex; align-items:center; gap:8px; margin-top:12px; font-weight:500; }
+  .check input { width:auto; }
+  .hint { color:var(--muted); font-size:13px; margin:6px 0 0; }
+  .out { position:relative; }
+  pre { background:var(--code); color:#d7f0e6; border-radius:11px; padding:16px; overflow:auto; font-size:13px; margin:0; white-space:pre-wrap; word-break:break-all; }
+  .copy { position:absolute; top:10px; right:10px; padding:6px 12px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; font:inherit; font-size:13px; }
+  .copy.ok { background:#2f8f5b; }
+  .muted-card { background:transparent; border:1px dashed var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Generator marcaje tracker — Consent Manager Pro</h1>
+  <p class="sub">Transformă un tracker într-un <code>&lt;script type="text/plain"&gt;</code> pe care CMP îl activează doar după consimțământ. Totul se calculează local, nimic nu pleacă de pe pagină.</p>
+
+  <div class="card">
+    <label>Tip tracker</label>
+    <div class="radio" id="type">
+      <button data-type="external" aria-pressed="true">Extern (are un URL, ex. GA/GTM/Meta)</button>
+      <button data-type="inline" aria-pressed="false">Inline (cod propriu, ex. fbq/gtag)</button>
+    </div>
+
+    <div id="externalBox">
+      <label for="url">URL-ul trackerului</label>
+      <input type="text" id="url" placeholder="https://www.googletagmanager.com/gtag/js?id=G-XXXX">
+      <div class="check"><input type="checkbox" id="enc" checked><label for="enc" style="margin:0;font-weight:500">Ascunde domeniul (base64) — recomandat pentru scanere GDPR</label></div>
+    </div>
+
+    <div id="inlineBox" hidden>
+      <label for="code">Codul inline</label>
+      <textarea id="code" placeholder="fbq('init','123456789');&#10;fbq('track','PageView');"></textarea>
+      <div class="check"><input type="checkbox" id="encInline"><label for="encInline" style="margin:0;font-weight:500">Ascunde corpul (base64) — doar caractere ASCII</label></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="cat">Categorie</label>
+        <select id="cat">
+          <option value="statistics">statistics (analiză — GA/GTM)</option>
+          <option value="marketing">marketing (reclame — Meta Pixel, Ads)</option>
+          <option value="necessary">necessary (se încarcă mereu)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card out">
+    <label style="margin-bottom:10px">Marcaj gata de copiat</label>
+    <button class="copy" id="copy">Copiază</button>
+    <pre id="output"><!-- output --></pre>
+    <p class="hint" id="warn"></p>
+  </div>
+
+  <div class="card muted-card">
+    <strong>Cum îl folosești:</strong> înlocuiește scriptul-tracker original din HTML cu marcajul de mai sus. Asigură-te că pagina încarcă bundle-ul (<code>rt.md/cmp/cmp.css</code> + <code>window.CMP_CONFIG</code> + <code>rt.md/cmp/cmp.js</code>) — altfel marcajul rămâne inert.
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var state = { type: 'external' };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function b64(s) {
+    // ASCII-safe (URLs / plain JS). Falls back to UTF-8-safe for accented text.
+    try { return btoa(s); } catch (e) { return btoa(unescape(encodeURIComponent(s))); }
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function render() {
+    var cat = $('cat').value;
+    var warn = '';
+    var markup = '';
+    if (state.type === 'external') {
+      var url = $('url').value.trim();
+      if (!url) { $('output').textContent = '// introdu URL-ul trackerului sus'; $('warn').textContent = ''; return; }
+      if (!/^https?:\/\//i.test(url)) { warn = 'Atenție: URL-ul ar trebui să înceapă cu http:// sau https://'; }
+      if ($('enc').checked) {
+        markup = '<script type="text/plain" data-cmp-block="' + cat + '" data-cmp-enc="1"\n        data-cmp-src="' + b64(url) + '"><\/script>';
+      } else {
+        markup = '<script type="text/plain" data-cmp-block="' + cat + '"\n        data-cmp-src="' + esc(url) + '"><\/script>';
+      }
+    } else {
+      var code = $('code').value;
+      if (!code.trim()) { $('output').textContent = '// lipește codul inline sus'; $('warn').textContent = ''; return; }
+      if ($('encInline').checked) {
+        if (/[^\x00-\x7F]/.test(code)) { warn = 'Codul conține caractere non-ASCII — pentru siguranță, lasă base64 debifat la inline.'; }
+        markup = '<script type="text/plain" data-cmp-block="' + cat + '" data-cmp-enc="1" data-cmp-body="' + b64(code) + '"><\/script>';
+      } else {
+        markup = '<script type="text/plain" data-cmp-block="' + cat + '">\n' + code + '\n<\/script>';
+      }
+    }
+    $('output').textContent = markup;
+    $('warn').textContent = warn;
+  }
+
+  document.getElementById('type').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) { return; }
+    state.type = b.getAttribute('data-type');
+    [].forEach.call(this.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    $('externalBox').hidden = state.type !== 'external';
+    $('inlineBox').hidden = state.type !== 'inline';
+    render();
+  });
+
+  ['url', 'code', 'cat', 'enc', 'encInline'].forEach(function (id) {
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+
+  $('copy').addEventListener('click', function () {
+    var txt = $('output').textContent;
+    navigator.clipboard.writeText(txt).then(function () {
+      var b = $('copy'); b.textContent = 'Copiat ✓'; b.classList.add('ok');
+      setTimeout(function () { b.textContent = 'Copiază'; b.classList.remove('ok'); }, 1400);
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
