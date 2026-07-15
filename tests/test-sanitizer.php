@@ -12,7 +12,7 @@ $in = array(
 	'cookie_page_id'   => 'abc',
 );
 $s = CMP_Sanitizer::settings( $in );
-cmp_assert_eq( $s['position'], 'bottom', 'invalid position falls back to bottom' );
+cmp_assert_eq( $s['position'], 'middle-center', 'invalid position falls back to middle-center' );
 cmp_assert_eq( $s['preset'], 'egov', 'valid preset kept' );
 cmp_assert_eq( $s['policy_version'], '3', 'policy_version kept' );
 cmp_assert_eq( $s['retention_months'], 13, 'retention < 1 falls back to 13' );
@@ -80,3 +80,13 @@ $lf1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'localize_fonts' 
 cmp_assert_eq( $lf1['localize_fonts'], true, 'localize_fonts truthy -> true' );
 $lf2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
 cmp_assert_eq( $lf2['localize_fonts'], false, 'localize_fonts missing -> false' );
+
+// new positions accepted; legacy still accepted; invalid -> middle-center
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'position' => 'bottom-left' ) )['position'], 'bottom-left', 'new position kept' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'position' => 'modal-center' ) )['position'], 'modal-center', 'legacy position kept' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'position' => 'nope' ) )['position'], 'middle-center', 'invalid position -> middle-center' );
+// cookie_days clamps
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 90 ) )['cookie_days'], 90, 'cookie_days kept' );
+cmp_assert_eq( CMP_Sanitizer::settings( array() )['cookie_days'], 180, 'cookie_days default 180' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 0 ) )['cookie_days'], 180, 'cookie_days 0 -> 180' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 99999 ) )['cookie_days'], 180, 'cookie_days over max -> 180' );

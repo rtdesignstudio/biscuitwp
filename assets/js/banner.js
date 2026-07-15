@@ -15,7 +15,8 @@
 
 	function writeCookie(obj) {
 		var v = encodeURIComponent(JSON.stringify(obj));
-		var maxAge = 60 * 60 * 24 * 180; // 180 days
+		var days = (D.cookieDays && D.cookieDays > 0) ? D.cookieDays : 180;
+		var maxAge = 60 * 60 * 24 * days;
 		document.cookie = D.cookieName + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 	}
 

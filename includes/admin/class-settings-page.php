@@ -10,7 +10,21 @@ class CMP_Settings_Page {
 			return;
 		}
 		$s = CMP_Consent::get_settings();
-		$positions = array( 'bottom' => 'Jos', 'top' => 'Sus', 'modal-center' => 'Modal centrat' );
+		$positions = array(
+			'top-left'      => 'Stânga sus',
+			'top-center'    => 'Sus centru',
+			'top-right'     => 'Dreapta sus',
+			'middle-center' => 'Mijloc centru',
+			'bottom-left'   => 'Stânga jos',
+			'bottom-center' => 'Jos centru',
+			'bottom-right'  => 'Dreapta jos',
+		);
+		// Map legacy stored values onto the new set for the selected() display.
+		$cmp_pos = isset( $s['position'] ) ? $s['position'] : 'middle-center';
+		$cmp_pos_alias = array( 'bottom' => 'bottom-center', 'top' => 'top-center', 'modal-center' => 'middle-center' );
+		if ( isset( $cmp_pos_alias[ $cmp_pos ] ) ) {
+			$cmp_pos = $cmp_pos_alias[ $cmp_pos ];
+		}
 		$presets   = array( 'neutral' => 'Neutral', 'warm' => 'Warm', 'dark' => 'Dark', 'egov' => 'eGov' );
 		?>
 		<div class="wrap cmp-admin">
@@ -37,9 +51,16 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Poziție banner', 'consent-manager-pro' ); ?></th>
 						<td><select name="cmp[position]">
 							<?php foreach ( $positions as $k => $lbl ) : ?>
-								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $s['position'], $k ); ?>><?php echo esc_html( $lbl ); ?></option>
+								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $cmp_pos, $k ); ?>><?php echo esc_html( $lbl ); ?></option>
 							<?php endforeach; ?>
 						</select></td>
+					</tr>
+					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Memorarea consimțământului (zile)', 'consent-manager-pro' ); ?></th>
+						<td>
+							<input type="number" name="cmp[cookie_days]" min="1" max="3650" value="<?php echo esc_attr( isset( $s['cookie_days'] ) ? (int) $s['cookie_days'] : 180 ); ?>" class="small-text">
+							<p class="description"><?php esc_html_e( 'Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180). Diferit de retenția registrului de consimțăminte.', 'consent-manager-pro' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Preset design', 'consent-manager-pro' ); ?></th>

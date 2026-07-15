@@ -6,7 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CMP_Sanitizer {
 
 	public static function settings( array $input ) {
-		$positions = array( 'bottom', 'top', 'modal-center' );
+		$positions = array(
+			'top-center', 'middle-center', 'bottom-center',
+			'top-left', 'bottom-left', 'top-right', 'bottom-right',
+			'bottom', 'top', 'modal-center', // legacy aliases
+		);
 		$layouts   = array( 'compact', 'detailed' );
 		$presets   = array( 'neutral', 'warm', 'dark', 'egov' );
 		$modes = array( 'pro', 'light' );
@@ -17,6 +21,7 @@ class CMP_Sanitizer {
 		$pre = isset( $input['preset'] ) ? (string) $input['preset'] : '';
 		$ver = isset( $input['policy_version'] ) ? trim( (string) $input['policy_version'] ) : '';
 		$ret = isset( $input['retention_months'] ) ? (int) $input['retention_months'] : 0;
+		$cd  = isset( $input['cookie_days'] ) ? (int) $input['cookie_days'] : 0;
 
 		$text_keys = array( 'title', 'intro', 'light_intro', 'accept', 'reject', 'prefs', 'save', 'prefs_title' );
 		$texts_in  = isset( $input['texts'] ) && is_array( $input['texts'] ) ? $input['texts'] : array();
@@ -26,12 +31,13 @@ class CMP_Sanitizer {
 		}
 
 		return array(
-			'position'         => in_array( $pos, $positions, true ) ? $pos : 'bottom',
+			'position'         => in_array( $pos, $positions, true ) ? $pos : 'middle-center',
 			'layout'           => in_array( $lay, $layouts, true ) ? $lay : 'detailed',
 			'preset'           => in_array( $pre, $presets, true ) ? $pre : 'neutral',
 			'mode'             => in_array( $mode, $modes, true ) ? $mode : 'pro',
 			'policy_version'   => '' !== $ver ? $ver : '1',
 			'retention_months' => $ret >= 1 ? $ret : 13,
+			'cookie_days'      => ( $cd >= 1 && $cd <= 3650 ) ? $cd : 180,
 			'privacy_page_id'  => self::pos_int( $input, 'privacy_page_id' ),
 			'terms_page_id'    => self::pos_int( $input, 'terms_page_id' ),
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),

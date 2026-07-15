@@ -56,6 +56,7 @@ class CMP_Banner {
 					'Sec-GPC' => isset( $_SERVER['HTTP_SEC_GPC'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_GPC'] ) ) : '',
 				) ),
 				'reopenButton' => ! isset( $cmp_settings['reopen_button'] ) || ! empty( $cmp_settings['reopen_button'] ),
+				'cookieDays' => isset( $cmp_settings['cookie_days'] ) ? (int) $cmp_settings['cookie_days'] : 180,
 			)
 		);
 	}
