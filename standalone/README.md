@@ -67,7 +67,7 @@ All keys are **optional**. Defaults are applied if not specified.
 |-----|------|---------|-------------|
 | `mode` | string | `"pro"` | `"pro"` (full consent form) or `"light"` (compact banner) |
 | `preset` | string | `"default"` | Preset theme: `"neutral"`, `"warm"`, `"dark"`, `"egov"`, `"default"` |
-| `position` | string | `"modal-center"` | Modal position: `"modal-center"`, `"bottom"`, `"top"` |
+| `position` | string | `"modal-center"` | Banner position: `"top-left"`, `"top-center"`, `"top-right"`, `"middle-center"`, `"bottom-left"`, `"bottom-center"`, `"bottom-right"` |
 | `lang` | string | `"ro"` | Language: `"ro"` (Romanian), `"ru"` (Russian), `"en"` (English) |
 | `site` | string | — | Optional site label shown in the banner |
 | `categories` | array | `["necessary", "statistics", "marketing"]` | Consent categories to offer. `"necessary"` is always required and locked. |
@@ -75,6 +75,7 @@ All keys are **optional**. Defaults are applied if not specified.
 | `texts` | object | — | Override default text strings. Supported keys: `title`, `intro`, `prefs`, `reject`, `accept`, `prefs_title`, `save`, `badge`, `locked`, `privacy`, `back`, `dialogLabel` |
 | `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (DNT) and auto-reject non-necessary consent |
 | `reopenButton` | boolean | `true` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `false` to disable. Pro mode only. |
+| `cookieDays` | number | `180` | Number of days the consent choice is remembered before the banner reappears. Clamped to 1-3650, else falls back to 180. |
 
 ### Example: Custom texts
 ```javascript

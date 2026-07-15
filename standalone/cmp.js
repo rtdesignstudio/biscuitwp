@@ -167,6 +167,9 @@
 			};
 		});
 
+		var cd = parseInt(raw.cookieDays, 10);
+		if (!(cd >= 1 && cd <= 3650)) { cd = 180; }
+
 		return {
 			site: typeof raw.site === 'string' ? raw.site : '',
 			mode: mode,
@@ -176,6 +179,7 @@
 			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
 			reopenButton: false !== raw.reopenButton,
+			cookieDays: cd,
 			categories: categories,
 			texts: texts
 		};
@@ -374,7 +378,7 @@
 
 		function writeCookie(obj) {
 			var v = encodeURIComponent(serializeConsent(obj));
-			var maxAge = 60 * 60 * 24 * 180; // 180 days
+			var maxAge = 60 * 60 * 24 * (cfg.cookieDays || 180);
 			document.cookie = COOKIE_NAME + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 		}
 

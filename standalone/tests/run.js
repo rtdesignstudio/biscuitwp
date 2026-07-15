@@ -62,6 +62,12 @@ var s = cmp.serializeConsent({ v: '1', categories: ['necessary'], decision: 'rej
 eq(cmp.parseConsent(s).decision, 'rejected_all', 'roundtrip decision');
 eq(cmp.parseConsent('not json'), null, 'bad json -> null');
 
+// cookieDays: default, clamp, out-of-range fallback
+eq(cmp.normalizeConfig({}).cookieDays, 180, 'cookieDays default 180');
+eq(cmp.normalizeConfig({ cookieDays: 90 }).cookieDays, 90, 'cookieDays kept');
+eq(cmp.normalizeConfig({ cookieDays: 0 }).cookieDays, 180, 'cookieDays 0 -> 180');
+eq(cmp.normalizeConfig({ cookieDays: 99999 }).cookieDays, 180, 'cookieDays over max -> 180');
+
 // escapeHtml
 eq(cmp.escapeHtml('<a>"&\''), '&lt;a&gt;&quot;&amp;&#39;', 'escapes html');
 
