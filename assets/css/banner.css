@@ -43,6 +43,21 @@
 .cmp--pos-top { align-items: flex-start; }
 .cmp--pos-modal-center { align-items: center; }
 
+/* Full position set: vertical (align-items) × horizontal (modal margin).
+   Legacy classes above remain as aliases (bottom=bottom-center, etc.). */
+.cmp--pos-top-center,
+.cmp--pos-top-left,
+.cmp--pos-top-right { align-items: flex-start; }
+.cmp--pos-middle-center { align-items: center; }
+.cmp--pos-bottom-center,
+.cmp--pos-bottom-left,
+.cmp--pos-bottom-right { align-items: flex-end; }
+/* Horizontal anchor (base .cmp__modal is margin-inline:auto = centered). */
+.cmp--pos-top-left .cmp__modal,
+.cmp--pos-bottom-left .cmp__modal { margin-inline: 0 auto; }
+.cmp--pos-top-right .cmp__modal,
+.cmp--pos-bottom-right .cmp__modal { margin-inline: auto 0; }
+
 /* Scroll lock while the banner is open (class added by JS). */
 body.cmp-has-banner { overflow: hidden; }
 
@@ -239,7 +254,7 @@ body.cmp-has-banner { overflow: hidden; }
 /* Mobile */
 @media (max-width: 575px) {
 	.cmp { padding: 0; align-items: flex-end; }
-	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; }
+	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; margin-inline: auto; }
 	.cmp__title { font-size: 19px; }
 	.cmp__actions { flex-direction: column; align-items: stretch; }
 	.cmp__actions .cmp__btn { width: 100%; text-align: center; }
