@@ -48,7 +48,8 @@
 					locked: 'Activat permanent',
 					privacy: 'Politica de confidențialitate',
 					back: 'Înapoi',
-					dialogLabel: 'Informații despre cookie-uri'
+					dialogLabel: 'Informații despre cookie-uri',
+					reopen: 'Setări cookie'
 				}
 			},
 			ru: {
@@ -78,7 +79,8 @@
 					locked: 'Всегда включено',
 					privacy: 'Политика конфиденциальности',
 					back: 'Назад',
-					dialogLabel: 'Информация о файлах cookie'
+					dialogLabel: 'Информация о файлах cookie',
+					reopen: 'Настройки cookie'
 				}
 			},
 			en: {
@@ -108,7 +110,8 @@
 					locked: 'Always active',
 					privacy: 'Privacy policy',
 					back: 'Back',
-					dialogLabel: 'Cookie information'
+					dialogLabel: 'Cookie information',
+					reopen: 'Cookie settings'
 				}
 			}
 		}
@@ -172,6 +175,7 @@
 			lang: lang,
 			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
+			reopenButton: false !== raw.reopenButton,
 			categories: categories,
 			texts: texts
 		};
@@ -339,6 +343,24 @@
 
 		var cfg = null;
 		var banner = null;
+		var reopenBtn = null;
+
+		/** Floating round cookie-settings button (pro mode); shown after a decision. */
+		function renderReopen(c) {
+			if (!c.reopenButton) { return null; }
+			var b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'cmp-reopen';
+			b.setAttribute('data-cmp-reopen', '');
+			b.hidden = true;
+			b.setAttribute('aria-label', c.texts.reopen || 'Cookie settings');
+			b.setAttribute('title', c.texts.reopen || 'Cookie settings');
+			b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="14.5" r="1"/><circle cx="9" cy="15" r="1"/></svg>';
+			document.body.appendChild(b);
+			return b;
+		}
+		function showReopen() { if (reopenBtn) { reopenBtn.hidden = false; } }
+		function hideReopen() { if (reopenBtn) { reopenBtn.hidden = true; } }
 
 		function requiredSlugs() {
 			return (cfg.categories || []).filter(function (c) { return c.required; }).map(function (c) { return c.slug; });
@@ -369,6 +391,7 @@
 		function save(accepted, decision) {
 			var data = { v: VERSION, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 			writeCookie(data);
+			showReopen();
 			pushConsent(accepted);
 			unblockScripts(accepted);
 			document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
@@ -387,6 +410,7 @@
 
 		function show() {
 			if (!banner) { return; }
+			hideReopen();
 			banner.hidden = false;
 			document.body.classList.add('cmp-has-banner');
 			trapFocus(true);
@@ -397,6 +421,7 @@
 			document.body.classList.remove('cmp-has-banner');
 			closePrefs();
 			trapFocus(false);
+			if (readCookie()) { showReopen(); }
 		}
 
 		// --- Focus trap (WCAG 2.1 AA) ---
@@ -511,6 +536,7 @@
 				renderPro(cfg);
 				banner = document.querySelector('[data-cmp]');
 				bind();
+				reopenBtn = renderReopen(cfg);
 			}
 
 			window.CMP = {
@@ -529,14 +555,12 @@
 				}
 			};
 
-			var settingsEls = document.querySelectorAll('[data-cmp-settings]');
-			settingsEls.forEach(function (el) {
+			// Wire every reopen control once: page-provided [data-cmp-settings] /
+			// .cmp-reopen, plus the auto-rendered floating button (also .cmp-reopen).
+			var openers = document.querySelectorAll('[data-cmp-settings], .cmp-reopen');
+			openers.forEach(function (el) {
 				el.addEventListener('click', function (e) { e.preventDefault(); window.CMP.openPreferences(); });
 			});
-			var reopen = document.querySelector('.cmp-reopen');
-			if (reopen) {
-				reopen.addEventListener('click', function (e) { e.preventDefault(); window.CMP.openPreferences(); });
-			}
 
 			if (cfg.mode === 'light') {
 				initLight();
@@ -546,6 +570,7 @@
 			var stored = readCookie();
 			if (stored && String(stored.v) === String(VERSION)) {
 				unblockScripts(stored.categories || []);
+				showReopen();
 				return;
 			}
 			if (cfg.respectGPC && (navigator.globalPrivacyControl === true || navigator.doNotTrack === '1')) {

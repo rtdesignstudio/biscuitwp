@@ -4,18 +4,20 @@
  * body.cmp-has-banner class (added by banner.js) until the user decides. */
 
 .cmp, .cmp-light {
-	--cmp-primary: #0058d2;
-	--cmp-primary-hover: #003e96;
+	/* Neutral monochrome default — no brand colour, drops onto any site.
+	   Coloured looks are opt-in via the .cmp--egov / --warm / --dark presets. */
+	--cmp-primary: #111827;
+	--cmp-primary-hover: #000000;
 	--cmp-primary-text: #ffffff;
-	--cmp-dark: #001b35;
-	--cmp-muted: #475467;
+	--cmp-dark: #111827;
+	--cmp-muted: #4b5563;
 	--cmp-bg: #ffffff;
-	--cmp-panel: #f4f6f8;
+	--cmp-panel: #f5f5f5;
 	--cmp-border: #d0d5dd;
 	--cmp-radius: 12px;
-	--cmp-scrim: rgba(0, 27, 53, 0.55);
-	--cmp-hover: #f2f4f7;
-	--cmp-outline-hover: #eaf2ff;
+	--cmp-scrim: rgba(17, 24, 39, 0.55);
+	--cmp-hover: #f2f2f2;
+	--cmp-outline-hover: #f2f2f2;
 }
 .cmp {
 	position: fixed;
@@ -289,3 +291,17 @@ body.cmp-has-banner { overflow: hidden; }
 @media (max-width: 575px) {
 	.cmp-light { left: 12px; right: 12px; bottom: 12px; max-width: none; }
 }
+
+/* ---- Floating reopen button (bottom-left) ---- */
+.cmp-reopen {
+	position: fixed; left: 20px; bottom: 20px; z-index: 2147483000;
+	width: 46px; height: 46px; border-radius: 50%;
+	background: var(--cmp-bg, #fff); color: var(--cmp-dark, #111827);
+	border: 1px solid var(--cmp-border, #d0d5dd);
+	box-shadow: 0 4px 14px rgba(0,0,0,.18);
+	display: inline-flex; align-items: center; justify-content: center;
+	cursor: pointer; padding: 0; transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.cmp-reopen:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.24); }
+.cmp-reopen[hidden] { display: none; }
+@media (max-width: 480px) { .cmp-reopen { left: 14px; bottom: 14px; width: 42px; height: 42px; } }

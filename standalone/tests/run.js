@@ -49,6 +49,14 @@ eq(cmp.normalizeConfig({ privacyUrl: 'javascript:alert(1)' }).privacyUrl, '', 'n
 var onlyReq = cmp.normalizeConfig({ categories: ['necessary'] }).categories;
 eq(cmp.decisionFor(['necessary'], onlyReq), 'accepted_all', 'no optional cats -> accepted_all');
 
+// reopenButton: on by default, off only when explicitly false
+eq(cmp.normalizeConfig({}).reopenButton, true, 'reopenButton default true');
+eq(cmp.normalizeConfig({ reopenButton: false }).reopenButton, false, 'reopenButton false honored');
+eq(cmp.normalizeConfig({ reopenButton: true }).reopenButton, true, 'reopenButton true');
+// reopen label present in every language
+eq(cmp.normalizeConfig({ lang: 'en' }).texts.reopen, 'Cookie settings', 'en reopen label');
+ok(typeof cmp.normalizeConfig({ lang: 'ru' }).texts.reopen === 'string' && cmp.normalizeConfig({ lang: 'ru' }).texts.reopen.length > 0, 'ru reopen label present');
+
 // cookie serialize/parse
 var s = cmp.serializeConsent({ v: '1', categories: ['necessary'], decision: 'rejected_all', ts: 5 });
 eq(cmp.parseConsent(s).decision, 'rejected_all', 'roundtrip decision');

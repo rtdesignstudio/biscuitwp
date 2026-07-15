@@ -74,6 +74,7 @@ All keys are **optional**. Defaults are applied if not specified.
 | `privacyUrl` | string | — | URL to privacy/cookie policy. URLs starting with `javascript:` or `data:` are stripped for security. |
 | `texts` | object | — | Override default text strings. Supported keys: `title`, `intro`, `prefs`, `reject`, `accept`, `prefs_title`, `save`, `badge`, `locked`, `privacy`, `back`, `dialogLabel` |
 | `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (DNT) and auto-reject non-necessary consent |
+| `reopenButton` | boolean | `true` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `false` to disable. Pro mode only. |
 
 ### Example: Custom texts
 ```javascript
