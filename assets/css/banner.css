@@ -4,18 +4,20 @@
  * body.cmp-has-banner class (added by banner.js) until the user decides. */
 
 .cmp, .cmp-light {
-	--cmp-primary: #0058d2;
-	--cmp-primary-hover: #003e96;
+	/* Neutral monochrome default — no brand colour, drops onto any site.
+	   Coloured looks are opt-in via the .cmp--egov / --warm / --dark presets. */
+	--cmp-primary: #111827;
+	--cmp-primary-hover: #000000;
 	--cmp-primary-text: #ffffff;
-	--cmp-dark: #001b35;
-	--cmp-muted: #475467;
+	--cmp-dark: #111827;
+	--cmp-muted: #4b5563;
 	--cmp-bg: #ffffff;
-	--cmp-panel: #f4f6f8;
+	--cmp-panel: #f5f5f5;
 	--cmp-border: #d0d5dd;
 	--cmp-radius: 12px;
-	--cmp-scrim: rgba(0, 27, 53, 0.55);
-	--cmp-hover: #f2f4f7;
-	--cmp-outline-hover: #eaf2ff;
+	--cmp-scrim: rgba(17, 24, 39, 0.55);
+	--cmp-hover: #f2f2f2;
+	--cmp-outline-hover: #f2f2f2;
 }
 .cmp {
 	position: fixed;
