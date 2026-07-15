@@ -254,7 +254,10 @@ body.cmp-has-banner { overflow: hidden; }
 /* Mobile */
 @media (max-width: 575px) {
 	.cmp { padding: 0; align-items: flex-end; }
-	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; margin-inline: auto; }
+	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; }
+	/* Collapse every position to a centered bottom sheet on phones. Same
+	   specificity (0,2,0) as the corner rules but later in source, so it wins. */
+	.cmp .cmp__modal { margin-inline: auto; }
 	.cmp__title { font-size: 19px; }
 	.cmp__actions { flex-direction: column; align-items: stretch; }
 	.cmp__actions .cmp__btn { width: 100%; text-align: center; }
