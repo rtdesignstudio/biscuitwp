@@ -3,6 +3,9 @@
 
 	var D = window.CMP_DATA || { categories: [], version: '1', cookieName: 'cmp_consent' };
 	var banner = document.querySelector('[data-cmp]');
+	var reopenBtn = document.querySelector('[data-cmp-reopen]');
+	function showReopen() { if (reopenBtn) { reopenBtn.hidden = false; } }
+	function hideReopen() { if (reopenBtn) { reopenBtn.hidden = true; } }
 
 	function readCookie() {
 		var m = document.cookie.match('(?:^|; )' + D.cookieName + '=([^;]*)');
@@ -48,6 +51,7 @@
 		writeCookie(data);
 		pushConsent(accepted);
 		unblockScripts(accepted);
+		showReopen();
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 		logConsent({ categories: accepted, decision: decision });
 		hide();
@@ -66,6 +70,7 @@
 		if (!banner) { return; }
 		banner.hidden = false;
 		document.body.classList.add('cmp-has-banner');
+		hideReopen();
 		trapFocus(true);
 	}
 	function hide() {
@@ -74,6 +79,7 @@
 		document.body.classList.remove('cmp-has-banner');
 		closePrefs();
 		trapFocus(false);
+		if (readCookie()) { showReopen(); }
 	}
 
 	// --- Focus trap (WCAG 2.1 AA) ---
@@ -106,6 +112,9 @@
 	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 	function bind() {
+		if (reopenBtn) {
+			reopenBtn.addEventListener('click', function () { window.CMP.openPreferences(); });
+		}
 		if (!banner) { return; }
 		banner.addEventListener('click', function (e) {
 			var btn = e.target.closest('[data-cmp-action]');
@@ -184,6 +193,7 @@
 		var c = readCookie();
 		if (c && String(c.v) === String(D.version)) {
 			unblockScripts(c.categories || []);
+			showReopen();
 			return;
 		}
 		if (D.autoReject) {

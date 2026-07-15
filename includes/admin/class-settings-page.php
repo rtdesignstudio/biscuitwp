@@ -57,6 +57,13 @@ class CMP_Settings_Page {
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Buton flotant redeschidere', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[reopen_button]" value="1" <?php checked( ! isset( $s['reopen_button'] ) || ! empty( $s['reopen_button'] ) ); ?>> <?php esc_html_e( 'Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
+					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Localizare Google Fonts', 'consent-manager-pro' ); ?></th>
 						<td>
 							<label><input type="checkbox" name="cmp[localize_fonts]" value="1" <?php checked( ! empty( $s['localize_fonts'] ) ); ?>> <?php esc_html_e( 'Servește Google Fonts local (fără request la Google)', 'consent-manager-pro' ); ?></label>

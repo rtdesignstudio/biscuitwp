@@ -38,6 +38,7 @@ class CMP_Sanitizer {
 			'github_token'     => isset( $input['github_token'] ) ? trim( strip_tags( (string) $input['github_token'] ) ) : '',
 			'block_scripts'    => ! empty( $input['block_scripts'] ),
 			'localize_fonts'   => ! empty( $input['localize_fonts'] ),
+			'reopen_button'    => ! empty( $input['reopen_button'] ),
 			'texts'            => $texts,
 		);
 	}

@@ -55,6 +55,7 @@ class CMP_Banner {
 					'DNT'     => isset( $_SERVER['HTTP_DNT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_DNT'] ) ) : '',
 					'Sec-GPC' => isset( $_SERVER['HTTP_SEC_GPC'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_GPC'] ) ) : '',
 				) ),
+				'reopenButton' => ! isset( $cmp_settings['reopen_button'] ) || ! empty( $cmp_settings['reopen_button'] ),
 			)
 		);
 	}
@@ -70,5 +71,13 @@ class CMP_Banner {
 			return;
 		}
 		include CMP_PATH . 'templates/banner-bottom.php';
+
+		$reopen = ! isset( $settings['reopen_button'] ) || ! empty( $settings['reopen_button'] );
+		if ( $reopen ) {
+			$label = CMP_Lang::text( 'reopen' );
+			echo '<button type="button" class="cmp-reopen" data-cmp-reopen hidden aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '">'
+				. '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="14.5" r="1"/><circle cx="9" cy="15" r="1"/></svg>'
+				. '</button>';
+		}
 	}
 }
