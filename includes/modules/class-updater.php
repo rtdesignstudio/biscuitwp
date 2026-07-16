@@ -26,6 +26,7 @@ class CMP_Updater {
 	}
 
 	const CACHE_KEY = 'cmp_latest_release';
+	const MAX_DOWNLOAD = 26214400; // 25 MB — defensive cap on the update package size.
 	const PROXY_URL = 'https://rt.md/cmp-update';
 	const PROXY_KEY = '16befd065cfff99d43ccc75215faeeb8fea8049f050445cf';
 
@@ -267,13 +268,17 @@ class CMP_Updater {
 				}
 				return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
 			}
+			if ( filesize( $tmp ) > self::MAX_DOWNLOAD ) {
+				unlink( $tmp );
+				return new WP_Error( 'cmp_download_too_large', __( 'Pachetul de update depășește dimensiunea maximă permisă.', 'consent-manager-pro' ) );
+			}
 			return $tmp;
 		}
 
 		// Step 2b: rare direct 200 from api.github.com — the body is the package.
 		if ( 200 === $code ) {
 			$body = wp_remote_retrieve_body( $auth );
-			if ( '' !== $body && false !== file_put_contents( $tmp, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			if ( '' !== $body && strlen( $body ) <= self::MAX_DOWNLOAD && false !== file_put_contents( $tmp, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 				return $tmp;
 			}
 		}

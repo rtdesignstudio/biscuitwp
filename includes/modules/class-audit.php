@@ -27,6 +27,11 @@ class CMP_Audit {
 		return hash( 'sha256', (string) $ip . '|' . (string) $salt );
 	}
 
+	/** Salted SHA-256 of the user agent (pseudonymized, consistent with hash_ip). */
+	public static function hash_ua( $ua, $salt ) {
+		return hash( 'sha256', (string) $ua . '|' . (string) $salt );
+	}
+
 	private static function client_ip() {
 		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
 	}
@@ -66,7 +71,7 @@ class CMP_Audit {
 		$now     = current_time( 'timestamp', true );
 		$ip_hash = self::hash_ip( self::client_ip(), wp_salt( 'auth' ) );
 		$ua      = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
-		$ua_hash = md5( $ua );
+		$ua_hash = self::hash_ua( $ua, wp_salt( 'auth' ) );
 
 		// Dedup: same (ip_hash, decision) within 24h.
 		$last = $wpdb->get_var( $wpdb->prepare(

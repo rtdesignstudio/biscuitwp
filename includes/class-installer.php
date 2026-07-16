@@ -63,7 +63,7 @@ class CMP_Installer {
 			categories VARCHAR(255) NOT NULL,
 			lang VARCHAR(8) NOT NULL,
 			ip_hash CHAR(64) NOT NULL,
-			ua_hash CHAR(32) NOT NULL,
+			ua_hash CHAR(64) NOT NULL,
 			url VARCHAR(500) NOT NULL,
 			version VARCHAR(20) NOT NULL,
 			PRIMARY KEY  (id),

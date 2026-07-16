@@ -13,6 +13,13 @@ cmp_assert_eq( $h1, $h2, 'ip hash deterministic' );
 cmp_assert_eq( strlen( $h1 ), 64, 'ip hash is sha256 (64 hex chars)' );
 cmp_assert( $h1 !== CMP_Audit::hash_ip( '1.2.3.4', 'other' ), 'different salt => different hash' );
 
+// UA hash: salted sha256 (was unsalted md5), deterministic, salt-dependent.
+$u1 = CMP_Audit::hash_ua( 'Mozilla/5.0', 'salt' );
+cmp_assert_eq( $u1, CMP_Audit::hash_ua( 'Mozilla/5.0', 'salt' ), 'ua hash deterministic' );
+cmp_assert_eq( strlen( $u1 ), 64, 'ua hash is sha256 (64 hex chars)' );
+cmp_assert( $u1 !== md5( 'Mozilla/5.0' ), 'ua hash is not plain md5' );
+cmp_assert( $u1 !== CMP_Audit::hash_ua( 'Mozilla/5.0', 'other' ), 'ua hash depends on salt' );
+
 // CSV/JSON export and prune.
 $rows = array(
 	array( 'id' => 1, 'ts' => '2026-01-01 10:00:00', 'decision' => 'accepted_all', 'categories' => 'necessary,statistics', 'lang' => 'ro', 'ip_hash' => 'abc', 'ua_hash' => 'def', 'url' => 'https://x/', 'version' => '1' ),

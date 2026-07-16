@@ -13,6 +13,19 @@ class CMP_Fonts {
 	const MAP_KEY  = 'cmp_fonts_map';
 	const SUBDIR   = 'cmp-fonts';
 
+	/** Pure: true if $url's host is exactly $host or a subdomain of it. Parses the
+	 * host (native parse_url) instead of substring-matching, so a decoy like
+	 * https://evil.com/?x=fonts.googleapis.com does not pass. */
+	public static function host_is( $url, $host ) {
+		$h = parse_url( (string) $url, PHP_URL_HOST );
+		if ( ! is_string( $h ) || '' === $h ) {
+			return false;
+		}
+		$h    = strtolower( $h );
+		$host = strtolower( (string) $host );
+		return $h === $host || ( '' !== $host && substr( $h, -( strlen( $host ) + 1 ) ) === '.' . $host );
+	}
+
 	/** Pure: Google Fonts <link> hrefs found in the HTML (entities decoded, deduped). */
 	public static function extract_font_links( $html ) {
 		$out = array();
@@ -20,7 +33,7 @@ class CMP_Fonts {
 			foreach ( $tags[0] as $tag ) {
 				if ( preg_match( '/\bhref\s*=\s*["\']([^"\']+)["\']/i', $tag, $hm ) ) {
 					$url = html_entity_decode( $hm[1], ENT_QUOTES );
-					if ( false !== stripos( $url, self::HOST ) && ! in_array( $url, $out, true ) ) {
+					if ( self::host_is( $url, self::HOST ) && ! in_array( $url, $out, true ) ) {
 						$out[] = $url;
 					}
 				}
@@ -126,7 +139,7 @@ class CMP_Fonts {
 			$woff2   = self::parse_woff2_urls( $css );
 			$url_map = array();
 			foreach ( $woff2 as $remote ) {
-				if ( false === stripos( $remote, 'fonts.gstatic.com' ) ) {
+				if ( ! self::host_is( $remote, 'fonts.gstatic.com' ) ) {
 					continue;
 				}
 				$body = self::fetch( $remote );

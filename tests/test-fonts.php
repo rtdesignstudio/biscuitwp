@@ -5,7 +5,16 @@ require_once __DIR__ . '/../includes/modules/class-fonts.php';
 $html = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap">'
 	. '<link rel="stylesheet" href="https://example.com/style.css">'
 	. "<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap'>";
+// host_is: parses host, so a decoy substring URL is rejected (SSRF hardening).
+cmp_assert( CMP_Fonts::host_is( 'https://fonts.googleapis.com/css2?x', 'fonts.googleapis.com' ), 'exact host matches' );
+cmp_assert( CMP_Fonts::host_is( 'https://fonts.gstatic.com/a.woff2', 'fonts.gstatic.com' ), 'gstatic host matches' );
+cmp_assert( ! CMP_Fonts::host_is( 'https://evil.com/?x=fonts.googleapis.com', 'fonts.googleapis.com' ), 'decoy substring host rejected' );
+cmp_assert( ! CMP_Fonts::host_is( 'https://fonts.googleapis.com.evil.com/x', 'fonts.googleapis.com' ), 'suffix-spoof host rejected' );
+
 $links = CMP_Fonts::extract_font_links( $html );
+// extract_font_links ignores a decoy URL whose host is not Google Fonts.
+$decoy = CMP_Fonts::extract_font_links( '<link href="https://evil.com/?x=fonts.googleapis.com">' );
+cmp_assert_eq( count( $decoy ), 0, 'decoy font link not extracted' );
 cmp_assert_eq( count( $links ), 1, 'one unique Google Fonts link' );
 cmp_assert_eq( $links[0], 'https://fonts.googleapis.com/css2?family=Roboto&display=swap', 'entities decoded' );
 
