@@ -55,16 +55,20 @@ class CMP_Audit {
 		}
 		$version    = isset( $_POST['version'] ) ? sanitize_text_field( wp_unslash( $_POST['version'] ) ) : CMP_Consent::current_version();
 
-		self::record( array(
+		$ok = self::record( array(
 			'decision'   => $decision,
 			'categories' => $cats_csv,
 			'lang'       => substr( (string) get_locale(), 0, 8 ),
 			'url'        => isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
 			'version'    => $version,
 		) );
+		if ( false === $ok ) {
+			wp_send_json_error( 'not_logged', 500 );
+		}
 		wp_send_json_success();
 	}
 
+	/** Insert a consent row. Returns true on write (or dedup skip), false if the DB write failed. */
 	public static function record( array $row ) {
 		global $wpdb;
 		$table   = $wpdb->prefix . 'cmp_consent_log';
@@ -80,10 +84,10 @@ class CMP_Audit {
 			$row['decision']
 		) );
 		if ( self::should_dedup( null !== $last ? (int) $last : null, $now, DAY_IN_SECONDS ) ) {
-			return;
+			return true;
 		}
 
-		$wpdb->insert(
+		$done = $wpdb->insert(
 			$table,
 			array(
 				'ts'         => gmdate( 'Y-m-d H:i:s', $now ),
@@ -97,6 +101,7 @@ class CMP_Audit {
 			),
 			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
+		return false !== $done;
 	}
 
 	public static function to_csv( array $rows ) {

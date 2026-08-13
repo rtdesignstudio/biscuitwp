@@ -41,6 +41,21 @@ class CMP_Plugin {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
 		}
+
+		// Plugin updates do NOT fire the activation hook, so refresh the schema
+		// (create the log table / migrate columns) whenever the version changes.
+		// Runs on every load but the version gate makes dbDelta fire only once.
+		self::maybe_upgrade();
+	}
+
+	/** Run the installer (idempotent dbDelta + add_option) once per version change. */
+	public static function maybe_upgrade() {
+		if ( get_option( 'cmp_db_version' ) === CMP_VERSION ) {
+			return;
+		}
+		require_once CMP_PATH . 'includes/class-installer.php';
+		CMP_Installer::install();
+		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 
 	/**
@@ -57,5 +72,6 @@ class CMP_Plugin {
 	public static function activate() {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		CMP_Installer::install();
+		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 }
