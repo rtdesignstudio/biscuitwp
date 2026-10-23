@@ -28,7 +28,7 @@ class CMP_Updater {
 	const CACHE_KEY = 'cmp_latest_release';
 	const MAX_DOWNLOAD = 26214400; // 25 MB — defensive cap on the update package size.
 	const PROXY_URL = 'https://rt.md/cmp-update';
-	const PROXY_KEY = '16befd065cfff99d43ccc75215faeeb8fea8049f050445cf';
+	const PROXY_KEY = '668df26dc0d04136723a5492a767b4268f4693d210294151';
 
 	public static function register() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check' ) );
