@@ -113,7 +113,16 @@
 	}
 
 	function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
-	function openPrefs() { var m = modal(); if (m) { m.classList.add('is-prefs-open'); } }
+	// Optional toggles reflect the saved choice for the current policy version,
+	// and start OFF when there is none (pre-ticked boxes are not valid consent).
+	function syncToggles() {
+		var c = readCookie();
+		var valid = c && String(c.v) === String(D.version);
+		banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) {
+			b.checked = !!valid && (c.categories || []).indexOf(b.value) !== -1;
+		});
+	}
+	function openPrefs() { var m = modal(); if (m) { syncToggles(); m.classList.add('is-prefs-open'); } }
 	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 	function bind() {

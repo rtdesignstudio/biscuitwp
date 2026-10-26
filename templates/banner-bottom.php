@@ -73,7 +73,7 @@ $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 							</span>
 						<?php else : ?>
 							<label class="cmp__toggle" for="<?php echo esc_attr( $cmp_id ); ?>">
-								<input type="checkbox" id="<?php echo esc_attr( $cmp_id ); ?>" value="<?php echo esc_attr( $cmp_slug ); ?>" data-cmp-cat checked>
+								<input type="checkbox" id="<?php echo esc_attr( $cmp_id ); ?>" value="<?php echo esc_attr( $cmp_slug ); ?>" data-cmp-cat>
 								<span class="cmp__toggle-slider"></span>
 							</label>
 						<?php endif; ?>

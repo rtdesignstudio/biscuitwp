@@ -25,6 +25,11 @@ eq(cmp.signalsFor(cats, []).analytics_storage, 'denied', 'analytics denied when 
 eq(cmp.signalsFor(cats, ['statistics']).analytics_storage, 'granted', 'analytics granted when accepted');
 eq(cmp.signalsFor(cats, ['marketing']).ad_storage, 'granted', 'ad_storage granted with marketing');
 
+// isToggleOn: off without consent / stale version, mirrors saved choice otherwise
+eq(cmp.isToggleOn('marketing', null, '1'), false, 'no consent -> toggle off');
+eq(cmp.isToggleOn('marketing', { v: '1', categories: ['necessary', 'marketing'] }, '1'), true, 'saved on -> on');
+eq(cmp.isToggleOn('statistics', { v: '1', categories: ['necessary', 'marketing'] }, '1'), false, 'saved off -> off');
+eq(cmp.isToggleOn('marketing', { v: '0', categories: ['marketing'] }, '1'), false, 'stale version -> off');
 // decisionFor
 eq(cmp.decisionFor(['necessary', 'statistics', 'marketing'], cats), 'accepted_all', 'all -> accepted_all');
 eq(cmp.decisionFor(['necessary'], cats), 'rejected_all', 'only required -> rejected_all');

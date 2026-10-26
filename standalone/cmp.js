@@ -199,6 +199,13 @@
 		return signals;
 	}
 
+	// Optional toggles reflect the saved choice for the current policy version,
+	// and start OFF when there is none (pre-ticked boxes are not valid consent).
+	function isToggleOn(slug, consent, version) {
+		if (!consent || String(consent.v) !== String(version)) { return false; }
+		return (consent.categories || []).indexOf(slug) !== -1;
+	}
+
 	function decisionFor(selected, cats) {
 		selected = selected || [];
 		var optional = (cats || []).filter(function (c) { return !c.required; });
@@ -279,7 +286,7 @@
 						'</span>';
 				} else {
 					control = '<label class="cmp__toggle" for="' + escapeHtml(id) + '">' +
-						'<input type="checkbox" id="' + escapeHtml(id) + '" value="' + escapeHtml(cat.slug) + '" data-cmp-cat checked>' +
+						'<input type="checkbox" id="' + escapeHtml(id) + '" value="' + escapeHtml(cat.slug) + '" data-cmp-cat>' +
 						'<span class="cmp__toggle-slider"></span>' +
 						'</label>';
 				}
@@ -458,7 +465,11 @@
 		}
 
 		function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
-		function openPrefs() { var m = modal(); if (m) { m.classList.add('is-prefs-open'); } }
+		function syncToggles() {
+			var c = readCookie();
+			banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) { b.checked = isToggleOn(b.value, c, VERSION); });
+		}
+		function openPrefs() { var m = modal(); if (m) { syncToggles(); m.classList.add('is-prefs-open'); } }
 		function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 		function bind() {
@@ -594,6 +605,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, isToggleOn: isToggleOn, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();
