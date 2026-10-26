@@ -63,3 +63,36 @@ define( 'CMP_UPDATE_PROXY', 'https://rt.md/u/' );
 define( 'CMP_UPDATE_KEY', 'k2' );
 cmp_assert_eq( CMP_Updater::proxy_url(), 'https://rt.md/u/', 'proxy_url from wp-config override' );
 cmp_assert_eq( CMP_Updater::proxy_key(), 'k2', 'proxy_key from wp-config override' );
+
+// pick_assets: zip + detached signature picked by name, regardless of order.
+$pa = CMP_Updater::pick_assets( array(
+	array( 'name' => 'consent-manager-pro.zip.sig', 'url' => 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/2' ),
+	array( 'name' => 'consent-manager-pro.zip', 'url' => 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1' ),
+) );
+cmp_assert_eq( $pa['zip'], 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1', 'pick_assets: zip by name' );
+cmp_assert_eq( $pa['sig'], 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/2', 'pick_assets: sig by name' );
+$pa2 = CMP_Updater::pick_assets( array( array( 'name' => 'other.zip', 'url' => 'u1' ) ) );
+cmp_assert_eq( $pa2, array( 'zip' => 'u1', 'sig' => '' ), 'pick_assets: unsigned release -> no sig' );
+cmp_assert_eq( CMP_Updater::pick_assets( 'x' ), array( 'zip' => '', 'sig' => '' ), 'pick_assets: non-array' );
+
+// package_kind: only our relay / our repo are handled (and verified).
+cmp_assert_eq( CMP_Updater::package_kind( 'https://rt.md/cmp-update?action=download&key=k', 'https://rt.md/cmp-update' ), 'proxy', 'package_kind: relay' );
+cmp_assert_eq( CMP_Updater::package_kind( 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1', 'https://rt.md/cmp-update' ), 'github', 'package_kind: our repo' );
+cmp_assert_eq( CMP_Updater::package_kind( 'https://api.github.com/repos/someone/else/releases/assets/1', 'https://rt.md/cmp-update' ), '', 'package_kind: other repo' );
+cmp_assert_eq( CMP_Updater::package_kind( 'https://downloads.wordpress.org/plugin/akismet.zip', 'https://rt.md/cmp-update' ), '', 'package_kind: other plugin' );
+cmp_assert_eq( CMP_Updater::package_kind( 'https://rt.md/cmp-update?action=version&key=k', 'https://rt.md/cmp-update' ), '', 'package_kind: relay non-download' );
+
+// verify_signature: detached Ed25519 over the package bytes.
+$kp  = sodium_crypto_sign_keypair();
+$pk  = base64_encode( sodium_crypto_sign_publickey( $kp ) );
+$zip = tempnam( sys_get_temp_dir(), 'cmpzip' );
+file_put_contents( $zip, 'PK fake package bytes' );
+$sig = base64_encode( sodium_crypto_sign_detached( 'PK fake package bytes', sodium_crypto_sign_secretkey( $kp ) ) );
+cmp_assert( CMP_Updater::verify_signature( $zip, $sig, $pk ), 'verify_signature: valid signature accepted' );
+cmp_assert( ! CMP_Updater::verify_signature( $zip, $sig ), 'verify_signature: signed by another key -> rejected' );
+cmp_assert( ! CMP_Updater::verify_signature( $zip, '', $pk ), 'verify_signature: missing signature -> rejected' );
+cmp_assert( ! CMP_Updater::verify_signature( $zip, 'not base64 !!', $pk ), 'verify_signature: garbage -> rejected' );
+file_put_contents( $zip, 'PK tampered package bytes' );
+cmp_assert( ! CMP_Updater::verify_signature( $zip, $sig, $pk ), 'verify_signature: tampered package -> rejected' );
+unlink( $zip );
+cmp_assert_eq( strlen( base64_decode( CMP_Updater::SIGN_PUBLIC_KEY ) ), 32, 'baked public key is 32 bytes' );

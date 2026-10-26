@@ -29,10 +29,17 @@ class CMP_Updater {
 	const MAX_DOWNLOAD = 26214400; // 25 MB — defensive cap on the update package size.
 	const PROXY_URL = 'https://rt.md/cmp-update';
 	const PROXY_KEY = '668df26dc0d04136723a5492a767b4268f4693d210294151';
+	/**
+	 * Ed25519 public key that every update package must be signed with
+	 * (bin/release.sh signs with the matching secret key, which never leaves
+	 * the release machine). A compromised relay or GitHub account cannot push
+	 * code to sites without that key.
+	 */
+	const SIGN_PUBLIC_KEY = 'YeJZw3HBsttEaUxHNqbxC+13IewsPPbOyUOU08hkE8o=';
 
 	public static function register() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check' ) );
-		add_filter( 'upgrader_pre_download', array( __CLASS__, 'authenticated_download' ), 10, 3 );
+		add_filter( 'upgrader_pre_download', array( __CLASS__, 'verified_download' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_source_dir' ), 10, 4 );
 	}
 
@@ -103,6 +110,70 @@ class CMP_Updater {
 		);
 	}
 
+	/**
+	 * Pure: from a GitHub release's assets, the API URLs of the package zip and
+	 * of its detached signature (<slug>.zip.sig). Falls back to the first
+	 * non-signature asset for the zip.
+	 */
+	public static function pick_assets( $assets ) {
+		$out = array( 'zip' => '', 'sig' => '' );
+		if ( ! is_array( $assets ) ) {
+			return $out;
+		}
+		foreach ( $assets as $a ) {
+			$name = isset( $a['name'] ) ? (string) $a['name'] : '';
+			$url  = isset( $a['url'] ) ? (string) $a['url'] : '';
+			if ( '' === $url ) {
+				continue;
+			}
+			if ( self::SLUG . '.zip.sig' === $name ) {
+				$out['sig'] = $url;
+			} elseif ( self::SLUG . '.zip' === $name ) {
+				$out['zip'] = $url;
+			} elseif ( '' === $out['zip'] && '.sig' !== substr( $name, -4 ) ) {
+				$out['zip'] = $url;
+			}
+		}
+		return $out;
+	}
+
+	/** Pure: does this package URL come from our relay or our GitHub repo? Returns 'proxy', 'github' or ''. */
+	public static function package_kind( $package, $proxy_url ) {
+		if ( ! is_string( $package ) || '' === $package ) {
+			return '';
+		}
+		$proxy_url = (string) $proxy_url;
+		if ( '' !== $proxy_url && 0 === strpos( $package, $proxy_url ) && false !== strpos( $package, 'action=download' ) ) {
+			return 'proxy';
+		}
+		$parts = parse_url( $package );
+		$host  = isset( $parts['host'] ) ? $parts['host'] : '';
+		$path  = isset( $parts['path'] ) ? $parts['path'] : '';
+		if ( 'api.github.com' === $host && 0 === strpos( $path, '/repos/' . self::REPO . '/' ) ) {
+			return 'github';
+		}
+		return '';
+	}
+
+	/** Pure: is $file signed (detached Ed25519, base64 $sig_b64) by the release key? */
+	public static function verify_signature( $file, $sig_b64, $public_key_b64 = self::SIGN_PUBLIC_KEY ) {
+		if ( ! function_exists( 'sodium_crypto_sign_verify_detached' ) || ! is_readable( $file ) ) {
+			return false;
+		}
+		$sig = base64_decode( trim( (string) $sig_b64 ), true );
+		$pk  = base64_decode( (string) $public_key_b64, true );
+		if ( false === $sig || false === $pk || 64 !== strlen( $sig ) || 32 !== strlen( $pk ) ) {
+			return false;
+		}
+		try {
+			return sodium_crypto_sign_verify_detached( $sig, (string) file_get_contents( $file ), $pk );
+		} catch ( Exception $e ) {
+			return false;
+		} catch ( Error $e ) {
+			return false;
+		}
+	}
+
 	public static function token() {
 		if ( defined( 'CMP_GITHUB_TOKEN' ) && CMP_GITHUB_TOKEN ) {
 			return (string) CMP_GITHUB_TOKEN;
@@ -161,9 +232,11 @@ class CMP_Updater {
 			'zipball_url' => isset( $body['zipball_url'] ) ? $body['zipball_url'] : '',
 			'assets'      => array(),
 		);
-		if ( ! empty( $body['assets'][0]['url'] ) ) {
-			$release['assets'][] = array( 'url' => $body['assets'][0]['url'] );
+		$picked = self::pick_assets( isset( $body['assets'] ) ? $body['assets'] : array() );
+		if ( '' !== $picked['zip'] ) {
+			$release['assets'][] = array( 'url' => $picked['zip'] );
 		}
+		$release['sig_url'] = $picked['sig'];
 		set_transient( self::CACHE_KEY, $release, 6 * HOUR_IN_SECONDS );
 		return $release;
 	}
@@ -213,6 +286,80 @@ class CMP_Updater {
 			$transient->response[ self::file() ] = $update;
 		}
 		return $transient;
+	}
+
+	/**
+	 * Download our package (relay or GitHub) and install it only if its
+	 * signature verifies against SIGN_PUBLIC_KEY. Other plugins' packages
+	 * pass through untouched.
+	 */
+	public static function verified_download( $reply, $package, $upgrader ) {
+		if ( false !== $reply ) {
+			return $reply;
+		}
+		$kind = self::package_kind( $package, self::proxy_url() );
+		if ( '' === $kind ) {
+			return $reply;
+		}
+
+		$file = 'proxy' === $kind ? self::download_to_temp( $package ) : self::authenticated_download( false, $package, $upgrader );
+		if ( is_wp_error( $file ) || ! is_string( $file ) || '' === $file ) {
+			return is_wp_error( $file ) ? $file : new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update.', 'consent-manager-pro' ) );
+		}
+
+		if ( ! self::verify_signature( $file, self::fetch_signature( $kind ) ) ) {
+			unlink( $file );
+			return new WP_Error( 'cmp_bad_signature', __( 'Pachetul de update nu are o semnătură validă și nu a fost instalat.', 'consent-manager-pro' ) );
+		}
+		return $file;
+	}
+
+	/** Stream a URL to a temp file (redirects followed), capped at MAX_DOWNLOAD. */
+	private static function download_to_temp( $url ) {
+		$tmp      = wp_tempnam( 'cmp-update' );
+		$response = wp_remote_get(
+			$url,
+			array(
+				'timeout'  => 300,
+				'stream'   => true,
+				'filename' => $tmp,
+			)
+		);
+		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			if ( file_exists( $tmp ) ) {
+				unlink( $tmp );
+			}
+			return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update.', 'consent-manager-pro' ) );
+		}
+		if ( filesize( $tmp ) > self::MAX_DOWNLOAD ) {
+			unlink( $tmp );
+			return new WP_Error( 'cmp_download_too_large', __( 'Pachetul de update depășește dimensiunea maximă permisă.', 'consent-manager-pro' ) );
+		}
+		return $tmp;
+	}
+
+	/** The detached signature of the latest release ('' when unavailable). */
+	private static function fetch_signature( $kind ) {
+		if ( 'proxy' === $kind ) {
+			$proxy    = self::proxy_url();
+			$url      = $proxy . ( false === strpos( $proxy, '?' ) ? '?' : '&' ) . 'action=signature&key=' . rawurlencode( self::proxy_key() );
+			$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				return '';
+			}
+			return substr( trim( (string) wp_remote_retrieve_body( $response ) ), 0, 200 );
+		}
+		$release = self::fetch_release( true );
+		if ( ! is_array( $release ) || empty( $release['sig_url'] ) ) {
+			return '';
+		}
+		$tmp = self::authenticated_download( false, $release['sig_url'], null );
+		if ( is_wp_error( $tmp ) || ! is_string( $tmp ) || ! is_readable( $tmp ) ) {
+			return '';
+		}
+		$sig = substr( trim( (string) file_get_contents( $tmp ) ), 0, 200 );
+		unlink( $tmp );
+		return $sig;
 	}
 
 	/** Download our package: ask GitHub with the token but do NOT follow its

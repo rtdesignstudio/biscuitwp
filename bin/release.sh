@@ -31,8 +31,27 @@ rsync -a --exclude 'docs' --exclude 'tests' --exclude 'bin' --exclude 'dist' \
 ( cd dist && zip -qr "$SLUG.zip" "$SLUG" )
 echo "Built dist/$SLUG.zip"
 
+# 3b. Sign the zip (detached Ed25519). The secret key lives only on the release
+#     machine; sites refuse any package whose signature does not verify against
+#     CMP_Updater::SIGN_PUBLIC_KEY. Override the key path with CMP_SIGNING_KEY.
+SIGNING_KEY="${CMP_SIGNING_KEY:-$HOME/.config/cmp-release/signing.key}"
+[ -r "$SIGNING_KEY" ] || { echo "ERROR: signing key not found at $SIGNING_KEY"; exit 1; }
+php -r '
+	$sk  = base64_decode( trim( file_get_contents( $argv[1] ) ), true );
+	$zip = file_get_contents( $argv[2] );
+	if ( false === $sk || 64 !== strlen( $sk ) ) { fwrite( STDERR, "ERROR: invalid signing key\n" ); exit( 1 ); }
+	file_put_contents( $argv[2] . ".sig", base64_encode( sodium_crypto_sign_detached( $zip, $sk ) ) . "\n" );
+' "$SIGNING_KEY" "dist/$SLUG.zip"
+# Verify with the public key baked into the plugin, so a key mismatch never ships.
+PUBKEY="$(grep -o "SIGN_PUBLIC_KEY = '[^']*'" includes/modules/class-updater.php | cut -d"'" -f2)"
+php -r '
+	$ok = sodium_crypto_sign_verify_detached( base64_decode( trim( file_get_contents( $argv[2] . ".sig" ) ) ), file_get_contents( $argv[2] ), base64_decode( $argv[1] ) );
+	if ( ! $ok ) { fwrite( STDERR, "ERROR: signature does not verify against SIGN_PUBLIC_KEY\n" ); exit( 1 ); }
+' "$PUBKEY" "dist/$SLUG.zip"
+echo "Signed dist/$SLUG.zip.sig"
+
 # 4. Tag + push + release.
 git tag "v$VERSION"
 git push -q origin main --tags
-gh release create "v$VERSION" "dist/$SLUG.zip" --title "v$VERSION" --generate-notes
+gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" --title "v$VERSION" --generate-notes
 echo "Released v$VERSION."
