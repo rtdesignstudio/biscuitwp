@@ -50,11 +50,21 @@ class CMP_Plugin {
 
 	/** Run the installer (idempotent dbDelta + add_option) once per version change. */
 	public static function maybe_upgrade() {
-		if ( get_option( 'cmp_db_version' ) === CMP_VERSION ) {
+		$old = get_option( 'cmp_db_version' );
+		if ( $old === CMP_VERSION ) {
 			return;
 		}
 		require_once CMP_PATH . 'includes/class-installer.php';
 		CMP_Installer::install();
+		// 0.3.4: the floating reopen button is off by default (a footer link replaces
+		// it). It used to default to on, so switch it off once on existing installs.
+		if ( false === $old || version_compare( $old, '0.3.4', '<' ) ) {
+			$settings = get_option( 'cmp_settings', array() );
+			if ( is_array( $settings ) && ! empty( $settings['reopen_button'] ) ) {
+				$settings['reopen_button'] = false;
+				update_option( 'cmp_settings', $settings );
+			}
+		}
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 

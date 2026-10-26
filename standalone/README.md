@@ -74,7 +74,7 @@ All keys are **optional**. Defaults are applied if not specified.
 | `privacyUrl` | string | — | URL to privacy/cookie policy. URLs starting with `javascript:` or `data:` are stripped for security. |
 | `texts` | object | — | Override default text strings. Supported keys: `title`, `intro`, `prefs`, `reject`, `accept`, `prefs_title`, `save`, `badge`, `locked`, `privacy`, `back`, `dialogLabel` |
 | `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (DNT) and auto-reject non-necessary consent |
-| `reopenButton` | boolean | `true` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `false` to disable. Pro mode only. |
+| `reopenButton` | boolean | `false` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `true` to enable. Pro mode only. Recommended: leave it off and put a "Cookie settings" link in the footer (see below). |
 | `cookieDays` | number | `180` | Number of days the consent choice is remembered before the banner reappears. Clamped to 1-3650, else falls back to 180. |
 
 ### Example: Custom texts
@@ -161,7 +161,7 @@ window.CMP.openPreferences();
 
 ### Re-open via data attributes
 
-Any element with `data-cmp-settings` or class `cmp-reopen` will open the preferences when clicked:
+Any element with `data-cmp-settings`, class `cmp-settings-link` / `cmp-reopen`, or a link to `#cmp-settings` will open the preferences when clicked (put one in the footer):
 
 ```html
 <button data-cmp-settings>Cookie Settings</button>

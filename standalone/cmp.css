@@ -85,7 +85,25 @@ body.cmp-has-banner { overflow: hidden; }
 	margin: 0 0 24px;
 	color: var(--cmp-muted);
 }
-.cmp__link { color: var(--cmp-primary); text-decoration: underline; }
+/* Fixed underline in every state: themes often swap text-decoration for a
+   border-bottom / padding / offset on a:hover, which makes the line jump. */
+.cmp .cmp__link,
+.cmp .cmp__link:hover,
+.cmp .cmp__link:focus,
+.cmp-light .cmp-light__link,
+.cmp-light .cmp-light__link:hover,
+.cmp-light .cmp-light__link:focus {
+	color: var(--cmp-primary);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+	border: 0;
+	padding: 0;
+	box-shadow: none;
+	background: none;
+}
+.cmp .cmp__link:hover,
+.cmp-light .cmp-light__link:hover { opacity: 0.8; }
 
 /* View switching: prefs hidden until modal has .is-prefs-open. */
 .cmp__prefs { display: none; }
@@ -111,6 +129,8 @@ body.cmp-has-banner { overflow: hidden; }
 	transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 .cmp__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+/* The dialog receives focus on open (for screen readers); no ring on it. */
+.cmp__modal:focus { outline: none; }
 
 .cmp__btn--ghost { color: var(--cmp-dark); border-color: var(--cmp-dark); background: var(--cmp-bg); }
 .cmp__btn--ghost:hover { background: var(--cmp-hover); }
@@ -290,7 +310,6 @@ body.cmp-has-banner { overflow: hidden; }
 }
 .cmp-light[hidden] { display: none; }
 .cmp-light__text { margin: 0; color: var(--cmp-muted); }
-.cmp-light__link { color: var(--cmp-primary); text-decoration: underline; }
 .cmp-light__btn {
 	appearance: none;
 	border: 1px solid var(--cmp-primary);

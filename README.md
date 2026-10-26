@@ -59,7 +59,7 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 ```
 [cmp_privacy_link]           Link to the Privacy Policy
 [cmp_terms_link]             Link to the Terms & Conditions
-[cmp_cookie_settings_link]   "Cookie settings" button (reopens preferences)
+[cmp_cookie_settings_link]   "Cookie settings" link (reopens preferences) — put it in the footer
 ```
 
 ## Updates & releases

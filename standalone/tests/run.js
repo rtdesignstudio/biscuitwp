@@ -49,8 +49,8 @@ eq(cmp.normalizeConfig({ privacyUrl: 'javascript:alert(1)' }).privacyUrl, '', 'n
 var onlyReq = cmp.normalizeConfig({ categories: ['necessary'] }).categories;
 eq(cmp.decisionFor(['necessary'], onlyReq), 'accepted_all', 'no optional cats -> accepted_all');
 
-// reopenButton: on by default, off only when explicitly false
-eq(cmp.normalizeConfig({}).reopenButton, true, 'reopenButton default true');
+// reopenButton: off by default (footer link instead), on only when explicitly true
+eq(cmp.normalizeConfig({}).reopenButton, false, 'reopenButton default false');
 eq(cmp.normalizeConfig({ reopenButton: false }).reopenButton, false, 'reopenButton false honored');
 eq(cmp.normalizeConfig({ reopenButton: true }).reopenButton, true, 'reopenButton true');
 // reopen label present in every language

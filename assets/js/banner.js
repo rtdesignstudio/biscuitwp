@@ -86,22 +86,26 @@
 	// --- Focus trap (WCAG 2.1 AA) ---
 	var lastFocus = null;
 	function focusable() {
-		return banner.querySelectorAll('button:not([disabled]), input:not([disabled])');
+		return banner.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])');
 	}
 	function onKeydown(e) {
 		if (e.key !== 'Tab') { return; }
 		var f = focusable();
 		if (!f.length) { return; }
 		var first = f[0], last = f[f.length - 1];
-		if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+		// Focus starts on the dialog itself (see trapFocus): Shift+Tab from there wraps to the end.
+		if (e.shiftKey && (document.activeElement === first || document.activeElement === modal())) { e.preventDefault(); last.focus(); }
 		else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 	}
 	function trapFocus(on) {
 		if (on) {
 			lastFocus = document.activeElement;
 			document.addEventListener('keydown', onKeydown);
-			var f = focusable();
-			if (f.length) { f[0].focus(); }
+			// Focus the dialog, not its first button: a programmatic focus on a button
+			// shows the :focus-visible ring on open. The ring now appears only once
+			// the visitor tabs into the buttons.
+			var m = modal();
+			if (m) { m.focus(); }
 		} else {
 			document.removeEventListener('keydown', onKeydown);
 			if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
@@ -113,9 +117,16 @@
 	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 	function bind() {
-		if (reopenBtn) {
-			reopenBtn.addEventListener('click', function () { window.CMP.openPreferences(); });
-		}
+		// Any "cookie settings" control reopens the preferences: the shortcode link,
+		// [data-cmp-settings] / .cmp-settings-link, a menu item pointing to
+		// #cmp-settings, or the optional floating button. Delegated, so links
+		// rendered later (menus, page builders) work too.
+		document.addEventListener('click', function (e) {
+			var el = e.target.closest && e.target.closest('[data-cmp-settings], .cmp-settings-link, .cmp-cookie-settings-link, .cmp-reopen, a[href$="#cmp-settings"]');
+			if (!el) { return; }
+			e.preventDefault();
+			window.CMP.openPreferences();
+		});
 		if (!banner) { return; }
 		banner.addEventListener('click', function (e) {
 			var btn = e.target.closest('[data-cmp-action]');

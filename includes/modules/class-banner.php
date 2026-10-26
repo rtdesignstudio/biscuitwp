@@ -55,7 +55,7 @@ class CMP_Banner {
 					'DNT'     => isset( $_SERVER['HTTP_DNT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_DNT'] ) ) : '',
 					'Sec-GPC' => isset( $_SERVER['HTTP_SEC_GPC'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_GPC'] ) ) : '',
 				) ),
-				'reopenButton' => ! isset( $cmp_settings['reopen_button'] ) || ! empty( $cmp_settings['reopen_button'] ),
+				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
 				'cookieDays' => isset( $cmp_settings['cookie_days'] ) ? (int) $cmp_settings['cookie_days'] : 180,
 			)
 		);
@@ -73,7 +73,7 @@ class CMP_Banner {
 		}
 		include CMP_PATH . 'templates/banner-bottom.php';
 
-		$reopen = ! isset( $settings['reopen_button'] ) || ! empty( $settings['reopen_button'] );
+		$reopen = ! empty( $settings['reopen_button'] );
 		if ( $reopen ) {
 			$label = CMP_Lang::text( 'reopen' );
 			echo '<button type="button" class="cmp-reopen" data-cmp-reopen hidden aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '">'

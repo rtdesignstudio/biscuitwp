@@ -178,7 +178,7 @@
 			lang: lang,
 			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
-			reopenButton: false !== raw.reopenButton,
+			reopenButton: true === raw.reopenButton,
 			cookieDays: cd,
 			categories: categories,
 			texts: texts
@@ -294,7 +294,7 @@
 			});
 
 			root.innerHTML =
-				'<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" data-cmp-modal>' +
+				'<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>' +
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
 				'<p class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
@@ -431,22 +431,26 @@
 		// --- Focus trap (WCAG 2.1 AA) ---
 		var lastFocus = null;
 		function focusable() {
-			return banner.querySelectorAll('button:not([disabled]), input:not([disabled])');
+			return banner.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])');
 		}
 		function onKeydown(e) {
 			if (e.key !== 'Tab') { return; }
 			var f = focusable();
 			if (!f.length) { return; }
 			var first = f[0], last = f[f.length - 1];
-			if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+			// Focus starts on the dialog itself (see trapFocus): Shift+Tab from there wraps to the end.
+			if (e.shiftKey && (document.activeElement === first || document.activeElement === modal())) { e.preventDefault(); last.focus(); }
 			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 		}
 		function trapFocus(on) {
 			if (on) {
 				lastFocus = document.activeElement;
 				document.addEventListener('keydown', onKeydown);
-				var f = focusable();
-				if (f.length) { f[0].focus(); }
+				// Focus the dialog, not its first button: a programmatic focus on a button
+				// shows the :focus-visible ring on open. The ring now appears only once
+				// the visitor tabs into the buttons.
+				var m = modal();
+				if (m) { m.focus(); }
 			} else {
 				document.removeEventListener('keydown', onKeydown);
 				if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
@@ -559,11 +563,15 @@
 				}
 			};
 
-			// Wire every reopen control once: page-provided [data-cmp-settings] /
-			// .cmp-reopen, plus the auto-rendered floating button (also .cmp-reopen).
-			var openers = document.querySelectorAll('[data-cmp-settings], .cmp-reopen');
-			openers.forEach(function (el) {
-				el.addEventListener('click', function (e) { e.preventDefault(); window.CMP.openPreferences(); });
+			// Any "cookie settings" control reopens the preferences: page-provided
+			// [data-cmp-settings] / .cmp-settings-link / .cmp-reopen, a link to
+			// #cmp-settings, or the optional floating button. Delegated, so elements
+			// added later work too.
+			document.addEventListener('click', function (e) {
+				var el = e.target.closest && e.target.closest('[data-cmp-settings], .cmp-settings-link, .cmp-cookie-settings-link, .cmp-reopen, a[href$="#cmp-settings"]');
+				if (!el) { return; }
+				e.preventDefault();
+				window.CMP.openPreferences();
 			});
 
 			if (cfg.mode === 'light') {

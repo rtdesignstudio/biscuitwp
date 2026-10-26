@@ -80,7 +80,8 @@ class CMP_Settings_Page {
 					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Buton flotant redeschidere', 'consent-manager-pro' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="cmp[reopen_button]" value="1" <?php checked( ! isset( $s['reopen_button'] ) || ! empty( $s['reopen_button'] ) ); ?>> <?php esc_html_e( 'Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri', 'consent-manager-pro' ); ?></label>
+							<label><input type="checkbox" name="cmp[reopen_button]" value="1" <?php checked( ! empty( $s['reopen_button'] ) ); ?>> <?php esc_html_e( 'Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Recomandat: oprit, cu un link „Setări cookie-uri” în footer — shortcode [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings.', 'consent-manager-pro' ); ?></p>
 							<p class="description"><?php esc_html_e( 'Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>

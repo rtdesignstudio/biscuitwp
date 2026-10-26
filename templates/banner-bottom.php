@@ -23,7 +23,7 @@ $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 ?>
 <?php $cmp_position = isset( $settings['position'] ) ? $settings['position'] : 'modal-center'; ?>
 <div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?> cmp--pos-<?php echo esc_attr( $cmp_position ); ?>" data-cmp hidden>
-	<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" data-cmp-modal>
+	<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>
 
 		<!-- View 1: main message + actions -->
 		<div class="cmp__main" data-cmp-view="main">

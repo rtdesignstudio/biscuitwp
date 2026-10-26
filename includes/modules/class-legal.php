@@ -75,8 +75,9 @@ class CMP_Legal {
 	}
 
 	public static function sc_cookie_settings() {
-		$label = esc_html__( 'Setări cookie-uri', 'consent-manager-pro' );
-		return '<button type="button" class="cmp-cookie-settings-link" onclick="if(window.CMP){CMP.openPreferences();}return false;">' . $label . '</button>';
+		$label = esc_html( CMP_Lang::text( 'reopen' ) );
+		// Opened by the banner script's delegated click handler (no inline JS: CSP-safe).
+		return '<a href="#cmp-settings" class="cmp-settings-link cmp-cookie-settings-link" data-cmp-settings>' . $label . '</a>';
 	}
 
 	public static function privacy_guide() {
