@@ -213,6 +213,11 @@
 		bind();
 		var c = readCookie();
 		if (c && String(c.v) === String(D.version)) {
+			// Replay the stored consent to Consent Mode before the scripts come back,
+			// as save() does. Without it the signals stay on the `denied` defaults
+			// printed in wp_head (the gtag stub there is data-cmp-keep, so it exists),
+			// and a returning visitor who accepted statistics is measured as refused.
+			pushConsent(c.categories || []);
 			unblockScripts(c.categories || []);
 			showReopen();
 			return;

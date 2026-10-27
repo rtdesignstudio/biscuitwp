@@ -206,6 +206,13 @@
 		return (consent.categories || []).indexOf(slug) !== -1;
 	}
 
+	// Pure: the categories to replay for a returning visitor, or null when the
+	// stored consent is missing or belongs to another policy version.
+	function storedCategories(consent, version) {
+		if (!consent || String(consent.v) !== String(version)) { return null; }
+		return consent.categories || [];
+	}
+
 	function decisionFor(selected, cats) {
 		selected = selected || [];
 		var optional = (cats || []).filter(function (c) { return !c.required; });
@@ -590,9 +597,12 @@
 				return;
 			}
 
-			var stored = readCookie();
-			if (stored && String(stored.v) === String(VERSION)) {
-				unblockScripts(stored.categories || []);
+			var stored = storedCategories(readCookie(), VERSION);
+			if (stored) {
+				// Replay the stored consent to Consent Mode before the scripts come
+				// back, as save() does; otherwise the signals stay on the defaults.
+				pushConsent(stored);
+				unblockScripts(stored);
 				showReopen();
 				return;
 			}
@@ -605,6 +615,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, isToggleOn: isToggleOn, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

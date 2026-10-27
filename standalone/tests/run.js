@@ -30,6 +30,12 @@ eq(cmp.isToggleOn('marketing', null, '1'), false, 'no consent -> toggle off');
 eq(cmp.isToggleOn('marketing', { v: '1', categories: ['necessary', 'marketing'] }, '1'), true, 'saved on -> on');
 eq(cmp.isToggleOn('statistics', { v: '1', categories: ['necessary', 'marketing'] }, '1'), false, 'saved off -> off');
 eq(cmp.isToggleOn('marketing', { v: '0', categories: ['marketing'] }, '1'), false, 'stale version -> off');
+// storedCategories: what a returning visitor's consent replays (signals + scripts)
+eq(cmp.storedCategories(null, '1'), null, 'no consent -> nothing to replay');
+eq(cmp.storedCategories({ v: '0', categories: ['statistics'] }, '1'), null, 'stale version -> nothing to replay');
+eq(JSON.stringify(cmp.storedCategories({ v: '1', categories: ['necessary', 'statistics'] }, '1')), '["necessary","statistics"]', 'valid consent -> its categories');
+eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['statistics'] }, '1')).analytics_storage, 'granted', 'returning accept -> analytics granted');
+eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['necessary'] }, '1')).analytics_storage, 'denied', 'returning reject -> analytics denied');
 // decisionFor
 eq(cmp.decisionFor(['necessary', 'statistics', 'marketing'], cats), 'accepted_all', 'all -> accepted_all');
 eq(cmp.decisionFor(['necessary'], cats), 'rejected_all', 'only required -> rejected_all');
