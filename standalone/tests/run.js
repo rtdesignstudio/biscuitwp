@@ -36,6 +36,10 @@ eq(cmp.storedCategories({ v: '0', categories: ['statistics'] }, '1'), null, 'sta
 eq(JSON.stringify(cmp.storedCategories({ v: '1', categories: ['necessary', 'statistics'] }, '1')), '["necessary","statistics"]', 'valid consent -> its categories');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['statistics'] }, '1')).analytics_storage, 'granted', 'returning accept -> analytics granted');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['necessary'] }, '1')).analytics_storage, 'denied', 'returning reject -> analytics denied');
+// reloadOnDecision: off by default, on only when explicitly true
+eq(cmp.normalizeConfig({}).reloadOnDecision, false, 'reloadOnDecision default false');
+eq(cmp.normalizeConfig({ reloadOnDecision: true }).reloadOnDecision, true, 'reloadOnDecision true honored');
+eq(cmp.normalizeConfig({ reloadOnDecision: 'yes' }).reloadOnDecision, false, 'reloadOnDecision non-boolean ignored');
 // decisionFor
 eq(cmp.decisionFor(['necessary', 'statistics', 'marketing'], cats), 'accepted_all', 'all -> accepted_all');
 eq(cmp.decisionFor(['necessary'], cats), 'rejected_all', 'only required -> rejected_all');

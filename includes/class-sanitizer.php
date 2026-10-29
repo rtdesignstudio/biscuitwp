@@ -45,6 +45,7 @@ class CMP_Sanitizer {
 			'block_scripts'    => ! empty( $input['block_scripts'] ),
 			'localize_fonts'   => ! empty( $input['localize_fonts'] ),
 			'reopen_button'    => ! empty( $input['reopen_button'] ),
+			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
 			'texts'            => $texts,
 		);
 	}

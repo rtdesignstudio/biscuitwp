@@ -90,3 +90,7 @@ cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 90 ) )['cookie_d
 cmp_assert_eq( CMP_Sanitizer::settings( array() )['cookie_days'], 180, 'cookie_days default 180' );
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 0 ) )['cookie_days'], 180, 'cookie_days 0 -> 180' );
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 99999 ) )['cookie_days'], 180, 'cookie_days over max -> 180' );
+
+// reload_on_decision: off by default, on only when ticked
+cmp_assert_eq( CMP_Sanitizer::settings( array() )['reload_on_decision'], false, 'reload_on_decision default off' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'reload_on_decision' => '1' ) )['reload_on_decision'], true, 'reload_on_decision ticked' );

@@ -44,10 +44,17 @@
 		body.set('decision', payload.decision);
 		body.set('categories', JSON.stringify(payload.categories));
 		body.set('version', D.version);
-		fetch(D.ajaxUrl, { method: 'POST', body: body, credentials: 'same-origin' }).catch(function () {});
+		// keepalive: the request survives an immediate page reload (reloadOnDecision).
+		fetch(D.ajaxUrl, { method: 'POST', body: body, credentials: 'same-origin', keepalive: true }).catch(function () {});
 	}
 
+	// True while the banner shown on page load is still waiting for the first
+	// decision; only that decision may trigger reloadOnDecision.
+	var firstDecision = false;
+
 	function save(accepted, decision) {
+		var reload = firstDecision && !!D.reloadOnDecision;
+		firstDecision = false;
 		var data = { v: D.version, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 		writeCookie(data);
 		pushConsent(accepted);
@@ -56,6 +63,8 @@
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 		logConsent({ categories: accepted, decision: decision });
 		hide();
+		// Load-time animations ran behind the overlay; reload so they play visibly.
+		if (reload) { window.location.reload(); }
 	}
 
 	function selectedFromUI() {
@@ -226,6 +235,7 @@
 			// Global Privacy Control / Do-Not-Track: record refusal without prompting.
 			save(requiredSlugs(), 'rejected_all');
 		} else {
+			firstDecision = true;
 			show();
 		}
 	});

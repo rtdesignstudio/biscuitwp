@@ -86,6 +86,13 @@ class CMP_Settings_Page {
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Reîncărcare după alegere', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[reload_on_decision]" value="1" <?php checked( ! empty( $s['reload_on_decision'] ) ); ?>> <?php esc_html_e( 'Reîncarcă pagina după alegerea din banner', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Pentru site-uri cu animații la încărcare, ascunse de overlay: după reîncărcare se văd de la început. Se aplică doar la prima alegere, din bannerul apărut la încărcare — nu și la schimbările făcute ulterior din linkul „Setări cookie-uri”.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
+					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Localizare Google Fonts', 'consent-manager-pro' ); ?></th>
 						<td>
 							<label><input type="checkbox" name="cmp[localize_fonts]" value="1" <?php checked( ! empty( $s['localize_fonts'] ) ); ?>> <?php esc_html_e( 'Servește Google Fonts local (fără request la Google)', 'consent-manager-pro' ); ?></label>

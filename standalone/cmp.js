@@ -179,6 +179,7 @@
 			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
 			reopenButton: true === raw.reopenButton,
+			reloadOnDecision: true === raw.reloadOnDecision,
 			cookieDays: cd,
 			categories: categories,
 			texts: texts
@@ -406,7 +407,13 @@
 			// No-op in Phase 1 — Phase 2 adds the rt.md POST.
 		}
 
+		// True while the banner shown on page load is still waiting for the first
+		// decision; only that decision may trigger reloadOnDecision.
+		var firstDecision = false;
+
 		function save(accepted, decision) {
+			var reload = firstDecision && cfg.reloadOnDecision;
+			firstDecision = false;
 			var data = { v: VERSION, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 			writeCookie(data);
 			showReopen();
@@ -415,6 +422,8 @@
 			document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 			logConsent({ categories: accepted, decision: decision });
 			hide();
+			// Load-time animations ran behind the overlay; reload so they play visibly.
+			if (reload) { window.location.reload(); }
 		}
 
 		function selectedFromUI() {
@@ -609,6 +618,7 @@
 			if (cfg.respectGPC && (navigator.globalPrivacyControl === true || navigator.doNotTrack === '1')) {
 				save(requiredSlugs(), 'rejected_all');
 			} else {
+				firstDecision = true;
 				show();
 			}
 		});
