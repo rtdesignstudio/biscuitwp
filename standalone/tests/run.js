@@ -40,6 +40,10 @@ eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.
 eq(cmp.normalizeConfig({}).reloadOnDecision, false, 'reloadOnDecision default false');
 eq(cmp.normalizeConfig({ reloadOnDecision: true }).reloadOnDecision, true, 'reloadOnDecision true honored');
 eq(cmp.normalizeConfig({ reloadOnDecision: 'yes' }).reloadOnDecision, false, 'reloadOnDecision non-boolean ignored');
+// fbqConsentFor: Meta Pixel follows the marketing category
+eq(cmp.fbqConsentFor(['necessary', 'marketing']), 'grant', 'marketing accepted -> grant');
+eq(cmp.fbqConsentFor(['necessary', 'statistics']), 'revoke', 'marketing not accepted -> revoke');
+eq(cmp.fbqConsentFor(null), 'revoke', 'no categories -> revoke');
 // decisionFor
 eq(cmp.decisionFor(['necessary', 'statistics', 'marketing'], cats), 'accepted_all', 'all -> accepted_all');
 eq(cmp.decisionFor(['necessary'], cats), 'rejected_all', 'only required -> rejected_all');

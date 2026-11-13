@@ -135,3 +135,23 @@ $fbhints = array( '//connect.facebook.net', 'https://example.com' );
 $fbkept  = CMP_Blocker::strip_hints( $fbhints, CMP_Blocker::TRACKER_HOSTS );
 cmp_assert_eq( count( $fbkept ), 1, 'Meta hint stripped, unrelated kept' );
 cmp_assert_eq( $fbkept[0], 'https://example.com', 'unrelated hint preserved' );
+
+// blocks_trackers: Pro follows block_scripts; Light always blocks (no way to consent).
+cmp_assert( CMP_Blocker::blocks_trackers( array( 'mode' => 'pro', 'block_scripts' => true ) ), 'pro + block_scripts -> blocks' );
+cmp_assert( ! CMP_Blocker::blocks_trackers( array( 'mode' => 'pro', 'block_scripts' => false ) ), 'pro without block_scripts -> no block' );
+cmp_assert( CMP_Blocker::blocks_trackers( array( 'mode' => 'light', 'block_scripts' => false ) ), 'light always blocks' );
+cmp_assert( CMP_Blocker::blocks_trackers( array( 'block_scripts' => true ) ), 'missing mode = pro' );
+cmp_assert( ! CMP_Blocker::localizes_fonts( array( 'mode' => 'light', 'localize_fonts' => true ) ), 'fonts localization stays pro-only' );
+cmp_assert( CMP_Blocker::localizes_fonts( array( 'mode' => 'pro', 'localize_fonts' => true ) ), 'fonts localization in pro' );
+
+// detect_trackers: live tags are 'raw'; after rewrite() they are only 'blocked'.
+$cmp_page = '<head><script async src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>'
+	. "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('config','G-X');</script>"
+	. "<script>!function(f,b,e,v,n,t,s){}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1');</script></head>";
+$cmp_det = CMP_Blocker::detect_trackers( $cmp_page );
+cmp_assert_eq( $cmp_det['raw'], array( 'statistics', 'marketing' ), 'detect: live GA + Pixel are raw' );
+cmp_assert_eq( $cmp_det['blocked'], array(), 'detect: nothing blocked yet' );
+$cmp_det2 = CMP_Blocker::detect_trackers( CMP_Blocker::rewrite( $cmp_page ) );
+cmp_assert_eq( $cmp_det2['raw'], array(), 'detect: after rewrite nothing is raw' );
+cmp_assert_eq( $cmp_det2['blocked'], array( 'statistics', 'marketing' ), 'detect: after rewrite both are blocked' );
+cmp_assert_eq( CMP_Blocker::detect_trackers( '<p>no trackers</p><script>gtag("consent","default",{})</script>' ), array( 'raw' => array(), 'blocked' => array() ), 'detect: consent stub alone is not a tracker' );

@@ -186,6 +186,11 @@
 		};
 	}
 
+	// Pure: the Meta Pixel consent action for the accepted categories.
+	function fbqConsentFor(accepted) {
+		return (accepted || []).indexOf('marketing') !== -1 ? 'grant' : 'revoke';
+	}
+
 	function signalsFor(cats, accepted) {
 		accepted = accepted || [];
 		var signals = {};
@@ -398,6 +403,11 @@
 		}
 
 		function pushConsent(accepted) {
+			// Meta Pixel follows the marketing category, when it is already on the
+			// page: "grant" on consent, "revoke" when withdrawn (stops it at once).
+			if (typeof window.fbq === 'function') {
+				try { window.fbq('consent', fbqConsentFor(accepted)); } catch (e) {}
+			}
 			if (typeof window.gtag !== 'function') { return; }
 			var signals = signalsFor(cfg.categories, accepted);
 			try { window.gtag('consent', 'update', signals); } catch (e) {}
@@ -625,6 +635,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

@@ -5,6 +5,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CMP_Settings_Page {
 
+	/** Warn when the homepage loads trackers without consent, or runs Light mode with trackers. */
+	private static function render_tracker_warnings( $s ) {
+		$scan = CMP_Blocker::scan_homepage( isset( $_GET['updated'] ) );
+		if ( null === $scan ) {
+			return;
+		}
+		$names = array( 'statistics' => 'Google Analytics / Tag Manager', 'marketing' => 'Meta Pixel' );
+		$label = function ( $cats ) use ( $names ) {
+			$out = array();
+			foreach ( $cats as $c ) {
+				$out[] = isset( $names[ $c ] ) ? $names[ $c ] : $c;
+			}
+			return implode( ', ', array_unique( $out ) );
+		};
+		$mode = isset( $s['mode'] ) ? $s['mode'] : 'pro';
+		if ( 'light' === $mode && ( $scan['raw'] || $scan['blocked'] ) ) {
+			echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Modul Light nu poate cere acord.', 'consent-manager-pro' ) . '</strong> '
+				/* translators: %s: tracker names */
+				. esc_html( sprintf( __( 'Pe pagina principală am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro.', 'consent-manager-pro' ), $label( array_merge( $scan['raw'], $scan['blocked'] ) ) ) )
+				. '</p></div>';
+			if ( $scan['raw'] ) {
+				echo '<div class="notice notice-error"><p>'
+					/* translators: %s: tracker names */
+					. esc_html( sprintf( __( 'Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca (injectat ulterior din JavaScript). Verifică sursa lui.', 'consent-manager-pro' ), $label( $scan['raw'] ) ) )
+					. '</p></div>';
+			}
+			return;
+		}
+		if ( 'pro' === $mode && $scan['raw'] ) {
+			$msg = empty( $s['block_scripts'] )
+				/* translators: %s: tracker names */
+				? __( '%s se încarcă pe pagina principală înainte de acord. Bifează „Blochează scripturile de tracking până la consimțământ” mai jos.', 'consent-manager-pro' )
+				/* translators: %s: tracker names */
+				: __( '%s se încarcă pe pagina principală înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui.', 'consent-manager-pro' );
+			echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Tracking fără acord.', 'consent-manager-pro' ) . '</strong> '
+				. esc_html( sprintf( $msg, $label( $scan['raw'] ) ) ) . '</p></div>';
+		}
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -32,6 +71,7 @@ class CMP_Settings_Page {
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Setări salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
+			<?php self::render_tracker_warnings( $s ); ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_save_settings">
 				<?php wp_nonce_field( 'cmp_save_settings' ); ?>
@@ -44,7 +84,7 @@ class CMP_Settings_Page {
 								<option value="pro" <?php selected( $cmp_mode, 'pro' ); ?>><?php esc_html_e( 'Pro — banner cu consimțământ granular', 'consent-manager-pro' ); ?></option>
 								<option value="light" <?php selected( $cmp_mode, 'light' ); ?>><?php esc_html_e( 'Light — bară informativă, fără cookie-uri', 'consent-manager-pro' ); ?></option>
 							</select>
-							<p class="description"><?php esc_html_e( 'Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie.', 'consent-manager-pro' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, Tag Manager și Meta Pixel sunt blocate permanent; dacă ai nevoie de ele, folosește Pro.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
@@ -73,8 +113,8 @@ class CMP_Settings_Page {
 					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Blocare scripturi tracking', 'consent-manager-pro' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="cmp[block_scripts]" value="1" <?php checked( ! empty( $s['block_scripts'] ) ); ?>> <?php esc_html_e( 'Blochează Google Analytics / Tag Manager până la consimțământ', 'consent-manager-pro' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Împiedică încărcarea scripturilor GA/GTM înainte de Accept (blocare efectivă, nu doar Consent Mode). Testează pe site după activare. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
+							<label><input type="checkbox" name="cmp[block_scripts]" value="1" <?php checked( ! empty( $s['block_scripts'] ) ); ?>> <?php esc_html_e( 'Blochează scripturile de tracking până la consimțământ', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Recomandat: pornit. În modul Light, blocarea e mereu activă.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">

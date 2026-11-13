@@ -44,6 +44,7 @@ class CMP_Installer {
 			'privacy_page_id'  => 0,
 			'terms_page_id'    => 0,
 			'cookie_page_id'   => 0,
+			'block_scripts'    => true,
 		);
 	}
 

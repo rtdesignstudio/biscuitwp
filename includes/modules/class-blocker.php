@@ -4,8 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Prior blocking of Google Analytics / Tag Manager: rewrites their <script>
- * tags to non-executing until the visitor consents. Opt-in, Pro mode only.
+ * Prior blocking of Google Analytics / Tag Manager / Meta Pixel: rewrites their
+ * <script> tags to non-executing until the visitor consents. On by default in
+ * Pro mode; always on in Light mode, which cannot ask for consent, so trackers
+ * there never run.
  */
 class CMP_Blocker {
 
@@ -41,15 +43,12 @@ class CMP_Blocker {
 		if ( ! is_array( $urls ) ) {
 			return $urls;
 		}
-		$s = CMP_Consent::get_settings();
-		if ( 'pro' !== ( isset( $s['mode'] ) ? $s['mode'] : 'pro' ) ) {
-			return $urls;
-		}
+		$s     = CMP_Consent::get_settings();
 		$hosts = array();
-		if ( ! empty( $s['block_scripts'] ) ) {
+		if ( self::blocks_trackers( $s ) ) {
 			$hosts = array_merge( $hosts, self::TRACKER_HOSTS );
 		}
-		if ( ! empty( $s['localize_fonts'] ) ) {
+		if ( self::localizes_fonts( $s ) ) {
 			$hosts = array_merge( $hosts, self::FONT_HOSTS );
 		}
 		if ( empty( $hosts ) ) {
@@ -90,11 +89,72 @@ class CMP_Blocker {
 		if ( function_exists( 'is_feed' ) && is_feed() ) {
 			return false;
 		}
-		$s     = CMP_Consent::get_settings();
-		$block = ! empty( $s['block_scripts'] );
-		$fonts = ! empty( $s['localize_fonts'] );
-		$mode  = isset( $s['mode'] ) ? $s['mode'] : 'pro';
-		return ( $block || $fonts ) && 'pro' === $mode;
+		$s = CMP_Consent::get_settings();
+		return self::blocks_trackers( $s ) || self::localizes_fonts( $s );
+	}
+
+	/**
+	 * Pure: are trackers blocked for these settings? Light mode has no way to
+	 * collect consent, so it always blocks; Pro follows the block_scripts setting.
+	 */
+	public static function blocks_trackers( $s ) {
+		$mode = isset( $s['mode'] ) ? $s['mode'] : 'pro';
+		return 'light' === $mode || ! empty( $s['block_scripts'] );
+	}
+
+	/** Pure: is Google Fonts localization active (Pro mode only)? */
+	public static function localizes_fonts( $s ) {
+		$mode = isset( $s['mode'] ) ? $s['mode'] : 'pro';
+		return 'pro' === $mode && ! empty( $s['localize_fonts'] );
+	}
+
+	/**
+	 * Pure: which tracker categories a page's HTML loads directly ('raw') and
+	 * which this plugin has neutralized ('blocked'), e.g.
+	 * array( 'raw' => array( 'statistics' ), 'blocked' => array( 'marketing' ) ).
+	 */
+	public static function detect_trackers( $html ) {
+		$html    = (string) $html;
+		$raw     = array();
+		$blocked = array();
+		// Hosts/markers inside neutralized tags are base64-encoded, so only live tags match here.
+		foreach ( self::RULES as $rule ) {
+			$hit = false;
+			foreach ( array_merge( $rule['hosts'], $rule['inline'] ) as $needle ) {
+				if ( false !== stripos( $html, $needle ) ) {
+					$hit = true;
+					break;
+				}
+			}
+			if ( ! $hit && $rule['gtm'] && false !== strpos( $html, 'GTM-' ) && false !== strpos( $html, 'dataLayer' ) && preg_match( '/<script\b(?![^>]*\bdata-cmp-block)[^>]*>[^<]*GTM-/i', $html ) ) {
+				$hit = true;
+			}
+			if ( $hit ) {
+				$raw[] = $rule['cat'];
+			}
+		}
+		if ( preg_match_all( '/data-cmp-block\s*=\s*["\']([a-z0-9_-]+)["\']/i', $html, $m ) ) {
+			$blocked = array_values( array_unique( $m[1] ) );
+		}
+		return array( 'raw' => $raw, 'blocked' => $blocked );
+	}
+
+	/**
+	 * Scan the public homepage for trackers (cached 1 hour). Null when the page
+	 * could not be fetched. Used for the admin warnings only.
+	 */
+	public static function scan_homepage( $force = false ) {
+		$cached = $force ? false : get_transient( 'cmp_tracker_scan' );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+		$res = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'redirection' => 3 ) );
+		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+			return null;
+		}
+		$scan = self::detect_trackers( wp_remote_retrieve_body( $res ) );
+		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
+		return $scan;
 	}
 
 	public static function maybe_start() {
@@ -107,10 +167,10 @@ class CMP_Blocker {
 	public static function apply( $html ) {
 		$s    = CMP_Consent::get_settings();
 		$html = (string) $html;
-		if ( ! empty( $s['block_scripts'] ) ) {
+		if ( self::blocks_trackers( $s ) ) {
 			$html = self::rewrite( $html );
 		}
-		if ( ! empty( $s['localize_fonts'] ) ) {
+		if ( self::localizes_fonts( $s ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
 			$html = self::strip_hint_links( $html, self::FONT_HOSTS );
 		}

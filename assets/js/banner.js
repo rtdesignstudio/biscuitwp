@@ -25,6 +25,11 @@
 	}
 
 	function pushConsent(accepted) {
+		// Meta Pixel follows the marketing category, when it is already on the page:
+		// "grant" on consent, "revoke" when it is withdrawn (stops it immediately).
+		if (typeof window.fbq === 'function') {
+			try { window.fbq('consent', accepted.indexOf('marketing') !== -1 ? 'grant' : 'revoke'); } catch (e) {}
+		}
 		if (typeof window.gtag !== 'function') { return; }
 		var signals = {};
 		D.categories.forEach(function (cat) {

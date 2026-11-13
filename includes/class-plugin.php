@@ -65,6 +65,16 @@ class CMP_Plugin {
 				update_option( 'cmp_settings', $settings );
 			}
 		}
+		// 0.4.0: blocking trackers until consent is on by default (Consent Mode
+		// "basic": no Google/Meta request at all before Accept). Turn it on once
+		// on existing installs, where it used to default to off.
+		if ( false === $old || version_compare( $old, '0.4.0', '<' ) ) {
+			$settings = get_option( 'cmp_settings', array() );
+			if ( is_array( $settings ) && empty( $settings['block_scripts'] ) ) {
+				$settings['block_scripts'] = true;
+				update_option( 'cmp_settings', $settings );
+			}
+		}
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 
