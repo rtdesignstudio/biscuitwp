@@ -37,8 +37,11 @@ $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 			<div class="cmp__actions">
 				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?></button>
 				<span class="cmp__spacer" aria-hidden="true"></span>
-				<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject"><?php echo esc_html( $cmp_text( 'reject', CMP_Lang::text( 'reject' ) ) ); ?></button>
-				<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="accept"><?php echo esc_html( $cmp_text( 'accept', CMP_Lang::text( 'accept' ) ) ); ?></button>
+				<!-- Equal weight: refusing is as easy and as visible as accepting. -->
+				<span class="cmp__choices">
+					<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="reject"><?php echo esc_html( $cmp_text( 'reject', CMP_Lang::text( 'reject' ) ) ); ?></button>
+					<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="accept"><?php echo esc_html( $cmp_text( 'accept', CMP_Lang::text( 'accept' ) ) ); ?></button>
+				</span>
 			</div>
 		</div>
 
@@ -82,8 +85,10 @@ $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 			</div>
 
 			<div class="cmp__prefs-actions">
-				<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject"><?php echo esc_html( $cmp_text( 'reject', CMP_Lang::text( 'reject' ) ) ); ?></button>
-				<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save"><?php echo esc_html( $cmp_text( 'save', CMP_Lang::text( 'save' ) ) ); ?></button>
+				<span class="cmp__choices">
+					<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="reject"><?php echo esc_html( $cmp_text( 'reject', CMP_Lang::text( 'reject' ) ) ); ?></button>
+					<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save"><?php echo esc_html( $cmp_text( 'save', CMP_Lang::text( 'save' ) ) ); ?></button>
+				</span>
 			</div>
 			<p class="cmp__consent-id" data-cmp-consent-id hidden><?php echo esc_html( CMP_Lang::text( 'consent_id' ) ); ?>: <code></code></p>
 		</div>

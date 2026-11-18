@@ -114,6 +114,10 @@ body.cmp-has-banner { overflow: hidden; }
 .cmp__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .cmp__spacer { flex: 1 1 auto; }
 .cmp__prefs-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+/* The two decisions (reject / accept, reject / save) side by side in two equal
+   columns, same style: refusing must weigh as much as accepting. */
+.cmp__choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cmp__choices .cmp__btn { width: 100%; text-align: center; }
 
 .cmp__btn {
 	appearance: none;
@@ -284,6 +288,7 @@ body.cmp-has-banner { overflow: hidden; }
 	.cmp__spacer { display: none; }
 	.cmp__prefs-actions { flex-direction: column; }
 	.cmp__prefs-actions .cmp__btn { width: 100%; }
+	.cmp__choices { width: 100%; }
 }
 
 /* ---- Light mode: small floating card, bottom-left corner (non-blocking) ---- */

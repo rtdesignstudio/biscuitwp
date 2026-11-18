@@ -355,8 +355,10 @@
 				'<div class="cmp__actions">' +
 				'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">' + escapeHtml(cfg.texts.prefs) + '</button>' +
 				'<span class="cmp__spacer" aria-hidden="true"></span>' +
-				'<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
+				'<span class="cmp__choices">' +
+				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
 				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="accept">' + escapeHtml(cfg.texts.accept) + '</button>' +
+				'</span>' +
 				'</div>' +
 				'</div>' +
 				'<div class="cmp__prefs" data-cmp-view="prefs">' +
@@ -368,8 +370,10 @@
 				'</div>' +
 				'<div class="cmp__cats">' + catsHtml + '</div>' +
 				'<div class="cmp__prefs-actions">' +
-				'<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
+				'<span class="cmp__choices">' +
+				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
 				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save">' + escapeHtml(cfg.texts.save) + '</button>' +
+				'</span>' +
 				'</div>' +
 				'<p class="cmp__consent-id" data-cmp-consent-id hidden>' + escapeHtml(cfg.texts.consent_id || 'Consent ID') + ': <code></code></p>' +
 				'</div>' +
