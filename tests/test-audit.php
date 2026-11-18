@@ -37,3 +37,35 @@ cmp_assert_eq( $back[0]['decision'], 'accepted_all', 'JSON round-trips decision'
 $now = gmmktime( 12, 0, 0, 2, 1, 2026 );
 $threshold = CMP_Audit::prune_before_date( 13, $now );
 cmp_assert_eq( $threshold, '2025-01-01 12:00:00', '13-month prune threshold computed' );
+
+// --- Logging without a nonce (cache-safe): strict request validation. ---
+$slugs = array( 'necessary', 'statistics', 'marketing' );
+
+$ok = CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '["necessary","statistics","bogus"]', 'version' => '3' ), $slugs, '3' );
+cmp_assert( is_array( $ok ), 'valid request parsed' );
+cmp_assert_eq( $ok['decision'], 'partial', 'decision kept' );
+cmp_assert_eq( $ok['categories'], 'necessary,statistics', 'unknown category dropped' );
+cmp_assert_eq( $ok['version'], '3', 'version kept' );
+
+cmp_assert_eq( CMP_Audit::parse_request( array( 'decision' => 'hacked', 'categories' => '[]' ), $slugs, '1' ), 'bad_decision', 'unknown decision rejected' );
+cmp_assert_eq( CMP_Audit::parse_request( array(), $slugs, '1' ), 'bad_decision', 'missing decision rejected' );
+
+$junk = CMP_Audit::parse_request( array( 'decision' => 'rejected_all', 'categories' => 'not json' ), $slugs, '1' );
+cmp_assert_eq( $junk['categories'], '', 'non-JSON categories become empty' );
+
+$weird = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]', 'version' => '<script>' ), $slugs, '2' );
+cmp_assert_eq( $weird['version'], '2', 'malformed version falls back to the current one' );
+$long = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]', 'version' => str_repeat( '9', 50 ) ), $slugs, '2' );
+cmp_assert_eq( $long['version'], '2', 'overlong version falls back to the current one' );
+
+// Origin: only our own site (or no Origin header) may log.
+cmp_assert_eq( CMP_Audit::same_origin( 'https://example.md', 'https://example.md/' ), true, 'same origin allowed' );
+cmp_assert_eq( CMP_Audit::same_origin( 'https://www.example.md', 'https://example.md/' ), false, 'other host rejected' );
+cmp_assert_eq( CMP_Audit::same_origin( 'https://evil.com', 'https://example.md/' ), false, 'foreign origin rejected' );
+cmp_assert_eq( CMP_Audit::same_origin( '', 'https://example.md/' ), true, 'missing Origin allowed (older browsers)' );
+cmp_assert_eq( CMP_Audit::same_origin( 'null', 'https://example.md/' ), false, 'opaque origin rejected' );
+
+// Rate limit per hashed IP.
+cmp_assert_eq( CMP_Audit::throttled( 30, 30 ), false, 'at the limit still allowed' );
+cmp_assert_eq( CMP_Audit::throttled( 31, 30 ), true, 'over the limit throttled' );
+cmp_assert_eq( CMP_Audit::same_origin( 'https://example.md', 'http://example.md/' ), true, 'http home URL served over https still allowed' );

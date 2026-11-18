@@ -36,36 +36,95 @@ class CMP_Audit {
 		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
 	}
 
-	public static function ajax_log() {
-		if ( ! check_ajax_referer( 'cmp_log_consent', 'nonce', false ) ) {
-			wp_send_json_error( 'bad_nonce', 400 );
-		}
-		$decisions  = array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' );
-		$decision   = isset( $_POST['decision'] ) ? sanitize_text_field( wp_unslash( $_POST['decision'] ) ) : '';
-		if ( ! in_array( $decision, $decisions, true ) ) {
-			wp_send_json_error( 'bad_decision', 400 );
-		}
-		$categories = isset( $_POST['categories'] ) ? wp_unslash( $_POST['categories'] ) : '[]';
-		$decoded    = json_decode( $categories, true );
-		$valid_slugs = wp_list_pluck( CMP_Consent::get_categories(), 'slug' );
-		$cats_csv    = '';
-		if ( is_array( $decoded ) ) {
-			$clean    = array_intersect( array_map( 'sanitize_key', $decoded ), $valid_slugs );
-			$cats_csv = implode( ',', array_values( $clean ) );
-		}
-		$version    = isset( $_POST['version'] ) ? sanitize_text_field( wp_unslash( $_POST['version'] ) ) : CMP_Consent::current_version();
+	/** Max consent log requests per hashed IP per hour. */
+	const RATE_MAX = 30;
 
-		$ok = self::record( array(
-			'decision'   => $decision,
-			'categories' => $cats_csv,
-			'lang'       => substr( (string) get_locale(), 0, 8 ),
-			'url'        => isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
-			'version'    => $version,
-		) );
+	/**
+	 * Public, unauthenticated endpoint. No nonce on purpose: pages are often
+	 * served from a cache for days, and an expired nonce silently dropped every
+	 * consent record. Abuse is limited instead by same-origin, strict validation
+	 * and a per-IP rate limit.
+	 */
+	public static function ajax_log() {
+		$origin = isset( $_SERVER['HTTP_ORIGIN'] ) ? (string) wp_unslash( $_SERVER['HTTP_ORIGIN'] ) : '';
+		if ( ! self::same_origin( $origin, home_url( '/' ) ) ) {
+			wp_send_json_error( 'bad_origin', 403 );
+		}
+
+		$key  = 'cmp_rl_' . substr( self::hash_ip( self::client_ip(), wp_salt( 'auth' ) ), 0, 32 );
+		$hits = (int) get_transient( $key ) + 1;
+		set_transient( $key, $hits, HOUR_IN_SECONDS );
+		if ( self::throttled( $hits, self::RATE_MAX ) ) {
+			wp_send_json_error( 'too_many', 429 );
+		}
+
+		$row = self::parse_request(
+			wp_unslash( $_POST ),
+			wp_list_pluck( CMP_Consent::get_categories(), 'slug' ),
+			CMP_Consent::current_version()
+		);
+		if ( is_string( $row ) ) {
+			wp_send_json_error( $row, 400 );
+		}
+
+		$ok = self::record( array_merge( $row, array(
+			'lang' => substr( (string) get_locale(), 0, 8 ),
+			'url'  => isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
+		) ) );
 		if ( false === $ok ) {
 			wp_send_json_error( 'not_logged', 500 );
 		}
 		wp_send_json_success();
+	}
+
+	/**
+	 * Pure: validate a consent log request. Returns the row fields (decision,
+	 * categories as CSV of known slugs, version) or an error code string.
+	 */
+	public static function parse_request( array $post, array $valid_slugs, $current_version ) {
+		$decision = isset( $post['decision'] ) ? (string) $post['decision'] : '';
+		if ( ! in_array( $decision, array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' ), true ) ) {
+			return 'bad_decision';
+		}
+		$decoded = json_decode( isset( $post['categories'] ) ? (string) $post['categories'] : '', true );
+		$cats    = array();
+		if ( is_array( $decoded ) ) {
+			foreach ( $decoded as $slug ) {
+				$slug = is_string( $slug ) ? strtolower( preg_replace( '/[^A-Za-z0-9_-]/', '', $slug ) ) : '';
+				if ( '' !== $slug && in_array( $slug, $valid_slugs, true ) && ! in_array( $slug, $cats, true ) ) {
+					$cats[] = $slug;
+				}
+			}
+		}
+		$version = isset( $post['version'] ) ? (string) $post['version'] : '';
+		if ( ! preg_match( '/^[A-Za-z0-9._-]{1,20}$/', $version ) ) {
+			$version = (string) $current_version;
+		}
+		return array(
+			'decision'   => $decision,
+			'categories' => implode( ',', $cats ),
+			'version'    => $version,
+		);
+	}
+
+	/**
+	 * Pure: is the request's Origin our own site? Compares hosts only: a site whose
+	 * home URL still says http:// while served over https (common behind proxies)
+	 * must not lose its consent records. A missing header is allowed.
+	 */
+	public static function same_origin( $origin, $home_url ) {
+		$origin = (string) $origin;
+		if ( '' === $origin ) {
+			return true;
+		}
+		$o = parse_url( $origin, PHP_URL_HOST );
+		$h = parse_url( (string) $home_url, PHP_URL_HOST );
+		return is_string( $o ) && is_string( $h ) && '' !== $o && strtolower( $o ) === strtolower( $h );
+	}
+
+	/** Pure: over the per-IP limit? */
+	public static function throttled( $hits, $max ) {
+		return (int) $hits > (int) $max;
 	}
 
 	/** Insert a consent row. Returns true on write (or dedup skip), false if the DB write failed. */

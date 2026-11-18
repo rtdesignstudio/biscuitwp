@@ -50,7 +50,6 @@ class CMP_Banner {
 				'mode'       => isset( $cmp_settings['mode'] ) ? $cmp_settings['mode'] : 'pro',
 				'cookieName' => CMP_Consent::COOKIE,
 				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
-				'nonce'      => wp_create_nonce( 'cmp_log_consent' ),
 				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
 				'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
 				'cookieDays' => isset( $cmp_settings['cookie_days'] ) ? (int) $cmp_settings['cookie_days'] : 180,

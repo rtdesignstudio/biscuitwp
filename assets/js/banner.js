@@ -45,7 +45,6 @@
 		if (!D.ajaxUrl) { return; }
 		var body = new URLSearchParams();
 		body.set('action', 'cmp_log_consent');
-		body.set('nonce', D.nonce || '');
 		body.set('decision', payload.decision);
 		body.set('categories', JSON.stringify(payload.categories));
 		body.set('version', D.version);
