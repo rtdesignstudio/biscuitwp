@@ -242,6 +242,46 @@
 	}
 	// Pure: a cookie value (still URI-encoded) as an object, or null when it is
 	// malformed (bad %-escape or not JSON). Never throws.
+	// reconsent:begin
+	// Re-consent helpers. svcByCat = { slug: [serviceIds] } as published by the
+	// server; a missing / non-object map means "unknown" (no scan has run yet).
+	// Pure; tested in standalone/tests/run.js (source-extracted in banner.js).
+	function rcMap(m) {
+		return (m && typeof m === 'object' && !Array.isArray(m)) ? m : null;
+	}
+	function rcList(v) { return Array.isArray(v) ? v : []; }
+	// Snapshot of the services per accepted category; null = unknown, store none.
+	function svcSnapshot(accepted, svcByCat) {
+		var map = rcMap(svcByCat), out = {}, acc = rcList(accepted);
+		if (!map) { return null; }
+		Object.keys(map).forEach(function (slug) {
+			if (acc.indexOf(slug) !== -1 && Array.isArray(map[slug])) { out[slug] = map[slug].slice(); }
+		});
+		return out;
+	}
+	// Services that appeared since the cookie was saved, in accepted categories.
+	function newServices(cookie, svcByCat) {
+		var map = rcMap(svcByCat), out = {};
+		if (!map || !cookie || typeof cookie !== 'object') { return out; }
+		var svc = cookie.svc;
+		if (!svc || typeof svc !== 'object' || Array.isArray(svc)) { return out; }
+		var cats = rcList(cookie.categories);
+		Object.keys(map).forEach(function (slug) {
+			if (cats.indexOf(slug) === -1 || !Array.isArray(map[slug])) { return; }
+			var known = rcList(svc[slug]);
+			var fresh = map[slug].filter(function (id) { return known.indexOf(id) === -1; });
+			if (fresh.length) { out[slug] = fresh; }
+		});
+		return out;
+	}
+	// The cookie's categories minus those that gained a service.
+	function effectiveCategories(cookie, svcByCat) {
+		if (!cookie || typeof cookie !== 'object') { return []; }
+		var fresh = newServices(cookie, svcByCat);
+		return rcList(cookie.categories).filter(function (s) { return !Object.prototype.hasOwnProperty.call(fresh, s); });
+	}
+	// reconsent:end
+
 	function parseSvcCookie(raw) {
 		try {
 			var o = JSON.parse(decodeURIComponent(raw));
@@ -902,6 +942,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl, svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories };
 	}
 })();

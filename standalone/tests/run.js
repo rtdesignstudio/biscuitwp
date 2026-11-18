@@ -171,6 +171,50 @@ eq(wpConsentValues({ necessary: ['functional'], custom_x: ['marketing'], marketi
 eq(wpConsentValues({ necessary: ['functional'], a: ['marketing'], b: ['marketing'] }, []), { functional: 'allow', marketing: 'deny' }, 'wp consent: shared WP category denies when none accepted');
 eq(wpConsentValues(null, ['marketing']), {}, 'wp consent: no map -> nothing');
 
+// Re-consent helpers (B4): same cases against both builds. banner.js's block is
+// source-extracted like wpConsentValues; standalone/cmp.js exports its copy.
+var rcM = bannerSrc.match(/\/\/ reconsent:begin\n([\s\S]*?)\/\/ reconsent:end/);
+ok(!!rcM, 'banner.js exposes the reconsent block');
+var rcBanner = rcM ? new Function(rcM[1] + '\nreturn { svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories };')() : {};
+[['banner', rcBanner], ['standalone', cmp]].forEach(function (pair) {
+	var n = 'reconsent ' + pair[0] + ': ', h = pair[1];
+	ok(typeof h.svcSnapshot === 'function' && typeof h.newServices === 'function' && typeof h.effectiveCategories === 'function', n + 'helpers present');
+	if (typeof h.svcSnapshot !== 'function' || typeof h.newServices !== 'function' || typeof h.effectiveCategories !== 'function') { return; }
+	var MAP = { marketing: ['meta-pixel', 'tiktok-pixel'] };
+	eq(h.svcSnapshot(['necessary', 'marketing'], { marketing: ['meta-pixel'], statistics: ['google-analytics'] }), { marketing: ['meta-pixel'] }, n + 'snapshot only accepted categories');
+	eq(h.svcSnapshot(['necessary'], { marketing: ['meta-pixel'] }), {}, n + 'known map, nothing accepted -> {}');
+	eq(h.svcSnapshot(['marketing'], {}), {}, n + 'known empty map -> {}');
+	eq(h.svcSnapshot(['marketing'], undefined), null, n + 'snapshot: undefined map -> null');
+	eq(h.svcSnapshot(['marketing'], null), null, n + 'snapshot: null map -> null');
+	eq(h.svcSnapshot(['marketing'], 'x'), null, n + 'snapshot: non-object map -> null');
+	eq(h.svcSnapshot('marketing', { marketing: ['a'] }), {}, n + 'snapshot: accepted not an array -> {}');
+	eq(h.svcSnapshot(['marketing'], { marketing: 'oops' }), {}, n + 'snapshot: non-array value skipped');
+	var ck = { categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel'] } };
+	eq(h.newServices(ck, MAP), { marketing: ['tiktok-pixel'] }, n + 'new service in accepted category');
+	eq(h.effectiveCategories(ck, MAP), ['necessary'], n + 'effective drops category with new service');
+	eq(h.newServices({ categories: ['necessary'], svc: {} }, { marketing: ['tiktok-pixel'] }), {}, n + 'new service in refused category ignored');
+	eq(h.newServices({ categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel', 'tiktok-pixel'] } }, { marketing: ['meta-pixel'] }), {}, n + 'removed service -> nothing new');
+	var old = { categories: ['marketing'] };
+	eq(h.newServices(old, { marketing: ['tiktok-pixel'] }), {}, n + 'old cookie without svc -> {}');
+	eq(h.effectiveCategories(old, { marketing: ['tiktok-pixel'] }), ['marketing'], n + 'old cookie keeps categories');
+	eq(h.newServices(null, MAP), {}, n + 'no cookie -> {}');
+	eq(h.effectiveCategories(null, MAP), [], n + 'no cookie -> []');
+	eq(h.newServices(ck, undefined), {}, n + 'unknown map -> no new services');
+	eq(h.newServices(ck, null), {}, n + 'null map -> no new services');
+	eq(h.effectiveCategories(ck, undefined), ['necessary', 'marketing'], n + 'unknown map keeps cookie categories');
+	eq(h.effectiveCategories(ck, null), ['necessary', 'marketing'], n + 'null map keeps cookie categories');
+	eq(h.effectiveCategories({}, undefined), [], n + 'cookie without categories, unknown map -> []');
+	eq(h.newServices({ categories: ['marketing'], svc: 'junk' }, MAP), {}, n + 'svc string -> like old cookie');
+	eq(h.effectiveCategories({ categories: ['marketing'], svc: 'junk' }, MAP), ['marketing'], n + 'svc string keeps categories');
+	eq(h.newServices({ categories: 'marketing', svc: { marketing: [] } }, MAP), {}, n + 'categories not an array -> {}');
+	eq(h.effectiveCategories({ categories: 'marketing', svc: {} }, MAP), [], n + 'categories not an array -> []');
+	eq(h.newServices({ categories: ['marketing'], svc: { marketing: 'x' } }, MAP), { marketing: ['meta-pixel', 'tiktok-pixel'] }, n + 'svc value not an array -> all new');
+	eq(h.newServices({ categories: ['marketing'], svc: [] }, MAP), {}, n + 'svc array -> like old cookie');
+	eq(h.newServices(ck, { marketing: 'oops' }), {}, n + 'map value not an array skipped');
+	eq(h.newServices('str', MAP), {}, n + 'cookie string -> {}');
+	eq(h.newServices({ categories: ['marketing'], svc: {} }, { marketing: ['b', 'a', 'c'] }), { marketing: ['b', 'a', 'c'] }, n + 'ids keep map order');
+});
+
 // Final fix wave I2: without a valid decision every mapped category is pushed
 // (functional allow, the rest deny), so stale 'allow' values never survive.
 var WPDENY = { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' };
