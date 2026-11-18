@@ -9,6 +9,14 @@ class CMP_Banner {
 		add_action( 'wp_head', array( $this, 'print_consent_default' ), 1 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'wp_footer', array( $this, 'render' ) );
+		add_action( 'wp_footer', array( $this, 'print_custom_scripts' ), 20 );
+	}
+
+	/** Scripts of the custom services: blocked until consent (Pro), or run directly when necessary/exempt. */
+	public function print_custom_scripts() {
+		$settings = CMP_Consent::get_settings();
+		$mode     = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+		echo CMP_Blocker::custom_script_html( CMP_Services::active(), $mode ); // phpcs:ignore WordPress.Security.EscapeOutput -- admin-authored script markup, built and escaped in the blocker.
 	}
 
 	/** Emit gtag consent default BEFORE any tag manager fires. */

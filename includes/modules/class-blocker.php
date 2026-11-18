@@ -337,52 +337,100 @@ class CMP_Blocker {
 			array_filter( $labels, 'strlen' )
 		);
 		return (string) preg_replace_callback(
-			'/<iframe\b([^>]*)>(.*?)<\/iframe>/is',
+			'/(<template\b[^>]*\bdata-cmp-embed-src\b[^>]*>.*?<\/template>)|<iframe\b([^>]*)>(.*?)<\/iframe>/is',
 			function ( $m ) use ( $labels, $services ) {
-				$attrs = $m[1];
-				if ( false !== stripos( $attrs, 'data-cmp-keep' ) ) {
+				if ( ! empty( $m[1] ) ) {
+					return $m[1]; // an iframe already held in a consent placeholder
+				}
+				$attrs = $m[2];
+				$m     = array( $m[0], $attrs );
+				if ( self::has_keep( $attrs ) ) {
 					return $m[0];
 				}
 				if ( ! preg_match( '/(?:^|\s)src\s*=\s*(["\'])(.*?)\1/is', $attrs, $sm ) ) {
 					return $m[0];
 				}
-				$src   = trim( html_entity_decode( $sm[2], ENT_QUOTES ) );
+				$src = trim( html_entity_decode( $sm[2], ENT_QUOTES ) );
+
+				// An explicit data-cmp-category wins over the library.
+				$cat = self::tag_category( $attrs );
+				if ( false === $cat ) {
+					return $m[0];
+				}
+				if ( null !== $cat ) {
+					$host = parse_url( $src, PHP_URL_HOST );
+					$name = is_string( $host ) && '' !== $host ? $host : preg_replace( '/[?#].*$/s', '', $src );
+					return self::embed_placeholder( $m[0], $attrs, $sm, $src, $cat, null, $name, $labels, false );
+				}
+
 				$embed = self::embed_for( $src, $services );
 				if ( null === $embed ) {
 					return $m[0];
 				}
-
-				$iframe = $m[0];
-				if ( ! empty( $embed['nocookie'] ) && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
-					$nocookie = preg_replace( '#^https?://(?:www\.)?youtube\.com/#i', 'https://www.youtube-nocookie.com/', $src );
-					$iframe   = str_replace( $sm[0], str_replace( $sm[2], htmlspecialchars( $nocookie, ENT_QUOTES, 'UTF-8' ), $sm[0] ), $iframe );
-				}
-
-				// Pixel sizes only ("560" or "560px"); a percentage width keeps 16/9.
-				$ratio = '16/9';
-				$max   = '';
-				if ( preg_match( '/\bwidth\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $wm ) && preg_match( '/\bheight\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $hm ) && (int) $wm[1] > 0 && (int) $hm[1] > 0 ) {
-					$ratio = (int) $wm[1] . '/' . (int) $hm[1];
-					$max   = ';max-width:' . (int) $wm[1] . 'px';
-				}
-				$e    = function ( $v ) {
-					return htmlspecialchars( (string) $v, ENT_QUOTES, 'UTF-8' );
-				};
-				$text = str_replace( '%s', $e( $embed['name'] ), $e( $labels['embed_text'] ) );
-
-				$preset = isset( $labels['preset'] ) && in_array( $labels['preset'], array( 'neutral', 'warm', 'dark', 'egov' ), true ) ? ' cmp--' . $labels['preset'] : '';
-				return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $embed['category'] ) . '" data-cmp-service="' . $e( $embed['id'] ) . '" style="aspect-ratio:' . $ratio . $max . '">'
-					. '<div class="cmp-embed__inner">'
-					. '<p class="cmp-embed__text">' . $text . '</p>'
-					. '<p class="cmp-embed__actions">'
-					. '<button type="button" class="cmp-embed__btn" data-cmp-embed-load>' . $e( $labels['embed_load'] ) . '</button>'
-					. '<a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>' . $e( $labels['settings'] ) . '</a>'
-					. '</p></div>'
-					. '<template data-cmp-embed-src>' . $iframe . '</template>'
-					. '</div>';
+				return self::embed_placeholder( $m[0], $attrs, $sm, $src, $embed['category'], $embed['id'], $embed['name'], $labels, ! empty( $embed['nocookie'] ) );
 			},
 			(string) $html
 		);
+	}
+
+	/**
+	 * Pure: the data-cmp-category of a tag's attributes. Null = no attribute or an
+	 * invalid slug (normal library handling applies), false = "necessary" (leave
+	 * the tag alone), else the slug. Unknown valid slugs are blocked on purpose
+	 * (fail-safe). Quoted, single-quoted and unquoted values are recognised.
+	 */
+	private static function tag_category( $attrs ) {
+		if ( ! preg_match( '/(?:^|[\s\/"\'])data-cmp-category\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>\/]+))(?=\s|\/|>|$)/i', $attrs, $cm ) ) {
+			return null;
+		}
+		$v = isset( $cm[3] ) ? $cm[3] : ( isset( $cm[2] ) && '' !== $cm[2] ? $cm[2] : $cm[1] );
+		if ( ! preg_match( '/^[a-z0-9_-]{1,40}$/', $v ) ) {
+			return null;
+		}
+		return 'necessary' === $v ? false : $v;
+	}
+
+	/** Pure: does the attribute string carry the data-cmp-keep attribute (not just the text)? */
+	private static function has_keep( $attrs ) {
+		return 1 === preg_match( '/(?:^|\s)data-cmp-keep(?=[\s=\/>]|$)/i', (string) $attrs );
+	}
+
+	/** Pure: an already-blocked script: type="text/plain" plus an exact data-cmp-block attribute. */
+	private static function is_blocked_tag( $attrs ) {
+		return 1 === preg_match( '/(?:^|\s)type\s*=\s*["\']?text\/plain/i', $attrs )
+			&& 1 === preg_match( '/(?:^|[\s"\'\/])data-cmp-block(?=[\s=\/>]|$)/i', $attrs );
+	}
+
+	/** Pure: the consent placeholder wrapping an iframe ($service_id null = anonymous). */
+	private static function embed_placeholder( $iframe, $attrs, array $sm, $src, $category, $service_id, $name, array $labels, $nocookie ) {
+		if ( $nocookie && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
+			$nc     = preg_replace( '#^https?://(?:www\.)?youtube\.com/#i', 'https://www.youtube-nocookie.com/', $src );
+			$iframe = str_replace( $sm[0], str_replace( $sm[2], htmlspecialchars( $nc, ENT_QUOTES, 'UTF-8' ), $sm[0] ), $iframe );
+		}
+
+		// Pixel sizes only ("560" or "560px"); a percentage width keeps 16/9.
+		$ratio = '16/9';
+		$max   = '';
+		if ( preg_match( '/\bwidth\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $wm ) && preg_match( '/\bheight\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $hm ) && (int) $wm[1] > 0 && (int) $hm[1] > 0 ) {
+			$ratio = (int) $wm[1] . '/' . (int) $hm[1];
+			$max   = ';max-width:' . (int) $wm[1] . 'px';
+		}
+		$e    = function ( $v ) {
+			return htmlspecialchars( (string) $v, ENT_QUOTES, 'UTF-8' );
+		};
+		$text = str_replace( '%s', $e( $name ), $e( $labels['embed_text'] ) );
+
+		$preset  = isset( $labels['preset'] ) && in_array( $labels['preset'], array( 'neutral', 'warm', 'dark', 'egov' ), true ) ? ' cmp--' . $labels['preset'] : '';
+		$service = null === $service_id ? '' : ' data-cmp-service="' . $e( $service_id ) . '"';
+		return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $category ) . '"' . $service . ' style="aspect-ratio:' . $ratio . $max . '">'
+			. '<div class="cmp-embed__inner">'
+			. '<p class="cmp-embed__text">' . $text . '</p>'
+			. '<p class="cmp-embed__actions">'
+			. '<button type="button" class="cmp-embed__btn" data-cmp-embed-load>' . $e( $labels['embed_load'] ) . '</button>'
+			. '<a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>' . $e( $labels['settings'] ) . '</a>'
+			. '</p></div>'
+			. '<template data-cmp-embed-src>' . $iframe . '</template>'
+			. '</div>';
 	}
 
 	/** Pure: drop dns-prefetch / preconnect <link> hints whose href matches one of $hosts. */
@@ -455,35 +503,89 @@ class CMP_Blocker {
 		return $svc;
 	}
 
-	private static function rewrite_tag( $m, array $services ) {
-		$attrs = $m[1];
-		$body  = $m[2];
-
-		// Never touch our own tagged scripts (e.g. the Consent Mode init).
-		if ( false !== stripos( $attrs, 'data-cmp-keep' ) ) {
-			return $m[0];
-		}
-
-		$src = self::script_src( $attrs );
-		$svc = self::script_for( $src, $body, $services );
-		if ( null === $svc ) {
-			return $m[0];
-		}
-		$category = $svc['category'];
-
-		// Keep the other attributes (id, async, defer, …) but drop type + src.
-		$keep = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', $attrs );
+	/**
+	 * Pure: the non-executing replacement for a script. $src / $body are stored
+	 * base64-encoded so the tracker URL never appears in the page source before
+	 * consent; $attrs keeps id, async, defer, … but drops type + src.
+	 * $service_id null = anonymous (no data-cmp-service).
+	 */
+	private static function blocked_script( $category, $service_id, $src, $body, $attrs ) {
+		$keep = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', (string) $attrs );
 		$keep = preg_replace( '/(^|\s)src\s*=\s*["\'][^"\']*["\']/i', '$1', $keep );
 		$keep = trim( preg_replace( '/\s+/', ' ', $keep ) );
 		$keep = '' === $keep ? '' : ' ' . $keep;
-
-		// Obfuscate: store the URL / inline body base64-encoded so the tracker
-		// domain string never appears in the page source before consent.
 		if ( '' !== $src ) {
 			$enc = ' data-cmp-enc="1" data-cmp-src="' . base64_encode( $src ) . '"';
 		} else {
 			$enc = ' data-cmp-enc="1" data-cmp-body="' . base64_encode( $body ) . '"';
 		}
-		return '<script type="text/plain" data-cmp-block="' . $category . '" data-cmp-service="' . $svc['id'] . '"' . $enc . $keep . '></script>';
+		$svc = null === $service_id ? '' : ' data-cmp-service="' . htmlspecialchars( (string) $service_id, ENT_QUOTES, 'UTF-8' ) . '"';
+		return '<script type="text/plain" data-cmp-block="' . htmlspecialchars( (string) $category, ENT_QUOTES, 'UTF-8' ) . '"' . $svc . $enc . $keep . '></script>';
+	}
+
+	/**
+	 * Pure: the footer markup for the custom services' own scripts. Necessary /
+	 * exempt ones run normally (both modes); others are emitted blocked in Pro
+	 * and not at all in Light (which cannot collect consent).
+	 */
+	public static function custom_script_html( array $services, $mode ) {
+		$out = '';
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || ! isset( $s['source'] ) || 'custom' !== $s['source'] || empty( $s['script'] ) || ! is_string( $s['script'] ) ) {
+				continue;
+			}
+			$cat  = isset( $s['category'] ) ? (string) $s['category'] : '';
+			$free = 'necessary' === $cat || ! empty( $s['exempt'] );
+			if ( ! $free && ( 'pro' !== $mode || ! preg_match( '/^[a-z0-9_-]{1,40}$/', $cat ) ) ) {
+				continue;
+			}
+			$tags = array(); // each: array( attrs, body )
+			if ( false !== stripos( $s['script'], '<script' ) ) {
+				if ( preg_match_all( '/<script\b([^>]*)>(.*?)<\/script>/is', $s['script'], $mm, PREG_SET_ORDER ) ) {
+					foreach ( $mm as $t ) {
+						$tags[] = array( $t[1], $t[2] );
+					}
+				}
+			} else {
+				$tags[] = array( '', $s['script'] );
+			}
+			foreach ( $tags as $t ) {
+				if ( $free ) {
+					$attrs = ! self::has_keep( $t[0] ) ? ' data-cmp-keep' . $t[0] : $t[0];
+					$out  .= '<script' . $attrs . '>' . $t[1] . "</script>\n";
+				} else {
+					$out .= self::blocked_script( $cat, isset( $s['id'] ) ? $s['id'] : null, self::script_src( $t[0] ), $t[1], $t[0] ) . "\n";
+				}
+			}
+		}
+		return $out;
+	}
+
+	private static function rewrite_tag( $m, array $services ) {
+		$attrs = $m[1];
+		$body  = $m[2];
+
+		// Never touch our own tagged scripts (e.g. the Consent Mode init) or ones
+		// already blocked (footer custom scripts pass through the buffer too).
+		if ( self::has_keep( $attrs ) || self::is_blocked_tag( $attrs ) ) {
+			return $m[0];
+		}
+
+		$src = self::script_src( $attrs );
+
+		// An explicit data-cmp-category wins over the library.
+		$cat = self::tag_category( $attrs );
+		if ( false === $cat ) {
+			return $m[0];
+		}
+		if ( null !== $cat ) {
+			return self::blocked_script( $cat, null, $src, $body, $attrs );
+		}
+
+		$svc = self::script_for( $src, $body, $services );
+		if ( null === $svc ) {
+			return $m[0];
+		}
+		return self::blocked_script( $svc['category'], $svc['id'], $src, $body, $attrs );
 	}
 }
