@@ -48,10 +48,20 @@ class CMP_Plugin {
 			new CMP_Admin();
 		}
 
+		// Per-request caches of the services list follow their options.
+		foreach ( array( 'cmp_services', 'cmp_categories' ) as $opt ) {
+			add_action( 'add_option_' . $opt, array( 'CMP_Services', 'flush' ) );
+			add_action( 'update_option_' . $opt, array( 'CMP_Services', 'flush' ) );
+			add_action( 'delete_option_' . $opt, array( 'CMP_Services', 'flush' ) );
+		}
+
 		// Plugin updates do NOT fire the activation hook, so refresh the schema
 		// (create the log table / migrate columns) whenever the version changes.
 		// Runs on every load but the version gate makes dbDelta fire only once.
 		self::maybe_upgrade();
+		// The schema has its own revision (cmp_db_schema), checked even when
+		// CMP_VERSION did not change, so a missing column is always added.
+		CMP_Installer::maybe_upgrade_schema();
 	}
 
 	/** Run the installer (idempotent dbDelta + add_option) once per version change. */
@@ -61,7 +71,7 @@ class CMP_Plugin {
 			return;
 		}
 		require_once CMP_PATH . 'includes/class-installer.php';
-		CMP_Installer::install();
+		CMP_Installer::upgrade_schema();
 		// 0.3.4: the floating reopen button is off by default (a footer link replaces
 		// it). It used to default to on, so switch it off once on existing installs.
 		if ( false === $old || version_compare( $old, '0.3.4', '<' ) ) {
@@ -122,7 +132,14 @@ class CMP_Plugin {
 
 	public static function activate() {
 		require_once CMP_PATH . 'includes/class-installer.php';
-		CMP_Installer::install();
+		CMP_Installer::upgrade_schema();
 		update_option( 'cmp_db_version', CMP_VERSION );
+	}
+
+	/** Deactivation: stop the thumbnail cron job only (settings and data stay). */
+	public static function deactivate() {
+		if ( function_exists( 'wp_clear_scheduled_hook' ) ) {
+			wp_clear_scheduled_hook( 'cmp_fetch_thumbs' );
+		}
 	}
 }

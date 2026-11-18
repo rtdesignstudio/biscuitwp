@@ -73,6 +73,15 @@
 	function svcLogPayload(decision, id, categories, consentId) {
 		return { id: consentId || '', categories: categories || [], decision: decision, services: [id] };
 	}
+	// svcAfterReject:begin
+	// Pure: the cmp_svc value after an explicit "reject": no service left, same
+	// policy version, the cookie's own id kept. Tested in standalone/tests/run.js.
+	function svcAfterReject(c, version) {
+		var out = { v: String(version), svc: [] };
+		if (c && typeof c === 'object' && typeof c.id === 'string' && UUID_RE.test(c.id)) { out.id = c.id; }
+		return out;
+	}
+	// svcAfterReject:end
 	// Pure: fill the service name in a "%s" text, literally ($ in the name is safe).
 	function fillName(tpl, name) { return String(tpl).split('%s').join(name); }
 	function readSvc() {
@@ -107,13 +116,15 @@
 		});
 		return out;
 	}
-	// What to send on every page view, before any decision: 'functional' is always allowed.
-	function wpInitValues(map) {
-		var has = false;
-		Object.keys(map || {}).forEach(function (slug) {
-			if ((map[slug] || []).indexOf('functional') !== -1) { has = true; }
-		});
-		return has ? { functional: 'allow' } : {};
+	// What to send on every page view. Without a valid CMP decision (no cookie,
+	// an expired or malformed one, another policy version, or Light mode) every
+	// mapped category is pushed: 'functional' allow, the rest deny, so stale
+	// 'allow' values in WP Consent API's own cookies never survive. With a valid
+	// decision, its categories.
+	function wpInitValues(map, cookie, version, mode, required) {
+		var valid = mode !== 'light' && !!cookie && typeof cookie === 'object' &&
+			String(cookie.v) === String(version) && Array.isArray(cookie.categories);
+		return wpConsentValues(map, valid ? cookie.categories : (required || []));
 	}
 	// wpConsentValues:end
 
@@ -127,7 +138,7 @@
 
 	function pushWpInit() {
 		if (!D.wpConsent || typeof window.wp_set_consent !== 'function') { return; }
-		var vals = wpInitValues(D.wpConsent);
+		var vals = wpInitValues(D.wpConsent, readCookie(), D.version, D.mode, requiredSlugs());
 		Object.keys(vals).forEach(function (cat) {
 			try { window.wp_set_consent(cat, vals[cat]); } catch (e) {}
 		});
@@ -281,7 +292,7 @@
 			if (!btn) { return; }
 			var action = btn.getAttribute('data-cmp-action');
 			if (action === 'accept') { save(D.categories.map(function (c) { return c.slug; }), 'accepted_all'); }
-			else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); }
+			else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); rejectServices(); }
 			else if (action === 'prefs') { openPrefs(); }
 			else if (action === 'back') { closePrefs(); }
 			else if (action === 'save') {
@@ -423,6 +434,22 @@
 			live.textContent = '';
 			live.textContent = fillName((row && row.getAttribute('data-cmp-always-remove')) || '%s', name);
 		}
+	}
+	// The explicit "reject" also withdraws every "always load" choice (one
+	// service_withdraw row naming them all). A partial save and GPC do not.
+	// Embeds already loaded on this page stay until the next load.
+	function rejectServices() {
+		var cur = readSvc();
+		if (!cur) { return; }
+		var gone = svcAllowed(cur, D.version);
+		var next = svcAfterReject(cur, D.version);
+		writeSvc(next);
+		if (gone.length) {
+			var payload = svcLogPayload('service_withdraw', gone[0], currentCategories(), svcLogId(next));
+			payload.services = gone;
+			logConsent(payload);
+		}
+		renderAlways();
 	}
 	function serviceName(id) {
 		if (D.svcNames && typeof D.svcNames[id] === 'string' && D.svcNames[id]) { return D.svcNames[id]; }

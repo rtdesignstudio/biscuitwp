@@ -132,8 +132,31 @@ class CMP_Sanitizer {
 	/** Public suffixes that must never be a custom host (they would match every site under them). */
 	const PUBLIC_SUFFIXES = 'co.uk org.uk ac.uk gov.uk com.au net.au co.jp com.br com.tr co.nz co.za com.md org.md net.md gov.md com.ro org.ro com.ru org.ru com.ua';
 
-	/** Pure: a host (plus optional path) from free text; '' when it is not plausible. */
-	public static function normalize_host( $raw ) {
+	/**
+	 * Pure: is $host the site's own host ($own_host, e.g. home_url's), its parent
+	 * domain or its www. variant? Such a custom host would block the site's own
+	 * scripts (and every inline script that mentions the site URL).
+	 */
+	public static function is_own_host( $host, $own_host ) {
+		$host = strtolower( trim( (string) $host ) );
+		$own  = strtolower( trim( (string) $own_host ) );
+		$slash = strpos( $host, '/' );
+		if ( false !== $slash ) {
+			$host = substr( $host, 0, $slash );
+		}
+		if ( '' === $host || '' === $own ) {
+			return false;
+		}
+		return $host === $own
+			|| substr( $own, -( strlen( $host ) + 1 ) ) === '.' . $host
+			|| $host === 'www.' . $own;
+	}
+
+	/**
+	 * Pure: a host (plus optional path) from free text; '' when it is not
+	 * plausible, or when it is the site's own host ($own_host, see is_own_host()).
+	 */
+	public static function normalize_host( $raw, $own_host = '' ) {
 		$h = trim( (string) $raw );
 		$h = preg_replace( '#^([a-z][a-z0-9+.\-]*:)?//#i', '', $h );
 		$h = preg_split( '/[?#]/', $h, 2 );
@@ -154,6 +177,9 @@ class CMP_Sanitizer {
 		if ( preg_match( '/^\d+\.\d+\.\d+\.\d+$/', $host ) || in_array( $host, explode( ' ', self::PUBLIC_SUFFIXES ), true ) ) {
 			return '';
 		}
+		if ( self::is_own_host( $host, $own_host ) ) {
+			return '';
+		}
 		return $host . $path;
 	}
 
@@ -166,8 +192,9 @@ class CMP_Sanitizer {
 	 * @param bool  $can_script     Whether the user may store raw script (unfiltered_html).
 	 * @param array $old            The stored cmp_services option.
 	 * @param array $library_categories Optional id => default category; overrides equal to the default are skipped.
+	 * @param string $own_host      The site's own host (home_url); it and its parent domain are dropped from custom hosts.
 	 */
-	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array() ) {
+	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array(), $own_host = '' ) {
 		$overrides = array();
 		$raw_over  = isset( $input['overrides'] ) && is_array( $input['overrides'] ) ? $input['overrides'] : array();
 		foreach ( $raw_over as $id => $o ) {
@@ -217,7 +244,7 @@ class CMP_Sanitizer {
 				$raw_h = preg_split( '/[\s,]+/', $raw_h );
 			}
 			foreach ( (array) $raw_h as $h ) {
-				$n = self::normalize_host( is_string( $h ) ? $h : '' );
+				$n = self::normalize_host( is_string( $h ) ? $h : '', $own_host );
 				if ( '' !== $n && ! in_array( $n, $hosts, true ) ) {
 					$hosts[] = $n;
 				}

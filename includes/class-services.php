@@ -15,8 +15,10 @@ class CMP_Services {
 	/** Services 0.4.x already blocked (before the library existed). */
 	const LEGACY_IDS = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' );
 
-	private static $cache  = null;
-	private static $errors = array();
+	private static $cache    = null;
+	private static $errors   = array();
+	private static $fallback = false;
+	private static $active   = null;
 
 	/** Defaults every service is completed with. */
 	private static function defaults() {
@@ -94,14 +96,65 @@ class CMP_Services {
 		return $errors;
 	}
 
-	/** The plugin's library (cached per request). */
+	/**
+	 * Built-in rules for the 6 services 0.4.x always blocked, used when
+	 * data/services.json is missing or unreadable so blocking never switches off.
+	 * Same hosts, markers and categories as their JSON entries (a test keeps them
+	 * in sync). Cookie details live only in the JSON.
+	 */
+	public static function fallback() {
+		$g    = 'Google Ireland Ltd.';
+		$list = array(
+			array( 'id' => 'google-analytics', 'name' => 'Google Analytics', 'provider' => $g, 'type' => 'script', 'category' => 'statistics', 'hosts' => array( 'google-analytics.com', 'googletagmanager.com/gtag/js' ), 'inline' => array( "gtag('config'", 'gtag("config"', "ga('create'" ), 'gtm' => false ),
+			array( 'id' => 'google-tag-manager', 'name' => 'Google Tag Manager', 'provider' => $g, 'type' => 'script', 'category' => 'statistics', 'hosts' => array( 'googletagmanager.com' ), 'inline' => array(), 'gtm' => true ),
+			array( 'id' => 'meta-pixel', 'name' => 'Meta Pixel', 'provider' => 'Meta Platforms Ireland Ltd.', 'type' => 'script', 'category' => 'marketing', 'hosts' => array( 'connect.facebook.net' ), 'inline' => array( "fbq('init'", 'fbq("init"', "fbq('track'", 'fbq("track"' ), 'gtm' => false ),
+			array( 'id' => 'youtube', 'name' => 'YouTube', 'provider' => $g, 'type' => 'embed', 'category' => 'marketing', 'hosts' => array( 'youtube.com', 'youtube-nocookie.com', 'youtu.be' ), 'nocookie' => true ),
+			array( 'id' => 'vimeo', 'name' => 'Vimeo', 'provider' => 'Vimeo, Inc.', 'type' => 'embed', 'category' => 'statistics', 'hosts' => array( 'vimeo.com' ) ),
+			array( 'id' => 'google-maps', 'name' => 'Google Maps', 'provider' => $g, 'type' => 'embed', 'category' => 'marketing', 'hosts' => array( 'google.com', 'google.md', 'google.ro' ), 'path' => '/maps' ),
+		);
+		$out = array();
+		foreach ( $list as $s ) {
+			$out[] = array_merge( self::defaults(), $s );
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure: load a library file, falling back to the built-in legacy rules when it
+	 * yields no services. Returns services, errors and whether the fallback is used.
+	 */
+	public static function library_from( $path ) {
+		$r        = self::load_file( $path );
+		$fallback = ! $r['services'];
+		if ( $fallback ) {
+			$r['services'] = self::fallback();
+			if ( ! $r['errors'] ) {
+				$r['errors'][] = 'Services file has no services: ' . $path;
+			}
+		}
+		return array( 'services' => $r['services'], 'errors' => $r['errors'], 'fallback' => $fallback );
+	}
+
+	/** The plugin's library (read and parsed once per request). */
 	public static function library() {
 		if ( null === self::$cache ) {
-			$r             = self::load_file( dirname( __DIR__ ) . '/' . self::FILE );
-			self::$cache   = $r['services'];
-			self::$errors  = $r['errors'];
+			$r              = self::library_from( dirname( __DIR__ ) . '/' . self::FILE );
+			self::$cache    = $r['services'];
+			self::$errors   = $r['errors'];
+			self::$fallback = $r['fallback'];
 		}
 		return self::$cache;
+	}
+
+	/** True when data/services.json failed to load and the built-in rules are in use. */
+	public static function using_fallback() {
+		self::library();
+		return self::$fallback;
+	}
+
+	/** Drop the per-request active() cache (hooked to the cmp_services / cmp_categories option changes). */
+	public static function flush() {
+		self::$active = null;
 	}
 
 	/** Problems found when the library was last loaded (empty = fine). */
@@ -200,8 +253,11 @@ class CMP_Services {
 		return $out;
 	}
 
-	/** WordPress wrapper: library + cmp_services option + current category slugs. */
+	/** WordPress wrapper: library + cmp_services option + current category slugs (memoised per request). */
 	public static function active() {
+		if ( null !== self::$active ) {
+			return self::$active;
+		}
 		$stored = function_exists( 'get_option' ) ? get_option( 'cmp_services', array() ) : array();
 		$slugs  = array();
 		if ( function_exists( 'get_option' ) && class_exists( 'CMP_Consent' ) ) {
@@ -211,7 +267,8 @@ class CMP_Services {
 				}
 			}
 		}
-		return self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs );
+		self::$active = self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs );
+		return self::$active;
 	}
 
 	/** Pure: does a URL's parsed host (exact or subdomain) and path prefix match 'host' or 'host/path'? */
@@ -276,5 +333,49 @@ class CMP_Services {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Pure: the first custom service whose hosts match an iframe src (custom
+	 * services are script-type, but the admin's domains apply to iframes too).
+	 */
+	public static function custom_embed_service( $src, array $services ) {
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || ! isset( $s['source'] ) || 'custom' !== $s['source'] ) {
+				continue;
+			}
+			foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
+				if ( self::host_matches( $src, $h ) ) {
+					return $s;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Pure: the service an iframe src belongs to: a library embed first, else a custom service. */
+	public static function iframe_service( $src, array $services ) {
+		$svc = self::embed_service( $src, $services );
+		return null !== $svc ? $svc : self::custom_embed_service( $src, $services );
+	}
+
+	/**
+	 * Pure: id => name of the services that can appear as an embed placeholder
+	 * (library embeds, custom services with hosts), for the "always loaded" row.
+	 */
+	public static function svc_names( array $services ) {
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) ) {
+				continue;
+			}
+			$embed  = isset( $s['type'] ) && 'embed' === $s['type'];
+			$custom = isset( $s['source'] ) && 'custom' === $s['source'] && ! empty( $s['hosts'] );
+			if ( $embed || $custom ) {
+				$name                       = isset( $s['name'] ) ? (string) $s['name'] : '';
+				$out[ (string) $s['id'] ] = '' !== $name ? $name : (string) $s['id'];
+			}
+		}
+		return $out;
 	}
 }

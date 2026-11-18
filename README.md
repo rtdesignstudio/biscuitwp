@@ -76,8 +76,8 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 
 ### Custom services and `data-cmp-category`
 
-- A custom service has a name, hosts, category and cookies; it can also carry a script, printed in the footer and blocked until consent. Saving a script requires the `unfiltered_html` capability.
-- `data-cmp-category="<slug>"` works on any `<script>` or `<iframe>` and forces its category. `necessary` leaves the tag unchanged. An invalid slug falls through to normal library handling. A valid slug that matches no configured category is blocked on purpose (fail-safe). On an `<iframe>` the attribute turns it into a consent placeholder, named after the iframe's host. `data-cmp-keep` always wins.
+- A custom service has a name, hosts, category and cookies; it can also carry a script, printed in the footer and blocked until consent. Saving a script requires the `unfiltered_html` capability. Its hosts match `<script src>` and `<iframe src>` alike: a matching iframe gets the standard placeholder named after the service, with "Încarcă mereu" (library embeds keep priority). The site's own domain is refused as a custom host.
+- `data-cmp-category="<slug>"` works on any `<script>` or `<iframe>` and forces its category. The value is trimmed and lowercased (`Marketing` = `marketing`); `necessary` leaves the tag unchanged and an empty value counts as absent. Any other invalid value fails closed: the library rule applies if one matches, otherwise the tag is blocked as `marketing`. A valid slug that matches no configured category is blocked on purpose (fail-safe). On an `<iframe>` the attribute turns it into a consent placeholder, named after the iframe's host. `data-cmp-keep` always wins.
 
 ### Cookie table
 
@@ -85,7 +85,7 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 
 ### "Încarcă mereu" (Always load)
 
-Embed placeholders get a second button next to "Încarcă conținutul". The choice is stored in its own `cmp_svc` cookie, separate from the category consent (it does not close the banner and does not count as a refusal), and can be withdrawn from the preferences panel ("Încărcate mereu: YouTube ×"). Each grant/withdrawal is logged as `service_allow` / `service_withdraw`, with a `services` column in the register. Not available in Light mode.
+Embed placeholders get a second button next to "Încarcă conținutul". The choice is stored in its own `cmp_svc` cookie, separate from the category consent (it does not close the banner and does not count as a refusal), and can be withdrawn from the preferences panel ("Încărcate mereu: YouTube ×") or all at once with "Reject all". Each grant/withdrawal is logged as `service_allow` / `service_withdraw`, with a `services` column in the register. Not available in Light mode.
 
 ### YouTube thumbnail
 
@@ -107,7 +107,8 @@ Only what is in the page HTML is blocked. Anything that GTM or other JavaScript 
 
 - Cookie pages generated earlier keep their old static table until regenerated from **Legal pages**.
 - The release version must be ≥ 0.5.0, otherwise the post-update notice is not shown (it appears only when updating from a version below 0.5.0).
-- "Reject all" does not clear "Încarcă mereu": it is a separate choice, withdrawn on its own from the preferences panel.
+- "Reject all" / "Necessary only" also clears every "Încarcă mereu" choice (one `service_withdraw` row lists them). Saving a partial selection and the GPC auto-reject keep it; embeds already loaded stay until the page is reloaded.
+- The DB schema has its own revision (`cmp_db_schema`), so the `services` column is added even when the version string did not change; a consent record is never lost to a missing column.
 - On update, services that used to run freely (Clarity, Hotjar, chat widgets, etc.) start waiting for consent.
 
 ## Updates & releases

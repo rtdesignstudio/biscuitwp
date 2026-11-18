@@ -101,6 +101,7 @@ class CMP_Services_Page {
 			<p>
 				<label><?php esc_html_e( 'Domenii (unul pe rând)', 'consent-manager-pro' ); ?><br>
 					<textarea class="large-text code" rows="3" name="<?php echo esc_attr( $n ); ?>[hosts]"<?php echo $dis; // phpcs:ignore WordPress.Security.EscapeOutput ?>><?php echo esc_textarea( $hosts ); ?></textarea></label>
+				<span class="description"><?php esc_html_e( 'Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe aceste domenii.', 'consent-manager-pro' ); ?></span>
 			</p>
 			<div class="cmp-cookies" data-cmp-ck-prefix="<?php echo esc_attr( $n ); ?>[cookies]">
 				<strong><?php esc_html_e( 'Cookie-uri', 'consent-manager-pro' ); ?></strong>
@@ -175,6 +176,9 @@ class CMP_Services_Page {
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_noscript'] ) ) : ?>
 				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate.', 'consent-manager-pro' ); ?></p></div>
+			<?php endif; ?>
+			<?php if ( isset( $_GET['cmp_ownhost'] ) ) : ?>
+				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar bloca scripturile site-ului). L-am scos din listă.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
 			<?php foreach ( CMP_Services::errors() as $err ) : ?>
 				<div class="notice notice-error"><p><?php echo esc_html( sprintf( /* translators: %s: error text */ __( 'Biblioteca de servicii: %s', 'consent-manager-pro' ), $err ) ); ?></p></div>
@@ -297,15 +301,30 @@ class CMP_Services_Page {
 			}
 		}
 
-		$clean = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats );
+		// The site's own domain is never a custom host (it would block the site itself).
+		$own      = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		$own_host = false;
+		foreach ( ( isset( $raw['custom'] ) && is_array( $raw['custom'] ) ? $raw['custom'] : array() ) as $c ) {
+			$rh = is_array( $c ) && isset( $c['hosts'] ) ? $c['hosts'] : array();
+			foreach ( ( is_string( $rh ) ? preg_split( '/[\s,]+/', $rh ) : (array) $rh ) as $h ) {
+				if ( is_string( $h ) && '' !== CMP_Sanitizer::normalize_host( $h ) && '' === CMP_Sanitizer::normalize_host( $h, $own ) ) {
+					$own_host = true;
+				}
+			}
+		}
+
+		$clean = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own );
 		update_option( 'cmp_services', $clean );
 		delete_transient( 'cmp_tracker_scan' );
-		if ( is_callable( array( 'CMP_Legal_Page', 'regenerate_cookie_page' ) ) ) {
-			CMP_Legal_Page::regenerate_cookie_page();
-		}
+		// The Cookie Policy page renders [cmp_cookie_table] live, so it is not
+		// regenerated here (that would overwrite the client's own edits). The
+		// explicit "Regenerează" in "Pagini legale" still does it.
 		$args = array( 'page' => self::SLUG, 'updated' => 1 );
 		if ( $script_dropped ) {
 			$args['cmp_noscript'] = 1;
+		}
+		if ( $own_host ) {
+			$args['cmp_ownhost'] = 1;
 		}
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
 		exit;

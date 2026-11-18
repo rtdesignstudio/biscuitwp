@@ -110,10 +110,12 @@ class CMP_Blocker {
 	 * Pure: which tracker categories a page's HTML loads directly ('raw') and
 	 * which this plugin has neutralized ('blocked'), e.g.
 	 * array( 'raw' => array( 'statistics' ), 'blocked' => array( 'marketing' ) ).
+	 * $services: the same rules blocking uses (null = the active services), so an
+	 * exempt or necessary service is never reported as tracking without consent.
 	 */
-	public static function detect_trackers( $html ) {
+	public static function detect_trackers( $html, ?array $services = null ) {
 		$html     = (string) $html;
-		$services = self::rewritable( CMP_Services::library() );
+		$services = self::rewritable( null === $services ? self::default_services() : $services );
 		$raw      = array();
 		foreach ( self::detect_services( $html, $services )['raw'] as $id ) {
 			foreach ( $services as $svc ) {
@@ -193,7 +195,8 @@ class CMP_Blocker {
 
 	/**
 	 * Pure: ids of every service present on the page (live or already blocked),
-	 * exempt and necessary ones included. For the admin screen only.
+	 * exempt and necessary ones included, live iframes too (an exempt embed, or
+	 * any embed when blocking is off). For the admin screen only.
 	 */
 	public static function found_ids( $html, array $services ) {
 		$open = array();
@@ -207,8 +210,17 @@ class CMP_Blocker {
 			}
 			$open[] = $s;
 		}
-		$d = self::detect_services( $html, $open );
-		return array_values( array_unique( array_merge( $d['raw'], $d['blocked'] ) ) );
+		$d     = self::detect_services( $html, $open );
+		$ids   = array_merge( $d['raw'], $d['blocked'] );
+		if ( preg_match_all( '/<iframe\b[^>]*?(?:^|\s)src\s*=\s*(["\'])(.*?)\1/is', (string) $html, $im ) ) {
+			foreach ( $im[2] as $src ) {
+				$svc = CMP_Services::iframe_service( trim( html_entity_decode( $src, ENT_QUOTES ) ), $open );
+				if ( null !== $svc && isset( $svc['id'] ) ) {
+					$ids[] = (string) $svc['id'];
+				}
+			}
+		}
+		return array_values( array_unique( $ids ) );
 	}
 
 	/**
@@ -230,9 +242,9 @@ class CMP_Blocker {
 		}
 		delete_transient( 'cmp_tracker_scan_fail' );
 		$body                  = wp_remote_retrieve_body( $res );
-		$scan                  = self::detect_trackers( $body );
-		$scan['settings_link'] = self::has_settings_link( $body );
 		$svcs                  = self::default_services();
+		$scan                  = self::detect_trackers( $body, $svcs );
+		$scan['settings_link'] = self::has_settings_link( $body );
 		$scan['services']      = self::detect_services( $body, $svcs );
 		$scan['services']['found'] = self::found_ids( $body, $svcs );
 		$scan['time']          = time();
@@ -392,20 +404,27 @@ class CMP_Blocker {
 				}
 				$src = trim( html_entity_decode( $sm[2], ENT_QUOTES ) );
 
+				$host  = parse_url( $src, PHP_URL_HOST );
+				$hname = is_string( $host ) && '' !== $host ? $host : preg_replace( '/[?#].*$/s', '', $src );
+
 				// An explicit data-cmp-category wins over the library.
 				$cat = self::tag_category( $attrs );
 				if ( false === $cat ) {
 					return $m[0];
 				}
-				if ( null !== $cat ) {
-					$host = parse_url( $src, PHP_URL_HOST );
-					$name = is_string( $host ) && '' !== $host ? $host : preg_replace( '/[?#].*$/s', '', $src );
-					return self::embed_placeholder( $m[0], $attrs, $sm, $src, $cat, null, $name, $labels, false );
+				if ( null !== $cat && '' !== $cat ) {
+					return self::embed_placeholder( $m[0], $attrs, $sm, $src, $cat, null, $hname, $labels, false );
 				}
 
-				$embed = self::embed_for( $src, $services );
+				// Library embeds first, then the admin's custom services (by host).
+				$embed = CMP_Services::iframe_service( $src, $services );
 				if ( null === $embed ) {
-					return $m[0];
+					// An invalid data-cmp-category fails closed: blocked as marketing.
+					return '' === $cat ? self::embed_placeholder( $m[0], $attrs, $sm, $src, 'marketing', null, $hname, $labels, false ) : $m[0];
+				}
+				if ( isset( $embed['source'] ) && 'custom' === $embed['source'] ) {
+					$cname = isset( $embed['name'] ) && '' !== (string) $embed['name'] ? (string) $embed['name'] : $hname;
+					return self::embed_placeholder( $m[0], $attrs, $sm, $src, $embed['category'], $embed['id'], $cname, $labels, false );
 				}
 				$thumb_url = '';
 				if ( null !== $thumb && 'youtube' === $embed['id'] ) {
@@ -443,18 +462,31 @@ class CMP_Blocker {
 	}
 
 	/**
-	 * Pure: the data-cmp-category of a tag's attributes. Null = no attribute or an
-	 * invalid slug (normal library handling applies), false = "necessary" (leave
-	 * the tag alone), else the slug. Unknown valid slugs are blocked on purpose
-	 * (fail-safe). Quoted, single-quoted and unquoted values are recognised.
+	 * Pure: the data-cmp-category of a tag's attributes, trimmed and lowercased.
+	 * Null = no attribute or a blank value (normal library handling), false =
+	 * "necessary" (leave the tag alone), '' = present but invalid (fail closed:
+	 * the library rule if one matches, else blocked as marketing), else the slug.
+	 * Unknown valid slugs are blocked on purpose (fail-safe). Quoted,
+	 * single-quoted and unquoted values are recognised, also with no whitespace
+	 * before or after the attribute.
 	 */
 	private static function tag_category( $attrs ) {
-		if ( ! preg_match( '/(?:^|[\s\/"\'])data-cmp-category\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>\/]+))(?=\s|\/|>|$)/i', $attrs, $cm ) ) {
+		if ( ! preg_match( '/(?:^|[\s\/"\'])data-cmp-category\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>\/]+)(?=\s|\/|>|$))/i', $attrs, $cm ) ) {
 			return null;
 		}
-		$v = isset( $cm[3] ) ? $cm[3] : ( isset( $cm[2] ) && '' !== $cm[2] ? $cm[2] : $cm[1] );
-		if ( ! preg_match( '/^[a-z0-9_-]{1,40}$/', $v ) ) {
+		$v = '';
+		for ( $i = 1; $i <= 3; $i++ ) {
+			if ( isset( $cm[ $i ] ) && '' !== $cm[ $i ] ) {
+				$v = $cm[ $i ];
+				break;
+			}
+		}
+		$v = strtolower( trim( html_entity_decode( $v, ENT_QUOTES ) ) );
+		if ( '' === $v ) {
 			return null;
+		}
+		if ( ! preg_match( '/^[a-z0-9_-]{1,40}$/', $v ) ) {
+			return '';
 		}
 		return 'necessary' === $v ? false : $v;
 	}
@@ -568,10 +600,10 @@ class CMP_Blocker {
 				if ( ! isset( $s['type'] ) || 'script' !== $s['type'] ) {
 					continue;
 				}
+				// A host/path rule (www.google.com/recaptcha) needs its full pattern in
+				// the body; the bare host alone would catch unrelated scripts.
 				foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
-					$slash = strpos( (string) $h, '/' );
-					$host  = false === $slash ? (string) $h : substr( (string) $h, 0, $slash );
-					if ( '' !== $host && self::has_host( $body, $host ) ) {
+					if ( '' !== (string) $h && self::has_host( $body, (string) $h ) ) {
 						return $s;
 					}
 				}
@@ -655,13 +687,14 @@ class CMP_Blocker {
 		if ( false === $cat ) {
 			return $m[0];
 		}
-		if ( null !== $cat ) {
+		if ( null !== $cat && '' !== $cat ) {
 			return self::blocked_script( $cat, null, $src, $body, $attrs );
 		}
 
 		$svc = self::script_for( $src, $body, $services );
 		if ( null === $svc ) {
-			return $m[0];
+			// An invalid data-cmp-category fails closed: blocked as marketing.
+			return '' === $cat ? self::blocked_script( 'marketing', null, $src, $body, $attrs ) : $m[0];
 		}
 		return self::blocked_script( $svc['category'], $svc['id'], $src, $body, $attrs );
 	}

@@ -195,23 +195,63 @@ class CMP_Audit {
 			}
 		}
 
-		$done = $wpdb->insert(
-			$table,
-			array(
-				'ts'         => gmdate( 'Y-m-d H:i:s', $now ),
-				'consent_id' => $row['consent_id'],
-				'decision'   => $row['decision'],
-				'categories' => $row['categories'],
-				'services'   => isset( $row['services'] ) ? (string) $row['services'] : '',
-				'lang'       => $row['lang'],
-				'ip_hash'    => $ip_hash,
-				'ua_hash'    => $ua_hash,
-				'url'        => $row['url'],
-				'version'    => $row['version'],
-			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+		$data = array(
+			'ts'         => gmdate( 'Y-m-d H:i:s', $now ),
+			'consent_id' => $row['consent_id'],
+			'decision'   => $row['decision'],
+			'categories' => $row['categories'],
+			'services'   => isset( $row['services'] ) ? (string) $row['services'] : '',
+			'lang'       => $row['lang'],
+			'ip_hash'    => $ip_hash,
+			'ua_hash'    => $ua_hash,
+			'url'        => $row['url'],
+			'version'    => $row['version'],
 		);
-		return false !== $done;
+		return self::insert_resilient(
+			$data,
+			function ( $d ) use ( $wpdb, $table ) {
+				return $wpdb->insert( $table, $d, '%s' );
+			},
+			function () use ( $wpdb ) {
+				return (string) $wpdb->last_error;
+			},
+			function () {
+				if ( ! class_exists( 'CMP_Installer' ) && defined( 'CMP_PATH' ) ) {
+					require_once CMP_PATH . 'includes/class-installer.php';
+				}
+				// At most one dbDelta per hour when the ALTER keeps failing (public AJAX).
+				if ( class_exists( 'CMP_Installer' ) && ! get_transient( 'cmp_db_schema_retry' ) ) {
+					CMP_Installer::upgrade_schema();
+				}
+			}
+		);
+	}
+
+	/**
+	 * Pure (given its callables): write a consent row so that it is never lost to a
+	 * missing 'services' column. On "Unknown column 'services'" the schema is
+	 * repaired once (dbDelta) and the insert retried; if the column still cannot
+	 * be added, the row is written without it.
+	 *
+	 * @param array    $data       Column => value.
+	 * @param callable $insert     function( array $data ): int|false.
+	 * @param callable $last_error function(): string, the last DB error.
+	 * @param callable $repair     function(): void, runs dbDelta.
+	 * @return bool True when the row was written.
+	 */
+	public static function insert_resilient( array $data, $insert, $last_error, $repair ) {
+		if ( false !== call_user_func( $insert, $data ) ) {
+			return true;
+		}
+		if ( ! array_key_exists( 'services', $data ) || false === stripos( (string) call_user_func( $last_error ), 'services' ) ) {
+			return false;
+		}
+		call_user_func( $repair );
+		if ( false !== call_user_func( $insert, $data ) ) {
+			return true;
+		}
+		unset( $data['services'] );
+		return false !== call_user_func( $insert, $data );
 	}
 
 	public static function to_csv( array $rows ) {

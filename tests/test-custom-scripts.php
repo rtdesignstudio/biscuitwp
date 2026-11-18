@@ -16,12 +16,20 @@ cmp_assert( false !== strpos( $o, 'data-cmp-embed="marketing"' ), 'category ifra
 cmp_assert( false !== strpos( $o, 'x.md' ) && false === strpos( $o, 'data-cmp-service' ), 'placeholder names the host, no service id' );
 cmp_assert( false !== strpos( $o, '<template data-cmp-embed-src><iframe' ), 'original iframe kept inside the template' );
 
-// Invalid slug / necessary / keep: unchanged.
-foreach ( array( 'Bad Cat', 'a"b', '', str_repeat( 'a', 41 ), 'necessary' ) as $bad ) {
+// Empty / necessary / keep: unchanged.
+foreach ( array( '', 'necessary' ) as $bad ) {
 	$h = '<script data-cmp-category="' . $bad . '" src="https://x.md/a.js"></script>';
 	cmp_assert_eq( CMP_Blocker::rewrite( $h ), $h, 'script category "' . $bad . '" leaves tag unchanged' );
 	$h = '<iframe data-cmp-category="' . $bad . '" src="https://x.md/w"></iframe>';
 	cmp_assert_eq( CMP_Blocker::rewrite( $h ), $h, 'iframe category "' . $bad . '" leaves tag unchanged' );
+}
+// Final fix wave I6: an invalid value fails closed (blocked as marketing, or as
+// the slug before a stray quote), it no longer leaves a non-library tag running.
+foreach ( array( 'Bad Cat' => 'marketing', 'a"b' => 'a', str_repeat( 'a', 41 ) => 'marketing' ) as $bad => $as ) {
+	$h = '<script data-cmp-category="' . $bad . '" src="https://x.md/a.js"></script>';
+	cmp_assert( false !== strpos( CMP_Blocker::rewrite( $h ), 'data-cmp-block="' . $as . '"' ), 'script category "' . $bad . '" is blocked as ' . $as );
+	$h = '<iframe data-cmp-category="' . $bad . '" src="https://x.md/w"></iframe>';
+	cmp_assert( false !== strpos( CMP_Blocker::rewrite( $h ), 'data-cmp-embed="' . $as . '"' ), 'iframe category "' . $bad . '" is blocked as ' . $as );
 }
 $h = '<script data-cmp-keep data-cmp-category="marketing" src="https://x.md/a.js"></script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $h ), $h, 'data-cmp-keep wins on script' );

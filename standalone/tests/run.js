@@ -171,9 +171,41 @@ eq(wpConsentValues({ necessary: ['functional'], custom_x: ['marketing'], marketi
 eq(wpConsentValues({ necessary: ['functional'], a: ['marketing'], b: ['marketing'] }, []), { functional: 'allow', marketing: 'deny' }, 'wp consent: shared WP category denies when none accepted');
 eq(wpConsentValues(null, ['marketing']), {}, 'wp consent: no map -> nothing');
 
-eq(wpInitValues(WPMAP), { functional: 'allow' }, 'wp init: functional allowed before any decision');
-eq(wpInitValues({ marketing: ['marketing'] }), {}, 'wp init: no functional entry -> nothing');
+// Final fix wave I2: without a valid decision every mapped category is pushed
+// (functional allow, the rest deny), so stale 'allow' values never survive.
+var WPDENY = { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' };
+eq(wpInitValues(WPMAP), WPDENY, 'wp init: no decision -> functional allow, every other mapped category deny');
+eq(wpInitValues({ marketing: ['marketing'] }), { marketing: 'deny' }, 'wp init: no decision, no functional entry -> marketing deny');
 eq(wpInitValues(null), {}, 'wp init: no map -> nothing');
+eq(wpInitValues(WPMAP, null, '2', 'pro', ['necessary']), WPDENY, 'wp init I2: no cookie -> deny');
+eq(wpInitValues(WPMAP, { v: '1', categories: ['necessary', 'statistics', 'marketing'] }, '2', 'pro', ['necessary']), WPDENY, 'wp init I2: other policy version -> deny');
+eq(wpInitValues(WPMAP, { v: '2', categories: ['necessary', 'statistics', 'marketing'] }, '2', 'light', ['necessary']), WPDENY, 'wp init I2: Light mode -> deny even with a cookie');
+eq(wpInitValues(WPMAP, { v: '2', categories: 'statistics' }, '2', 'pro', ['necessary']), WPDENY, 'wp init I2: malformed cookie (categories not a list) -> deny');
+eq(wpInitValues(WPMAP, 'garbage', '2', 'pro', ['necessary']), WPDENY, 'wp init I2: invalid cookie value -> deny');
+eq(wpInitValues(WPMAP, { v: '2', categories: ['necessary', 'statistics'] }, '2', 'pro', ['necessary']), { functional: 'allow', statistics: 'allow', 'statistics-anonymous': 'allow', marketing: 'deny', preferences: 'deny' }, 'wp init I2: valid decision -> its categories');
+eq(wpInitValues(WPMAP, { v: 2, categories: ['marketing'] }, '2', 'pro', ['necessary']).marketing, 'allow', 'wp init I2: numeric version in the cookie still matches');
+ok(/function pushWpInit\(\) \{[\s\S]*?wpInitValues\(D\.wpConsent, readCookie\(\), D\.version, D\.mode, requiredSlugs\(\)\)/.test(bannerSrc), 'wp init I2: pushWpInit passes the cookie, version, mode and required slugs');
+
+// T8 M5 (owner decision): the explicit reject clears "always load" in both builds.
+var SV_ID = '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f';
+var rjM = bannerSrc.match(/\/\/ svcAfterReject:begin\n([\s\S]*?)\/\/ svcAfterReject:end/);
+ok(!!rjM, 'banner.js exposes the svcAfterReject block');
+var UUIDRE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+var wpAfterReject = rjM ? new Function('UUID_RE', rjM[1] + '\nreturn svcAfterReject;')(UUIDRE) : function () { return null; };
+[['banner.js', wpAfterReject], ['cmp.js', cmp.svcAfterReject]].forEach(function (b) {
+	var f = b[1], n = b[0];
+	eq(f({ v: '1', svc: ['youtube', 'vimeo'], id: SV_ID }, '1'), { v: '1', svc: [], id: SV_ID }, n + ' svcAfterReject: list cleared, id kept');
+	eq(f({ v: '0', svc: ['youtube'], id: SV_ID }, 2), { v: '2', svc: [], id: SV_ID }, n + ' svcAfterReject: current version written');
+	eq(f({ v: '1', svc: ['youtube'], id: 'junk' }, '1'), { v: '1', svc: [] }, n + ' svcAfterReject: invalid id dropped');
+	eq(f(null, '1'), { v: '1', svc: [] }, n + ' svcAfterReject: no cookie');
+});
+var cmpSrc = require('fs').readFileSync(require('path').join(__dirname, '../cmp.js'), 'utf8');
+[['banner.js', bannerSrc], ['cmp.js', cmpSrc]].forEach(function (b) {
+	ok(/action === 'reject'\) \{ save\(requiredSlugs\(\), 'rejected_all'\); rejectServices\(\); \}/.test(b[1]), b[0] + ': the reject action clears always-load');
+	ok((b[1].match(/rejectServices\(\)/g) || []).length === 2, b[0] + ': rejectServices is called only by the reject action (not save / GPC)');
+	ok(/function rejectServices\(\) \{[\s\S]*?svcAfterReject\([\s\S]*?renderAlways\(\);/.test(b[1]), b[0] + ': rejectServices writes the cleared cookie and refreshes the row');
+});
+ok(/function rejectServices\(\) \{[\s\S]*?if \(gone\.length\) \{[\s\S]*?'service_withdraw'[\s\S]*?payload\.services = gone;[\s\S]*?logConsent\(payload\)/.test(bannerSrc), 'banner.js: one service_withdraw naming every withdrawn id, only when the list was not empty');
 ok(/pushWpInit\(\);\s*bindEmbeds\(\);/.test(bannerSrc), 'wp init runs at the top of DOMContentLoaded, before the Light-mode return');
 
 // stripAlwaysButtons: Light mode drops the "Always load" buttons

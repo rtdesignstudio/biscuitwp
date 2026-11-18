@@ -223,8 +223,8 @@
 
 	// "Always load" (cmp_svc): the embed services the visitor chose to load every
 	// time, kept apart from the category consent (clicking it neither closes the
-	// banner nor counts as a refusal; save() never touches it). `id` is a UUID made
-	// on the first click.
+	// banner nor counts as a refusal; save() never touches it, but the explicit
+	// "reject" action clears it). `id` is a UUID made on the first click.
 	var SVC_ID_RE = /^[a-z0-9-]+$/;
 	// Removes the "Always load" buttons from a document (Light mode keeps no cookie).
 	// Returns how many were removed.
@@ -261,6 +261,13 @@
 		if (on) { list.push(id); }
 		var out = { v: String(version), svc: list };
 		if (c && typeof c.id === 'string' && UUID_RE.test(c.id)) { out.id = c.id; }
+		return out;
+	}
+	// Pure: the cmp_svc value after an explicit "reject": no service left, same
+	// policy version, the cookie's own id kept.
+	function svcAfterReject(c, version) {
+		var out = { v: String(version), svc: [] };
+		if (c && typeof c === 'object' && typeof c.id === 'string' && UUID_RE.test(c.id)) { out.id = c.id; }
 		return out;
 	}
 
@@ -646,7 +653,7 @@
 				if (!btn) { return; }
 				var action = btn.getAttribute('data-cmp-action');
 				if (action === 'accept') { save(cfg.categories.map(function (c) { return c.slug; }), 'accepted_all'); }
-				else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); }
+				else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); rejectServices(); }
 				else if (action === 'prefs') { openPrefs(); }
 				else if (action === 'back') { closePrefs(); }
 				else if (action === 'save') {
@@ -774,6 +781,15 @@
 				live.textContent = fillName((row && row.getAttribute('data-cmp-always-remove')) || '%s', name);
 			}
 		}
+		// The explicit "reject" also withdraws every "always load" choice. A partial
+		// save and GPC do not. Embeds already loaded stay until the next load.
+		// (This build keeps no consent log, so nothing is logged.)
+		function rejectServices() {
+			var cur = readSvc();
+			if (!cur) { return; }
+			writeSvc(svcAfterReject(cur, VERSION));
+			renderAlways();
+		}
 		function serviceName(id) {
 			var el = document.querySelector('[data-cmp-service="' + id + '"][data-cmp-service-name]');
 			return (el && el.getAttribute('data-cmp-service-name')) || id;
@@ -886,6 +902,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

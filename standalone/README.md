@@ -197,6 +197,8 @@ used in the preferences panel) on the `.cmp-embed` wrapper, plus a button with
   not count as accepting or rejecting categories.
 - **Withdrawal:** the preferences panel shows a row "Încărcate mereu: YouTube ×".
   Clicking × removes the service. Embeds already loaded stay until the next page load.
+  The explicit "reject" button also clears the whole list (the cookie keeps its `id`);
+  saving a partial selection and the GPC auto-reject do not.
 - A different policy version ignores an older `cmp_svc`.
 - In `mode: "light"` (no cookie) the button is removed at init; leave it out of the markup there.
 - This build keeps no consent log: nothing is recorded for these choices.

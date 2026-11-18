@@ -23,6 +23,7 @@ class CMP_Admin {
 		add_action( 'admin_post_cmp_rescan_services', array( 'CMP_Services_Page', 'rescan' ) );
 		add_action( 'admin_post_cmp_dismiss_services_notice', array( 'CMP_Services_Page', 'dismiss' ) );
 		add_action( 'admin_notices', array( 'CMP_Services_Page', 'update_notice' ) );
+		add_action( 'admin_notices', array( $this, 'library_notice' ) );
 
 		require_once CMP_PATH . 'includes/admin/class-audit-page.php';
 		add_action( 'admin_post_cmp_export_log', array( 'CMP_Audit_Page', 'export' ) );
@@ -90,6 +91,26 @@ class CMP_Admin {
 
 		wp_safe_redirect( add_query_arg( array( 'cmp_up' => $available ? $available : 'latest' ), admin_url( 'plugins.php' ) ) );
 		exit;
+	}
+
+	/**
+	 * On every admin screen (manage_options only): the services library failed to
+	 * load. Blocking then runs on the built-in rules for the 6 classic services.
+	 * The "Servicii" screen lists the errors itself.
+	 */
+	public function library_notice() {
+		if ( ! current_user_can( 'manage_options' ) || ! CMP_Services::errors() ) {
+			return;
+		}
+		if ( isset( $_GET['page'] ) && CMP_Services_Page::SLUG === $_GET['page'] ) {
+			return;
+		}
+		$msg = CMP_Services::using_fallback()
+			? __( 'Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul).', 'consent-manager-pro' )
+			: __( 'Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect.', 'consent-manager-pro' );
+		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Consent Manager Pro:', 'consent-manager-pro' ) . '</strong> '
+			. esc_html( $msg )
+			. ' <a href="' . esc_url( admin_url( 'admin.php?page=' . CMP_Services_Page::SLUG ) ) . '">' . esc_html__( 'Detalii în „Servicii”', 'consent-manager-pro' ) . '</a></p></div>';
 	}
 
 	public function update_check_notice() {

@@ -185,6 +185,11 @@ class CMP_Legal {
 	}
 
 	public static function privacy_guide() {
+		// Real admin page loads only: admin_init also fires on admin-ajax.php,
+		// including every visitor's public consent-log call.
+		if ( ! self::guide_wanted( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax(), function_exists( 'is_admin' ) && is_admin() ) ) {
+			return;
+		}
 		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
 			return;
 		}
@@ -193,6 +198,11 @@ class CMP_Legal {
 			'Consent Manager Pro',
 			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
 		);
+	}
+
+	/** Pure: build the privacy-guide text on this request? Admin page loads only, never AJAX. */
+	public static function guide_wanted( $doing_ajax, $is_admin ) {
+		return ! $doing_ajax && $is_admin;
 	}
 
 	public static function on_page_created( $post_id, $type ) {
