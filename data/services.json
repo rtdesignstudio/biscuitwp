@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "services": [
+    {
+      "id": "google-analytics",
+      "name": "Google Analytics",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "google-analytics.com",
+        "googletagmanager.com/gtag/js"
+      ],
+      "inline": [
+        "gtag('config'",
+        "gtag(\"config\"",
+        "ga('create'"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_ga",
+          "duration": {
+            "ro": "2 ani",
+            "ru": "2 года",
+            "en": "2 years"
+          },
+          "purpose": {
+            "ro": "Distinge vizitatorii unici.",
+            "ru": "Различает уникальных посетителей.",
+            "en": "Distinguishes unique visitors."
+          }
+        },
+        {
+          "name": "_gid",
+          "duration": {
+            "ro": "24 de ore",
+            "ru": "24 часа",
+            "en": "24 hours"
+          },
+          "purpose": {
+            "ro": "Distinge vizitatorii pe durata unei zile.",
+            "ru": "Различает посетителей в течение суток.",
+            "en": "Distinguishes visitors within a day."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "google-tag-manager",
+      "name": "Google Tag Manager",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "googletagmanager.com"
+      ],
+      "inline": [],
+      "gtm": true,
+      "cookies": [],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "meta-pixel",
+      "name": "Meta Pixel",
+      "provider": "Meta Platforms Ireland Ltd.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "connect.facebook.net"
+      ],
+      "inline": [
+        "fbq('init'",
+        "fbq(\"init\"",
+        "fbq('track'",
+        "fbq(\"track\""
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_fbp",
+          "duration": {
+            "ro": "3 luni",
+            "ru": "3 месяца",
+            "en": "3 months"
+          },
+          "purpose": {
+            "ro": "Identifică browserul pentru măsurarea reclamelor.",
+            "ru": "Идентифицирует браузер для измерения рекламы.",
+            "en": "Identifies the browser for ad measurement."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://www.facebook.com/privacy/policy/"
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "provider": "Google Ireland Ltd.",
+      "type": "embed",
+      "category": "marketing",
+      "hosts": [
+        "youtube.com",
+        "youtube-nocookie.com",
+        "youtu.be"
+      ],
+      "nocookie": true,
+      "cookies": [
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Estimează lățimea de bandă a utilizatorului.",
+            "ru": "Оценивает пропускную способность пользователя.",
+            "en": "Estimates the user's bandwidth."
+          }
+        },
+        {
+          "name": "YSC",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Identifică vizionările video în sesiune.",
+            "ru": "Идентифицирует просмотры видео за сессию.",
+            "en": "Identifies video views during the session."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "vimeo",
+      "name": "Vimeo",
+      "provider": "Vimeo, Inc.",
+      "type": "embed",
+      "category": "statistics",
+      "hosts": [
+        "vimeo.com"
+      ],
+      "cookies": [
+        {
+          "name": "vuid",
+          "duration": {
+            "ro": "2 ani",
+            "ru": "2 года",
+            "en": "2 years"
+          },
+          "purpose": {
+            "ro": "Statistici privind vizionările video.",
+            "ru": "Статистика просмотров видео.",
+            "en": "Video playback statistics."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://vimeo.com/privacy"
+    },
+    {
+      "id": "google-maps",
+      "name": "Google Maps",
+      "provider": "Google Ireland Ltd.",
+      "type": "embed",
+      "category": "marketing",
+      "hosts": [
+        "google.com",
+        "google.md",
+        "google.ro"
+      ],
+      "path": "/maps",
+      "cookies": [
+        {
+          "name": "NID",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Stochează preferințele și personalizează reclamele.",
+            "ru": "Хранит предпочтения и персонализирует рекламу.",
+            "en": "Stores preferences and personalizes ads."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    }
+  ]
+}

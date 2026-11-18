@@ -20,6 +20,7 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		require_once CMP_PATH . 'includes/class-consent.php';
 		require_once CMP_PATH . 'includes/class-sanitizer.php';
+		require_once CMP_PATH . 'includes/class-services.php';
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
 		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
