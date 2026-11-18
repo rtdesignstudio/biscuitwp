@@ -53,13 +53,11 @@ class CMP_Categories_Page {
 				<strong><?php esc_html_e( 'Categorie', 'consent-manager-pro' ); ?></strong>
 				<button type="button" class="button-link button-link-delete" data-cmp-del-cat><?php esc_html_e( 'Șterge', 'consent-manager-pro' ); ?></button>
 			</div>
-			<p>
-				<label><?php esc_html_e( 'Slug', 'consent-manager-pro' ); ?><br>
+			<p class="cmp-cat-row__names">
+				<label class="cmp-cat-row__label"><?php esc_html_e( 'Etichetă', 'consent-manager-pro' ); ?><br>
+					<input type="text" name="<?php echo esc_attr( $n ); ?>[label]" value="<?php echo esc_attr( $label ); ?>"></label>
+				<label class="cmp-cat-row__slug"><?php esc_html_e( 'Slug', 'consent-manager-pro' ); ?><br>
 					<input type="text" name="<?php echo esc_attr( $n ); ?>[slug]" value="<?php echo esc_attr( $slug ); ?>" required></label>
-			</p>
-			<p>
-				<label><?php esc_html_e( 'Etichetă', 'consent-manager-pro' ); ?><br>
-					<input type="text" class="regular-text" name="<?php echo esc_attr( $n ); ?>[label]" value="<?php echo esc_attr( $label ); ?>"></label>
 			</p>
 			<p>
 				<label><?php esc_html_e( 'Descriere', 'consent-manager-pro' ); ?><br>
