@@ -327,12 +327,18 @@ class CMP_Blocker {
 			return array();
 		}
 		$s = class_exists( 'CMP_Consent' ) ? CMP_Consent::get_settings() : array();
-		return array(
-			'embed_text' => CMP_Lang::text( 'embed_text' ),
-			'embed_load' => CMP_Lang::text( 'embed_load' ),
-			'settings'   => CMP_Lang::text( 'reopen' ),
-			'preset'     => isset( $s['preset'] ) ? (string) $s['preset'] : 'neutral',
+		$labels = array(
+			'embed_text'   => CMP_Lang::text( 'embed_text' ),
+			'embed_load'   => CMP_Lang::text( 'embed_load' ),
+			'embed_always' => CMP_Lang::text( 'embed_always' ),
+			'settings'     => CMP_Lang::text( 'reopen' ),
+			'preset'       => isset( $s['preset'] ) ? (string) $s['preset'] : 'neutral',
 		);
+		// Light mode stores no cookie, so it has no "always load" (the button is omitted).
+		if ( isset( $s['mode'] ) && 'light' === $s['mode'] ) {
+			$labels['light'] = true;
+		}
+		return $labels;
 	}
 
 	/** Pure: true if $url's host is $host or a subdomain of it (parsed, not substring). */
@@ -362,6 +368,7 @@ class CMP_Blocker {
 			array(
 				'embed_text' => 'Conținut de la %s. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.',
 				'embed_load' => 'Încarcă conținutul',
+				'embed_always' => 'Încarcă mereu',
 				'settings'   => 'Setări cookie',
 			),
 			array_filter( $labels, 'strlen' )
@@ -451,12 +458,17 @@ class CMP_Blocker {
 		$text = str_replace( '%s', $e( $name ), $e( $labels['embed_text'] ) );
 
 		$preset  = isset( $labels['preset'] ) && in_array( $labels['preset'], array( 'neutral', 'warm', 'dark', 'egov' ), true ) ? ' cmp--' . $labels['preset'] : '';
-		$service = null === $service_id ? '' : ' data-cmp-service="' . $e( $service_id ) . '"';
+		$service = null === $service_id ? '' : ' data-cmp-service="' . $e( $service_id ) . '" data-cmp-service-name="' . $e( $name ) . '"';
+		// "Always load" only for library services, and never in Light mode (no cookie there).
+		$always = ( null === $service_id || ! empty( $labels['light'] ) )
+			? ''
+			: '<button type="button" class="cmp-embed__always" data-cmp-embed-always aria-label="' . $e( $labels['embed_always'] . ': ' . $name ) . '">' . $e( $labels['embed_always'] ) . '</button>';
 		return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $category ) . '"' . $service . ' style="aspect-ratio:' . $ratio . $max . '">'
 			. '<div class="cmp-embed__inner">'
 			. '<p class="cmp-embed__text">' . $text . '</p>'
 			. '<p class="cmp-embed__actions">'
 			. '<button type="button" class="cmp-embed__btn" data-cmp-embed-load>' . $e( $labels['embed_load'] ) . '</button>'
+			. $always
 			. '<a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>' . $e( $labels['settings'] ) . '</a>'
 			. '</p></div>'
 			. '<template data-cmp-embed-src>' . $iframe . '</template>'

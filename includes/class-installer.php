@@ -51,6 +51,7 @@ class CMP_Installer {
 	 * Pure: the consent log table (dbDelta format: two spaces after PRIMARY KEY).
 	 * consent_id (0.4.1) is the random per-visitor ID also kept in the consent
 	 * cookie, so a visitor's choice can be found and demonstrated.
+	 * services (0.5.0) lists the embed services allowed or withdrawn ("always load").
 	 */
 	public static function log_table_sql( $table, $charset ) {
 		return "CREATE TABLE {$table} (
@@ -59,6 +60,7 @@ class CMP_Installer {
 			consent_id CHAR(36) NOT NULL DEFAULT '',
 			decision VARCHAR(20) NOT NULL,
 			categories VARCHAR(255) NOT NULL,
+			services VARCHAR(255) NOT NULL DEFAULT '',
 			lang VARCHAR(8) NOT NULL,
 			ip_hash CHAR(64) NOT NULL,
 			ua_hash CHAR(64) NOT NULL,

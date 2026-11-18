@@ -3,9 +3,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// Standalone-loadable for tests; WP-only methods guarded at call time.
 }
 
+require_once dirname( __DIR__ ) . '/class-services.php';
+
 class CMP_Audit {
 
 	const CRON_HOOK = 'cmp_prune_consent_log';
+
+	/** Logged decisions; service_* are the per-embed "always load" choices. */
+	const DECISIONS = array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn', 'service_allow', 'service_withdraw' );
 
 	public static function register() {
 		add_action( 'wp_ajax_cmp_log_consent', array( __CLASS__, 'ajax_log' ) );
@@ -55,7 +60,8 @@ class CMP_Audit {
 		$row = self::parse_request(
 			wp_unslash( $_POST ),
 			wp_list_pluck( CMP_Consent::get_categories(), 'slug' ),
-			CMP_Consent::current_version()
+			CMP_Consent::current_version(),
+			wp_list_pluck( CMP_Services::active(), 'id' )
 		);
 		if ( is_string( $row ) ) {
 			wp_send_json_error( $row, 400 );
@@ -73,11 +79,12 @@ class CMP_Audit {
 
 	/**
 	 * Pure: validate a consent log request. Returns the row fields (decision,
-	 * categories as CSV of known slugs, version) or an error code string.
+	 * categories as CSV of known slugs, services as CSV of known service ids,
+	 * version) or an error code string. $valid_services null = the active library.
 	 */
-	public static function parse_request( array $post, array $valid_slugs, $current_version ) {
+	public static function parse_request( array $post, array $valid_slugs, $current_version, ?array $valid_services = null ) {
 		$decision = isset( $post['decision'] ) ? (string) $post['decision'] : '';
-		if ( ! in_array( $decision, array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' ), true ) ) {
+		if ( ! in_array( $decision, self::DECISIONS, true ) ) {
 			return 'bad_decision';
 		}
 		$decoded = json_decode( isset( $post['categories'] ) ? (string) $post['categories'] : '', true );
@@ -89,6 +96,29 @@ class CMP_Audit {
 					$cats[] = $slug;
 				}
 			}
+		}
+		if ( null === $valid_services ) {
+			$valid_services = array();
+			foreach ( CMP_Services::active() as $svc ) {
+				$valid_services[] = (string) $svc['id'];
+			}
+		}
+		$sdec = json_decode( isset( $post['services'] ) ? (string) $post['services'] : '', true );
+		$svcs = array();
+		if ( is_array( $sdec ) ) {
+			foreach ( $sdec as $sid ) {
+				if ( is_string( $sid ) && in_array( $sid, $valid_services, true ) && ! in_array( $sid, $svcs, true ) ) {
+					$svcs[] = $sid;
+				}
+			}
+		}
+		// Fit the 255-char column by dropping whole ids, never cutting one in half.
+		while ( strlen( implode( ',', $svcs ) ) > 255 ) {
+			array_pop( $svcs );
+		}
+		$services = implode( ',', $svcs );
+		if ( '' === $services && in_array( $decision, array( 'service_allow', 'service_withdraw' ), true ) ) {
+			return 'bad_services';
 		}
 		$version = isset( $post['version'] ) ? (string) $post['version'] : '';
 		if ( ! preg_match( '/^[A-Za-z0-9._-]{1,20}$/', $version ) ) {
@@ -102,6 +132,7 @@ class CMP_Audit {
 			'consent_id' => $cid,
 			'decision'   => $decision,
 			'categories' => implode( ',', $cats ),
+			'services'   => $services,
 			'version'    => $version,
 		);
 	}
@@ -123,14 +154,14 @@ class CMP_Audit {
 
 	/**
 	 * Pure: is $new the same choice as $last from the same visitor (same consent
-	 * ID, decision, categories and policy version)? Then it is not logged again.
+	 * ID, decision, categories, services and policy version)? Then it is not logged again.
 	 * Rows without an ID are never merged.
 	 */
 	public static function is_repeat( $last, array $new ) {
 		if ( ! is_array( $last ) || empty( $new['consent_id'] ) ) {
 			return false;
 		}
-		foreach ( array( 'consent_id', 'decision', 'categories', 'version' ) as $k ) {
+		foreach ( array( 'consent_id', 'decision', 'categories', 'services', 'version' ) as $k ) {
 			if ( (string) ( isset( $last[ $k ] ) ? $last[ $k ] : '' ) !== (string) ( isset( $new[ $k ] ) ? $new[ $k ] : '' ) ) {
 				return false;
 			}
@@ -156,7 +187,7 @@ class CMP_Audit {
 		$row['consent_id'] = isset( $row['consent_id'] ) ? (string) $row['consent_id'] : '';
 		if ( '' !== $row['consent_id'] ) {
 			$last = $wpdb->get_row( $wpdb->prepare(
-				"SELECT consent_id, decision, categories, version FROM {$table} WHERE consent_id = %s ORDER BY id DESC LIMIT 1",
+				"SELECT consent_id, decision, categories, services, version FROM {$table} WHERE consent_id = %s ORDER BY id DESC LIMIT 1",
 				$row['consent_id']
 			), ARRAY_A );
 			if ( self::is_repeat( $last, $row ) ) {
@@ -171,19 +202,20 @@ class CMP_Audit {
 				'consent_id' => $row['consent_id'],
 				'decision'   => $row['decision'],
 				'categories' => $row['categories'],
+				'services'   => isset( $row['services'] ) ? (string) $row['services'] : '',
 				'lang'       => $row['lang'],
 				'ip_hash'    => $ip_hash,
 				'ua_hash'    => $ua_hash,
 				'url'        => $row['url'],
 				'version'    => $row['version'],
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 		return false !== $done;
 	}
 
 	public static function to_csv( array $rows ) {
-		$cols = array( 'id', 'ts', 'consent_id', 'decision', 'categories', 'lang', 'ip_hash', 'ua_hash', 'url', 'version' );
+		$cols = array( 'id', 'ts', 'consent_id', 'decision', 'categories', 'services', 'lang', 'ip_hash', 'ua_hash', 'url', 'version' );
 		$out  = "\xEF\xBB\xBF"; // UTF-8 BOM
 		$out .= implode( ',', $cols ) . "\r\n";
 		foreach ( $rows as $r ) {

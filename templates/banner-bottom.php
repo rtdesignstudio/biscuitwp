@@ -92,6 +92,11 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 					<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save"><?php echo esc_html( $cmp_text( 'save', CMP_Lang::text( 'save' ) ) ); ?></button>
 				</span>
 			</div>
+			<div class="cmp__always" data-cmp-always-list data-cmp-always-remove="<?php echo esc_attr( CMP_Lang::text( 'always_remove' ) ); ?>" hidden>
+				<span class="cmp__always-label"><?php echo esc_html( CMP_Lang::text( 'always_loaded' ) ); ?></span>
+				<span class="cmp__always-items" data-cmp-always-items></span>
+			</div>
+			<span class="cmp__sr" aria-live="polite" data-cmp-always-live></span>
 			<p class="cmp__consent-id" data-cmp-consent-id hidden><?php echo esc_html( CMP_Lang::text( 'consent_id' ) ); ?>: <code></code></p>
 		</div>
 

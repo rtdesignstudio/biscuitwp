@@ -49,6 +49,15 @@ class CMP_Banner {
 		wp_enqueue_style( 'cmp-banner', CMP_URL . 'assets/css/banner.css', array(), CMP_Plugin::asset_ver( 'assets/css/banner.css' ) );
 		wp_enqueue_script( 'cmp-banner', CMP_URL . 'assets/js/banner.js', array(), CMP_Plugin::asset_ver( 'assets/js/banner.js' ), true );
 
+		// Embed services by id, for the "always loaded" row in the preferences:
+		// static, so it stays correct on cached pages.
+		$svc_names = array();
+		foreach ( CMP_Services::active() as $svc ) {
+			if ( isset( $svc['type'] ) && 'embed' === $svc['type'] ) {
+				$svc_names[ (string) $svc['id'] ] = (string) $svc['name'];
+			}
+		}
+
 		wp_localize_script(
 			'cmp-banner',
 			'CMP_DATA',
@@ -60,6 +69,7 @@ class CMP_Banner {
 				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
 				'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
+				'svcNames'   => (object) $svc_names,
 				'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
 			)
 		);

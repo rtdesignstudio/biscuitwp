@@ -85,3 +85,42 @@ cmp_assert_eq( CMP_Audit::is_repeat( array_merge( $last, array( 'consent_id' => 
 // Exports carry the consent ID.
 $cmp_csv2 = CMP_Audit::to_csv( array( array( 'id' => 2, 'consent_id' => $cid, 'decision' => 'partial' ) ) );
 cmp_assert( false !== strpos( $cmp_csv2, 'consent_id' ) && false !== strpos( $cmp_csv2, $cid ), 'CSV export includes consent_id' );
+
+// --- B1: "Always load" service decisions and the services column. ---
+$svc_ok = CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '["marketing"]', 'services' => '["youtube","bogus"]' ), $slugs, '1' );
+cmp_assert( is_array( $svc_ok ), 'service_allow is an accepted decision' );
+cmp_assert_eq( $svc_ok['services'], 'youtube', 'services keeps only known ids, as CSV' );
+cmp_assert( is_array( CMP_Audit::parse_request( array( 'decision' => 'service_withdraw', 'categories' => '[]', 'services' => '["youtube"]' ), $slugs, '1' ) ), 'service_withdraw is an accepted decision' );
+$svc_none = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]' ), $slugs, '1' );
+cmp_assert_eq( $svc_none['services'], '', 'missing services is empty' );
+$svc_bad = CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '[]', 'services' => 'not json' ), $slugs, '1' );
+cmp_assert_eq( $svc_bad['services'], '', 'malformed services is empty' );
+$svc_dup = CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => '["youtube","youtube","vimeo"]' ), $slugs, '1' );
+cmp_assert_eq( $svc_dup['services'], 'youtube,vimeo', 'duplicate service ids collapsed' );
+$svc_inj = CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '[]', 'services' => '[["youtube"],"x\' OR 1=1"]' ), $slugs, '1' );
+cmp_assert_eq( $svc_inj['services'], '', 'non-string and unknown services dropped' );
+$svc_ex = CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => '["a","youtube"]' ), $slugs, '1', array( 'a', 'youtube' ) );
+cmp_assert_eq( $svc_ex['services'], 'a,youtube', 'explicit valid service list honored' );
+$svc_long = CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => json_encode( array_fill( 0, 40, 'abcdefghij' ) ) ), $slugs, '1', array( 'abcdefghij' ) );
+cmp_assert( strlen( $svc_long['services'] ) <= 255, 'services truncated to 255' );
+
+$last_s = array( 'consent_id' => $cid, 'decision' => 'service_allow', 'categories' => '', 'version' => '1', 'services' => 'youtube' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last_s, $last_s ), true, 'same services is a repeat' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last_s, array_merge( $last_s, array( 'services' => 'youtube,vimeo' ) ) ), false, 'a differing services list is not a repeat' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last, array_merge( $last, array( 'services' => '' ) ) ), true, 'absent services equals empty services' );
+
+$cmp_csv3 = CMP_Audit::to_csv( array( array( 'id' => 3, 'consent_id' => $cid, 'decision' => 'service_allow', 'services' => 'youtube' ) ) );
+cmp_assert( false !== strpos( $cmp_csv3, 'services' ) && false !== strpos( $cmp_csv3, '"youtube"' ), 'CSV export includes services' );
+cmp_assert( false !== strpos( CMP_Audit::to_json( array( array( 'id' => 3, 'services' => 'youtube' ) ) ), '"services":"youtube"' ), 'JSON export includes services' );
+
+// Fix round 1: M2 (truncate at a comma) and M3 (service decisions need services).
+$mid = array();
+for ( $i = 0; $i < 30; $i++ ) {
+	$mid[] = 'svc' . str_pad( (string) $i, 7, '0', STR_PAD_LEFT ); // 10 chars
+}
+$trunc = CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => json_encode( $mid ) ), $slugs, '1', $mid );
+cmp_assert( strlen( $trunc['services'] ) <= 255, 'services within 255 after truncation' );
+cmp_assert( in_array( substr( $trunc['services'], strrpos( ',' . $trunc['services'], ',' ) ), $mid, true ), 'truncation never cuts an id in the middle' );
+cmp_assert_eq( CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => '["bogus"]' ), $slugs, '1' ), 'bad_services', 'service_allow with no known service is rejected' );
+cmp_assert_eq( CMP_Audit::parse_request( array( 'decision' => 'service_withdraw', 'categories' => '[]' ), $slugs, '1' ), 'bad_services', 'service_withdraw without services is rejected' );
+cmp_assert( is_array( CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '[]' ), $slugs, '1' ) ), 'category decisions need no services' );

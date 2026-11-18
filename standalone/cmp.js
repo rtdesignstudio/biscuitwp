@@ -50,7 +50,10 @@
 					back: 'Înapoi',
 					dialogLabel: 'Informații despre cookie-uri',
 					reopen: 'Setări cookie',
-					consent_id: 'ID-ul consimțământului'
+					consent_id: 'ID-ul consimțământului',
+					embed_always: 'Încarcă mereu',
+					always_loaded: 'Încărcate mereu:',
+					always_remove: 'Nu mai încărca %s'
 				}
 			},
 			ru: {
@@ -82,7 +85,10 @@
 					back: 'Назад',
 					dialogLabel: 'Информация о файлах cookie',
 					reopen: 'Настройки cookie',
-					consent_id: 'ID согласия'
+					consent_id: 'ID согласия',
+					embed_always: 'Загружать всегда',
+					always_loaded: 'Загружаются всегда:',
+					always_remove: 'Больше не загружать %s'
 				}
 			},
 			en: {
@@ -114,7 +120,10 @@
 					back: 'Back',
 					dialogLabel: 'Cookie information',
 					reopen: 'Cookie settings',
-					consent_id: 'Consent ID'
+					consent_id: 'Consent ID',
+					embed_always: 'Always load',
+					always_loaded: 'Always loaded:',
+					always_remove: 'Stop loading %s'
 				}
 			}
 		}
@@ -205,8 +214,45 @@
 		return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
 	}
 	// Pure (given the RNG): the visitor's existing ID, or a new one.
-	function consentIdFor(existing) {
-		return (existing && typeof existing.id === 'string' && UUID_RE.test(existing.id)) ? existing.id : makeConsentId();
+	// The visitor's existing ID, else the (valid) fallback one from cmp_svc, else a new one.
+	function consentIdFor(existing, fallback) {
+		if (existing && typeof existing.id === 'string' && UUID_RE.test(existing.id)) { return existing.id; }
+		if (typeof fallback === 'string' && UUID_RE.test(fallback)) { return fallback; }
+		return makeConsentId();
+	}
+
+	// "Always load" (cmp_svc): the embed services the visitor chose to load every
+	// time, kept apart from the category consent (clicking it neither closes the
+	// banner nor counts as a refusal; save() never touches it). `id` is a UUID made
+	// on the first click.
+	var SVC_ID_RE = /^[a-z0-9-]+$/;
+	// Pure: the allowed service ids, [] unless the cookie is for this policy version.
+	function svcAllowed(c, version) {
+		if (!c || typeof c !== 'object' || String(c.v) !== String(version) || !Array.isArray(c.svc)) { return []; }
+		return c.svc.filter(function (x, i, a) { return typeof x === 'string' && SVC_ID_RE.test(x) && a.indexOf(x) === i; });
+	}
+	// Pure: a cookie value (still URI-encoded) as an object, or null when it is
+	// malformed (bad %-escape or not JSON). Never throws.
+	function parseSvcCookie(raw) {
+		try {
+			var o = JSON.parse(decodeURIComponent(raw));
+			return o && typeof o === 'object' ? o : null;
+		} catch (e) { return null; }
+	}
+	// Pure: the log payload of an "always" decision. It names only the affected
+	// service, so a withdraw row says what was withdrawn.
+	function svcLogPayload(decision, id, categories, consentId) {
+		return { id: consentId || '', categories: categories || [], decision: decision, services: [id] };
+	}
+	// Pure: fill the service name in a "%s" text, literally ($ in the name is safe).
+	function fillName(tpl, name) { return String(tpl).split('%s').join(name); }
+	// Pure: the cookie object with a service switched on or off; keeps the cookie's own id.
+	function withSvc(c, version, id, on) {
+		var list = svcAllowed(c, version).filter(function (x) { return x !== id; });
+		if (on) { list.push(id); }
+		var out = { v: String(version), svc: list };
+		if (c && typeof c.id === 'string' && UUID_RE.test(c.id)) { out.id = c.id; }
+		return out;
 	}
 
 	// Pure: is the current page the privacy policy (privacyUrl)? There the banner
@@ -390,6 +436,11 @@
 				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save">' + escapeHtml(cfg.texts.save) + '</button>' +
 				'</span>' +
 				'</div>' +
+				'<div class="cmp__always" data-cmp-always-list data-cmp-always-remove="' + escapeHtml(cfg.texts.always_remove || 'Stop loading %s') + '" hidden>' +
+				'<span class="cmp__always-label">' + escapeHtml(cfg.texts.always_loaded || 'Always loaded:') + '</span>' +
+				'<span class="cmp__always-items" data-cmp-always-items></span>' +
+				'</div>' +
+				'<span class="cmp__sr" aria-live="polite" data-cmp-always-live></span>' +
 				'<p class="cmp__consent-id" data-cmp-consent-id hidden>' + escapeHtml(cfg.texts.consent_id || 'Consent ID') + ': <code></code></p>' +
 				'</div>' +
 				'</div>';
@@ -447,13 +498,25 @@
 		function readCookie() {
 			var m = document.cookie.match('(?:^|; )' + COOKIE_NAME + '=([^;]*)');
 			if (!m) { return null; }
-			return parseConsent(decodeURIComponent(m[1]));
+			return parseSvcCookie(m[1]);
 		}
 
 		function writeCookie(obj) {
 			var v = encodeURIComponent(serializeConsent(obj));
 			var maxAge = 60 * 60 * 24 * (cfg.cookieDays || 180);
 			document.cookie = COOKIE_NAME + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
+		}
+
+		var SVC_COOKIE = 'cmp_svc';
+		function readSvc() {
+			var m = document.cookie.match('(?:^|; )' + SVC_COOKIE + '=([^;]*)');
+			if (!m) { return null; }
+			return parseSvcCookie(m[1]);
+		}
+		function writeSvc(obj) {
+			var v = encodeURIComponent(serializeConsent(obj));
+			var maxAge = 60 * 60 * 24 * (cfg.cookieDays || 180);
+			document.cookie = SVC_COOKIE + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 		}
 
 		function pushConsent(accepted) {
@@ -478,7 +541,7 @@
 		function save(accepted, decision) {
 			var reload = firstDecision && cfg.reloadOnDecision;
 			firstDecision = false;
-			var data = { v: VERSION, id: consentIdFor(readCookie()), categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
+			var data = { v: VERSION, id: consentIdFor(readCookie(), (readSvc() || {}).id), categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 			writeCookie(data);
 			showReopen();
 			pushConsent(accepted);
@@ -562,12 +625,14 @@
 			var code = el.querySelector('code');
 			if (code) { code.textContent = id; }
 		}
-		function openPrefs() { var m = modal(); if (m) { syncToggles(); m.classList.add('is-prefs-open'); } }
+		function openPrefs() { var m = modal(); if (m) { syncToggles(); renderAlways(); m.classList.add('is-prefs-open'); } }
 		function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
 
 		function bind() {
 			if (!banner) { return; }
 			banner.addEventListener('click', function (e) {
+				var rm = e.target.closest('[data-cmp-svc-remove]');
+				if (rm) { withdrawService(rm.getAttribute('data-cmp-svc-remove')); return; }
 				var btn = e.target.closest('[data-cmp-action]');
 				if (!btn) { return; }
 				var action = btn.getAttribute('data-cmp-action');
@@ -643,6 +708,87 @@
 				e.preventDefault();
 				loadEmbed(btn.closest('[data-cmp-embed]'));
 			});
+			document.addEventListener('click', function (e) {
+				var btn = e.target.closest && e.target.closest('[data-cmp-embed-always]');
+				if (!btn || cfg.mode === 'light') { return; }
+				e.preventDefault();
+				allowService(btn.closest('[data-cmp-embed]'));
+			});
+		}
+
+		// On page load: placeholders of an "always loaded" service load whatever their category.
+		function unblockServices() {
+			var allowed = svcAllowed(readSvc(), VERSION);
+			document.querySelectorAll('[data-cmp-embed][data-cmp-service]').forEach(function (box) {
+				if (allowed.indexOf(box.getAttribute('data-cmp-service')) !== -1) { loadEmbed(box); }
+			});
+		}
+		// "Always load": load this embed and every other one of the same service, and
+		// remember the choice. The banner and the category consent are left alone.
+		// (This build keeps no consent log, so nothing is logged.)
+		function allowService(box) {
+			var id = box && box.getAttribute('data-cmp-service');
+			if (!id || !SVC_ID_RE.test(id)) { return; }
+			var same = document.querySelectorAll('[data-cmp-embed][data-cmp-service="' + id + '"]');
+			for (var i = 0; i < same.length; i++) { loadEmbed(same[i]); }
+			var next = withSvc(readSvc(), VERSION, id, true);
+			if (!next.id) { next.id = makeConsentId(); }
+			writeSvc(next);
+			logConsent(svcLogPayload('service_allow', id, [], next.id));
+			renderAlways();
+		}
+		// Withdrawing is as easy as granting. Embeds already loaded on this page stay
+		// until the next load.
+		function withdrawService(id) {
+			if (!id || !SVC_ID_RE.test(id)) { return; }
+			var name = serviceName(id);
+			var rm = banner && banner.querySelector('[data-cmp-svc-remove="' + id + '"]');
+			var btns = banner ? Array.prototype.slice.call(banner.querySelectorAll('[data-cmp-svc-remove]')) : [];
+			var idx = rm ? btns.indexOf(rm) : -1;
+			var next = withSvc(readSvc(), VERSION, id, false);
+			writeSvc(next);
+			logConsent(svcLogPayload('service_withdraw', id, [], next.id));
+			renderAlways();
+			if (!banner) { return; }
+			// The focused button was removed: keep the keyboard user inside the dialog.
+			var left = banner.querySelectorAll('[data-cmp-svc-remove]');
+			var target = left.length ? left[Math.min(Math.max(idx, 0), left.length - 1)] : null;
+			if (!target) {
+				var first = banner.querySelector('[data-cmp-view="prefs"] button:not([disabled]), [data-cmp-view="prefs"] a[href]');
+				target = first || modal();
+			}
+			if (target && target.focus) { target.focus(); }
+			var live = banner.querySelector('[data-cmp-always-live]');
+			var row = banner.querySelector('[data-cmp-always-list]');
+			if (live) {
+				live.textContent = '';
+				live.textContent = fillName((row && row.getAttribute('data-cmp-always-remove')) || '%s', name);
+			}
+		}
+		function serviceName(id) {
+			var el = document.querySelector('[data-cmp-service="' + id + '"][data-cmp-service-name]');
+			return (el && el.getAttribute('data-cmp-service-name')) || id;
+		}
+		// The "Always loaded: YouTube ×" row in the preferences; hidden when empty.
+		function renderAlways() {
+			if (!banner) { return; }
+			var row = banner.querySelector('[data-cmp-always-list]');
+			var box = row && row.querySelector('[data-cmp-always-items]');
+			if (!row || !box) { return; }
+			var tpl = row.getAttribute('data-cmp-always-remove') || '%s';
+			var ids = svcAllowed(readSvc(), VERSION);
+			while (box.firstChild) { box.removeChild(box.firstChild); }
+			ids.forEach(function (id) {
+				var name = serviceName(id);
+				var b = document.createElement('button');
+				b.type = 'button';
+				b.className = 'cmp__always-item';
+				b.setAttribute('data-cmp-svc-remove', id);
+				b.setAttribute('aria-label', fillName(tpl, name));
+				b.textContent = name + ' \u00d7';
+				box.appendChild(b);
+			});
+			row.hidden = !ids.length;
 		}
 
 		function setConsentModeDefaults() {
@@ -708,6 +854,7 @@
 				return;
 			}
 
+			unblockServices();
 			var stored = storedCategories(readCookie(), VERSION);
 			if (stored) {
 				// Replay the stored consent to Consent Mode before the scripts come
@@ -728,6 +875,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, withSvc: withSvc, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

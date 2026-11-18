@@ -29,3 +29,6 @@ $cmp_sql = CMP_Installer::log_table_sql( 'wp_cmp_consent_log', 'DEFAULT CHARSET=
 cmp_assert( false !== strpos( $cmp_sql, 'consent_id CHAR(36)' ), 'log table has a consent_id column' );
 cmp_assert( false !== strpos( $cmp_sql, 'KEY consent_id (consent_id)' ), 'consent_id is indexed' );
 cmp_assert( false !== strpos( $cmp_sql, 'CREATE TABLE wp_cmp_consent_log' ), 'table name used' );
+
+// B1: the log table records which embed services were allowed/withdrawn.
+cmp_assert( false !== strpos( $cmp_sql, "services VARCHAR(255) NOT NULL DEFAULT ''" ), 'log table has a services column' );

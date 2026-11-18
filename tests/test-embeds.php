@@ -74,3 +74,15 @@ cmp_assert( false !== strpos( $out, 'max-width:560px' ), 'placeholder capped at 
 $pct = CMP_Blocker::rewrite( '<iframe src="https://www.youtube.com/embed/p" width="100%" height="450"></iframe>', $labels );
 cmp_assert( false !== strpos( $pct, 'aspect-ratio:16/9' ), 'percentage width falls back to 16/9' );
 cmp_assert( false === strpos( $pct, 'max-width' ), 'percentage width sets no max-width' );
+
+// B1: "Always load" second button, only for library services and not in Light mode.
+$al = CMP_Blocker::rewrite( $yt, array_merge( $labels, array( 'embed_always' => 'Încarcă mereu' ) ) );
+cmp_assert( false !== strpos( $al, '<button type="button" class="cmp-embed__always" data-cmp-embed-always aria-label="Încarcă mereu: YouTube">Încarcă mereu</button>' ), 'library embed has an "always load" button' );
+cmp_assert( false !== strpos( $al, 'data-cmp-service-name="YouTube"' ), 'placeholder carries the service name' );
+$al_light = CMP_Blocker::rewrite( $yt, array_merge( $labels, array( 'embed_always' => 'Încarcă mereu', 'light' => true ) ) );
+cmp_assert( false === strpos( $al_light, 'data-cmp-embed-always' ), 'no "always load" button in Light mode' );
+cmp_assert( false !== strpos( $al_light, 'data-cmp-embed-load' ), 'Light mode keeps the per-click load button' );
+$al_anon = CMP_Blocker::rewrite( '<iframe data-cmp-category="marketing" src="https://example.com/w"></iframe>', array_merge( $labels, array( 'embed_always' => 'Încarcă mereu' ) ) );
+cmp_assert( false !== strpos( $al_anon, 'data-cmp-embed="marketing"' ) && false === strpos( $al_anon, 'data-cmp-embed-always' ), 'anonymous embed has no "always load" button' );
+$al_def = CMP_Blocker::rewrite( $yt );
+cmp_assert( false !== strpos( $al_def, 'data-cmp-embed-always' ), 'default labels give the always button too' );

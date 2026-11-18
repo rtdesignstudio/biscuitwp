@@ -369,6 +369,22 @@ body.cmp-has-banner { overflow: hidden; }
 /* The visitor's consent ID, under the preferences (to quote in a data request). */
 .cmp__consent-id { margin: 14px 0 0; font-size: 12px; color: var(--cmp-muted); text-align: right; }
 .cmp__consent-id[hidden] { display: none; }
+.cmp__always { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 13px; color: var(--cmp-muted); }
+.cmp__always[hidden] { display: none; }
+.cmp__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.cmp__always-items { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.cmp__always-item {
+	font: inherit;
+	font-size: 13px;
+	padding: 4px 10px;
+	border: 1px solid var(--cmp-border, currentColor);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--cmp-dark);
+	cursor: pointer;
+}
+.cmp__always-item:hover { border-color: var(--cmp-primary); color: var(--cmp-primary); }
+.cmp__always-item:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 .cmp__consent-id code { font-size: 12px; background: none; padding: 0; color: inherit; user-select: all; overflow-wrap: anywhere; }
 
 /* Third-party embed placeholder (YouTube, Vimeo, Maps) until consent. Takes the
@@ -406,7 +422,18 @@ body.cmp-has-banner { overflow: hidden; }
 	cursor: pointer;
 }
 .cmp-embed__btn:hover { background: var(--cmp-primary-hover); border-color: var(--cmp-primary-hover); }
-.cmp-embed__btn:focus-visible, .cmp-embed__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+.cmp-embed__always {
+	font: inherit;
+	font-weight: 600;
+	padding: 10px 18px;
+	border: 1px solid var(--cmp-primary);
+	border-radius: 8px;
+	background: transparent;
+	color: var(--cmp-primary);
+	cursor: pointer;
+}
+.cmp-embed__always:hover { background: var(--cmp-primary); color: var(--cmp-primary-text); }
+.cmp-embed__btn:focus-visible, .cmp-embed__always:focus-visible, .cmp-embed__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 .cmp .cmp-embed__link, .cmp-embed__link,
 .cmp-embed__link:hover, .cmp-embed__link:focus {
 	color: var(--cmp-dark);

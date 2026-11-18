@@ -116,5 +116,43 @@ eq(cmp.normalizeConfig({ cookieDays: 'x' }).cookieDays, 180, 'cookieDays not a n
 // escapeHtml
 eq(cmp.escapeHtml('<a>"&\''), '&lt;a&gt;&quot;&amp;&#39;', 'escapes html');
 
+// B1: "Always load" cookie (cmp_svc), pure helpers
+eq(cmp.svcAllowed(null, '1'), [], 'svcAllowed: no cookie');
+eq(cmp.svcAllowed({ v: '0', svc: ['youtube'] }, '1'), [], 'svcAllowed: other version');
+eq(cmp.svcAllowed({ v: '1', svc: 'x' }, '1'), [], 'svcAllowed: svc not a list');
+eq(cmp.svcAllowed({ v: '1', svc: ['youtube', '<x>'] }, '1'), ['youtube'], 'svcAllowed: bad ids dropped');
+eq(cmp.svcAllowed({ v: '1', svc: ['youtube'], id: 'whatever', extra: 1 }, '1'), ['youtube'], 'svcAllowed ignores extra fields');
+eq(cmp.svcAllowed({ v: 1, svc: ['vimeo'] }, '1'), ['vimeo'], 'svcAllowed compares version as string');
+eq(cmp.withSvc(null, '1', 'youtube', true), { v: '1', svc: ['youtube'] }, 'withSvc adds to an empty cookie');
+eq(cmp.withSvc({ v: '1', svc: ['youtube'] }, '1', 'youtube', false).svc, [], 'withSvc removes');
+eq(cmp.withSvc({ v: '1', svc: ['youtube'] }, '1', 'youtube', true).svc, ['youtube'], 'withSvc does not duplicate');
+eq(cmp.withSvc({ v: '1', svc: ['youtube'] }, '1', 'vimeo', true).svc, ['youtube', 'vimeo'], 'withSvc appends');
+eq(cmp.withSvc({ v: '0', svc: ['youtube'] }, '1', 'vimeo', true), { v: '1', svc: ['vimeo'] }, 'withSvc drops an old-version list');
+var SID = '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f';
+eq(cmp.withSvc({ v: '1', svc: ['youtube'], id: SID }, '1', 'vimeo', true).id, SID, 'withSvc keeps the id');
+ok(cmp.withSvc({ v: '1', svc: ['youtube'], id: SID }, '1', 'youtube', false).id === SID, 'withSvc keeps the id on removal');
+ok(!('id' in cmp.withSvc(null, '1', 'youtube', true)), 'withSvc adds no id when there is none');
+['ro', 'ru', 'en'].forEach(function (l) {
+	var t = cmp.normalizeConfig({ lang: l }).texts;
+	['embed_always', 'always_loaded', 'always_remove'].forEach(function (k) { ok(typeof t[k] === 'string' && t[k].length > 0, l + ' text ' + k); });
+	ok(t.always_remove.indexOf('%s') !== -1, l + ' always_remove has %s');
+});
+eq(cmp.normalizeConfig({ lang: 'ro' }).texts.always_loaded, 'Încărcate mereu:', 'ro always_loaded');
+eq(cmp.normalizeConfig({ lang: 'ru' }).texts.embed_always, 'Загружать всегда', 'ru embed_always');
+eq(cmp.normalizeConfig({ lang: 'en' }).texts.always_remove, 'Stop loading %s', 'en always_remove');
+
+// Fix round 1 (review I1-I3, M4, M6, M7)
+eq(cmp.svcAllowed({ v: '1', svc: ['youtube', 'vimeo', 'youtube'] }, '1'), ['youtube', 'vimeo'], 'svcAllowed drops duplicates, keeps order');
+eq(cmp.svcLogPayload('service_withdraw', 'youtube', ['marketing'], SID), { id: SID, categories: ['marketing'], decision: 'service_withdraw', services: ['youtube'] }, 'log payload carries only the affected service');
+eq(cmp.svcLogPayload('service_allow', 'vimeo', null, ''), { id: '', categories: [], decision: 'service_allow', services: ['vimeo'] }, 'log payload: no categories -> []');
+eq(cmp.parseSvcCookie('%E0%A4%A'), null, 'malformed cookie value -> null, no throw');
+eq(cmp.parseSvcCookie('not json'), null, 'non-JSON cookie value -> null');
+eq(cmp.svcAllowed(cmp.parseSvcCookie('%E0%A4%A'), '1'), [], 'malformed cookie -> no services');
+eq(cmp.parseSvcCookie(encodeURIComponent('{"v":"1","svc":["youtube"]}')).svc, ['youtube'], 'valid cookie value parsed');
+eq(cmp.consentIdFor(null, SID), SID, 'consentIdFor adopts the fallback id');
+eq(cmp.consentIdFor({ id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e70' }, SID), '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e70', 'own id wins over the fallback');
+ok(/^[0-9a-f-]{36}$/.test(cmp.consentIdFor(null, 'junk')), 'invalid fallback ignored');
+eq(cmp.fillName('Stop loading %s', 'A$&B'), 'Stop loading A$&B', 'fillName is literal');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

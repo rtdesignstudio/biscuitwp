@@ -14,6 +14,7 @@ class CMP_Audit_List_Table extends WP_List_Table {
 			'consent_id' => __( 'ID consimțământ', 'consent-manager-pro' ),
 			'decision'   => __( 'Decizie', 'consent-manager-pro' ),
 			'categories' => __( 'Categorii', 'consent-manager-pro' ),
+			'services'   => __( 'Servicii', 'consent-manager-pro' ),
 			'lang'       => __( 'Limbă', 'consent-manager-pro' ),
 			'version'    => __( 'Versiune', 'consent-manager-pro' ),
 			'url'        => __( 'URL', 'consent-manager-pro' ),
@@ -34,7 +35,7 @@ class CMP_Audit_List_Table extends WP_List_Table {
 		$where  = '1=1';
 		$params = array();
 		$dec    = isset( $_GET['decision'] ) ? sanitize_text_field( wp_unslash( $_GET['decision'] ) ) : '';
-		if ( in_array( $dec, array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' ), true ) ) {
+		if ( in_array( $dec, CMP_Audit::DECISIONS, true ) ) {
 			$where   .= ' AND decision = %s';
 			$params[] = $dec;
 		}
