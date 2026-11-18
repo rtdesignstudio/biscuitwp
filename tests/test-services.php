@@ -3,10 +3,15 @@ require_once __DIR__ . '/../includes/class-services.php';
 
 $lib = CMP_Services::library();
 cmp_assert_eq(
-	array_column( $lib, 'id' ),
+	array_slice( array_column( $lib, 'id' ), 0, 6 ),
 	array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' ),
-	'library has the six services in order'
+	'library starts with the six original services in order'
 );
+$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha' );
+$cmp_have_ids     = array_column( $lib, 'id' );
+sort( $cmp_expected_ids );
+sort( $cmp_have_ids );
+cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 14 expected ids' );
 cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'real library validates' );
 foreach ( array( 'id', 'name', 'provider', 'type', 'category', 'hosts', 'inline', 'gtm', 'path', 'nocookie', 'cookies', 'transfer', 'privacy_url' ) as $k ) {
 	cmp_assert( array_key_exists( $k, $lib[0] ), "service has key {$k}" );

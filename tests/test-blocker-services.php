@@ -36,8 +36,10 @@ cmp_assert( false !== strpos( CMP_Blocker::rewrite( $cmp_ga, array(), array( $cm
 cmp_assert_eq( CMP_Blocker::rewrite( $cmp_ga, array(), array( $cmp_lib[2] ) ), $cmp_ga, 'GA left alone when only Meta Pixel is listed' );
 
 // tracker_hosts: hosts of script services only, without paths, unique.
-$cmp_hosts = CMP_Blocker::tracker_hosts( $cmp_lib );
+$cmp_hosts = CMP_Blocker::tracker_hosts( array_slice( $cmp_lib, 0, 6 ) );
 cmp_assert_eq( $cmp_hosts, array( 'google-analytics.com', 'googletagmanager.com', 'connect.facebook.net' ), 'tracker_hosts lists script hosts, no paths, no embeds' );
+$cmp_hint = '<link rel="preconnect" href="https://www.google.com"><link rel="dns-prefetch" href="https://www.gstatic.com">';
+cmp_assert_eq( CMP_Blocker::rewrite( $cmp_hint ), $cmp_hint, 'reCAPTCHA resource hints survive rewrite() on the full library' );
 cmp_assert_eq( CMP_Blocker::tracker_hosts( array() ), array(), 'tracker_hosts of nothing is empty' );
 
 // noscript stripping follows the services list too.
