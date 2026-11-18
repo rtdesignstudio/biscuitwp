@@ -4,8 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Self-hosted updates from GitHub Releases of the private repo. Native WP
- * update flow; no wordpress.org. Inactive when no token is configured.
+ * Self-hosted updates through the RT relay (rt.md/cmp-update), which fronts the
+ * private GitHub repo: sites never hold a GitHub token. Native WP update flow;
+ * no wordpress.org. Every package must carry a valid Ed25519 signature.
  */
 class CMP_Updater {
 
@@ -110,34 +111,7 @@ class CMP_Updater {
 		);
 	}
 
-	/**
-	 * Pure: from a GitHub release's assets, the API URLs of the package zip and
-	 * of its detached signature (<slug>.zip.sig). Falls back to the first
-	 * non-signature asset for the zip.
-	 */
-	public static function pick_assets( $assets ) {
-		$out = array( 'zip' => '', 'sig' => '' );
-		if ( ! is_array( $assets ) ) {
-			return $out;
-		}
-		foreach ( $assets as $a ) {
-			$name = isset( $a['name'] ) ? (string) $a['name'] : '';
-			$url  = isset( $a['url'] ) ? (string) $a['url'] : '';
-			if ( '' === $url ) {
-				continue;
-			}
-			if ( self::SLUG . '.zip.sig' === $name ) {
-				$out['sig'] = $url;
-			} elseif ( self::SLUG . '.zip' === $name ) {
-				$out['zip'] = $url;
-			} elseif ( '' === $out['zip'] && '.sig' !== substr( $name, -4 ) ) {
-				$out['zip'] = $url;
-			}
-		}
-		return $out;
-	}
-
-	/** Pure: does this package URL come from our relay or our GitHub repo? Returns 'proxy', 'github' or ''. */
+	/** Pure: is this package URL a download from our relay? Returns 'proxy' or ''. */
 	public static function package_kind( $package, $proxy_url ) {
 		if ( ! is_string( $package ) || '' === $package ) {
 			return '';
@@ -145,12 +119,6 @@ class CMP_Updater {
 		$proxy_url = (string) $proxy_url;
 		if ( '' !== $proxy_url && 0 === strpos( $package, $proxy_url ) && false !== strpos( $package, 'action=download' ) ) {
 			return 'proxy';
-		}
-		$parts = parse_url( $package );
-		$host  = isset( $parts['host'] ) ? $parts['host'] : '';
-		$path  = isset( $parts['path'] ) ? $parts['path'] : '';
-		if ( 'api.github.com' === $host && 0 === strpos( $path, '/repos/' . self::REPO . '/' ) ) {
-			return 'github';
 		}
 		return '';
 	}
@@ -174,71 +142,9 @@ class CMP_Updater {
 		}
 	}
 
-	public static function token() {
-		if ( defined( 'CMP_GITHUB_TOKEN' ) && CMP_GITHUB_TOKEN ) {
-			return (string) CMP_GITHUB_TOKEN;
-		}
-		$s = CMP_Consent::get_settings();
-		return isset( $s['github_token'] ) ? (string) $s['github_token'] : '';
-	}
-
-	/** Query GitHub for the latest release (cached). Null when unavailable. */
+	/** The latest release from the relay (cached). Null when unavailable. */
 	public static function fetch_release( $force = false ) {
-		$cmp_proxy = self::proxy_url();
-		if ( '' !== $cmp_proxy ) {
-			return self::fetch_release_proxy( $cmp_proxy, $force );
-		}
-
-		if ( '' === self::token() ) {
-			return null;
-		}
-		if ( ! $force ) {
-			$cached = get_transient( self::CACHE_KEY );
-			if ( 'none' === $cached ) {
-				return null;
-			}
-			if ( is_array( $cached ) ) {
-				return $cached;
-			}
-		}
-
-		$response = wp_remote_get(
-			'https://api.github.com/repos/' . self::REPO . '/releases/latest',
-			array(
-				'timeout' => 15,
-				'headers' => array(
-					'Authorization'        => 'Bearer ' . self::token(),
-					'Accept'               => 'application/vnd.github+json',
-					'X-GitHub-Api-Version' => '2022-11-28',
-				),
-			)
-		);
-
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			set_transient( self::CACHE_KEY, 'none', HOUR_IN_SECONDS );
-			return null;
-		}
-
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( ! is_array( $body ) || empty( $body['tag_name'] ) ) {
-			set_transient( self::CACHE_KEY, 'none', HOUR_IN_SECONDS );
-			return null;
-		}
-
-		// Keep only what we need — the transient stays small.
-		$release = array(
-			'tag_name'    => $body['tag_name'],
-			'html_url'    => isset( $body['html_url'] ) ? $body['html_url'] : '',
-			'zipball_url' => isset( $body['zipball_url'] ) ? $body['zipball_url'] : '',
-			'assets'      => array(),
-		);
-		$picked = self::pick_assets( isset( $body['assets'] ) ? $body['assets'] : array() );
-		if ( '' !== $picked['zip'] ) {
-			$release['assets'][] = array( 'url' => $picked['zip'] );
-		}
-		$release['sig_url'] = $picked['sig'];
-		set_transient( self::CACHE_KEY, $release, 6 * HOUR_IN_SECONDS );
-		return $release;
+		return self::fetch_release_proxy( self::proxy_url(), $force );
 	}
 
 	private static function fetch_release_proxy( $proxy, $force ) {
@@ -289,7 +195,7 @@ class CMP_Updater {
 	}
 
 	/**
-	 * Download our package (relay or GitHub) and install it only if its
+	 * Download our package from the relay and install it only if its
 	 * signature verifies against SIGN_PUBLIC_KEY. Other plugins' packages
 	 * pass through untouched.
 	 */
@@ -302,12 +208,12 @@ class CMP_Updater {
 			return $reply;
 		}
 
-		$file = 'proxy' === $kind ? self::download_to_temp( $package ) : self::authenticated_download( false, $package, $upgrader );
+		$file = self::download_to_temp( $package );
 		if ( is_wp_error( $file ) || ! is_string( $file ) || '' === $file ) {
 			return is_wp_error( $file ) ? $file : new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update.', 'consent-manager-pro' ) );
 		}
 
-		if ( ! self::verify_signature( $file, self::fetch_signature( $kind ) ) ) {
+		if ( ! self::verify_signature( $file, self::fetch_signature() ) ) {
 			unlink( $file );
 			return new WP_Error( 'cmp_bad_signature', __( 'Pachetul de update nu are o semnătură validă și nu a fost instalat.', 'consent-manager-pro' ) );
 		}
@@ -338,102 +244,15 @@ class CMP_Updater {
 		return $tmp;
 	}
 
-	/** The detached signature of the latest release ('' when unavailable). */
-	private static function fetch_signature( $kind ) {
-		if ( 'proxy' === $kind ) {
-			$proxy    = self::proxy_url();
-			$url      = $proxy . ( false === strpos( $proxy, '?' ) ? '?' : '&' ) . 'action=signature&key=' . rawurlencode( self::proxy_key() );
-			$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
-			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-				return '';
-			}
-			return substr( trim( (string) wp_remote_retrieve_body( $response ) ), 0, 200 );
-		}
-		$release = self::fetch_release( true );
-		if ( ! is_array( $release ) || empty( $release['sig_url'] ) ) {
+	/** The detached signature of the latest release, from the relay ('' when unavailable). */
+	private static function fetch_signature() {
+		$proxy    = self::proxy_url();
+		$url      = $proxy . ( false === strpos( $proxy, '?' ) ? '?' : '&' ) . 'action=signature&key=' . rawurlencode( self::proxy_key() );
+		$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
+		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
 			return '';
 		}
-		$tmp = self::authenticated_download( false, $release['sig_url'], null );
-		if ( is_wp_error( $tmp ) || ! is_string( $tmp ) || ! is_readable( $tmp ) ) {
-			return '';
-		}
-		$sig = substr( trim( (string) file_get_contents( $tmp ) ), 0, 200 );
-		unlink( $tmp );
-		return $sig;
-	}
-
-	/** Download our package: ask GitHub with the token but do NOT follow its
-	 * redirect with the token — GitHub 302s to a signed host, which we then
-	 * fetch without any auth header (prevents leaking the token cross-host). */
-	public static function authenticated_download( $reply, $package, $upgrader ) {
-		if ( false !== $reply ) {
-			return $reply;
-		}
-		if ( ! is_string( $package ) ) {
-			return $reply;
-		}
-		$parts = wp_parse_url( $package );
-		$host  = isset( $parts['host'] ) ? $parts['host'] : '';
-		$path  = isset( $parts['path'] ) ? $parts['path'] : '';
-		if ( 'api.github.com' !== $host || 0 !== strpos( $path, '/repos/' . self::REPO . '/' ) ) {
-			return $reply;
-		}
-
-		// Step 1: request the asset WITHOUT following redirects, so the Bearer
-		// token is only ever sent to api.github.com.
-		$auth = wp_remote_get(
-			$package,
-			array(
-				'timeout'     => 30,
-				'redirection' => 0,
-				'headers'     => array(
-					'Authorization' => 'Bearer ' . self::token(),
-					'Accept'        => 'application/octet-stream',
-				),
-			)
-		);
-		if ( is_wp_error( $auth ) ) {
-			return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
-		}
-		$code     = (int) wp_remote_retrieve_response_code( $auth );
-		$location = wp_remote_retrieve_header( $auth, 'location' );
-		$tmp      = wp_tempnam( 'cmp-update' );
-
-		// Step 2a: follow GitHub's redirect to the signed URL WITHOUT the token.
-		if ( in_array( $code, array( 301, 302, 303, 307, 308 ), true ) && $location ) {
-			$response = wp_remote_get(
-				$location,
-				array(
-					'timeout'  => 300,
-					'stream'   => true,
-					'filename' => $tmp,
-				)
-			);
-			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-				if ( file_exists( $tmp ) ) {
-					unlink( $tmp );
-				}
-				return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
-			}
-			if ( filesize( $tmp ) > self::MAX_DOWNLOAD ) {
-				unlink( $tmp );
-				return new WP_Error( 'cmp_download_too_large', __( 'Pachetul de update depășește dimensiunea maximă permisă.', 'consent-manager-pro' ) );
-			}
-			return $tmp;
-		}
-
-		// Step 2b: rare direct 200 from api.github.com — the body is the package.
-		if ( 200 === $code ) {
-			$body = wp_remote_retrieve_body( $auth );
-			if ( '' !== $body && strlen( $body ) <= self::MAX_DOWNLOAD && false !== file_put_contents( $tmp, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-				return $tmp;
-			}
-		}
-
-		if ( file_exists( $tmp ) ) {
-			unlink( $tmp );
-		}
-		return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update de pe GitHub.', 'consent-manager-pro' ) );
+		return substr( trim( (string) wp_remote_retrieve_body( $response ) ), 0, 200 );
 	}
 
 	/** GitHub zips extract as <slug>-<tag>/ or <owner>-<repo>-<sha>/ — rename to the real install folder. */

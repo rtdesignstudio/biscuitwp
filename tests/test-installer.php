@@ -18,6 +18,7 @@ cmp_assert( in_array( 'analytics_storage', $stat['gtag_signals'], true ), 'stati
 $settings = CMP_Installer::default_settings();
 cmp_assert_eq( $settings['policy_version'], '1', 'default policy_version is 1' );
 cmp_assert_eq( $settings['position'], 'bottom', 'default position is bottom' );
+cmp_assert( ! array_key_exists( 'layout', $settings ), 'no unused layout default' );
 
 // 0.4.0: tracker blocking is on by default on new installs.
 $cmp_ds = CMP_Installer::default_settings();

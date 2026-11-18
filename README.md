@@ -64,20 +64,13 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 
 ## Updates & releases
 
-Sites update straight from this repo's GitHub Releases (no wordpress.org):
+Sites update through the RT relay at `rt.md/cmp-update` (no wordpress.org, no GitHub token on any site). Updates show up natively under **Plugins / Dashboard → Updates**; the plugin row also has a **Check for updates** link. Every package must carry a valid Ed25519 signature (`CMP_Updater::SIGN_PUBLIC_KEY`), otherwise it is not installed.
 
-1. Define a fine-grained, read-only token on each site: `define( 'CMP_GITHUB_TOKEN', '...' );` in `wp-config.php` (or paste it in Settings → GitHub token).
-2. Updates then show up natively under **Plugins / Dashboard → Updates**; the plugin row also has a **Check for updates** link.
+To publish a new version: bump `Version:` and `CMP_VERSION` in `consent-manager-pro.php`, commit, then run `./bin/release.sh X.Y.Z` (requires the `gh` CLI and the signing key in `~/.config/cmp-release/signing.key`). The script signs the zip, verifies the signature and uploads `consent-manager-pro.zip.sig` next to it.
 
-To publish a new version: bump `Version:` and `CMP_VERSION` in `consent-manager-pro.php`, commit, then run `./bin/release.sh X.Y.Z` (requires the `gh` CLI).
+### Update relay
 
-### Update proxy (optional, for many client sites)
-
-To avoid putting a GitHub token on every site, deploy the relay in `proxy/cmp-update.php` on your own server (e.g. rt.md) and let the plugin talk to it instead of GitHub:
-
-1. On the server: upload `proxy/cmp-update.php`, copy `proxy/config.sample.php` to `config.php` (kept out of the web root or via the `CMP_PROXY_CONFIG` env var), and fill in the GitHub token + a shared key.
-2. In the plugin: set `CMP_Updater::PROXY_URL` to the proxy URL and `CMP_Updater::PROXY_KEY` to the same shared key (or define `CMP_UPDATE_PROXY` / `CMP_UPDATE_KEY` per site). Commit and release.
-3. Client sites then need **no token at all** — the proxy holds the single token and 302-redirects downloads to GitHub's signed CDN URL.
+The relay in `proxy/cmp-update.php` holds the single read-only GitHub token for the private repo and redirects downloads to GitHub's signed asset URLs (see `proxy/README.md`). Sites only know the relay URL and a shared key (`CMP_Updater::PROXY_URL` / `PROXY_KEY`, overridable per site with `CMP_UPDATE_PROXY` / `CMP_UPDATE_KEY`); the key is not a secret, package integrity comes from the signature.
 
 The `proxy/` folder is excluded from the plugin zip, so it never ships to sites.
 

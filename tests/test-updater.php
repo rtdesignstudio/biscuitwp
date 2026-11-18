@@ -64,20 +64,14 @@ define( 'CMP_UPDATE_KEY', 'k2' );
 cmp_assert_eq( CMP_Updater::proxy_url(), 'https://rt.md/u/', 'proxy_url from wp-config override' );
 cmp_assert_eq( CMP_Updater::proxy_key(), 'k2', 'proxy_key from wp-config override' );
 
-// pick_assets: zip + detached signature picked by name, regardless of order.
-$pa = CMP_Updater::pick_assets( array(
-	array( 'name' => 'consent-manager-pro.zip.sig', 'url' => 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/2' ),
-	array( 'name' => 'consent-manager-pro.zip', 'url' => 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1' ),
-) );
-cmp_assert_eq( $pa['zip'], 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1', 'pick_assets: zip by name' );
-cmp_assert_eq( $pa['sig'], 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/2', 'pick_assets: sig by name' );
-$pa2 = CMP_Updater::pick_assets( array( array( 'name' => 'other.zip', 'url' => 'u1' ) ) );
-cmp_assert_eq( $pa2, array( 'zip' => 'u1', 'sig' => '' ), 'pick_assets: unsigned release -> no sig' );
-cmp_assert_eq( CMP_Updater::pick_assets( 'x' ), array( 'zip' => '', 'sig' => '' ), 'pick_assets: non-array' );
+// 0.4.1: the direct GitHub path (token on the site) is gone; only the relay is handled.
+cmp_assert( ! method_exists( 'CMP_Updater', 'pick_assets' ), 'pick_assets removed with the token path' );
+cmp_assert( ! method_exists( 'CMP_Updater', 'token' ), 'token() removed: no GitHub token on sites' );
+cmp_assert( ! method_exists( 'CMP_Updater', 'authenticated_download' ), 'authenticated_download removed' );
 
 // package_kind: only our relay / our repo are handled (and verified).
 cmp_assert_eq( CMP_Updater::package_kind( 'https://rt.md/cmp-update?action=download&key=k', 'https://rt.md/cmp-update' ), 'proxy', 'package_kind: relay' );
-cmp_assert_eq( CMP_Updater::package_kind( 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1', 'https://rt.md/cmp-update' ), 'github', 'package_kind: our repo' );
+cmp_assert_eq( CMP_Updater::package_kind( 'https://api.github.com/repos/rtgit003/consent-manager-pro/releases/assets/1', 'https://rt.md/cmp-update' ), '', 'package_kind: GitHub API URLs no longer handled (relay only)' );
 cmp_assert_eq( CMP_Updater::package_kind( 'https://api.github.com/repos/someone/else/releases/assets/1', 'https://rt.md/cmp-update' ), '', 'package_kind: other repo' );
 cmp_assert_eq( CMP_Updater::package_kind( 'https://downloads.wordpress.org/plugin/akismet.zip', 'https://rt.md/cmp-update' ), '', 'package_kind: other plugin' );
 cmp_assert_eq( CMP_Updater::package_kind( 'https://rt.md/cmp-update?action=version&key=k', 'https://rt.md/cmp-update' ), '', 'package_kind: relay non-download' );

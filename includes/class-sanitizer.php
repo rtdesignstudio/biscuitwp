@@ -23,13 +23,11 @@ class CMP_Sanitizer {
 			'top-left', 'bottom-left', 'top-right', 'bottom-right',
 			'bottom', 'top', 'modal-center', // legacy aliases
 		);
-		$layouts   = array( 'compact', 'detailed' );
 		$presets   = array( 'neutral', 'warm', 'dark', 'egov' );
 		$modes = array( 'pro', 'light' );
 		$mode  = isset( $input['mode'] ) ? (string) $input['mode'] : '';
 
 		$pos = isset( $input['position'] ) ? (string) $input['position'] : '';
-		$lay = isset( $input['layout'] ) ? (string) $input['layout'] : '';
 		$pre = isset( $input['preset'] ) ? (string) $input['preset'] : '';
 		$ver = isset( $input['policy_version'] ) ? trim( (string) $input['policy_version'] ) : '';
 		$ret = isset( $input['retention_months'] ) ? (int) $input['retention_months'] : 0;
@@ -44,7 +42,6 @@ class CMP_Sanitizer {
 
 		return array(
 			'position'         => in_array( $pos, $positions, true ) ? $pos : 'middle-center',
-			'layout'           => in_array( $lay, $layouts, true ) ? $lay : 'detailed',
 			'preset'           => in_array( $pre, $presets, true ) ? $pre : 'neutral',
 			'mode'             => in_array( $mode, $modes, true ) ? $mode : 'pro',
 			'policy_version'   => '' !== $ver ? $ver : '1',
@@ -53,7 +50,6 @@ class CMP_Sanitizer {
 			'privacy_page_id'  => self::pos_int( $input, 'privacy_page_id' ),
 			'terms_page_id'    => self::pos_int( $input, 'terms_page_id' ),
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),
-			'github_token'     => isset( $input['github_token'] ) ? trim( strip_tags( (string) $input['github_token'] ) ) : '',
 			'block_scripts'    => ! empty( $input['block_scripts'] ),
 			'localize_fonts'   => ! empty( $input['localize_fonts'] ),
 			'reopen_button'    => ! empty( $input['reopen_button'] ),

@@ -76,6 +76,15 @@ class CMP_Plugin {
 				update_option( 'cmp_settings', $settings );
 			}
 		}
+		// 0.4.1: updates come only through the signed relay, so drop any GitHub
+		// token still stored on the site (and the unused "layout" setting).
+		if ( false === $old || version_compare( $old, '0.4.1', '<' ) ) {
+			$settings = get_option( 'cmp_settings', array() );
+			if ( is_array( $settings ) && ( array_key_exists( 'github_token', $settings ) || array_key_exists( 'layout', $settings ) ) ) {
+				unset( $settings['github_token'], $settings['layout'] );
+				update_option( 'cmp_settings', $settings );
+			}
+		}
 		// 0.4.1: consent lasts at most 13 months; cap longer stored durations.
 		if ( false === $old || version_compare( $old, '0.4.1', '<' ) ) {
 			$settings = get_option( 'cmp_settings', array() );

@@ -163,22 +163,6 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Retenție log (luni)', 'consent-manager-pro' ); ?></th>
 						<td><input type="number" min="1" name="cmp[retention_months]" value="<?php echo esc_attr( $s['retention_months'] ); ?>" class="small-text"></td>
 					</tr>
-					<?php if ( '' === CMP_Updater::proxy_url() ) : // Token doar in modul direct-GitHub; ascuns cand exista proxy de update. ?>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Token GitHub (update-uri)', 'consent-manager-pro' ); ?></th>
-						<td>
-							<?php if ( defined( 'CMP_GITHUB_TOKEN' ) && CMP_GITHUB_TOKEN ) : ?>
-								<p class="description"><?php esc_html_e( 'Tokenul este definit în wp-config.php (CMP_GITHUB_TOKEN) — câmpul de mai jos este ignorat.', 'consent-manager-pro' ); ?></p>
-							<?php endif; ?>
-							<?php $cmp_has_token = ! empty( $s['github_token'] ); ?>
-							<input type="password" class="regular-text" name="cmp[github_token]" value="" autocomplete="new-password" placeholder="<?php echo esc_attr( $cmp_has_token ? '••••••••' : '' ); ?>">
-							<?php if ( $cmp_has_token ) : ?>
-								<label style="margin-left:8px"><input type="checkbox" name="cmp[github_token_clear]" value="1"> <?php esc_html_e( 'Șterge tokenul salvat', 'consent-manager-pro' ); ?></label>
-							<?php endif; ?>
-							<p class="description"><?php esc_html_e( 'Fine-grained token, read-only pe repo-ul plugin-ului. Recomandat: define( \'CMP_GITHUB_TOKEN\', \'...\' ) în wp-config.php în loc de acest câmp. Fără token, verificarea de update-uri e dezactivată.', 'consent-manager-pro' ); ?></p>
-						</td>
-					</tr>
-					<?php endif; ?>
 					<?php
 					$cmp_texts = isset( $s['texts'] ) && is_array( $s['texts'] ) ? $s['texts'] : array();
 					$cmp_field = function ( $key ) use ( $cmp_texts ) {
@@ -253,11 +237,6 @@ class CMP_Settings_Page {
 		$raw   = isset( $_POST['cmp'] ) && is_array( $_POST['cmp'] ) ? wp_unslash( $_POST['cmp'] ) : array();
 		$clean = CMP_Sanitizer::settings( $raw );
 		$old = CMP_Consent::get_settings();
-		if ( ! empty( $raw['github_token_clear'] ) ) {
-			$clean['github_token'] = '';
-		} elseif ( '' === $clean['github_token'] && isset( $old['github_token'] ) ) {
-			$clean['github_token'] = (string) $old['github_token'];
-		}
 		update_option( 'cmp_settings', $clean );
 		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'updated' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;

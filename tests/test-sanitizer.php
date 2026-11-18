@@ -66,10 +66,11 @@ $lt = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'texts' => array( 
 cmp_assert( array_key_exists( 'light_intro', $lt['texts'] ), 'light_intro key present in texts' );
 cmp_assert_eq( $lt['texts']['light_intro'], 'Notice light', 'light_intro stripped + trimmed' );
 
-$tk = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'github_token' => "  ghp_abc<script>123  " ) );
-cmp_assert_eq( $tk['github_token'], 'ghp_abc123', 'github_token stripped + trimmed' );
-$tk2 = CMP_Sanitizer::settings( array( 'position' => 'bottom' ) );
-cmp_assert_eq( $tk2['github_token'], '', 'missing github_token => empty string' );
+// 0.4.1: updates come only through the signed relay; no GitHub token is stored,
+// and the unused "layout" setting is gone.
+$tk = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'github_token' => 'ghp_abc', 'layout' => 'compact' ) );
+cmp_assert( ! array_key_exists( 'github_token', $tk ), 'github_token is no longer a setting' );
+cmp_assert( ! array_key_exists( 'layout', $tk ), 'layout is no longer a setting' );
 
 $bs1 = CMP_Sanitizer::settings( array( 'position' => 'bottom', 'block_scripts' => '1' ) );
 cmp_assert_eq( $bs1['block_scripts'], true, 'block_scripts truthy -> true' );

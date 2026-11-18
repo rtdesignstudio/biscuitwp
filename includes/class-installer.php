@@ -37,7 +37,6 @@ class CMP_Installer {
 	public static function default_settings() {
 		return array(
 			'position'         => 'bottom',
-			'layout'           => 'detailed',
 			'preset'           => 'neutral',
 			'policy_version'   => '1',
 			'retention_months' => 13,
