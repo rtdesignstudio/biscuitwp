@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	// Standalone-loadable for tests; rewrite() is pure. WP-only methods guarded.
 }
+require_once dirname( __DIR__ ) . '/class-services.php';
 
 /**
  * Prior blocking of Google Analytics / Tag Manager / Meta Pixel: rewrites their
@@ -13,52 +14,12 @@ class CMP_Blocker {
 
 	const FONT_HOSTS = array( 'fonts.googleapis.com', 'fonts.gstatic.com' );
 
-	// All tracker hosts across every rule — used for resource-hint stripping.
+	/**
+	 * Tracker hosts of the built-in library.
+	 *
+	 * @deprecated Use CMP_Blocker::tracker_hosts( $services ); kept for older callers and tests.
+	 */
 	const TRACKER_HOSTS = array( 'googletagmanager.com', 'google-analytics.com', 'connect.facebook.net' );
-
-	// Ordered blocking rules. First match wins; its 'cat' becomes data-cmp-block.
-	// 'gtm' => container special-case (body has both 'GTM-' and 'dataLayer').
-	const RULES = array(
-		array(
-			'cat'    => 'statistics',
-			'hosts'  => array( 'googletagmanager.com', 'google-analytics.com' ),
-			'inline' => array( "gtag('config'", 'gtag("config"', "ga('create'" ),
-			'gtm'    => true,
-		),
-		array(
-			'cat'    => 'marketing',
-			'hosts'  => array( 'connect.facebook.net' ),
-			'inline' => array( "fbq('init'", 'fbq("init"', "fbq('track'", 'fbq("track"' ),
-			'gtm'    => false,
-		),
-	);
-
-	// Third-party iframes that set cookies: replaced by a placeholder until consent.
-	// 'path' (optional) restricts a shared host (google.com) to the embed path;
-	// 'nocookie' loads YouTube from youtube-nocookie.com once allowed.
-	const EMBEDS = array(
-		array(
-			'name'     => 'YouTube',
-			'cat'      => 'marketing',
-			'hosts'    => array( 'youtube.com', 'youtube-nocookie.com', 'youtu.be' ),
-			'path'     => '',
-			'nocookie' => true,
-		),
-		array(
-			'name'     => 'Vimeo',
-			'cat'      => 'statistics',
-			'hosts'    => array( 'vimeo.com' ),
-			'path'     => '',
-			'nocookie' => false,
-		),
-		array(
-			'name'     => 'Google Maps',
-			'cat'      => 'marketing',
-			'hosts'    => array( 'google.com', 'google.md', 'google.ro' ),
-			'path'     => '/maps',
-			'nocookie' => false,
-		),
-	);
 
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
@@ -73,7 +34,7 @@ class CMP_Blocker {
 		$s     = CMP_Consent::get_settings();
 		$hosts = array();
 		if ( self::blocks_trackers( $s ) ) {
-			$hosts = array_merge( $hosts, self::TRACKER_HOSTS );
+			$hosts = array_merge( $hosts, self::tracker_hosts( self::rewritable( self::default_services() ) ) );
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$hosts = array_merge( $hosts, self::FONT_HOSTS );
@@ -141,26 +102,68 @@ class CMP_Blocker {
 	 * array( 'raw' => array( 'statistics' ), 'blocked' => array( 'marketing' ) ).
 	 */
 	public static function detect_trackers( $html ) {
+		$html     = (string) $html;
+		$services = self::rewritable( CMP_Services::library() );
+		$raw      = array();
+		foreach ( self::detect_services( $html, $services )['raw'] as $id ) {
+			foreach ( $services as $svc ) {
+				if ( $svc['id'] === $id && ! in_array( $svc['category'], $raw, true ) ) {
+					$raw[] = $svc['category'];
+				}
+			}
+		}
+		$blocked = array();
+		if ( preg_match_all( '/data-cmp-block\s*=\s*["\']([a-z0-9_-]+)["\']/i', $html, $m ) ) {
+			$blocked = array_values( array_unique( $m[1] ) );
+		}
+		return array( 'raw' => $raw, 'blocked' => $blocked );
+	}
+
+	/**
+	 * Pure: which services a page's HTML loads directly ('raw', by service id:
+	 * live <script> tags) and which this plugin has neutralized ('blocked', from
+	 * data-cmp-service on rewritten scripts and embed placeholders).
+	 */
+	public static function detect_services( $html, array $services ) {
 		$html    = (string) $html;
 		$raw     = array();
 		$blocked = array();
-		// Hosts/markers inside neutralized tags are base64-encoded, so only live tags match here.
-		foreach ( self::RULES as $rule ) {
+		// Page-wide on purpose: optimizers move trackers to data-src / data-litespeed-src
+		// or leave them in <noscript>, and those still load. Neutralized tags hold
+		// their URL or body base64-encoded, so only live markup matches here.
+		$scripts = array_filter(
+			self::rewritable( $services ),
+			function ( $s ) {
+				return isset( $s['type'] ) && 'script' === $s['type'];
+			}
+		);
+		foreach ( $scripts as $svc ) {
+			$page = $html;
+			// A longer host of another service (googletagmanager.com/gtag/js) is not this service's.
+			foreach ( $scripts as $other ) {
+				foreach ( (array) $other['hosts'] as $oh ) {
+					foreach ( (array) $svc['hosts'] as $h ) {
+						if ( $other['id'] !== $svc['id'] && 0 === stripos( $oh, $h . '/' ) ) {
+							$page = str_ireplace( $oh, '', $page );
+						}
+					}
+				}
+			}
 			$hit = false;
-			foreach ( array_merge( $rule['hosts'], $rule['inline'] ) as $needle ) {
-				if ( false !== stripos( $html, $needle ) ) {
+			foreach ( array_merge( (array) $svc['hosts'], (array) $svc['inline'] ) as $needle ) {
+				if ( '' !== $needle && false !== stripos( $page, $needle ) ) {
 					$hit = true;
 					break;
 				}
 			}
-			if ( ! $hit && $rule['gtm'] && false !== strpos( $html, 'GTM-' ) && false !== strpos( $html, 'dataLayer' ) && preg_match( '/<script\b(?![^>]*\bdata-cmp-block)[^>]*>[^<]*GTM-/i', $html ) ) {
+			if ( ! $hit && ! empty( $svc['gtm'] ) && false !== strpos( $page, 'GTM-' ) && false !== strpos( $page, 'dataLayer' ) && preg_match( '/<script\b(?![^>]*\bdata-cmp-block)[^>]*>[^<]*GTM-/i', $page ) ) {
 				$hit = true;
 			}
 			if ( $hit ) {
-				$raw[] = $rule['cat'];
+				$raw[] = $svc['id'];
 			}
 		}
-		if ( preg_match_all( '/data-cmp-block\s*=\s*["\']([a-z0-9_-]+)["\']/i', $html, $m ) ) {
+		if ( preg_match_all( '/data-cmp-service\s*=\s*["\']([a-z0-9-]+)["\']/i', $html, $m ) ) {
 			$blocked = array_values( array_unique( $m[1] ) );
 		}
 		return array( 'raw' => $raw, 'blocked' => $blocked );
@@ -209,7 +212,7 @@ class CMP_Blocker {
 		$s    = CMP_Consent::get_settings();
 		$html = (string) $html;
 		if ( self::blocks_trackers( $s ) ) {
-			$html = self::rewrite( $html, self::embed_labels() );
+			$html = self::rewrite( $html, self::embed_labels() ); // services: active() when available, else the library
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
@@ -218,21 +221,65 @@ class CMP_Blocker {
 		return $html;
 	}
 
+	/** The services to act on when the caller gives none: the site's active ones (Task 4), else the library. */
+	private static function default_services() {
+		return method_exists( 'CMP_Services', 'active' ) ? CMP_Services::active() : CMP_Services::library();
+	}
+
+	/** Pure: services that may be blocked (necessary / exempt ones never are). */
+	private static function rewritable( array $services ) {
+		return array_values(
+			array_filter(
+				$services,
+				function ( $s ) {
+					return is_array( $s ) && ( ! isset( $s['category'] ) || 'necessary' !== $s['category'] ) && empty( $s['exempt'] );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Pure: hosts (no paths, unique) of the script-type services, for <noscript>
+	 * stripping and resource hints.
+	 */
+	public static function tracker_hosts( array $services ) {
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( ! isset( $s['type'] ) || 'script' !== $s['type'] ) {
+				continue;
+			}
+			foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
+				$slash = strpos( (string) $h, '/' );
+				$h     = strtolower( false === $slash ? (string) $h : substr( (string) $h, 0, $slash ) );
+				if ( '' !== $h && ! in_array( $h, $out, true ) ) {
+					$out[] = $h;
+				}
+			}
+		}
+		return $out;
+	}
+
 	/**
 	 * Pure: neutralize tracker <script> tags and third-party iframes, drop tracker
 	 * <noscript> blocks and resource-hint <link> tags. $labels: placeholder copy
-	 * (embed_text with %s for the service, embed_load, settings).
+	 * (embed_text with %s for the service, embed_load, settings). $services: the
+	 * rules to apply (null = active services, else the library). $thumb: reserved
+	 * for embed thumbnails.
 	 */
-	public static function rewrite( $html, array $labels = array() ) {
-		$html = (string) $html;
-		$html = preg_replace_callback(
+	public static function rewrite( $html, array $labels = array(), ?array $services = null, $thumb = null ) {
+		$html     = (string) $html;
+		$services = self::rewritable( null === $services ? self::default_services() : $services );
+		$html     = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
-			array( __CLASS__, 'rewrite_tag' ),
+			function ( $m ) use ( $services ) {
+				return self::rewrite_tag( $m, $services );
+			},
 			$html
 		);
-		$html = self::rewrite_embeds( (string) $html, $labels );
-		$html = self::strip_tracker_noscript( (string) $html, self::TRACKER_HOSTS );
-		return self::strip_hint_links( (string) $html, self::TRACKER_HOSTS );
+		$html  = self::rewrite_embeds( (string) $html, $labels, $services );
+		$hosts = self::tracker_hosts( $services );
+		$html  = self::strip_tracker_noscript( (string) $html, $hosts );
+		return self::strip_hint_links( (string) $html, $hosts );
 	}
 
 	/** Placeholder copy in the current page language. */
@@ -260,17 +307,9 @@ class CMP_Blocker {
 		return $h === $host || substr( $h, -( strlen( $host ) + 1 ) ) === '.' . $host;
 	}
 
-	/** Pure: the EMBEDS entry an iframe URL belongs to, or null. */
-	public static function embed_for( $url ) {
-		$path = (string) parse_url( (string) $url, PHP_URL_PATH );
-		foreach ( self::EMBEDS as $embed ) {
-			foreach ( $embed['hosts'] as $host ) {
-				if ( self::url_host_is( $url, $host ) && ( '' === $embed['path'] || 0 === strpos( $path, $embed['path'] ) ) ) {
-					return $embed;
-				}
-			}
-		}
-		return null;
+	/** Pure: the embed service an iframe URL belongs to, or null. */
+	public static function embed_for( $url, ?array $services = null ) {
+		return CMP_Services::embed_service( $url, null === $services ? self::default_services() : $services );
 	}
 
 	/**
@@ -278,7 +317,8 @@ class CMP_Blocker {
 	 * iframe sits in a <template> (inert: the browser never loads it) and is put
 	 * back by banner.js once its category is accepted or the visitor clicks "load".
 	 */
-	public static function rewrite_embeds( $html, array $labels = array() ) {
+	public static function rewrite_embeds( $html, array $labels = array(), ?array $services = null ) {
+		$services = self::rewritable( null === $services ? self::default_services() : $services );
 		$labels = array_merge(
 			array(
 				'embed_text' => 'Conținut de la %s. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.',
@@ -289,7 +329,7 @@ class CMP_Blocker {
 		);
 		return (string) preg_replace_callback(
 			'/<iframe\b([^>]*)>(.*?)<\/iframe>/is',
-			function ( $m ) use ( $labels ) {
+			function ( $m ) use ( $labels, $services ) {
 				$attrs = $m[1];
 				if ( false !== stripos( $attrs, 'data-cmp-keep' ) ) {
 					return $m[0];
@@ -297,14 +337,14 @@ class CMP_Blocker {
 				if ( ! preg_match( '/(?:^|\s)src\s*=\s*(["\'])(.*?)\1/is', $attrs, $sm ) ) {
 					return $m[0];
 				}
-				$src   = html_entity_decode( $sm[2], ENT_QUOTES );
-				$embed = self::embed_for( $src );
+				$src   = trim( html_entity_decode( $sm[2], ENT_QUOTES ) );
+				$embed = self::embed_for( $src, $services );
 				if ( null === $embed ) {
 					return $m[0];
 				}
 
 				$iframe = $m[0];
-				if ( $embed['nocookie'] && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
+				if ( ! empty( $embed['nocookie'] ) && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
 					$nocookie = preg_replace( '#^https?://(?:www\.)?youtube\.com/#i', 'https://www.youtube-nocookie.com/', $src );
 					$iframe   = str_replace( $sm[0], str_replace( $sm[2], htmlspecialchars( $nocookie, ENT_QUOTES, 'UTF-8' ), $sm[0] ), $iframe );
 				}
@@ -322,7 +362,7 @@ class CMP_Blocker {
 				$text = str_replace( '%s', $e( $embed['name'] ), $e( $labels['embed_text'] ) );
 
 				$preset = isset( $labels['preset'] ) && in_array( $labels['preset'], array( 'neutral', 'warm', 'dark', 'egov' ), true ) ? ' cmp--' . $labels['preset'] : '';
-				return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $embed['cat'] ) . '" style="aspect-ratio:' . $ratio . $max . '">'
+				return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $embed['category'] ) . '" data-cmp-service="' . $e( $embed['id'] ) . '" style="aspect-ratio:' . $ratio . $max . '">'
 					. '<div class="cmp-embed__inner">'
 					. '<p class="cmp-embed__text">' . $text . '</p>'
 					. '<p class="cmp-embed__actions">'
@@ -374,7 +414,39 @@ class CMP_Blocker {
 		);
 	}
 
-	private static function rewrite_tag( $m ) {
+	/** The src attribute of a <script> tag's attributes ('' when none). */
+	private static function script_src( $attrs ) {
+		return preg_match( '/(?:^|\s)src\s*=\s*["\']([^"\']+)["\']/i', $attrs, $sm ) ? trim( $sm[1] ) : '';
+	}
+
+	/**
+	 * Pure: the script service a tag belongs to (by src host, inline marker or
+	 * GTM container), or null. Inline loaders that only mention a service host
+	 * in their body (an SDK injected via js.src) count too.
+	 */
+	private static function script_for( $src, $body, array $services ) {
+		$svc = CMP_Services::script_service( $src, $body, $services );
+		if ( null === $svc && '' !== $src ) {
+			$svc = CMP_Services::script_service( '', $body, $services );
+		}
+		if ( null === $svc ) {
+			foreach ( $services as $s ) {
+				if ( ! isset( $s['type'] ) || 'script' !== $s['type'] ) {
+					continue;
+				}
+				foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
+					$slash = strpos( (string) $h, '/' );
+					$host  = false === $slash ? (string) $h : substr( (string) $h, 0, $slash );
+					if ( '' !== $host && false !== stripos( $body, $host ) ) {
+						return $s;
+					}
+				}
+			}
+		}
+		return $svc;
+	}
+
+	private static function rewrite_tag( $m, array $services ) {
 		$attrs = $m[1];
 		$body  = $m[2];
 
@@ -383,50 +455,12 @@ class CMP_Blocker {
 			return $m[0];
 		}
 
-		$src = '';
-		if ( preg_match( '/(?:^|\s)src\s*=\s*["\']([^"\']+)["\']/i', $attrs, $sm ) ) {
-			$src = $sm[1];
-		}
-
-		$category = '';
-		foreach ( self::RULES as $rule ) {
-			if ( '' !== $src ) {
-				foreach ( $rule['hosts'] as $host ) {
-					if ( false !== stripos( $src, $host ) ) {
-						$category = $rule['cat'];
-						break;
-					}
-				}
-			}
-			if ( '' === $category ) {
-				foreach ( $rule['inline'] as $needle ) {
-					if ( false !== strpos( $body, $needle ) ) {
-						$category = $rule['cat'];
-						break;
-					}
-				}
-			}
-			if ( '' === $category && ! empty( $rule['gtm'] )
-				&& false !== strpos( $body, 'GTM-' ) && false !== strpos( $body, 'dataLayer' ) ) {
-				$category = $rule['cat'];
-			}
-			// Inline loaders that reference a tracker host in the body (e.g. an
-			// SDK injected via js.src) but do not call fbq()/gtag('config').
-			if ( '' === $category ) {
-				foreach ( $rule['hosts'] as $host ) {
-					if ( false !== stripos( $body, $host ) ) {
-						$category = $rule['cat'];
-						break;
-					}
-				}
-			}
-			if ( '' !== $category ) {
-				break;
-			}
-		}
-		if ( '' === $category ) {
+		$src = self::script_src( $attrs );
+		$svc = self::script_for( $src, $body, $services );
+		if ( null === $svc ) {
 			return $m[0];
 		}
+		$category = $svc['category'];
 
 		// Keep the other attributes (id, async, defer, …) but drop type + src.
 		$keep = preg_replace( '/(^|\s)type\s*=\s*["\'][^"\']*["\']/i', '$1', $attrs );
@@ -441,6 +475,6 @@ class CMP_Blocker {
 		} else {
 			$enc = ' data-cmp-enc="1" data-cmp-body="' . base64_encode( $body ) . '"';
 		}
-		return '<script type="text/plain" data-cmp-block="' . $category . '"' . $enc . $keep . '></script>';
+		return '<script type="text/plain" data-cmp-block="' . $category . '" data-cmp-service="' . $svc['id'] . '"' . $enc . $keep . '></script>';
 	}
 }
