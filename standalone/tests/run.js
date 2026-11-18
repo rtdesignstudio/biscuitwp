@@ -109,7 +109,9 @@ eq(cmp.parseConsent('not json'), null, 'bad json -> null');
 eq(cmp.normalizeConfig({}).cookieDays, 180, 'cookieDays default 180');
 eq(cmp.normalizeConfig({ cookieDays: 90 }).cookieDays, 90, 'cookieDays kept');
 eq(cmp.normalizeConfig({ cookieDays: 0 }).cookieDays, 180, 'cookieDays 0 -> 180');
-eq(cmp.normalizeConfig({ cookieDays: 99999 }).cookieDays, 180, 'cookieDays over max -> 180');
+eq(cmp.normalizeConfig({ cookieDays: 99999 }).cookieDays, 396, 'cookieDays over 13 months -> 396');
+eq(cmp.normalizeConfig({ cookieDays: 396 }).cookieDays, 396, 'cookieDays 396 kept');
+eq(cmp.normalizeConfig({ cookieDays: 'x' }).cookieDays, 180, 'cookieDays not a number -> 180');
 
 // escapeHtml
 eq(cmp.escapeHtml('<a>"&\''), '&lt;a&gt;&quot;&amp;&#39;', 'escapes html');

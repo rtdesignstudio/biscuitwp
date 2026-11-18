@@ -89,7 +89,14 @@ cmp_assert_eq( CMP_Sanitizer::settings( array( 'position' => 'nope' ) )['positio
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 90 ) )['cookie_days'], 90, 'cookie_days kept' );
 cmp_assert_eq( CMP_Sanitizer::settings( array() )['cookie_days'], 180, 'cookie_days default 180' );
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 0 ) )['cookie_days'], 180, 'cookie_days 0 -> 180' );
-cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 99999 ) )['cookie_days'], 180, 'cookie_days over max -> 180' );
+// 0.4.1: consent lasts at most 13 months (396 days); longer values are capped, not reset.
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 99999 ) )['cookie_days'], 396, 'cookie_days over 13 months -> 396' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 3650 ) )['cookie_days'], 396, 'cookie_days 10 years -> 396' );
+cmp_assert_eq( CMP_Sanitizer::settings( array( 'cookie_days' => 396 ) )['cookie_days'], 396, 'cookie_days 396 kept' );
+cmp_assert_eq( CMP_Sanitizer::cap_cookie_days( 730 ), 396, 'cap_cookie_days caps stored values (migration)' );
+cmp_assert_eq( CMP_Sanitizer::cap_cookie_days( 180 ), 180, 'cap_cookie_days keeps valid values' );
+cmp_assert_eq( CMP_Sanitizer::cap_cookie_days( -5 ), 180, 'cap_cookie_days: invalid -> 180' );
+cmp_assert_eq( CMP_Sanitizer::MAX_COOKIE_DAYS, 396, 'MAX_COOKIE_DAYS is 13 months' );
 
 // reload_on_decision: off by default, on only when ticked
 cmp_assert_eq( CMP_Sanitizer::settings( array() )['reload_on_decision'], false, 'reload_on_decision default off' );

@@ -98,8 +98,8 @@ class CMP_Settings_Page {
 					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Memorarea consimțământului (zile)', 'consent-manager-pro' ); ?></th>
 						<td>
-							<input type="number" name="cmp[cookie_days]" min="1" max="3650" value="<?php echo esc_attr( isset( $s['cookie_days'] ) ? (int) $s['cookie_days'] : 180 ); ?>" class="small-text">
-							<p class="description"><?php esc_html_e( 'Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180). Diferit de retenția registrului de consimțăminte.', 'consent-manager-pro' ); ?></p>
+							<input type="number" name="cmp[cookie_days]" min="1" max="396" value="<?php echo esc_attr( isset( $s['cookie_days'] ) ? (int) $s['cookie_days'] : 180 ); ?>" class="small-text">
+							<p class="description"><?php esc_html_e( 'Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de retenția registrului de consimțăminte.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr>

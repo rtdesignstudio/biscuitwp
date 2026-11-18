@@ -52,7 +52,7 @@ class CMP_Banner {
 				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
 				'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
-				'cookieDays' => isset( $cmp_settings['cookie_days'] ) ? (int) $cmp_settings['cookie_days'] : 180,
+				'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
 			)
 		);
 	}

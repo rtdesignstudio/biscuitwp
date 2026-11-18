@@ -5,6 +5,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CMP_Sanitizer {
 
+	/** Longest a stored consent may last: 13 months (EU practice; CNIL: 6–13). */
+	const MAX_COOKIE_DAYS = 396;
+
+	/** Pure: consent duration in days, capped at 13 months; invalid -> 180. */
+	public static function cap_cookie_days( $days ) {
+		$days = (int) $days;
+		if ( $days < 1 ) {
+			return 180;
+		}
+		return min( $days, self::MAX_COOKIE_DAYS );
+	}
+
 	public static function settings( array $input ) {
 		$positions = array(
 			'top-center', 'middle-center', 'bottom-center',
@@ -37,7 +49,7 @@ class CMP_Sanitizer {
 			'mode'             => in_array( $mode, $modes, true ) ? $mode : 'pro',
 			'policy_version'   => '' !== $ver ? $ver : '1',
 			'retention_months' => $ret >= 1 ? $ret : 13,
-			'cookie_days'      => ( $cd >= 1 && $cd <= 3650 ) ? $cd : 180,
+			'cookie_days'      => self::cap_cookie_days( $cd ),
 			'privacy_page_id'  => self::pos_int( $input, 'privacy_page_id' ),
 			'terms_page_id'    => self::pos_int( $input, 'terms_page_id' ),
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),

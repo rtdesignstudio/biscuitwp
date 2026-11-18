@@ -19,6 +19,7 @@ class CMP_Plugin {
 	private function boot() {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		require_once CMP_PATH . 'includes/class-consent.php';
+		require_once CMP_PATH . 'includes/class-sanitizer.php';
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
 		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
@@ -73,6 +74,17 @@ class CMP_Plugin {
 			if ( is_array( $settings ) && empty( $settings['block_scripts'] ) ) {
 				$settings['block_scripts'] = true;
 				update_option( 'cmp_settings', $settings );
+			}
+		}
+		// 0.4.1: consent lasts at most 13 months; cap longer stored durations.
+		if ( false === $old || version_compare( $old, '0.4.1', '<' ) ) {
+			$settings = get_option( 'cmp_settings', array() );
+			if ( is_array( $settings ) && isset( $settings['cookie_days'] ) ) {
+				$capped = CMP_Sanitizer::cap_cookie_days( $settings['cookie_days'] );
+				if ( $capped !== (int) $settings['cookie_days'] ) {
+					$settings['cookie_days'] = $capped;
+					update_option( 'cmp_settings', $settings );
+				}
 			}
 		}
 		update_option( 'cmp_db_version', CMP_VERSION );

@@ -171,7 +171,8 @@
 		});
 
 		var cd = parseInt(raw.cookieDays, 10);
-		if (!(cd >= 1 && cd <= 3650)) { cd = 180; }
+		// Consent lasts at most 13 months (396 days); longer values are capped.
+		if (!(cd >= 1)) { cd = 180; } else if (cd > 396) { cd = 396; }
 
 		return {
 			site: typeof raw.site === 'string' ? raw.site : '',
