@@ -354,5 +354,94 @@ eq(cmp.stripAlwaysButtons({ querySelectorAll: function (sel) { return sel === '[
 ok(rm.length === 2 && rm[0] === b1 && rm[1] === b2, 'stripAlwaysButtons removes via the parent');
 eq(cmp.stripAlwaysButtons({ querySelectorAll: function () { return []; } }), 0, 'stripAlwaysButtons: none present');
 
+// B4 Task 4: re-consent in the standalone build.
+// normalizeConfig: services map (unknown -> null) and optional display names.
+var SVC_IN = { marketing: ['meta-pixel'] };
+eq(cmp.normalizeConfig({ services: SVC_IN }).services, SVC_IN, 'T4: valid services map kept');
+eq(cmp.normalizeConfig({}).services, null, 'T4: no services -> unknown (null)');
+eq(cmp.normalizeConfig({ services: 'x' }).services, null, 'T4: services string -> unknown');
+eq(cmp.normalizeConfig({ services: ['a'] }).services, null, 'T4: services array -> unknown');
+eq(cmp.normalizeConfig({ services: null }).services, null, 'T4: services null -> unknown');
+eq(cmp.normalizeConfig({ serviceNames: { 'meta-pixel': 'Meta Pixel', bad: 5 } }).serviceNames, { 'meta-pixel': 'Meta Pixel' }, 'T4: serviceNames keeps string values only');
+eq(cmp.normalizeConfig({ serviceNames: 'x' }).serviceNames, {}, 'T4: bad serviceNames -> {}');
+eq(cmp.normalizeConfig({}).serviceNames, {}, 'T4: no serviceNames -> {}');
+// Texts: exact copy in the three packs.
+var RC_TEXTS = {
+	ro: ['Am adăugat servicii noi', 'Pe site au apărut servicii noi în categoriile pe care le-ai acceptat. Alege din nou.', 'nou'],
+	ru: ['Мы добавили новые сервисы', 'На сайте появились новые сервисы в принятых вами категориях. Сделайте выбор снова.', 'новый'],
+	en: ['We added new services', 'New services were added to categories you accepted. Please choose again.', 'new']
+};
+Object.keys(RC_TEXTS).forEach(function (l) {
+	var t = cmp.normalizeConfig({ lang: l }).texts;
+	eq([t.reconsent_title, t.reconsent_text, t.svc_new], RC_TEXTS[l], 'T4: re-consent texts ' + l);
+});
+// The pure block of cmp.js behaves exactly like banner.js's (shared case table).
+var rcC = cmpSrc.match(/\/\/ reconsent:begin\n([\s\S]*?)\/\/ reconsent:end/);
+ok(!!rcC, 'T4: cmp.js exposes the reconsent block');
+if (rcC && rcM) {
+	var RC_RET = '\nreturn { svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories, reconsentView: reconsentView, svcFlat: svcFlat };';
+	var rcB = new Function(rcM[1] + RC_RET)(), rcS = new Function(rcC[1] + RC_RET)();
+	var TBL_CK = [
+		null, 'junk', {}, { categories: ['necessary', 'marketing'] },
+		{ categories: ['necessary', 'functional', 'marketing'], svc: { functional: ['a'], marketing: ['meta-pixel'] } },
+		{ categories: ['necessary', 'statistics', 'marketing'], svc: { statistics: ['ga'], marketing: ['meta-pixel'] } },
+		{ categories: ['marketing'], svc: 'junk' }, { categories: ['marketing'], svc: [] }, { categories: 'marketing', svc: {} },
+		{ categories: ['marketing'], svc: { marketing: 'x' } }
+	];
+	var TBL_MAP = [undefined, null, 'x', [], {}, { marketing: 'oops' }, { marketing: ['meta-pixel', 'tiktok-pixel'] }, { functional: ['a', 'b'], statistics: ['ga', 'ga2'], marketing: ['meta-pixel', 'tiktok-pixel'] }];
+	var TBL_REQ = [undefined, null, [], ['necessary'], ['necessary', 'functional'], 'necessary'];
+	var diffs = 0;
+	TBL_CK.forEach(function (ck) { TBL_MAP.forEach(function (mp) {
+		['newServices', 'svcSnapshot'].forEach(function (fn) {
+			var a = JSON.stringify(fn === 'svcSnapshot' ? rcB[fn](['necessary', 'marketing'], mp) : rcB[fn](ck, mp)), b = JSON.stringify(fn === 'svcSnapshot' ? rcS[fn](['necessary', 'marketing'], mp) : rcS[fn](ck, mp));
+			if (a !== b) { diffs++; console.error('DIFF ' + fn + ' ' + JSON.stringify([ck, mp]) + ' ' + a + ' vs ' + b); }
+		});
+		TBL_REQ.forEach(function (rq) {
+			['effectiveCategories', 'reconsentView'].forEach(function (fn) {
+				var a = JSON.stringify(rcB[fn](ck, mp, rq)), b = JSON.stringify(rcS[fn](ck, mp, rq));
+				if (a !== b) { diffs++; console.error('DIFF ' + fn + ' ' + JSON.stringify([ck, mp, rq]) + ' ' + a + ' vs ' + b); }
+			});
+		});
+	}); });
+	eq(diffs, 0, 'T4: banner.js and cmp.js reconsent blocks agree on the shared case table');
+	eq(rcS.svcFlat({ marketing: ['a', 'b'], statistics: ['b', 'c'] }), ['a', 'b', 'c'], 'T4: svcFlat dedupes');
+	eq(rcS.svcFlat(null), [], 'T4: svcFlat unknown -> []');
+	eq(rcS.effectiveCategories(reqCk, reqMap, ['necessary', 'functional']), ['necessary', 'functional', 'marketing'], 'T4: standalone effectiveCategories keeps required slugs');
+	eq(rcS.reconsentView(reqCk2, { functional: ['a', 'b'], marketing: ['meta-pixel', 'tiktok-pixel'] }, ['necessary', 'functional']), { show: true, newIds: { marketing: ['tiktok-pixel'] }, preselect: ['necessary', 'functional'] }, 'T4: standalone reconsentView lists only optional categories');
+	eq(rcS.reconsentView({ v: '1', categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel'] } }, undefined, ['necessary']).show, false, 'T4: unknown map -> no re-prompt');
+}
+ok(typeof cmp.reconsentView === 'function' && typeof cmp.svcFlat === 'function', 'T4: cmp.js exports reconsentView and svcFlat');
+// cmp.js wiring (source checks), mirroring banner.js.
+ok(/function save\(accepted, decision\) \{[\s\S]*?var snap = svcSnapshot\(accepted, cfg\.services\);[\s\S]*?if \(snap !== null\) \{ data\.svc = snap; \}[\s\S]*?writeCookie\(data\);/.test(cmpSrc), 'T4: cmp.js save(): svc written only when the map is known');
+ok(/function consentedCategories\(\) \{[\s\S]*?effectiveCategories\(c, cfg\.services, requiredSlugs\(\)\)/.test(cmpSrc), 'T4: cmp.js consentedCategories() reads through effectiveCategories');
+ok(!/c\.categories \|\| \[\]/.test(cmpSrc), 'T4: cmp.js: no raw `c.categories || []` read left');
+ok(!/storedCategories\(readCookie\(\), VERSION\)/.test(cmpSrc.replace(/function storedCategories[\s\S]*?\n\t\}/, '')) || /consentedCategories\(\)/.test(cmpSrc), 'T4: cmp.js replay uses the effective categories');
+ok(/isAllowed: function \(slug\) \{[\s\S]*?consentedCategories\(\)\.indexOf\(slug\)/.test(cmpSrc), 'T4: cmp.js isAllowed uses the effective categories');
+ok(/getConsent: function \(\) \{[\s\S]*?effectiveCategories\(c, cfg\.services, requiredSlugs\(\)\)/.test(cmpSrc), 'T4: cmp.js getConsent reports the effective categories');
+ok(/reconsentView\(c, cfg\.services, requiredSlugs\(\)\)/.test(cmpSrc), 'T4: cmp.js pendingReconsent passes the required slugs');
+ok(/function renderReconsent\(view\) \{[\s\S]*?\[data-cmp-action="back"\][\s\S]*?\.hidden = on;/.test(cmpSrc), 'T4: cmp.js hides the back button during re-consent');
+ok(/function openPrefs\(\) \{[\s\S]*?renderReconsent\(pendingReconsent\(\)\)/.test(cmpSrc), 'T4: cmp.js openPrefs renders re-consent');
+ok(/textContent = ids\.map\(svcLabel\)/.test(cmpSrc), 'T4: cmp.js names the new services via textContent');
+ok(/data-cmp-reconsent-text/.test(cmpSrc) && /data-cmp-cat-new=/.test(cmpSrc), 'T4: cmp.js renders the re-consent text and badges');
+ok(/if \(pendingReconsent\(\)\.show\) \{[\s\S]*?firstDecision = true;\s*openPrefs\(\);\s*show\(\);\s*return;/.test(cmpSrc), 'T4: cmp.js re-prompts on load straight on the preferences');
+ok(/openPreferences: function \(\) \{[\s\S]*?openPrefs\(\);\s*show\(\);/.test(cmpSrc), 'T4: cmp.js openPreferences: prefs first, then show');
+// Light mode untouched: renderLight has no re-consent.
+ok(!/function renderLight[\s\S]*?reconsent[\s\S]*?function renderReopen/.test(cmpSrc), 'T4: Light mode untouched');
+// Focus trap: same bug as banner.js (the hidden view's controls were counted); ported.
+var ftC = cmpSrc.match(/\/\/ focusTrap:begin\n([\s\S]*?)\/\/ focusTrap:end/);
+ok(!!ftC, 'T4: cmp.js exposes the focusTrap block');
+if (ftC && ftM) {
+	var tsC = new Function(ftC[1] + '\nreturn trapStep;')();
+	var tsB = new Function(ftM[1] + '\nreturn trapStep;')();
+	var tA = { n: 1 }, tB = { n: 2 }, tC = { n: 3 }, tD = { n: 4 }, tO = { n: 5 }, tL = [tA, tB, tC], tdiff = 0;
+	[tA, tB, tC, tD, tO].forEach(function (act) { [true, false].forEach(function (sh) {
+		if (tsC(tL, act, sh, tD) !== tsB(tL, act, sh, tD)) { tdiff++; }
+	}); });
+	eq(tdiff, 0, 'T4: cmp.js trapStep agrees with banner.js');
+	eq(tsC([], tA, false, tD), null, 'T4: cmp.js trapStep: nothing focusable -> null');
+}
+ok(/function focusable\(\) \{[\s\S]*?is-prefs-open[\s\S]*?getClientRects\(\)\.length/.test(cmpSrc), 'T4: cmp.js focusable() scopes to the active view');
+ok(/trapStep\(focusable\(\), document\.activeElement, e\.shiftKey, modal\(\)\)/.test(cmpSrc), 'T4: cmp.js onKeydown uses trapStep');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

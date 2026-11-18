@@ -261,6 +261,15 @@ body.cmp-has-banner { overflow: hidden; }
 	padding: 2px 8px;
 	line-height: 1.4;
 }
+/* Re-consent (B4): "new" marker with the new services' names, and the reason text. */
+.cmp__cat-head { flex-wrap: wrap; }
+.cmp__cat-new { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cmp__cat-new[hidden] { display: none; }
+.cmp__cat-badge--new { color: var(--cmp-primary-text); background: var(--cmp-primary); }
+.cmp__cat-new-names { font-size: 12px; line-height: 1.4; color: var(--cmp-muted); }
+.cmp__reconsent-text { margin: -8px 0 16px; }
+.cmp__reconsent-text[hidden] { display: none; }
+.cmp__collapse[hidden] { display: none; }
 .cmp__cat-desc { font-size: 13px; line-height: 1.55; color: var(--cmp-muted); max-width: 520px; }
 
 .cmp__cat-locked { width: 28px; height: 28px; color: var(--cmp-primary); display: flex; align-items: center; justify-content: center; }

@@ -102,7 +102,17 @@
       lang: 'ro',
       categories: ['necessary', 'statistics', 'marketing'],
       privacyUrl: '#privacy',
-      respectGPC: false
+      respectGPC: false,
+      // Re-consent: list the services per category; when you add one here, visitors
+      // who accepted the category are asked again. serviceNames is optional.
+      services: {
+        statistics: ['google-analytics'],
+        marketing: ['meta-pixel']
+      },
+      serviceNames: {
+        'google-analytics': 'Google Analytics',
+        'meta-pixel': 'Meta Pixel'
+      }
     };
   </script>
   <script src="./cmp.js" defer></script>

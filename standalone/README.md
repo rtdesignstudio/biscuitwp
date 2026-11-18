@@ -75,6 +75,8 @@ All keys are **optional**. Defaults are applied if not specified.
 | `texts` | object | — | Override default text strings. Supported keys: `title`, `intro`, `prefs`, `reject`, `accept`, `prefs_title`, `save`, `badge`, `locked`, `privacy`, `back`, `dialogLabel` |
 | `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (`navigator.globalPrivacyControl`) and auto-reject non-necessary consent. Do-Not-Track is ignored. |
 | `reopenButton` | boolean | `false` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `true` to enable. Pro mode only. Recommended: leave it off and put a "Cookie settings" link in the footer (see below). |
+| `services` | object | — | Services per category, `{ slug: [ids] }`, written by hand. Enables re-consent (see below). Missing or invalid = unknown: behaviour as before. |
+| `serviceNames` | object | — | Optional `{ id: "Display name" }` for the "new" badges. Without it the id is shown. |
 | `cookieDays` | number | `180` | Number of days the consent choice is remembered before the banner reappears. Clamped to 1-3650, else falls back to 180. |
 
 ### Example: Custom texts
@@ -91,6 +93,36 @@ window.CMP_CONFIG = {
 ```
 
 ---
+
+## Re-consent for new services
+
+When you add a service to a category (say a TikTok pixel under `marketing`), visitors who already accepted that category should be asked again. The banner does this on its own when `services` is set:
+
+- On every decision the banner stores, in the consent cookie, the services of the categories the visitor accepted.
+- On the next visit, if a category the visitor accepted now lists an id the cookie does not know, that category counts as **refused** (scripts, embeds, Consent Mode, `CMP.isAllowed`, `CMP.getConsent`) until the visitor decides again.
+- The banner opens straight on the preferences, with the title "We added new services", a short reason, and a "new" badge with the service names next to the affected category. That category starts switched off. There is no "decide later": it would be tacit consent to the new service.
+- Cookies saved before you set `services` carry no list, so nothing is re-asked for them. Removing a service never re-asks. Always-on (`necessary`) categories never re-ask.
+
+**You must update `services` whenever you add a service on the site.** The bundle cannot see what the page loads; the list is the only signal. Without `services` (or with an invalid value) nothing is stored and nothing is re-asked.
+
+```html
+<script>
+  window.CMP_CONFIG = {
+    categories: ['necessary', 'statistics', 'marketing'],
+    services: {
+      statistics: ['google-analytics'],
+      marketing: ['meta-pixel', 'tiktok-pixel']
+    },
+    serviceNames: {
+      'google-analytics': 'Google Analytics',
+      'meta-pixel': 'Meta Pixel',
+      'tiktok-pixel': 'TikTok Pixel'
+    }
+  };
+</script>
+```
+
+The texts (`reconsent_title`, `reconsent_text`, `svc_new`) come in the RO / RU / EN packs and can be overridden through `texts`. Light mode has no re-consent.
 
 ## Tracker Script Marking
 
