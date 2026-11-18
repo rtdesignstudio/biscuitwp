@@ -258,3 +258,35 @@ $cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => ar
 cmp_assert_eq( $cmp_xs['overrides'], array(), 'default row of a normal service is not stored' );
 $cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'exempt' => '1' ) ) ), array( 'umami', 'clarity' ), $cmp_sl, false, array(), $cmp_xd, '', $cmp_xe );
 cmp_assert_eq( $cmp_xs['overrides'], array( 'clarity' => array( 'exempt' => true ) ), 'exempt on a normal service still stored' );
+
+// ---- B2 Task 2: measurement mode (Strict / Advanced) ----
+$cmp_mm = CMP_Sanitizer::measurement( array(), array() );
+cmp_assert_eq( $cmp_mm, array( 'value' => 'strict', 'error' => '' ), 'measurement: default strict' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array(), array( 'measurement' => 'advanced' ) ), array( 'value' => 'advanced', 'error' => '' ), 'measurement: field absent keeps the old value (advanced)' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array(), array( 'measurement' => 'strict' ) ), array( 'value' => 'strict', 'error' => '' ), 'measurement: field absent keeps the old value (strict)' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'advanced' ), array( 'measurement' => 'strict' ) ), array( 'value' => 'strict', 'error' => 'ack' ), 'measurement: advanced without ack from strict stays strict with ack error' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'advanced' ), array() ), array( 'value' => 'strict', 'error' => 'ack' ), 'measurement: advanced without ack, nothing stored, stays strict' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'advanced', 'measurement_ack' => '1' ), array( 'measurement' => 'strict' ) ), array( 'value' => 'advanced', 'error' => '' ), 'measurement: advanced with ack' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'advanced' ), array( 'measurement' => 'advanced' ) ), array( 'value' => 'advanced', 'error' => '' ), 'measurement: advanced already active, saved again without ack' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'strict' ), array( 'measurement' => 'advanced' ) ), array( 'value' => 'strict', 'error' => '' ), 'measurement: back to strict' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => 'hacker', 'measurement_ack' => '1' ), array( 'measurement' => 'advanced' ) ), array( 'value' => 'strict', 'error' => '' ), 'measurement: unknown value -> strict' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array( 'measurement' => array( 'advanced' ) ), array( 'measurement' => 'advanced' ) ), array( 'value' => 'strict', 'error' => '' ), 'measurement: non-string value -> strict' );
+cmp_assert_eq( CMP_Sanitizer::measurement( array(), array( 'measurement' => 'junk' ) ), array( 'value' => 'strict', 'error' => '' ), 'measurement: absent field with junk old value -> strict' );
+cmp_assert( ! array_key_exists( 'measurement_ack', CMP_Sanitizer::settings( array( 'measurement' => 'advanced', 'measurement_ack' => '1' ) ) ), 'measurement_ack is never stored' );
+
+// A GA/GTM override locked by Advanced (its checkbox disabled, not posted) keeps its stored exempt value.
+$cmp_lk_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel' );
+$cmp_lk_cat = array( 'google-analytics' => 'statistics', 'google-tag-manager' => 'statistics', 'meta-pixel' => 'marketing' );
+$cmp_lk_old = array( 'overrides' => array( 'google-analytics' => array( 'exempt' => true ) ) );
+$cmp_lk_in  = array( 'overrides' => array(
+	'google-analytics'   => array( 'category' => 'statistics' ),
+	'google-tag-manager' => array( 'category' => 'statistics', 'exempt' => '1' ),
+	'meta-pixel'         => array( 'category' => 'marketing', 'exempt' => '1' ),
+) );
+$cmp_lk = CMP_Sanitizer::services( $cmp_lk_in, $cmp_lk_ids, $cmp_sl, false, $cmp_lk_old, $cmp_lk_cat, '', array(), array( 'google-analytics', 'google-tag-manager' ) );
+cmp_assert_eq( $cmp_lk['overrides']['google-analytics'], array( 'category' => 'statistics', 'exempt' => true ), 'Advanced: a disabled GA override is preserved on Services save' );
+cmp_assert( ! isset( $cmp_lk['overrides']['google-tag-manager'] ), 'Advanced: a posted GTM exempt is ignored, no stored override stays none' );
+cmp_assert_eq( $cmp_lk['overrides']['meta-pixel'], array( 'category' => 'marketing', 'exempt' => true ), 'Advanced: other services still take the posted exempt' );
+$cmp_lk = CMP_Sanitizer::services( $cmp_lk_in, $cmp_lk_ids, $cmp_sl, false, $cmp_lk_old, $cmp_lk_cat, '', array() );
+cmp_assert( ! isset( $cmp_lk['overrides']['google-analytics'] ), 'Strict: GA exempt follows the posted form (unchecked)' );
+cmp_assert_eq( $cmp_lk['overrides']['google-tag-manager'], array( 'category' => 'statistics', 'exempt' => true ), 'Strict: GTM exempt follows the posted form (checked)' );

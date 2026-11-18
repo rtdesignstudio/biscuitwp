@@ -70,3 +70,14 @@ cmp_assert_eq( CMP_Blocker::detect_services( '<script src="https://www.googletag
 // A stray space around the src URL does not hide a tracker (browsers trim it).
 $cmp_sp = CMP_Blocker::rewrite( '<script src=" https://www.googletagmanager.com/gtm.js?id=GTM-X "></script>' );
 cmp_assert( false !== strpos( $cmp_sp, 'data-cmp-service="google-tag-manager"' ), 'src with surrounding spaces is still blocked' );
+
+// ---- B2 Task 2: Advanced leaves GA/GTM alone, still blocks Meta and YouTube ----
+$cmp_adv = CMP_Services::apply_measurement( CMP_Services::library(), true );
+$cmp_ga_tag = '<script src="https://www.googletagmanager.com/gtag/js?id=G-1" async></script>';
+cmp_assert_eq( CMP_Blocker::rewrite( $cmp_ga_tag, array(), $cmp_adv ), $cmp_ga_tag, 'Advanced: GA script stays unchanged' );
+cmp_assert_eq( CMP_Blocker::rewrite( $cmp_ga, array(), $cmp_adv ), $cmp_ga, 'Advanced: analytics.js stays unchanged' );
+$cmp_gtm_tag = "<script>(function(w){w.dataLayer=w.dataLayer||[];})(window);var id='GTM-ABC123';</script>";
+cmp_assert_eq( CMP_Blocker::rewrite( $cmp_gtm_tag, array(), $cmp_adv ), $cmp_gtm_tag, 'Advanced: GTM container stays unchanged' );
+cmp_assert( false !== strpos( CMP_Blocker::rewrite( "<script>fbq('init','1');</script>", array(), $cmp_adv ), 'data-cmp-service="meta-pixel"' ), 'Advanced: Meta Pixel is still rewritten' );
+cmp_assert( false !== strpos( CMP_Blocker::rewrite( '<iframe src="https://www.youtube.com/embed/abc"></iframe>', array(), $cmp_adv ), 'class="cmp-embed' ), 'Advanced: YouTube is still rewritten' );
+cmp_assert( false !== strpos( CMP_Blocker::rewrite( $cmp_ga_tag, array(), CMP_Services::apply_measurement( CMP_Services::library(), false ) ), 'data-cmp-service="google-analytics"' ), 'Strict: GA is still rewritten' );

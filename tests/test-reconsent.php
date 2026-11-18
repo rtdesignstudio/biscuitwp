@@ -48,3 +48,46 @@ cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' 
 cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' ) ), array( 'functional' => array( 'f1' ), 'marketing' => array( 'm1' ) ), 'svc_by_cat I1: without required slugs only necessary is omitted' );
 cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' ), array( 'marketing' ) ), array( 'functional' => array( 'f1' ) ), 'svc_by_cat I1: necessary is always omitted, even when not listed as required' );
 cmp_assert_eq( CMP_Services::required_slugs( array( array( 'slug' => 'necessary', 'required' => true ), array( 'slug' => 'functional', 'required' => 1 ), array( 'slug' => 'marketing', 'required' => false ), array( 'slug' => 'stats' ), 'junk' ) ), array( 'necessary', 'functional' ), 'required_slugs I1: slugs of the categories marked required' );
+
+// ---- B2 Task 2 fix 1: the measurement mode changes loading only, never consent tracking ----
+require_once __DIR__ . '/../includes/class-consent.php';
+$cmp_m_lib  = CMP_Services::library();
+$cmp_m_seen = array( 'google-analytics', 'google-tag-manager', 'hotjar', 'meta-pixel' );
+$cmp_m_st   = CMP_Services::all( $cmp_m_lib, array(), array() );
+$cmp_m_adv  = CMP_Services::apply_measurement( $cmp_m_st, true );
+cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_m_adv, $cmp_m_seen ), CMP_Services::svc_by_cat( $cmp_m_st, $cmp_m_seen ), 'measurement: svc_by_cat equal in Advanced and Strict (GA blocked)' );
+cmp_assert( in_array( 'google-analytics', CMP_Services::svc_by_cat( $cmp_m_adv, $cmp_m_seen )['statistics'], true ), 'measurement: GA stays in the re-consent map in Advanced' );
+$cmp_m_stx  = CMP_Services::all( $cmp_m_lib, array( 'overrides' => array( 'google-analytics' => array( 'exempt' => true ) ) ), array() );
+$cmp_m_advx = CMP_Services::apply_measurement( $cmp_m_stx, true );
+cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_m_advx, $cmp_m_seen ), CMP_Services::svc_by_cat( $cmp_m_stx, $cmp_m_seen ), 'measurement: svc_by_cat equal in Advanced and Strict (GA admin-exempt)' );
+foreach ( $cmp_m_advx as $cmp_s ) {
+	if ( 'google-analytics' === $cmp_s['id'] ) {
+		cmp_assert( true === $cmp_s['exempt'] && true === $cmp_s['own_exempt'], 'apply_measurement: own_exempt keeps the admin value (true)' );
+	}
+}
+foreach ( $cmp_m_adv as $cmp_s ) {
+	if ( 'google-analytics' === $cmp_s['id'] ) {
+		cmp_assert( true === $cmp_s['exempt'] && false === $cmp_s['own_exempt'], 'apply_measurement: own_exempt keeps the admin value (false)' );
+		cmp_assert( false === CMP_Services::consent_exempt( $cmp_s ), 'consent_exempt: mode-exempt GA still needs consent' );
+	}
+}
+
+// Strict -> Advanced -> Strict round trip: a snapshot taken in Advanced still holds GA; nothing new after the switch back.
+$cmp_m_snap   = CMP_Services::svc_by_cat( $cmp_m_adv, $cmp_m_seen );
+$cmp_m_cookie = array( 'categories' => array( 'necessary', 'statistics', 'marketing' ), 'svc' => $cmp_m_snap );
+cmp_assert( in_array( 'google-analytics', $cmp_m_snap['statistics'], true ), 'round trip: Advanced snapshot contains GA' );
+cmp_assert_eq( CMP_Consent::effective_categories( $cmp_m_cookie, CMP_Services::svc_by_cat( $cmp_m_st, $cmp_m_seen ), array( 'necessary' ) ), array( 'necessary', 'statistics', 'marketing' ), 'round trip: back in Strict nothing is new, statistics kept' );
+cmp_assert_eq( CMP_Consent::effective_categories( $cmp_m_cookie, CMP_Services::svc_by_cat( $cmp_m_adv, $cmp_m_seen ), array( 'necessary' ) ), array( 'necessary', 'statistics', 'marketing' ), 'round trip: in Advanced nothing is new either' );
+
+// In Advanced, GA added to the history is new for earlier statistics acceptors.
+$cmp_m_old    = array( 'hotjar', 'meta-pixel' );
+$cmp_m_cookie = array( 'categories' => array( 'necessary', 'statistics' ), 'svc' => CMP_Services::svc_by_cat( $cmp_m_adv, $cmp_m_old ) );
+$cmp_m_now    = CMP_Services::svc_by_cat( $cmp_m_adv, array_merge( $cmp_m_old, array( 'google-analytics' ) ) );
+cmp_assert_eq( CMP_Consent::effective_categories( $cmp_m_cookie, $cmp_m_now, array( 'necessary' ) ), array( 'necessary' ), 'Advanced: GA added to history is new for earlier statistics acceptors' );
+
+// newly_blocked and the admin-exempt list follow the consent rule too.
+$cmp_m_cust = CMP_Services::apply_measurement( array( array( 'id' => 'google-analytics', 'category' => 'statistics', 'exempt' => false ) ), true );
+cmp_assert_eq( CMP_Services::admin_exempt_measurement( $cmp_m_cust ), array(), 'admin_exempt_measurement: mode-exempt GA is not an admin exemption' );
+cmp_assert_eq( CMP_Services::admin_exempt_measurement( $cmp_m_advx ), array( 'google-analytics' ), 'admin_exempt_measurement: admin-exempt GA listed in Advanced' );
+cmp_assert_eq( CMP_Services::admin_exempt_measurement( $cmp_m_stx ), array( 'google-analytics' ), 'admin_exempt_measurement: admin-exempt GA listed in Strict' );
+cmp_assert_eq( CMP_Services::admin_exempt_measurement( $cmp_m_st ), array(), 'admin_exempt_measurement: none by default' );

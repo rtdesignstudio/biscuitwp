@@ -118,9 +118,41 @@
 		apply();
 	}
 
+	// Settings page: the measurement mode (Strict / Advanced). Advanced needs Pro
+	// with script blocking on; otherwise the radios are disabled (not posted, so
+	// the stored value is kept). The confirmation shows only when switching to
+	// Advanced from a stored Strict.
+	function initMeasurement() {
+		var box = document.querySelector('[data-cmp-measurement]');
+		if (!box) { return; }
+		var stored = box.getAttribute('data-cmp-measurement-stored');
+		var sel = document.querySelector('select[name="cmp[mode]"]');
+		var block = document.querySelector('input[name="cmp[block_scripts]"]');
+		var radios = box.querySelectorAll('input[name="cmp[measurement]"]');
+		var ack = box.querySelector('[data-cmp-measurement-ack]');
+		var note = box.querySelector('[data-cmp-measurement-note]');
+		function apply() {
+			var avail = (!sel || sel.value === 'pro') && (!block || block.checked);
+			var adv = false;
+			var i;
+			for (i = 0; i < radios.length; i++) {
+				radios[i].disabled = !avail;
+				if (radios[i].checked && radios[i].value === 'advanced') { adv = true; }
+			}
+			if (note) { note.style.display = avail ? 'none' : ''; }
+			if (ack) { ack.style.display = (avail && adv && stored !== 'advanced') ? '' : 'none'; }
+		}
+		var j;
+		for (j = 0; j < radios.length; j++) { radios[j].addEventListener('change', apply); }
+		if (sel) { sel.addEventListener('change', apply); }
+		if (block) { block.addEventListener('change', apply); }
+		apply();
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		var page = document.querySelector('.cmp-admin');
 		if (page) { page.addEventListener('click', onClick); }
 		initSettingsMode();
+		initMeasurement();
 	});
 })();

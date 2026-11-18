@@ -15,6 +15,9 @@ class CMP_Services {
 	/** Services 0.4.x already blocked (before the library existed). */
 	const LEGACY_IDS = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' );
 
+	/** Services the Advanced measurement mode always loads (Consent Mode on "denied"). */
+	const MEASUREMENT_IDS = array( 'google-analytics', 'google-tag-manager' );
+
 	private static $cache    = null;
 	private static $errors   = array();
 	private static $fallback = false;
@@ -177,7 +180,7 @@ class CMP_Services {
 			if ( ! is_array( $s ) || ! isset( $s['id'] ) || ! in_array( $s['id'], $found_ids, true ) ) {
 				continue;
 			}
-			if ( ( isset( $s['category'] ) && 'necessary' === $s['category'] ) || ! empty( $s['exempt'] ) ) {
+			if ( ( isset( $s['category'] ) && 'necessary' === $s['category'] ) || self::consent_exempt( $s ) ) {
 				continue;
 			}
 			if ( in_array( $s['id'], self::LEGACY_IDS, true ) || in_array( $s['id'], $out, true ) ) {
@@ -326,7 +329,7 @@ class CMP_Services {
 		$out  = array();
 		$skip = array_merge( array( 'necessary' ), array_map( 'strval', $required_slugs ) );
 		foreach ( $services as $s ) {
-			if ( ! is_array( $s ) || empty( $s['id'] ) || empty( $s['category'] ) || in_array( (string) $s['category'], $skip, true ) || ! empty( $s['exempt'] ) ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) || empty( $s['category'] ) || in_array( (string) $s['category'], $skip, true ) || self::consent_exempt( $s ) ) {
 				continue;
 			}
 			$custom = isset( $s['source'] ) && 'custom' === $s['source'];
@@ -376,7 +379,71 @@ class CMP_Services {
 		return $out;
 	}
 
-	/** WordPress wrapper: library + cmp_services option + current category slugs (memoised per request). */
+	/**
+	 * Pure: is the Advanced measurement mode in effect? It needs Pro with script
+	 * blocking on (in Pro, CMP_Blocker::blocks_trackers() is exactly block_scripts);
+	 * otherwise the stored value has no effect.
+	 */
+	public static function measurement_active( array $settings ) {
+		$mode = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+		return 'pro' === $mode && ! empty( $settings['block_scripts'] )
+			&& isset( $settings['measurement'] ) && 'advanced' === $settings['measurement'];
+	}
+
+	/**
+	 * Pure: in Advanced, GA and GTM are never blocked, whatever their per-service
+	 * setting (mode_exempt marks that the mode, not the admin, made them exempt).
+	 * The mode changes loading only: own_exempt keeps the admin's value, which
+	 * consent tracking (consent_exempt) keeps using.
+	 */
+	public static function apply_measurement( array $services, $advanced ) {
+		if ( ! $advanced ) {
+			return $services;
+		}
+		foreach ( $services as $i => $s ) {
+			if ( is_array( $s ) && isset( $s['id'] ) && in_array( (string) $s['id'], self::MEASUREMENT_IDS, true ) ) {
+				$services[ $i ]['own_exempt']  = ! empty( $s['exempt'] );
+				$services[ $i ]['exempt']      = true;
+				$services[ $i ]['mode_exempt'] = true;
+			}
+		}
+		return $services;
+	}
+
+	/**
+	 * Pure: is a service exempt for consent purposes (re-consent map, warnings,
+	 * admin state)? A mode exemption (Advanced) does not count: only the admin's
+	 * own value does. The blocker's rewrite alone reads `exempt` as-is.
+	 */
+	public static function consent_exempt( $s ) {
+		if ( ! is_array( $s ) ) {
+			return false;
+		}
+		return ! empty( $s['mode_exempt'] ) ? ! empty( $s['own_exempt'] ) : ! empty( $s['exempt'] );
+	}
+
+	/** Pure: the GA/GTM ids the admin marked "nu bloca" (they stay unblocked in Strict too). */
+	public static function admin_exempt_measurement( array $services ) {
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( is_array( $s ) && isset( $s['id'] ) && in_array( (string) $s['id'], self::MEASUREMENT_IDS, true )
+				&& self::consent_exempt( $s ) && ! in_array( (string) $s['id'], $out, true ) ) {
+				$out[] = (string) $s['id'];
+			}
+		}
+		return $out;
+	}
+
+	/** WP: is Advanced in effect for the stored settings? False without WordPress. */
+	public static function advanced_now() {
+		if ( ! function_exists( 'get_option' ) ) {
+			return false;
+		}
+		$settings = get_option( 'cmp_settings', array() );
+		return self::measurement_active( is_array( $settings ) ? $settings : array() );
+	}
+
+	/** WordPress wrapper: library + cmp_services option + current category slugs + measurement mode (memoised per request). */
 	public static function active() {
 		if ( null !== self::$active ) {
 			return self::$active;
@@ -390,7 +457,7 @@ class CMP_Services {
 				}
 			}
 		}
-		self::$active = self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs );
+		self::$active = self::apply_measurement( self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs ), self::advanced_now() );
 		return self::$active;
 	}
 

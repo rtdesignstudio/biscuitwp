@@ -58,6 +58,10 @@ class CMP_Services_Page {
 			<td>
 				<?php if ( 'necessary' === $cat ) : ?>
 					<input type="hidden" name="<?php echo esc_attr( $n ); ?>[exempt]" value="<?php echo ! empty( $svc['exempt'] ) ? '1' : '0'; ?>">
+				<?php elseif ( ! empty( $svc['mode_exempt'] ) ) : ?>
+					<label><input type="checkbox" value="1" checked disabled> <?php esc_html_e( 'nu bloca (excepție)', 'consent-manager-pro' ); ?></label>
+					<p class="description"><?php esc_html_e( 'În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat».', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php echo esc_html( CMP_Services::consent_exempt( $svc ) ? __( 'Setarea ta: nu bloca (se aplică și în Strict).', 'consent-manager-pro' ) : __( 'Setarea ta: blocat până la acord (se aplică în Strict).', 'consent-manager-pro' ) ); ?></p>
 				<?php else : ?>
 					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[exempt]" value="1" <?php checked( ! empty( $svc['exempt'] ) ); ?>> <?php esc_html_e( 'nu bloca (excepție)', 'consent-manager-pro' ); ?></label>
 				<?php endif; ?>
@@ -327,7 +331,9 @@ class CMP_Services_Page {
 			}
 		}
 
-		$clean = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own, $lib_exempt );
+		// In Advanced the GA/GTM "nu bloca" box is disabled (not posted): keep their stored exempt.
+		$locked = CMP_Services::advanced_now() ? CMP_Services::MEASUREMENT_IDS : array();
+		$clean  = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own, $lib_exempt, $locked );
 		update_option( 'cmp_services', $clean );
 		delete_transient( 'cmp_tracker_scan' );
 		// The Cookie Policy page renders [cmp_cookie_table] live, so it is not

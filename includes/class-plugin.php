@@ -49,7 +49,7 @@ class CMP_Plugin {
 		}
 
 		// Per-request caches of the services list follow their options.
-		foreach ( array( 'cmp_services', 'cmp_categories' ) as $opt ) {
+		foreach ( array( 'cmp_services', 'cmp_categories', 'cmp_settings' ) as $opt ) { // cmp_settings: the measurement mode
 			add_action( 'add_option_' . $opt, array( 'CMP_Services', 'flush' ) );
 			add_action( 'update_option_' . $opt, array( 'CMP_Services', 'flush' ) );
 			add_action( 'delete_option_' . $opt, array( 'CMP_Services', 'flush' ) );

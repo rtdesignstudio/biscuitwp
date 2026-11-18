@@ -58,6 +58,29 @@ class CMP_Sanitizer {
 		);
 	}
 
+	/**
+	 * Pure: the measurement mode (strict|advanced) from the settings form.
+	 * Field absent (disabled in Light or with blocking off) -> the stored value.
+	 * Advanced needs the confirmation box, unless it is already the stored value.
+	 * Any unknown value -> strict. measurement_ack itself is never stored.
+	 *
+	 * @return array { value: strict|advanced, error: ''|'ack' }
+	 */
+	public static function measurement( array $input, array $old ) {
+		$prev = isset( $old['measurement'] ) && 'advanced' === $old['measurement'] ? 'advanced' : 'strict';
+		if ( ! array_key_exists( 'measurement', $input ) ) {
+			return array( 'value' => $prev, 'error' => '' );
+		}
+		$want = is_string( $input['measurement'] ) ? $input['measurement'] : '';
+		if ( 'advanced' !== $want ) {
+			return array( 'value' => 'strict', 'error' => '' );
+		}
+		if ( 'advanced' !== $prev && empty( $input['measurement_ack'] ) ) {
+			return array( 'value' => $prev, 'error' => 'ack' );
+		}
+		return array( 'value' => 'advanced', 'error' => '' );
+	}
+
 	/** Pure: the stored operator data for the legal pages (four fields, sanitized). */
 	public static function legal_meta( array $input ) {
 		$email = isset( $input['contact_email'] ) ? trim( (string) $input['contact_email'] ) : '';
@@ -195,8 +218,9 @@ class CMP_Sanitizer {
 	 * @param array $library_categories Optional id => default category; overrides equal to the default are skipped.
 	 * @param string $own_host      The site's own host (home_url); it and its parent domain are dropped from custom hosts.
 	 * @param array $library_exempt Optional id => true for services exempt by default (exempt_default); an override equal to the default is skipped, exempt=false is kept.
+	 * @param array $locked_exempt  Optional ids whose "nu bloca" box is disabled (GA/GTM in Advanced): their exempt is kept from the stored override, never taken from the form.
 	 */
-	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array(), $own_host = '', array $library_exempt = array() ) {
+	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array(), $own_host = '', array $library_exempt = array(), array $locked_exempt = array() ) {
 		$overrides = array();
 		$raw_over  = isset( $input['overrides'] ) && is_array( $input['overrides'] ) ? $input['overrides'] : array();
 		foreach ( $raw_over as $id => $o ) {
@@ -208,8 +232,13 @@ class CMP_Sanitizer {
 			if ( '' !== $cat ) {
 				$row['category'] = self::known_category( $cat, $category_slugs );
 			}
-			$row['exempt'] = self::flag( isset( $o['exempt'] ) ? $o['exempt'] : false );
 			$default_exempt = ! empty( $library_exempt[ $id ] );
+			if ( in_array( $id, $locked_exempt, true ) ) {
+				$old_o         = isset( $old['overrides'][ $id ] ) && is_array( $old['overrides'][ $id ] ) ? $old['overrides'][ $id ] : array();
+				$row['exempt'] = array_key_exists( 'exempt', $old_o ) ? (bool) $old_o['exempt'] : $default_exempt;
+			} else {
+				$row['exempt'] = self::flag( isset( $o['exempt'] ) ? $o['exempt'] : false );
+			}
 			if ( isset( $library_categories[ $id ] ) && $row['exempt'] === $default_exempt
 				&& ( ! isset( $row['category'] ) || $row['category'] === $library_categories[ $id ] ) ) {
 				continue;

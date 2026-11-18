@@ -94,9 +94,12 @@ class CMP_Settings_Page {
 		?>
 		<div class="wrap cmp-admin">
 			<h1><?php esc_html_e( 'Consent Manager — Setări', 'consent-manager-pro' ); ?></h1>
-			<?php if ( isset( $_GET['updated'] ) ) : ?>
+			<?php if ( isset( $_GET['cmp_measurement'] ) && 'ack' === $_GET['cmp_measurement'] ) : ?>
+				<div class="notice notice-error"><p><?php esc_html_e( 'Celelalte setări au fost salvate, dar modul Advanced nu a fost activat: bifează confirmarea de sub opțiune. Măsurarea a rămas pe Strict.', 'consent-manager-pro' ); ?></p></div>
+			<?php elseif ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Setări salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
+			<?php self::render_measurement_message(); ?>
 			<?php self::render_tracker_warnings( $s ); ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_save_settings">
@@ -141,6 +144,23 @@ class CMP_Settings_Page {
 						<td>
 							<label><input type="checkbox" name="cmp[block_scripts]" value="1" <?php checked( ! empty( $s['block_scripts'] ) ); ?>> <?php esc_html_e( 'Blochează scripturile de tracking până la consimțământ', 'consent-manager-pro' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Video-urile YouTube și Vimeo și hărțile Google Maps apar ca un bloc cu butonul „Încarcă conținutul” până la acord. Recomandat: pornit. În modul Light, blocarea e mereu activă.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
+					<?php
+					$cmp_meas       = isset( $s['measurement'] ) && 'advanced' === $s['measurement'] ? 'advanced' : 'strict';
+					$cmp_meas_avail = 'pro' === $cmp_mode && ! empty( $s['block_scripts'] );
+					?>
+					<tr data-cmp-mode="pro">
+						<th scope="row"><?php esc_html_e( 'Mod de măsurare', 'consent-manager-pro' ); ?></th>
+						<td data-cmp-measurement data-cmp-measurement-stored="<?php echo esc_attr( $cmp_meas ); ?>">
+							<fieldset>
+								<label><input type="radio" name="cmp[measurement]" value="strict" <?php checked( $cmp_meas, 'strict' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Strict', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'nimic nu se încarcă înainte de acord. Recomandat.', 'consent-manager-pro' ); ?></label><br>
+								<label><input type="radio" name="cmp[measurement]" value="advanced" <?php checked( $cmp_meas, 'advanced' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Advanced', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'Google Analytics și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat” până la acord. Google estimează vizitele celor care refuză.', 'consent-manager-pro' ); ?></label>
+								<p data-cmp-measurement-ack style="margin:6px 0 0 24px">
+									<label><input type="checkbox" name="cmp[measurement_ack]" value="1"> <?php esc_html_e( 'Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE.', 'consent-manager-pro' ); ?></label>
+								</p>
+							</fieldset>
+							<p class="description" data-cmp-measurement-note<?php echo $cmp_meas_avail ? ' style="display:none"' : ''; ?>><?php esc_html_e( 'Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu are niciun efect, iar alegerea salvată se păstrează.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
@@ -263,9 +283,45 @@ class CMP_Settings_Page {
 		$raw   = isset( $_POST['cmp'] ) && is_array( $_POST['cmp'] ) ? wp_unslash( $_POST['cmp'] ) : array();
 		$old   = CMP_Consent::get_settings();
 		// Legal page links and operator data are managed on the "Pagini legale" screen.
-		$clean = CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( $raw ), is_array( $old ) ? $old : array() );
+		$old   = is_array( $old ) ? $old : array();
+		$clean = CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( $raw ), $old );
+		$meas  = CMP_Sanitizer::measurement( $raw, $old );
+		$clean['measurement'] = $meas['value'];
 		update_option( 'cmp_settings', $clean );
-		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'updated' => 1 ), admin_url( 'admin.php' ) ) );
+		$prev = CMP_Sanitizer::measurement( array(), $old );
+		if ( $prev['value'] !== $meas['value'] ) {
+			set_transient( self::MSG_KEY . get_current_user_id(), $meas['value'], 60 );
+		}
+		delete_transient( 'cmp_tracker_scan' ); // like a Services save: the next scan follows the new settings
+		$args = array( 'page' => CMP_Admin::SLUG, 'updated' => 1 );
+		if ( 'ack' === $meas['error'] ) {
+			$args['cmp_measurement'] = 'ack';
+		}
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
 		exit;
+	}
+
+	/** Transient prefix (+ user id) for the one-time message after a measurement mode change. */
+	const MSG_KEY = 'cmp_measurement_msg_';
+
+	/** Show, once, what changed after switching between Strict and Advanced. */
+	private static function render_measurement_message() {
+		$key = self::MSG_KEY . get_current_user_id();
+		$to  = get_transient( $key );
+		if ( false === $to ) {
+			return;
+		}
+		delete_transient( $key );
+		if ( 'advanced' === $to ) {
+			$msg = __( 'Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag Manager ca etichetele să respecte Consent Mode. Regenerează paginile legale.', 'consent-manager-pro' );
+		} elseif ( 'strict' === $to ) {
+			$msg = __( 'Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care refuză, deci statisticile vor arăta mai puține vizite. Regenerează paginile legale.', 'consent-manager-pro' );
+			if ( CMP_Services::admin_exempt_measurement( CMP_Services::active() ) ) {
+				$msg .= ' ' . __( 'Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii».', 'consent-manager-pro' );
+			}
+		} else {
+			return;
+		}
+		echo '<div class="notice notice-warning"><p>' . esc_html( $msg ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=cmp-legal' ) ) . '">' . esc_html__( 'Pagini legale', 'consent-manager-pro' ) . '</a></p></div>';
 	}
 }

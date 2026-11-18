@@ -187,3 +187,30 @@ foreach ( array( 'https://www.clarity.ms/tag/x', 'https://static.hotjar.com/c/ho
 	$cmp_m = CMP_Services::script_service( $cmp_u, '', $cmp_cl_all );
 	cmp_assert( null !== $cmp_m && ! in_array( $cmp_m['id'], $cmp_cl_ids, true ), 'existing loader not taken by a cookieless tool: ' . $cmp_u );
 }
+
+// ---- B2 Task 2: measurement mode ----
+cmp_assert( true === CMP_Services::measurement_active( array( 'mode' => 'pro', 'block_scripts' => true, 'measurement' => 'advanced' ) ), 'measurement_active: pro + blocking + advanced' );
+cmp_assert( false === CMP_Services::measurement_active( array( 'mode' => 'light', 'block_scripts' => true, 'measurement' => 'advanced' ) ), 'measurement_active: light -> false' );
+cmp_assert( false === CMP_Services::measurement_active( array( 'mode' => 'pro', 'block_scripts' => false, 'measurement' => 'advanced' ) ), 'measurement_active: blocking off -> false' );
+cmp_assert( false === CMP_Services::measurement_active( array( 'mode' => 'pro', 'block_scripts' => true, 'measurement' => 'strict' ) ), 'measurement_active: strict -> false' );
+cmp_assert( false === CMP_Services::measurement_active( array( 'mode' => 'pro', 'block_scripts' => true ) ), 'measurement_active: unset -> false' );
+cmp_assert( false === CMP_Services::measurement_active( array() ), 'measurement_active: empty settings -> false' );
+
+$cmp_ma_lib = CMP_Services::library();
+$cmp_ma_on  = CMP_Services::apply_measurement( $cmp_ma_lib, true );
+$cmp_ma_by  = array();
+foreach ( $cmp_ma_on as $cmp_s ) {
+	$cmp_ma_by[ $cmp_s['id'] ] = $cmp_s;
+}
+cmp_assert( true === $cmp_ma_by['google-analytics']['exempt'] && true === $cmp_ma_by['google-analytics']['mode_exempt'], 'apply_measurement(true): GA exempt' );
+cmp_assert( true === $cmp_ma_by['google-tag-manager']['exempt'] && true === $cmp_ma_by['google-tag-manager']['mode_exempt'], 'apply_measurement(true): GTM exempt' );
+cmp_assert( empty( $cmp_ma_by['meta-pixel']['exempt'] ) && ! isset( $cmp_ma_by['meta-pixel']['mode_exempt'] ), 'apply_measurement(true): Meta Pixel untouched' );
+cmp_assert_eq( count( $cmp_ma_on ), count( $cmp_ma_lib ), 'apply_measurement(true): same number of services' );
+cmp_assert_eq( CMP_Services::apply_measurement( $cmp_ma_lib, false ), $cmp_ma_lib, 'apply_measurement(false): services unchanged' );
+$cmp_ma_over = CMP_Services::all( $cmp_ma_lib, array( 'overrides' => array( 'google-analytics' => array( 'exempt' => false ) ) ), array() );
+$cmp_ma_ov2  = CMP_Services::apply_measurement( $cmp_ma_over, true );
+foreach ( $cmp_ma_ov2 as $cmp_s ) {
+	if ( 'google-analytics' === $cmp_s['id'] ) {
+		cmp_assert( true === $cmp_s['exempt'], 'apply_measurement(true): the mode wins over a per-service override' );
+	}
+}
