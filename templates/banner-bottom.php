@@ -19,7 +19,8 @@ $cmp_text = function ( $key, $default ) use ( $cmp_t ) {
 };
 
 $cmp_privacy_id  = isset( $settings['privacy_page_id'] ) ? (int) $settings['privacy_page_id'] : 0;
-$cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
+// Link only a published page: a draft would be a 404 for visitors.
+$cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_privacy_id ) ) ? get_permalink( $cmp_privacy_id ) : '';
 ?>
 <?php $cmp_position = isset( $settings['position'] ) ? $settings['position'] : 'modal-center'; ?>
 <?php $cmp_no_overlay = ! empty( $no_overlay ); // Policy pages: readable behind a non-blocking banner. ?>

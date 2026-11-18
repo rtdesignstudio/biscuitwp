@@ -102,3 +102,20 @@ cmp_assert_eq( CMP_Sanitizer::MAX_COOKIE_DAYS, 396, 'MAX_COOKIE_DAYS is 13 month
 // reload_on_decision: off by default, on only when ticked
 cmp_assert_eq( CMP_Sanitizer::settings( array() )['reload_on_decision'], false, 'reload_on_decision default off' );
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'reload_on_decision' => '1' ) )['reload_on_decision'], true, 'reload_on_decision ticked' );
+
+// 0.4.2: legal pages live on the "Pagini legale" screen. Saving the main settings
+// must keep the page links and the operator data it does not post.
+$cmp_old = array( 'privacy_page_id' => 12, 'terms_page_id' => 0, 'cookie_page_id' => 14, 'legal_meta' => array( 'company' => 'Vin de Autor' ) );
+$cmp_kept = CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( array( 'position' => 'bottom' ) ), $cmp_old );
+cmp_assert_eq( $cmp_kept['privacy_page_id'], 12, 'settings save keeps the privacy page' );
+cmp_assert_eq( $cmp_kept['cookie_page_id'], 14, 'settings save keeps the cookie page' );
+cmp_assert_eq( $cmp_kept['legal_meta']['company'], 'Vin de Autor', 'settings save keeps the operator data' );
+cmp_assert_eq( CMP_Sanitizer::keep_legal( array( 'position' => 'bottom' ), array() )['privacy_page_id'], 0, 'nothing stored -> 0' );
+
+// Operator data is stored, sanitized.
+$cmp_meta = CMP_Sanitizer::legal_meta( array( 'company' => ' Vin <b>de</b> Autor ', 'contact_email' => 'not an email', 'dpo' => 'Ion', 'jurisdiction' => 'Republica Moldova', 'x' => 'y' ) );
+cmp_assert_eq( $cmp_meta['company'], 'Vin de Autor', 'company stripped and trimmed' );
+cmp_assert_eq( $cmp_meta['contact_email'], '', 'invalid email dropped' );
+cmp_assert_eq( CMP_Sanitizer::legal_meta( array( 'contact_email' => 'a@b.md' ) )['contact_email'], 'a@b.md', 'valid email kept' );
+cmp_assert( ! array_key_exists( 'x', $cmp_meta ), 'unknown keys dropped' );
+cmp_assert_eq( array_keys( $cmp_meta ), array( 'company', 'contact_email', 'dpo', 'jurisdiction' ), 'exactly the four operator fields' );

@@ -22,3 +22,15 @@ cmp_assert( strpos( $html, 'Analytics &lt;x&gt;' ) !== false, 'cookie purpose is
 
 $empty = CMP_Legal::cookie_table_html( array( array( 'slug' => 'necessary', 'cookies' => array() ) ) );
 cmp_assert( strpos( $empty, '<table' ) === false, 'no cookies => no table' );
+
+// 0.4.2: status of each legal page, from its WordPress post status.
+cmp_assert_eq( CMP_Legal::page_status( 'publish' ), 'published', 'publish -> published' );
+cmp_assert_eq( CMP_Legal::page_status( 'draft' ), 'draft', 'draft -> draft' );
+cmp_assert_eq( CMP_Legal::page_status( 'pending' ), 'draft', 'pending -> draft' );
+cmp_assert_eq( CMP_Legal::page_status( 'private' ), 'draft', 'private -> draft (visitors cannot see it)' );
+cmp_assert_eq( CMP_Legal::page_status( 'trash' ), 'missing', 'trash -> missing' );
+cmp_assert_eq( CMP_Legal::page_status( false ), 'missing', 'no post -> missing' );
+
+// Summary line for the settings screen.
+cmp_assert_eq( CMP_Legal::status_summary( array( 'published', 'draft', 'missing' ) ), array( 'published' => 1, 'draft' => 1, 'missing' => 1 ), 'counts by status' );
+cmp_assert_eq( CMP_Legal::status_summary( array() ), array( 'published' => 0, 'draft' => 0, 'missing' => 0 ), 'empty -> zeros' );

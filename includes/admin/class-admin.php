@@ -23,7 +23,7 @@ class CMP_Admin {
 		add_action( 'admin_post_cmp_purge_log', array( 'CMP_Audit_Page', 'purge' ) );
 
 		require_once CMP_PATH . 'includes/admin/class-legal-page.php';
-		add_action( 'admin_post_cmp_generate_legal', array( 'CMP_Legal_Page', 'generate' ) );
+		add_action( 'admin_post_cmp_legal', array( 'CMP_Legal_Page', 'handle' ) );
 
 		add_action( 'admin_post_cmp_check_updates', array( $this, 'check_updates' ) );
 		add_action( 'admin_notices', array( $this, 'update_check_notice' ) );

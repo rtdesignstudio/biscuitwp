@@ -58,6 +58,32 @@ class CMP_Sanitizer {
 		);
 	}
 
+	/** Pure: the stored operator data for the legal pages (four fields, sanitized). */
+	public static function legal_meta( array $input ) {
+		$email = isset( $input['contact_email'] ) ? trim( (string) $input['contact_email'] ) : '';
+		return array(
+			'company'       => isset( $input['company'] ) ? self::text( $input['company'] ) : '',
+			'contact_email' => false !== filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : '',
+			'dpo'           => isset( $input['dpo'] ) ? self::text( $input['dpo'] ) : '',
+			'jurisdiction'  => isset( $input['jurisdiction'] ) ? self::text( $input['jurisdiction'] ) : '',
+		);
+	}
+
+	/**
+	 * Pure: carry the legal page links and operator data over from the stored
+	 * settings. They are managed on the "Pagini legale" screen, so the main
+	 * settings form does not post them and must not reset them.
+	 */
+	public static function keep_legal( array $clean, array $old ) {
+		foreach ( array( 'privacy_page_id', 'terms_page_id', 'cookie_page_id' ) as $k ) {
+			$clean[ $k ] = isset( $old[ $k ] ) ? max( 0, (int) $old[ $k ] ) : 0;
+		}
+		if ( isset( $old['legal_meta'] ) && is_array( $old['legal_meta'] ) ) {
+			$clean['legal_meta'] = $old['legal_meta'];
+		}
+		return $clean;
+	}
+
 	public static function categories( array $input ) {
 		$allowed_signals = array(
 			'analytics_storage', 'ad_storage', 'ad_user_data', 'ad_personalization',

@@ -7,6 +7,28 @@ class CMP_Legal {
 
 	const TYPES = array( 'privacy', 'terms', 'cookie' );
 
+	/** Pure: 'published', 'draft' (not visible to visitors) or 'missing', from a post status. */
+	public static function page_status( $post_status ) {
+		if ( 'publish' === $post_status ) {
+			return 'published';
+		}
+		if ( in_array( $post_status, array( 'draft', 'pending', 'private', 'future', 'auto-draft' ), true ) ) {
+			return 'draft';
+		}
+		return 'missing';
+	}
+
+	/** Pure: how many legal pages are published / drafts / missing. */
+	public static function status_summary( array $statuses ) {
+		$out = array( 'published' => 0, 'draft' => 0, 'missing' => 0 );
+		foreach ( $statuses as $st ) {
+			if ( isset( $out[ $st ] ) ) {
+				$out[ $st ]++;
+			}
+		}
+		return $out;
+	}
+
 	public static function fill_template( $tpl, array $vars ) {
 		$out = (string) $tpl;
 		foreach ( $vars as $k => $v ) {

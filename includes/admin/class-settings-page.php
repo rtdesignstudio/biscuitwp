@@ -193,16 +193,21 @@ class CMP_Settings_Page {
 						</tr>
 					<?php endforeach; ?>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Pagină Confidențialitate', 'consent-manager-pro' ); ?></th>
-						<td><?php wp_dropdown_pages( array( 'name' => 'cmp[privacy_page_id]', 'selected' => $s['privacy_page_id'], 'show_option_none' => __( '— niciuna —', 'consent-manager-pro' ), 'option_none_value' => 0 ) ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Pagină Termeni', 'consent-manager-pro' ); ?></th>
-						<td><?php wp_dropdown_pages( array( 'name' => 'cmp[terms_page_id]', 'selected' => $s['terms_page_id'], 'show_option_none' => __( '— niciuna —', 'consent-manager-pro' ), 'option_none_value' => 0 ) ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Pagină Cookies', 'consent-manager-pro' ); ?></th>
-						<td><?php wp_dropdown_pages( array( 'name' => 'cmp[cookie_page_id]', 'selected' => $s['cookie_page_id'], 'show_option_none' => __( '— niciuna —', 'consent-manager-pro' ), 'option_none_value' => 0 ) ); ?></td>
+						<th scope="row"><?php esc_html_e( 'Pagini legale', 'consent-manager-pro' ); ?></th>
+						<td>
+							<?php
+							$cmp_docs = CMP_Legal_Page::documents();
+							$cmp_sum  = CMP_Legal::status_summary( wp_list_pluck( $cmp_docs, 'status' ) );
+							printf(
+								/* translators: 1: published count, 2: total, 3: drafts */
+								esc_html__( 'Publicate: %1$d din %2$d · ciorne: %3$d', 'consent-manager-pro' ),
+								(int) $cmp_sum['published'],
+								count( $cmp_docs ),
+								(int) $cmp_sum['draft']
+							);
+							?>
+							· <a href="<?php echo esc_url( admin_url( 'admin.php?page=cmp-legal' ) ); ?>"><?php esc_html_e( 'Gestionează paginile legale', 'consent-manager-pro' ); ?></a>
+						</td>
 					</tr>
 				</table>
 				<?php submit_button( __( 'Salvează setările', 'consent-manager-pro' ) ); ?>
@@ -235,8 +240,9 @@ class CMP_Settings_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		$raw   = isset( $_POST['cmp'] ) && is_array( $_POST['cmp'] ) ? wp_unslash( $_POST['cmp'] ) : array();
-		$clean = CMP_Sanitizer::settings( $raw );
-		$old = CMP_Consent::get_settings();
+		$old   = CMP_Consent::get_settings();
+		// Legal page links and operator data are managed on the "Pagini legale" screen.
+		$clean = CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( $raw ), is_array( $old ) ? $old : array() );
 		update_option( 'cmp_settings', $clean );
 		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'updated' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
