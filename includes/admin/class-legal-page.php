@@ -31,6 +31,25 @@ class CMP_Legal_Page {
 		return $date;
 	}
 
+	/**
+	 * Pure: template variables from the plugin settings: register retention,
+	 * consent duration in days, and the mode flags for {{#pro}} / {{#light}} /
+	 * {{#blocking}} blocks ('1' or ''). "blocking" is Pro with block_scripts on;
+	 * Light always blocks but has its own texts, so it is never "blocking".
+	 */
+	public static function settings_vars( array $settings ) {
+		$ret   = isset( $settings['retention_months'] ) ? (int) $settings['retention_months'] : 13;
+		$days  = isset( $settings['cookie_days'] ) ? $settings['cookie_days'] : 180;
+		$light = isset( $settings['mode'] ) && 'light' === $settings['mode'];
+		return array(
+			'retention_months' => (string) ( $ret >= 1 ? $ret : 13 ),
+			'cookie_days'      => (string) CMP_Sanitizer::cap_cookie_days( $days ),
+			'pro'              => $light ? '' : '1',
+			'light'            => $light ? '1' : '',
+			'blocking'         => ! $light && ! empty( $settings['block_scripts'] ) ? '1' : '',
+		);
+	}
+
 	/** Page content from the $lang template. $meta is the stored operator data (or settings holding it). */
 	public static function build_content( $type, array $meta, $lang = 'ro' ) {
 		if ( isset( $meta['legal_meta'] ) && is_array( $meta['legal_meta'] ) ) {
@@ -46,6 +65,7 @@ class CMP_Legal_Page {
 			'address'        => isset( $meta['address'] ) ? $meta['address'] : '',
 			'effective_date' => self::date_for( $lang ),
 		);
+		$vars = array_merge( $vars, self::settings_vars( CMP_Consent::get_settings() ) );
 		return CMP_Legal::fill_template( CMP_Legal::load_template( $type, $lang ), $vars );
 	}
 
@@ -140,6 +160,7 @@ class CMP_Legal_Page {
 			<?php endif; ?>
 
 			<div class="notice notice-warning inline"><p><?php esc_html_e( 'Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare.', 'consent-manager-pro' ); ?></p></div>
+			<div class="notice notice-info inline"><p><?php esc_html_e( 'Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale.', 'consent-manager-pro' ); ?> <?php esc_html_e( 'După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale.', 'consent-manager-pro' ); ?></p></div>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_legal">

@@ -368,7 +368,7 @@ msgid "Informații despre cookie-uri"
 msgstr ""
 
 #: templates/banner-bottom.php:31
-msgid "Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul dumneavoastră, cookie-uri de analiză pentru a-l îmbunătăți. Puteți accepta sau refuza cookie-urile opționale."
+msgid "Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul tău, cookie-uri de analiză pentru a-l îmbunătăți. Poți accepta sau refuza cookie-urile opționale."
 msgstr ""
 
 #: templates/banner-bottom.php:37

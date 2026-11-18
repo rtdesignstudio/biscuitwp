@@ -38,7 +38,7 @@
 				},
 				texts: {
 					title: 'Informații despre cookie-uri',
-					intro: 'Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul dumneavoastră, cookie-uri de analiză pentru a-l îmbunătăți. Puteți accepta sau refuza cookie-urile opționale.',
+					intro: 'Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul tău, cookie-uri de analiză pentru a-l îmbunătăți. Poți accepta sau refuza cookie-urile opționale.',
 					prefs: 'Gestionează cookie-urile',
 					reject: 'Doar cele necesare',
 					accept: 'Permite tot',

@@ -119,3 +119,165 @@ cmp_assert_eq( CMP_Lang::text( 'title_terms', 'en' ), 'Terms and Conditions', 'E
 cmp_assert_eq( CMP_Legal::locale_for( 'ru' ), 'ru_RU', 'locale_for ru' );
 cmp_assert_eq( CMP_Legal::locale_for( 'en-US' ), 'en_US', 'locale_for en-US' );
 cmp_assert_eq( CMP_Legal::locale_for( 'de' ), 'ro_RO', 'locale_for unknown -> ro_RO' );
+
+// B4 Task 6: the template texts (RO/RU/EN) and the new settings variables.
+$t6_expect = array(
+	'ro' => array(
+		'disclaimer' => 'nu constituie consultanță juridică', 'authority' => 'CNPDCP', 'register' => 'Registrul de consimțăminte',
+		'before' => 'nu se încarcă până nu îți dai acordul', 'gpc_cond' => 'nu ai ales încă', 'light' => 'bară informativă',
+		'rights' => 'Drepturile tale ca persoană vizată', 'remove' => 'Nu mai încărca',
+	),
+	'ru' => array(
+		'disclaimer' => 'не является юридической консультацией', 'authority' => 'НЦЗПД', 'register' => 'Реестр согласий',
+		'before' => 'не загружаются, пока вы не дадите согласие', 'gpc_cond' => 'ещё не сделали выбор', 'light' => 'информационная панель',
+		'rights' => 'Ваши права как субъекта данных', 'remove' => 'Больше не загружать',
+	),
+	'en' => array(
+		'disclaimer' => 'not legal advice', 'authority' => 'NCPDP', 'register' => 'The consent register',
+		'before' => 'do not load until you give your consent', 'gpc_cond' => 'not chosen yet', 'light' => 'information bar',
+		'rights' => 'Your rights as a data subject', 'remove' => 'Stop loading',
+	),
+);
+$t6_known = array( 'company', 'site_name', 'contact_email', 'dpo', 'jurisdiction', 'address', 'effective_date', 'retention_months', 'cookie_days', 'pro', 'light', 'blocking' );
+$t6_base  = array(
+	'company' => 'Acme SRL', 'site_name' => 'Acme', 'contact_email' => 'a@b.md', 'dpo' => 'Ion DPO',
+	'jurisdiction' => 'Republica Moldova', 'address' => 'str. X 1, Chișinău', 'effective_date' => '18.11.2026',
+	'retention_months' => '13', 'cookie_days' => '180',
+);
+$t6_modes = array(
+	'blocking' => array( 'pro' => '1', 'light' => '', 'blocking' => '1' ),
+	'pro'      => array( 'pro' => '1', 'light' => '', 'blocking' => '' ),
+	'light'    => array( 'pro' => '', 'light' => '1', 'blocking' => '' ),
+);
+$t6_sections = array();
+$t6_render   = array();
+foreach ( $t6_expect as $l => $exp ) {
+	foreach ( array( 'privacy', 'cookie', 'terms' ) as $type ) {
+		$tpl = CMP_Legal::load_template( $type, $l );
+		cmp_assert( false !== strpos( $tpl, $exp['disclaimer'] ), "$l/$type: disclaimer present" );
+		preg_match_all( '/\{\{([#\/]?)([a-z0-9_]+)\}\}/', $tpl, $mm, PREG_SET_ORDER );
+		$unknown = array();
+		$stack   = array();
+		$bad     = array();
+		foreach ( $mm as $m ) {
+			if ( ! in_array( $m[2], $t6_known, true ) ) {
+				$unknown[] = $m[2];
+			}
+			if ( '#' === $m[1] ) {
+				if ( $stack ) {
+					$bad[] = 'nested ' . $m[2];
+				}
+				$stack[] = $m[2];
+			} elseif ( '/' === $m[1] ) {
+				if ( array_pop( $stack ) !== $m[2] ) {
+					$bad[] = 'unbalanced ' . $m[2];
+				}
+			}
+		}
+		cmp_assert_eq( $unknown, array(), "$l/$type: only known placeholders" );
+		cmp_assert_eq( array_merge( $bad, $stack ), array(), "$l/$type: conditional blocks balanced, not nested" );
+		cmp_assert( false === strpos( $tpl, '{{address}}.' ) && false === strpos( $tpl, '{{dpo}}.' ), "$l/$type: no period after address/dpo" );
+		preg_match_all( '/<h3>/', $tpl, $hh );
+		$t6_sections[ $type ][ $l ] = count( $hh[0] );
+		foreach ( $t6_modes as $mode => $mv ) {
+			foreach ( array( 'full' => array(), 'bare' => array( 'address' => '', 'dpo' => '', 'jurisdiction' => '' ) ) as $fill => $over ) {
+				$out = CMP_Legal::fill_template( $tpl, array_merge( $t6_base, $mv, $over ) );
+				cmp_assert( false === strpos( $out, '{{' ) && false === strpos( $out, '}}' ), "$l/$type/$mode/$fill: no {{ left" );
+				cmp_assert( ! preg_match( '/<p>\s*<\/p>|<li>\s*<\/li>|<ul>\s*<\/ul>/u', $out ), "$l/$type/$mode/$fill: no empty p/li/ul" );
+				cmp_assert( ! preg_match( '/<!-- wp:(paragraph|list|list-item) -->\s*<!-- \/wp:\1 -->/', $out ), "$l/$type/$mode/$fill: no empty block" );
+				cmp_assert( ! preg_match( '/<p>[^<]*\s\.<\/p>|\s\.\s/u', strip_tags( $out, '<p>' ) ), "$l/$type/$mode/$fill: no dangling ' .'" );
+			}
+			$t6_render[ $l ][ $type ][ $mode ] = CMP_Legal::fill_template( $tpl, array_merge( $t6_base, $mv ) );
+			preg_match_all( '/<h3>/', $t6_render[ $l ][ $type ][ $mode ], $rh );
+			$t6_sections[ "$type/$mode" ][ $l ] = count( $rh[0] );
+		}
+	}
+	$priv = CMP_Legal::load_template( 'privacy', $l );
+	foreach ( array( '195/2024', $exp['authority'], 'datepersonale.md', '{{#address}}', '{{#dpo}}', '{{retention_months}}', '{{cookie_days}}', '2016/679', $exp['rights'] ) as $needle ) {
+		cmp_assert( false !== strpos( $priv, $needle ), "$l/privacy contains $needle" );
+	}
+	cmp_assert( false !== strpos( $priv, CMP_Lang::text( 'title_cookie', $l ) ), "$l/privacy names the cookie policy" );
+	$ck = CMP_Legal::load_template( 'cookie', $l );
+	foreach ( array( '72/2025', '116', '[cmp_cookie_table]', '{{cookie_days}}', '[cmp_cookie_settings_link]', '195/2024', 'cmp_consent', 'cmp_svc', CMP_Lang::text( 'embed_always', $l ), 'Google Analytics' ) as $needle ) {
+		cmp_assert( false !== strpos( $ck, $needle ), "$l/cookie contains $needle" );
+	}
+	cmp_assert( false !== strpos( $ck, "<!-- wp:shortcode -->[cmp_cookie_table]<!-- /wp:shortcode -->\n" ), "$l/cookie: table shortcode on its own line" );
+	cmp_assert( false !== strpos( $ck, CMP_Lang::text( 'title_privacy', $l ) ), "$l/cookie names the privacy policy" );
+	$tm = CMP_Legal::load_template( 'terms', $l );
+	cmp_assert( false !== strpos( $tm, CMP_Lang::text( 'title_privacy', $l ) ), "$l/terms names the privacy policy" );
+	cmp_assert( false !== strpos( $tm, CMP_Lang::text( 'title_cookie', $l ) ), "$l/terms names the cookie policy" );
+
+	// Mode-dependent facts.
+	$r = $t6_render[ $l ];
+	foreach ( array( 'blocking', 'pro' ) as $m ) {
+		cmp_assert( false !== strpos( $r['privacy'][ $m ], $exp['register'] ), "$l/$m: register section present" );
+		cmp_assert( false !== strpos( $r['privacy'][ $m ], 'cmp_consent' ) || false !== strpos( $r['cookie'][ $m ], 'cmp_consent' ), "$l/$m: cmp_consent named" );
+		cmp_assert( false !== strpos( $r['cookie'][ $m ], '[cmp_cookie_settings_link]' ), "$l/$m: settings link present" );
+		cmp_assert( false !== strpos( $r['cookie'][ $m ], 'Global Privacy Control' ) && false !== strpos( $r['cookie'][ $m ], $exp['gpc_cond'] ), "$l/$m: GPC only before a choice" );
+		cmp_assert( false === strpos( $r['cookie'][ $m ], $exp['light'] ), "$l/$m: no light-bar text" );
+		cmp_assert( false !== strpos( $r['cookie'][ $m ], '{{cookie_days}}' ) || false !== strpos( $r['cookie'][ $m ], '180' ), "$l/$m: consent duration stated" );
+	}
+	foreach ( array( 'privacy', 'cookie' ) as $type ) {
+		cmp_assert( false !== strpos( $r[ $type ]['blocking'], $exp['before'] ), "$l/$type/blocking: before-consent claim present" );
+		cmp_assert( false === strpos( $r[ $type ]['pro'], $exp['before'] ), "$l/$type/pro without blocking: no before-consent claim" );
+		cmp_assert( false === strpos( $r[ $type ]['light'], $exp['before'] ), "$l/$type/light: no before-consent claim" );
+	}
+	cmp_assert( false !== strpos( $r['cookie']['blocking'], CMP_Lang::text( 'embed_always', $l ) ) && false !== strpos( $r['cookie']['blocking'], '×' ), "$l/blocking: always-load section with ×" );
+	cmp_assert( false === strpos( $r['cookie']['pro'], CMP_Lang::text( 'embed_always', $l ) ), "$l/pro without blocking: no always-load section" );
+	cmp_assert( false === strpos( $ck, $exp['remove'] ), "$l/cookie: no invisible 'stop loading' label" );
+	foreach ( array( 'privacy', 'cookie', 'terms' ) as $type ) {
+		$lt = $r[ $type ]['light'];
+		cmp_assert( false === strpos( $lt, 'cmp_consent' ) && false === strpos( $lt, 'cmp_svc' ), "$l/$type/light: no cmp_consent/cmp_svc" );
+		cmp_assert( false === strpos( $lt, '[cmp_cookie_settings_link]' ), "$l/$type/light: no settings link" );
+		cmp_assert( false === strpos( $lt, $exp['register'] ), "$l/$type/light: no consent register" );
+		cmp_assert( false === strpos( $lt, 'Global Privacy Control' ), "$l/$type/light: no GPC" );
+		cmp_assert( false === strpos( $lt, CMP_Lang::text( 'embed_always', $l ) ), "$l/$type/light: no always-load" );
+		cmp_assert( false === strpos( $lt, 'Consent Mode' ), "$l/$type/light: no Consent Mode" );
+	}
+	cmp_assert( false !== strpos( $r['cookie']['light'], $exp['light'] ) && false !== strpos( $r['cookie']['light'], 'cmp_light_dismissed' ), "$l/light: information bar described" );
+	cmp_assert( false !== strpos( $r['cookie']['light'], CMP_Lang::text( 'embed_load', $l ) ), "$l/light: load-once embed button named" );
+}
+cmp_assert( false === strpos( CMP_Legal::load_template( 'privacy', 'en' ), 'in clear' ) && false !== strpos( CMP_Legal::load_template( 'privacy', 'en' ), 'plain text' ), 'en/privacy: plain text wording' );
+foreach ( $t6_sections as $type => $counts ) {
+	cmp_assert( $counts['ro'] >= 5 && $counts['ro'] === $counts['ru'] && $counts['ro'] === $counts['en'], "$type: same number of sections in ro/ru/en" );
+}
+
+// Owner decision: "tu" in the RO banner intro (plugin and standalone).
+$t6_intro = 'Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul tău, cookie-uri de analiză pentru a-l îmbunătăți. Poți accepta sau refuza cookie-urile opționale.';
+cmp_assert_eq( CMP_Lang::text( 'intro', 'ro' ), $t6_intro, 'RO banner intro uses "tu"' );
+$t6_cmpjs = (string) file_get_contents( __DIR__ . '/../standalone/cmp.js' );
+cmp_assert( false !== strpos( $t6_cmpjs, $t6_intro ) && false === strpos( $t6_cmpjs, 'dumneavoastră' ), 'standalone RO intro uses "tu"' );
+cmp_assert( false === strpos( (string) file_get_contents( __DIR__ . '/../includes/modules/class-lang.php' ), 'dumneavoastră' ), 'class-lang has no "dumneavoastră"' );
+
+// build_content gets retention_months, cookie_days and the mode flags from the settings.
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+require_once __DIR__ . '/../includes/class-sanitizer.php';
+require_once __DIR__ . '/../includes/admin/class-legal-page.php';
+cmp_assert( method_exists( 'CMP_Legal_Page', 'settings_vars' ), 'CMP_Legal_Page::settings_vars exists' );
+if ( method_exists( 'CMP_Legal_Page', 'settings_vars' ) ) {
+	$t6_sv = function ( $s ) {
+		return CMP_Legal_Page::settings_vars( $s );
+	};
+	cmp_assert_eq( $t6_sv( array() ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '1', 'light' => '', 'blocking' => '' ), 'settings_vars defaults (pro, blocking off as in CMP_Blocker)' );
+	cmp_assert_eq( $t6_sv( array( 'retention_months' => 24, 'cookie_days' => 90, 'mode' => 'pro', 'block_scripts' => true ) ), array( 'retention_months' => '24', 'cookie_days' => '90', 'pro' => '1', 'light' => '', 'blocking' => '1' ), 'settings_vars: pro with blocking' );
+	cmp_assert_eq( $t6_sv( array( 'retention_months' => 0, 'cookie_days' => 9999, 'mode' => 'pro', 'block_scripts' => false ) ), array( 'retention_months' => '13', 'cookie_days' => '396', 'pro' => '1', 'light' => '', 'blocking' => '' ), 'settings_vars: invalid retention -> 13, days capped, pro without blocking' );
+	cmp_assert_eq( $t6_sv( array( 'mode' => 'light', 'block_scripts' => true ) ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '', 'light' => '1', 'blocking' => '' ), 'settings_vars: light (never "blocking")' );
+	cmp_assert_eq( $t6_sv( array( 'mode' => 'weird' ) )['pro'], '1', 'settings_vars: unknown mode -> pro' );
+}
+$t6_src = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
+preg_match( '/function build_content\(.*?\n\t}\n/s', $t6_src, $t6_bc );
+cmp_assert( isset( $t6_bc[0] ) && false !== strpos( $t6_bc[0], 'self::settings_vars( CMP_Consent::get_settings() )' ), 'build_content merges settings_vars from the settings' );
+cmp_assert( false !== strpos( $t6_src, 'După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale.' ), 'legal screen: regenerate note for frozen durations' );
+
+// B4 Task 6, fix round 2: re-consent wording without blocking; Light names exempt services.
+cmp_assert( false === strpos( $t6_render['ro']['cookie']['pro'], 'rămâne blocată' ), 'ro/cookie/pro without blocking: no "rămâne blocată"' );
+cmp_assert( false !== strpos( $t6_render['ro']['cookie']['blocking'], 'rămâne blocată' ), 'ro/cookie/blocking: "rămâne blocată" kept' );
+cmp_assert( false === strpos( $t6_render['ru']['cookie']['pro'], 'заблокированной' ) && false === strpos( $t6_render['en']['cookie']['pro'], 'stays blocked' ), 'ru/en cookie/pro without blocking: no "blocked" re-consent claim' );
+foreach ( array( 'ro' => 'tratată ca refuzată', 'ru' => 'считается отклонённой', 'en' => 'treated as refused' ) as $l => $needle ) {
+	cmp_assert( false !== strpos( $t6_render[ $l ]['cookie']['pro'], $needle ), "$l/cookie/pro: re-consent category treated as refused" );
+}
+foreach ( array( 'ro' => 'marcat ca excepție', 'ru' => 'отметил как исключение', 'en' => 'marked as exempt' ) as $l => $needle ) {
+	cmp_assert( false !== strpos( $t6_render[ $l ]['cookie']['light'], $needle ) && false !== strpos( $t6_render[ $l ]['privacy']['light'], $needle ), "$l/light: exempt services mentioned" );
+}
