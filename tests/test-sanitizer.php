@@ -118,7 +118,7 @@ cmp_assert_eq( $cmp_meta['company'], 'Vin de Autor', 'company stripped and trimm
 cmp_assert_eq( $cmp_meta['contact_email'], '', 'invalid email dropped' );
 cmp_assert_eq( CMP_Sanitizer::legal_meta( array( 'contact_email' => 'a@b.md' ) )['contact_email'], 'a@b.md', 'valid email kept' );
 cmp_assert( ! array_key_exists( 'x', $cmp_meta ), 'unknown keys dropped' );
-cmp_assert_eq( array_keys( $cmp_meta ), array( 'company', 'contact_email', 'dpo', 'jurisdiction' ), 'exactly the four operator fields' );
+cmp_assert_eq( array_keys( $cmp_meta ), array( 'company', 'contact_email', 'dpo', 'jurisdiction', 'address' ), 'exactly the five operator fields' );
 
 // ---- Task 4: services / normalize_host ----
 cmp_assert_eq( CMP_Sanitizer::normalize_host( ' https://Chat.IO/ ' ), 'chat.io', 'normalize_host: scheme, case, trailing slash' );
@@ -241,3 +241,8 @@ cmp_assert_eq( $cmp_r6['seq'], 3, 'M6: seq carried from max existing' );
 $cmp_r6 = CMP_Sanitizer::services( array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A', 'hosts' => array( 'a.io' ) ), array( 'name' => 'N', 'hosts' => array( 'n.io' ) ) ) ), array(), array(), false, $cmp_r6 );
 cmp_assert_eq( $cmp_r6['custom'][1]['id'], 'custom-4', 'M6: deleted highest id not reused' );
 cmp_assert_eq( $cmp_r6['seq'], 4, 'M6: seq updated' );
+
+// B4 Task 5: operator address.
+cmp_assert_eq( CMP_Sanitizer::legal_meta( array( 'address' => '  str. X <b>1</b> ' ) )['address'], 'str. X 1', 'address stripped and trimmed' );
+cmp_assert_eq( strlen( CMP_Sanitizer::legal_meta( array( 'address' => str_repeat( 'a', 300 ) ) )['address'] ), 200, 'address capped at 200' );
+cmp_assert_eq( CMP_Sanitizer::legal_meta( array() )['address'], '', 'address defaults to empty' );

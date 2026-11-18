@@ -116,6 +116,11 @@ class CMP_Plugin {
 		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) && false === get_option( 'cmp_services_seen', false ) ) {
 			update_option( 'cmp_services_notice', 1 );
 		}
+		// B4: the legal templates changed (Moldova texts, RO/RU/EN): flag a one-time
+		// note on "Pagini legale" for existing installs only.
+		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) ) {
+			update_option( 'cmp_templates_notice', 1 );
+		}
 		// B4: seed the cumulative services list from the last scan, so the first
 		// admin scan after the update does not re-prompt every visitor at once.
 		if ( false === get_option( 'cmp_services_history', false ) ) {

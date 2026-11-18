@@ -3,7 +3,7 @@ require_once __DIR__ . '/../includes/modules/class-legal.php';
 
 $tpl = "Salut {{name}}, la {{site}}. {{missing}} rămâne.";
 $out = CMP_Legal::fill_template( $tpl, array( 'name' => 'Ana', 'site' => 'PlataEgala' ) );
-cmp_assert_eq( $out, 'Salut Ana, la PlataEgala. {{missing}} rămâne.', 'fill_template replaces known tokens, leaves unknown' );
+cmp_assert_eq( $out, 'Salut Ana, la PlataEgala.  rămâne.', 'fill_template replaces known tokens, drops unknown' );
 
 $priv = CMP_Legal::load_template( 'privacy' );
 cmp_assert( strpos( $priv, '{{site_name}}' ) !== false, 'privacy template has site_name placeholder' );
@@ -96,3 +96,26 @@ cmp_assert( strpos( $t7_ru, '<td>Custom cat</td>' ) !== false, 'custom category 
 cmp_assert( strpos( CMP_Legal::cookie_table_html( $t7_seed, array( $t7_ga ), 'ru' ), '<th>Срок хранения</th>' ) !== false, 'RU heading Срок хранения' );
 cmp_assert_eq( count( CMP_Legal::table_services( array( array( 'x' ) ), array( array( 'id' => array( 'x' ), 'cookies' => array( 1 ) ) ) ) ), 0, 'non-scalar ids are ignored' );
 cmp_assert_eq( CMP_Lang::text( 'tbl_name', 'ro' ), 'Nume', 'tbl_name RO in CMP_Lang' );
+
+// B4 Task 5: per-language templates, conditional blocks, operator address.
+cmp_assert_eq( CMP_Legal::fill_template( '<p>A</p>{{#address}}<p>{{address}}</p>{{/address}}', array( 'address' => '' ) ), '<p>A</p>', 'empty address drops the block' );
+cmp_assert( strpos( CMP_Legal::fill_template( '<p>A</p>{{#address}}<p>{{address}}</p>{{/address}}', array( 'address' => 'str. X 1' ) ), '<p>str. X 1</p>' ) !== false, 'address block kept and filled' );
+cmp_assert_eq( CMP_Legal::fill_template( 'a {{necunoscut}} b', array() ), 'a  b', 'unknown placeholder disappears' );
+cmp_assert_eq( CMP_Legal::fill_template( "A\n{{#address}}\n<p>\n{{address}}\n</p>\n{{/address}}\nB", array( 'address' => '' ) ), "A\n\nB", 'multi-line block dropped when empty' );
+cmp_assert( strpos( CMP_Legal::fill_template( "A\n{{#address}}\n<p>\n{{address}}\n</p>\n{{/address}}\nB", array( 'address' => 'X' ) ), "<p>\nX\n</p>" ) !== false, 'multi-line block kept when set' );
+cmp_assert_eq( CMP_Legal::fill_template( '{{#dpo}}x{{/dpo}}', array() ), '', 'block with an absent key is dropped' );
+cmp_assert( CMP_Legal::load_template( 'privacy', 'ru' ) !== '', 'ru template loads' );
+cmp_assert_eq( CMP_Legal::load_template( 'privacy', 'de' ), CMP_Legal::load_template( 'privacy', 'ro' ), 'unknown language falls back to ro' );
+cmp_assert_eq( CMP_Legal::load_template( 'nope', 'ro' ), '', 'unknown type is empty in any language' );
+cmp_assert_eq( CMP_Legal::page_lang_for( 'ru_RU' ), 'ru', 'ru_RU -> ru' );
+cmp_assert_eq( CMP_Legal::page_lang_for( 'en-US' ), 'en', 'en-US -> en' );
+cmp_assert_eq( CMP_Legal::page_lang_for( 'de' ), 'ro', 'de -> ro' );
+foreach ( array( 'ro', 'ru', 'en' ) as $cmp_l ) {
+	foreach ( array( 'title_privacy', 'title_terms', 'title_cookie' ) as $cmp_k ) {
+		cmp_assert( CMP_Lang::text( $cmp_k, $cmp_l ) !== '', "$cmp_k exists in $cmp_l" );
+	}
+}
+cmp_assert_eq( CMP_Lang::text( 'title_terms', 'en' ), 'Terms and Conditions', 'EN terms title' );
+cmp_assert_eq( CMP_Legal::locale_for( 'ru' ), 'ru_RU', 'locale_for ru' );
+cmp_assert_eq( CMP_Legal::locale_for( 'en-US' ), 'en_US', 'locale_for en-US' );
+cmp_assert_eq( CMP_Legal::locale_for( 'de' ), 'ro_RO', 'locale_for unknown -> ro_RO' );

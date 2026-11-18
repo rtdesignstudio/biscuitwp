@@ -18,18 +18,41 @@ class CMP_Legal_Page {
 		return isset( $map[ $type ] ) ? $map[ $type ] : '';
 	}
 
-	public static function build_content( $type, array $meta ) {
-		$vars = array(
-			'site_name'      => get_bloginfo( 'name' ),
-			'company'        => isset( $meta['company'] ) ? $meta['company'] : get_bloginfo( 'name' ),
-			'contact_email'  => isset( $meta['contact_email'] ) ? $meta['contact_email'] : get_bloginfo( 'admin_email' ),
-			'dpo'            => isset( $meta['dpo'] ) ? $meta['dpo'] : '',
-			'jurisdiction'   => isset( $meta['jurisdiction'] ) ? $meta['jurisdiction'] : '',
-			'effective_date' => date_i18n( get_option( 'date_format' ) ),
-		);
-		return CMP_Legal::fill_template( CMP_Legal::load_template( $type ), $vars );
+	/** The current date formatted for the page language (locale switched when possible). */
+	private static function date_for( $lang ) {
+		$switched = false;
+		if ( function_exists( 'switch_to_locale' ) && function_exists( 'restore_previous_locale' ) ) {
+			$switched = (bool) switch_to_locale( CMP_Legal::locale_for( $lang ) );
+		}
+		$date = date_i18n( get_option( 'date_format' ) );
+		if ( $switched ) {
+			restore_previous_locale();
+		}
+		return $date;
 	}
 
+	/** Page content from the $lang template. $meta is the stored operator data (or settings holding it). */
+	public static function build_content( $type, array $meta, $lang = 'ro' ) {
+		if ( isset( $meta['legal_meta'] ) && is_array( $meta['legal_meta'] ) ) {
+			$meta = $meta['legal_meta'];
+		}
+		$lang = CMP_Legal::page_lang_for( $lang );
+		$vars = array(
+			'site_name'      => get_bloginfo( 'name' ),
+			'company'        => isset( $meta['company'] ) && '' !== $meta['company'] ? $meta['company'] : get_bloginfo( 'name' ),
+			'contact_email'  => isset( $meta['contact_email'] ) && '' !== $meta['contact_email'] ? $meta['contact_email'] : get_bloginfo( 'admin_email' ),
+			'dpo'            => isset( $meta['dpo'] ) ? $meta['dpo'] : '',
+			'jurisdiction'   => isset( $meta['jurisdiction'] ) ? $meta['jurisdiction'] : '',
+			'address'        => isset( $meta['address'] ) ? $meta['address'] : '',
+			'effective_date' => self::date_for( $lang ),
+		);
+		return CMP_Legal::fill_template( CMP_Legal::load_template( $type, $lang ), $vars );
+	}
+
+	/**
+	 * Refreshes the source cookie page only. Must only be called from an explicit
+	 * admin action, never from automatic events (scans, saves).
+	 */
 	public static function regenerate_cookie_page() {
 		$settings = CMP_Consent::get_settings();
 		$pid      = (int) ( isset( $settings['cookie_page_id'] ) ? $settings['cookie_page_id'] : 0 );
@@ -41,7 +64,7 @@ class CMP_Legal_Page {
 			return;
 		}
 		$meta = isset( $settings['legal_meta'] ) && is_array( $settings['legal_meta'] ) ? $settings['legal_meta'] : array();
-		wp_update_post( array( 'ID' => $pid, 'post_content' => self::build_content( 'cookie', $meta ) ) );
+		wp_update_post( array( 'ID' => $pid, 'post_content' => self::build_content( 'cookie', $meta, CMP_Legal::primary_lang() ) ) );
 	}
 
 	/** Stored operator data, with defaults for a first visit. */
@@ -54,6 +77,7 @@ class CMP_Legal_Page {
 				'contact_email' => get_bloginfo( 'admin_email' ),
 				'dpo'           => '',
 				'jurisdiction'  => 'Republica Moldova',
+				'address'       => '',
 			),
 			array_filter( $meta, 'strlen' )
 		);
@@ -105,6 +129,10 @@ class CMP_Legal_Page {
 		?>
 		<div class="wrap cmp-admin">
 			<h1><?php esc_html_e( 'Consent Manager — Pagini legale', 'consent-manager-pro' ); ?></h1>
+			<?php if ( get_option( 'cmp_templates_notice' ) ) : ?>
+				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează paginile ca să le preiei.', 'consent-manager-pro' ); ?>
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_templates_notice' ), 'cmp_dismiss_templates_notice' ) ); ?>"><?php esc_html_e( 'Închide', 'consent-manager-pro' ); ?></a></p></div>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['generated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor.', 'consent-manager-pro' ); ?></p></div>
 			<?php elseif ( isset( $_GET['saved'] ) ) : ?>
@@ -128,6 +156,8 @@ class CMP_Legal_Page {
 						<td><input type="text" id="cmp-dpo" name="meta[dpo]" class="regular-text" value="<?php echo esc_attr( $meta['dpo'] ); ?>"></td></tr>
 					<tr><th scope="row"><label for="cmp-jur"><?php esc_html_e( 'Jurisdicție', 'consent-manager-pro' ); ?></label></th>
 						<td><input type="text" id="cmp-jur" name="meta[jurisdiction]" class="regular-text" value="<?php echo esc_attr( $meta['jurisdiction'] ); ?>"></td></tr>
+					<tr><th scope="row"><label for="cmp-address"><?php esc_html_e( 'Adresa (opțional, recomandat pentru firme)', 'consent-manager-pro' ); ?></label></th>
+						<td><input type="text" id="cmp-address" name="meta[address]" class="regular-text" maxlength="200" value="<?php echo esc_attr( $meta['address'] ); ?>"></td></tr>
 				</table>
 
 				<h2><?php esc_html_e( 'Documente', 'consent-manager-pro' ); ?></h2>
@@ -182,6 +212,7 @@ class CMP_Legal_Page {
 					</tbody>
 				</table>
 
+				<p class="description"><?php esc_html_e( 'Regenerarea suprascrie și traducerile create de plugin; paginile create de tine nu sunt atinse.', 'consent-manager-pro' ); ?></p>
 				<?php submit_button( __( 'Salvează', 'consent-manager-pro' ) ); ?>
 			</form>
 		</div>
@@ -216,7 +247,9 @@ class CMP_Legal_Page {
 		$type = isset( $_POST['generate'] ) ? sanitize_key( wp_unslash( $_POST['generate'] ) ) : '';
 		$args = array( 'page' => 'cmp-legal', 'saved' => 1 );
 		if ( in_array( $type, CMP_Legal::TYPES, true ) ) {
+			update_option( 'cmp_settings', $settings ); // translations read the operator data from the stored settings
 			$post_id = self::generate_page( $type, $settings );
+			delete_option( 'cmp_templates_notice' );
 			if ( is_wp_error( $post_id ) ) {
 				wp_die( esc_html__( 'Nu am putut crea pagina.', 'consent-manager-pro' ) );
 			}
@@ -232,11 +265,20 @@ class CMP_Legal_Page {
 		exit;
 	}
 
+	public static function dismiss_templates_notice() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_templates_notice' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+		delete_option( 'cmp_templates_notice' );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-legal' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	/** Fill the linked page from the template, or create it as a draft. Returns the page id or WP_Error. */
 	private static function generate_page( $type, array $settings ) {
 		$meta     = isset( $settings['legal_meta'] ) && is_array( $settings['legal_meta'] ) ? $settings['legal_meta'] : array();
-		$content  = self::build_content( $type, $meta );
-		$labels   = self::labels();
+		$lang     = CMP_Legal::primary_lang();
+		$content  = self::build_content( $type, $meta, $lang );
 		$existing = (int) ( isset( $settings[ self::settings_key( $type ) ] ) ? $settings[ self::settings_key( $type ) ] : 0 );
 		$post     = $existing ? get_post( $existing ) : null;
 
@@ -244,11 +286,14 @@ class CMP_Legal_Page {
 			$post_id = wp_update_post( array( 'ID' => $existing, 'post_content' => $content ), true );
 		} else {
 			$post_id = wp_insert_post( array(
-				'post_title'   => $labels[ $type ],
+				'post_title'   => CMP_Lang::text( 'title_' . $type, $lang ),
 				'post_content' => $content,
 				'post_status'  => 'draft',
 				'post_type'    => 'page',
 			), true );
+		}
+		if ( ! is_wp_error( $post_id ) && $post_id ) {
+			update_post_meta( (int) $post_id, '_cmp_legal_type', $type ); // generated by the plugin
 		}
 		if ( is_wp_error( $post_id ) || ! $post_id ) {
 			return is_wp_error( $post_id ) ? $post_id : new WP_Error( 'cmp_legal_failed', 'failed' );

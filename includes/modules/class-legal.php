@@ -31,20 +31,68 @@ class CMP_Legal {
 		return $out;
 	}
 
+	/**
+	 * Fill a template. {{#key}}...{{/key}} blocks (may span lines, not nested) are
+	 * kept only when $vars[key] is non-empty; then {{key}} is replaced (values
+	 * as given, no escaping: the operator fields are stripped on save); any
+	 * placeholder still left is removed.
+	 */
 	public static function fill_template( $tpl, array $vars ) {
 		$out = (string) $tpl;
+		$out = preg_replace_callback(
+			'/\{\{#([a-z0-9_]+)\}\}(.*?)\{\{\/\1\}\}/s',
+			function ( $m ) use ( $vars ) {
+				return isset( $vars[ $m[1] ] ) && '' !== trim( (string) $vars[ $m[1] ] ) ? $m[2] : '';
+			},
+			$out
+		);
 		foreach ( $vars as $k => $v ) {
 			$out = str_replace( '{{' . $k . '}}', (string) $v, $out );
 		}
-		return $out;
+		return preg_replace( '/\{\{[^{}]*\}\}/', '', $out );
 	}
 
-	public static function load_template( $type ) {
+	/** Template for $type in $lang (ro/ru/en), falling back to the ro one. '' for an unknown type. */
+	public static function load_template( $type, $lang = 'ro' ) {
 		if ( ! in_array( $type, self::TYPES, true ) ) {
 			return '';
 		}
-		$path = dirname( __DIR__, 2 ) . '/templates/legal/' . $type . '.html';
-		return is_readable( $path ) ? (string) file_get_contents( $path ) : '';
+		$base  = dirname( __DIR__, 2 ) . '/templates/legal/';
+		$lang  = in_array( $lang, array( 'ro', 'ru', 'en' ), true ) ? $lang : 'ro';
+		foreach ( array_unique( array( $lang, 'ro' ) ) as $l ) {
+			$path = $base . $l . '/' . $type . '.html';
+			if ( is_readable( $path ) ) {
+				return (string) file_get_contents( $path );
+			}
+		}
+		return '';
+	}
+
+	/** Pure: a WPML/Polylang language code ("ru", "ru_RU", "en-US", "de") as ro|ru|en (ro by default). */
+	public static function page_lang_for( $code ) {
+		return CMP_Lang::normalize( $code );
+	}
+
+	/** Pure: WordPress locale for a ro|ru|en page language. */
+	public static function locale_for( $lang ) {
+		$map = array( 'ro' => 'ro_RO', 'ru' => 'ru_RU', 'en' => 'en_US' );
+		$l   = self::page_lang_for( $lang );
+		return $map[ $l ];
+	}
+
+	/** WP: the site's primary language as ro|ru|en (WPML, then Polylang, then the locale). */
+	public static function primary_lang() {
+		$code = '';
+		if ( defined( 'ICL_SITEPRESS_VERSION' ) ) {
+			$code = (string) apply_filters( 'wpml_default_language', null );
+		}
+		if ( '' === $code && function_exists( 'pll_default_language' ) ) {
+			$code = (string) pll_default_language();
+		}
+		if ( '' === $code && function_exists( 'get_locale' ) ) {
+			$code = (string) get_locale();
+		}
+		return self::page_lang_for( $code );
 	}
 
 	/** Pure: a per-language value ({ro,ru,en}) in $lang, falling back to ro. */
@@ -207,23 +255,60 @@ class CMP_Legal {
 
 	public static function on_page_created( $post_id, $type ) {
 		$post_id = (int) $post_id;
-		if ( ! $post_id ) {
+		if ( ! $post_id || ! in_array( $type, self::TYPES, true ) ) {
 			return;
 		}
 
 		// Polylang.
 		if ( function_exists( 'pll_set_post_language' ) && function_exists( 'pll_save_post_translations' ) && function_exists( 'pll_languages_list' ) && function_exists( 'pll_default_language' ) ) {
-			self::duplicate_polylang( $post_id );
+			self::duplicate_polylang( $post_id, $type );
 			return;
 		}
 
 		// WPML.
 		if ( defined( 'ICL_SITEPRESS_VERSION' ) && function_exists( 'icl_object_id' ) ) {
-			self::duplicate_wpml( $post_id );
+			self::duplicate_wpml( $post_id, $type );
 		}
 	}
 
-	private static function duplicate_polylang( $source_id ) {
+	/** WP: operator data stored on the "Pagini legale" screen. */
+	private static function stored_meta() {
+		$s = CMP_Consent::get_settings();
+		return isset( $s['legal_meta'] ) && is_array( $s['legal_meta'] ) ? $s['legal_meta'] : array();
+	}
+
+	/**
+	 * WP: one translation of a legal page, built from its own language's
+	 * template. A new page is a draft marked with _cmp_legal_type; an existing
+	 * translation is refreshed only when it carries that mark (the plugin made
+	 * it), never otherwise. Returns the page id, or 0.
+	 */
+	private static function sync_translation( $existing_id, $type, $code ) {
+		if ( ! class_exists( 'CMP_Legal_Page' ) ) {
+			require_once dirname( __DIR__ ) . '/admin/class-legal-page.php';
+		}
+		$lang = self::page_lang_for( $code );
+		$meta = self::stored_meta();
+		if ( $existing_id ) {
+			if ( get_post_meta( $existing_id, '_cmp_legal_type', true ) === $type ) {
+				wp_update_post( array( 'ID' => $existing_id, 'post_content' => CMP_Legal_Page::build_content( $type, $meta, $lang ) ) );
+			}
+			return (int) $existing_id;
+		}
+		$id = wp_insert_post( array(
+			'post_title'   => CMP_Lang::text( 'title_' . $type, $lang ),
+			'post_content' => CMP_Legal_Page::build_content( $type, $meta, $lang ),
+			'post_status'  => 'draft',
+			'post_type'    => 'page',
+		), true );
+		if ( ! $id || is_wp_error( $id ) ) {
+			return 0;
+		}
+		update_post_meta( $id, '_cmp_legal_type', $type );
+		return (int) $id;
+	}
+
+	private static function duplicate_polylang( $source_id, $type ) {
 		$default = pll_default_language();
 		if ( ! $default ) {
 			return;
@@ -232,32 +317,26 @@ class CMP_Legal {
 			pll_set_post_language( $source_id, $default );
 		}
 
+		$src_lang     = function_exists( 'pll_get_post_language' ) ? pll_get_post_language( $source_id ) : '';
+		$default      = $src_lang ? $src_lang : $default;
 		$translations = array( $default => $source_id );
-		$source       = get_post( $source_id );
 		foreach ( (array) pll_languages_list() as $lang ) {
 			if ( $lang === $default ) {
 				continue;
 			}
-			// Skip if a translation already exists.
-			if ( function_exists( 'pll_get_post' ) && pll_get_post( $source_id, $lang ) ) {
-				$translations[ $lang ] = (int) pll_get_post( $source_id, $lang );
-				continue;
-			}
-			$copy_id = wp_insert_post( array(
-				'post_title'   => $source->post_title,
-				'post_content' => $source->post_content,
-				'post_status'  => 'draft',
-				'post_type'    => 'page',
-			), true );
-			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
-				pll_set_post_language( $copy_id, $lang );
-				$translations[ $lang ] = (int) $copy_id;
+			$existing = function_exists( 'pll_get_post' ) ? (int) pll_get_post( $source_id, $lang ) : 0;
+			$id       = self::sync_translation( $existing, $type, $lang );
+			if ( $id ) {
+				if ( ! $existing ) {
+					pll_set_post_language( $id, $lang );
+				}
+				$translations[ $lang ] = $id;
 			}
 		}
 		pll_save_post_translations( $translations );
 	}
 
-	private static function duplicate_wpml( $source_id ) {
+	private static function duplicate_wpml( $source_id, $type ) {
 		$default = apply_filters( 'wpml_default_language', null );
 		$trid    = apply_filters( 'wpml_element_trid', null, $source_id, 'post_page' );
 
@@ -269,29 +348,25 @@ class CMP_Legal {
 			'language_code'        => $default,
 			'source_language_code' => null,
 		) );
+		// Re-read: a source not yet registered had no trid before the call above.
+		$trid = apply_filters( 'wpml_element_trid', null, $source_id, 'post_page' );
 
 		$langs = apply_filters( 'wpml_active_languages', null );
 		if ( ! is_array( $langs ) ) {
 			return;
 		}
-		$source = get_post( $source_id );
 		foreach ( $langs as $code => $lang ) {
 			if ( $code === $default ) {
 				continue;
 			}
-			$existing = apply_filters( 'wpml_object_id', $source_id, 'page', false, $code );
-			if ( $existing && (int) $existing !== $source_id ) {
-				continue; // translation already exists
+			$existing = (int) apply_filters( 'wpml_object_id', $source_id, 'page', false, $code );
+			if ( $existing === (int) $source_id ) {
+				$existing = 0;
 			}
-			$copy_id = wp_insert_post( array(
-				'post_title'   => $source->post_title,
-				'post_content' => $source->post_content,
-				'post_status'  => 'draft',
-				'post_type'    => 'page',
-			), true );
-			if ( $copy_id && ! is_wp_error( $copy_id ) ) {
+			$id = self::sync_translation( $existing, $type, $code );
+			if ( $id && ! $existing ) {
 				do_action( 'wpml_set_element_language_details', array(
-					'element_id'           => $copy_id,
+					'element_id'           => $id,
 					'element_type'         => 'post_page',
 					'trid'                 => $trid,
 					'language_code'        => $code,

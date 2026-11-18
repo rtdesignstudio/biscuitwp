@@ -66,6 +66,7 @@ class CMP_Sanitizer {
 			'contact_email' => false !== filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : '',
 			'dpo'           => isset( $input['dpo'] ) ? self::text( $input['dpo'] ) : '',
 			'jurisdiction'  => isset( $input['jurisdiction'] ) ? self::text( $input['jurisdiction'] ) : '',
+			'address'       => isset( $input['address'] ) ? trim( function_exists( 'mb_substr' ) ? mb_substr( self::text( $input['address'] ), 0, 200, 'UTF-8' ) : substr( self::text( $input['address'] ), 0, 200 ) ) : '',
 		);
 	}
 

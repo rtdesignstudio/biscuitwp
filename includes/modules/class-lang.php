@@ -53,6 +53,9 @@ class CMP_Lang {
 					'tbl_transfer' => 'Transfer',
 					'tbl_none'     => '—',
 					'tbl_empty'    => 'Nu au fost definite cookie-uri.',
+					'title_privacy' => 'Politica de confidențialitate',
+					'title_terms'   => 'Termeni și condiții',
+					'title_cookie'  => 'Politica de cookie-uri',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Necesare',   'description' => 'Cookie-uri esențiale pentru funcționarea site-ului.' ),
@@ -92,6 +95,9 @@ class CMP_Lang {
 					'tbl_transfer' => 'Передача данных',
 					'tbl_none'     => '—',
 					'tbl_empty'    => 'Файлы cookie не определены.',
+					'title_privacy' => 'Политика конфиденциальности',
+					'title_terms'   => 'Условия использования',
+					'title_cookie'  => 'Политика использования файлов cookie',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Необходимые', 'description' => 'Основные файлы cookie, необходимые для работы сайта.' ),
@@ -131,6 +137,9 @@ class CMP_Lang {
 					'tbl_transfer' => 'Transfer',
 					'tbl_none'     => '—',
 					'tbl_empty'    => 'No cookies have been defined.',
+					'title_privacy' => 'Privacy Policy',
+					'title_terms'   => 'Terms and Conditions',
+					'title_cookie'  => 'Cookie Policy',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Necessary',  'description' => 'Essential cookies required for the website to function.' ),
