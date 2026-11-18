@@ -116,6 +116,14 @@ class CMP_Plugin {
 		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) && false === get_option( 'cmp_services_seen', false ) ) {
 			update_option( 'cmp_services_notice', 1 );
 		}
+		// B4: seed the cumulative services list from the last scan, so the first
+		// admin scan after the update does not re-prompt every visitor at once.
+		if ( false === get_option( 'cmp_services_history', false ) ) {
+			$seed = CMP_Services::history_or_found( false, get_option( 'cmp_services_found', false ) );
+			if ( null !== $seed ) {
+				update_option( 'cmp_services_history', $seed, false );
+			}
+		}
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 

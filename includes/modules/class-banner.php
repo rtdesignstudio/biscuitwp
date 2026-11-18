@@ -65,6 +65,14 @@ class CMP_Banner {
 			'svcNames'   => (object) $svc_names,
 			'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
 		);
+		// svcByCat: a MISSING key means "unknown" (no scan has ever run). Custom
+		// services alone are not a known map either: a partial map would re-prompt
+		// everyone once the first scan lands. The JS must then store no `svc`
+		// snapshot (legacy behaviour) and never trigger re-consent.
+		$cmp_seen = CMP_Services::history_or_found( get_option( 'cmp_services_history', false ), get_option( 'cmp_services_found', false ) );
+		if ( null !== $cmp_seen ) {
+			$cmp_data['svcByCat'] = (object) CMP_Services::svc_by_cat( CMP_Services::active(), $cmp_seen );
+		}
 		// WP Consent API bridge: only present when that plugin is active.
 		if ( CMP_Consent_API::active() ) {
 			$cmp_data['wpConsent'] = (object) CMP_Consent_API::map( wp_list_pluck( (array) $cmp_data['categories'], 'slug' ) );

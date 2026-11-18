@@ -12,7 +12,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-foreach ( array( 'cmp_services', 'cmp_services_found', 'cmp_services_notice', 'cmp_services_seen', 'cmp_thumb_queue', 'cmp_db_schema' ) as $cmp_option ) {
+foreach ( array( 'cmp_services', 'cmp_services_found', 'cmp_services_notice', 'cmp_services_seen', 'cmp_services_history', 'cmp_thumb_queue', 'cmp_db_schema' ) as $cmp_option ) {
 	delete_option( $cmp_option );
 }
 delete_transient( 'cmp_db_schema_retry' );

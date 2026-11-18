@@ -21,6 +21,7 @@ class CMP_Admin {
 		require_once CMP_PATH . 'includes/admin/class-services-page.php';
 		add_action( 'admin_post_cmp_save_services', array( 'CMP_Services_Page', 'save' ) );
 		add_action( 'admin_post_cmp_rescan_services', array( 'CMP_Services_Page', 'rescan' ) );
+		add_action( 'admin_post_cmp_reset_seen', array( 'CMP_Services_Page', 'reset_seen' ) );
 		add_action( 'admin_post_cmp_dismiss_services_notice', array( 'CMP_Services_Page', 'dismiss' ) );
 		add_action( 'admin_notices', array( 'CMP_Services_Page', 'update_notice' ) );
 		add_action( 'admin_notices', array( $this, 'library_notice' ) );

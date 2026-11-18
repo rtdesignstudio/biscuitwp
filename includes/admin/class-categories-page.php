@@ -114,9 +114,6 @@ class CMP_Categories_Page {
 		$raw   = isset( $_POST['cmp_cats'] ) && is_array( $_POST['cmp_cats'] ) ? wp_unslash( $_POST['cmp_cats'] ) : array();
 		$clean = CMP_Sanitizer::categories( array_values( $raw ) );
 		update_option( 'cmp_categories', $clean );
-		if ( is_callable( array( 'CMP_Legal_Page', 'regenerate_cookie_page' ) ) ) {
-			CMP_Legal_Page::regenerate_cookie_page();
-		}
 		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-categories', 'updated' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

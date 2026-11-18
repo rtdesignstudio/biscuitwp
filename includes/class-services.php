@@ -253,6 +253,52 @@ class CMP_Services {
 		return $out;
 	}
 
+	/** Pure: union of the cumulative seen list and a fresh scan; seen order kept, no duplicates. */
+	public static function merge_seen( array $seen, array $found ) {
+		$out = array();
+		foreach ( array_merge( $seen, $found ) as $id ) {
+			if ( is_string( $id ) && '' !== $id && ! in_array( $id, $out, true ) ) {
+				$out[] = $id;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure: the cumulative list to use. An array history wins; else the last scan's
+	 * found list; else null ("no scan ever": the map is unknown).
+	 */
+	public static function history_or_found( $history, $found ) {
+		if ( is_array( $history ) ) {
+			return $history;
+		}
+		return is_array( $found ) ? $found : null;
+	}
+
+	/**
+	 * Pure: {category slug: [service ids]} of the services that can be blocked
+	 * (not necessary, not exempt) and were seen on the site or are custom.
+	 * Ids sorted; categories without services are left out.
+	 */
+	public static function svc_by_cat( array $services, array $seen ) {
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) || empty( $s['category'] ) || 'necessary' === $s['category'] || ! empty( $s['exempt'] ) ) {
+				continue;
+			}
+			$custom = isset( $s['source'] ) && 'custom' === $s['source'];
+			if ( $custom || in_array( $s['id'], $seen, true ) ) {
+				$out[ (string) $s['category'] ][] = (string) $s['id'];
+			}
+		}
+		foreach ( $out as $slug => $ids ) {
+			$ids = array_values( array_unique( $ids ) );
+			sort( $ids );
+			$out[ $slug ] = $ids;
+		}
+		return $out;
+	}
+
 	/** WordPress wrapper: library + cmp_services option + current category slugs (memoised per request). */
 	public static function active() {
 		if ( null !== self::$active ) {

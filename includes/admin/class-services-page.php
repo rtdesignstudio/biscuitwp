@@ -174,6 +174,9 @@ class CMP_Services_Page {
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
+			<?php if ( isset( $_GET['cmp_reset'] ) ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista a fost resetată.', 'consent-manager-pro' ); ?></p></div>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_noscript'] ) ) : ?>
 				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
@@ -250,6 +253,13 @@ class CMP_Services_Page {
 			<form id="cmp-rescan-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_rescan_services">
 				<?php wp_nonce_field( 'cmp_rescan_services' ); ?>
+			</form>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?', 'consent-manager-pro' ) ); ?>');">
+				<input type="hidden" name="action" value="cmp_reset_seen">
+				<?php wp_nonce_field( 'cmp_reset_seen' ); ?>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Resetează lista serviciilor văzute', 'consent-manager-pro' ); ?></button>
+				<span class="description"><?php esc_html_e( 'Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) până o resetezi.', 'consent-manager-pro' ); ?></span></p>
 			</form>
 
 			<script type="text/template" id="cmp-custom-template"><?php self::custom_row( array(), $cats, $can_script, '__i__' ); ?></script>
@@ -336,6 +346,16 @@ class CMP_Services_Page {
 		}
 		CMP_Blocker::scan_homepage( true );
 		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	public static function reset_seen() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_reset_seen' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+		$found = get_option( 'cmp_services_found', array() );
+		update_option( 'cmp_services_history', CMP_Services::merge_seen( array(), is_array( $found ) ? $found : array() ), false );
+		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG, 'cmp_reset' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 
