@@ -709,6 +709,106 @@ window.CMP_SERVICES = {
       ],
       "transfer": "US",
       "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "umami",
+      "name": "Umami",
+      "provider": "Umami Software, Inc.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "cloud.umami.is"
+      ],
+      "inline": [
+        "cloud.umami.is",
+        "window.umami"
+      ],
+      "gtm": false,
+      "exempt_default": true,
+      "cookies": [],
+      "transfer": "US",
+      "privacy_url": "https://umami.is/privacy"
+    },
+    {
+      "id": "plausible",
+      "name": "Plausible Analytics",
+      "provider": "Plausible Insights OÜ",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "plausible.io"
+      ],
+      "inline": [
+        "plausible.io",
+        "plausible.init("
+      ],
+      "gtm": false,
+      "exempt_default": true,
+      "cookies": [],
+      "transfer": "EU",
+      "privacy_url": "https://plausible.io/privacy"
+    },
+    {
+      "id": "fathom",
+      "name": "Fathom Analytics",
+      "provider": "Conva Ventures Inc.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "cdn.usefathom.com"
+      ],
+      "inline": [
+        "cdn.usefathom.com"
+      ],
+      "gtm": false,
+      "exempt_default": true,
+      "cookies": [],
+      "transfer": "US",
+      "privacy_url": "https://usefathom.com/privacy"
+    },
+    {
+      "id": "matomo",
+      "name": "Matomo (Cloud)",
+      "provider": "InnoCraft Limited",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "matomo.cloud"
+      ],
+      "inline": [
+        "cdn.matomo.cloud"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_pk_id",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Distinge vizitatorii unici.",
+            "ru": "Различает уникальных посетителей.",
+            "en": "Distinguishes unique visitors."
+          }
+        },
+        {
+          "name": "_pk_ses",
+          "duration": {
+            "ro": "30 de minute",
+            "ru": "30 минут",
+            "en": "30 minutes"
+          },
+          "purpose": {
+            "ro": "Păstrează starea sesiunii curente.",
+            "ru": "Сохраняет состояние текущей сессии.",
+            "en": "Keeps the current session state."
+          }
+        }
+      ],
+      "transfer": "EU",
+      "privacy_url": "https://matomo.org/matomo-cloud-privacy-policy/"
     }
   ]
 };

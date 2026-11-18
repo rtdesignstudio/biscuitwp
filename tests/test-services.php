@@ -7,11 +7,11 @@ cmp_assert_eq(
 	array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' ),
 	'library starts with the six original services in order'
 );
-$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha' );
+$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha', 'umami', 'plausible', 'fathom', 'matomo' );
 $cmp_have_ids     = array_column( $lib, 'id' );
 sort( $cmp_expected_ids );
 sort( $cmp_have_ids );
-cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 14 expected ids' );
+cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 18 expected ids' );
 cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'real library validates' );
 foreach ( array( 'id', 'name', 'provider', 'type', 'category', 'hosts', 'inline', 'gtm', 'path', 'nocookie', 'cookies', 'transfer', 'privacy_url' ) as $k ) {
 	cmp_assert( array_key_exists( $k, $lib[0] ), "service has key {$k}" );
@@ -58,7 +58,7 @@ cmp_assert( null === CMP_Services::script_service( '', 'var a = 1;', $lib ), 'pl
 $cmp_slugs = array( 'necessary', 'statistics', 'marketing' );
 $cmp_all   = CMP_Services::all( $lib, array( 'overrides' => array( 'clarity' => array( 'category' => 'statistics', 'exempt' => true ) ) ), $cmp_slugs );
 $cmp_by    = array_column( $cmp_all, null, 'id' );
-cmp_assert_eq( count( $cmp_all ), 14, 'all() without custom keeps 14 services' );
+cmp_assert_eq( count( $cmp_all ), 18, 'all() without custom keeps 18 services' );
 cmp_assert_eq( $cmp_by['clarity']['category'], 'statistics', 'override category applied' );
 cmp_assert_eq( $cmp_by['clarity']['exempt'], true, 'override exempt applied' );
 cmp_assert_eq( $cmp_by['clarity']['source'], 'library', 'library service has source library' );
@@ -90,8 +90,8 @@ $cmp_custom = array(
 	),
 );
 $cmp_all = CMP_Services::all( $lib, $cmp_custom, $cmp_slugs );
-cmp_assert_eq( count( $cmp_all ), 15, 'custom service appended' );
-$cx = $cmp_all[14];
+cmp_assert_eq( count( $cmp_all ), 19, 'custom service appended' );
+$cx = $cmp_all[18];
 cmp_assert_eq( $cx['source'], 'custom', 'custom source' );
 cmp_assert_eq( $cx['type'], 'script', 'custom type script' );
 cmp_assert_eq( $cx['category'], 'marketing', 'custom unknown category remapped' );
@@ -110,6 +110,9 @@ cmp_assert( is_array( $cmp_found ) && 'custom-1' === $cmp_found['id'], 'custom s
 $cmp_act = CMP_Services::active();
 $cmp_exp = array_map(
 	function ( $s ) {
+		if ( ! empty( $s['exempt_default'] ) ) {
+			$s['exempt'] = true;
+		}
 		$s['source'] = 'library';
 		return $s;
 	},
@@ -137,3 +140,50 @@ cmp_assert( in_array( 'recaptcha', $cmp_fnd, true ), 'found_ids: necessary recap
 cmp_assert( in_array( 'clarity', $cmp_fnd, true ), 'found_ids: normal service found' );
 cmp_assert_eq( CMP_Blocker::detect_services( $cmp_page, $cmp_ex2 )['raw'], array( 'clarity' ), 'detect_services unchanged: raw excludes exempt and necessary' );
 cmp_assert_eq( CMP_Blocker::found_ids( '<p>hi</p>', $cmp_ex2 ), array(), 'found_ids: nothing on a clean page' );
+
+// ---- B2 Task 1: cookieless analytics tools, exempt_default ----
+$cmp_cl_ids = array( 'umami', 'plausible', 'fathom' );
+cmp_assert_eq( count( $lib ), 18, 'library has 18 services' );
+$cmp_cl_by = array_column( $lib, null, 'id' );
+foreach ( $cmp_cl_ids as $cmp_cl ) {
+	cmp_assert( isset( $cmp_cl_by[ $cmp_cl ] ), "{$cmp_cl} in library" );
+	cmp_assert_eq( $cmp_cl_by[ $cmp_cl ]['type'], 'script', "{$cmp_cl}: type script" );
+	cmp_assert_eq( $cmp_cl_by[ $cmp_cl ]['category'], 'statistics', "{$cmp_cl}: statistics" );
+	cmp_assert_eq( $cmp_cl_by[ $cmp_cl ]['cookies'], array(), "{$cmp_cl}: no cookies" );
+	cmp_assert( ! empty( $cmp_cl_by[ $cmp_cl ]['exempt_default'] ), "{$cmp_cl}: exempt_default" );
+	cmp_assert( ! empty( $cmp_cl_by[ $cmp_cl ]['hosts'] ) && ! empty( $cmp_cl_by[ $cmp_cl ]['inline'] ), "{$cmp_cl}: hosts and markers" );
+}
+cmp_assert( isset( $cmp_cl_by['matomo'] ) && empty( $cmp_cl_by['matomo']['exempt_default'] ), 'matomo: in library, NOT exempt by default' );
+cmp_assert_eq( array_column( $cmp_cl_by['matomo']['cookies'], 'name' ), array( '_pk_id', '_pk_ses' ), 'matomo: standard cookies listed' );
+cmp_assert_eq( $cmp_cl_by['matomo']['hosts'], array( 'matomo.cloud' ), 'matomo: hosts' );
+cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'library with cookieless tools validates' );
+$cmp_cl_all = array_column( CMP_Services::all( $lib, array(), array() ), null, 'id' );
+cmp_assert_eq( $cmp_cl_all['umami']['exempt'], true, 'all(): umami exempt by default' );
+cmp_assert( empty( $cmp_cl_all['clarity']['exempt'] ), 'all(): clarity not exempt by default' );
+$cmp_cl_ov = array_column( CMP_Services::all( $lib, array( 'overrides' => array( 'umami' => array( 'exempt' => false ) ) ), array() ), null, 'id' );
+cmp_assert_eq( $cmp_cl_ov['umami']['exempt'], false, 'all(): override exempt=false beats exempt_default' );
+// New hosts must not take ownership of existing services (and vice versa).
+$cmp_cl_urls = array(
+	'umami'             => 'https://cloud.umami.is/script.js',
+	'plausible'         => 'https://plausible.io/js/script.js',
+	'fathom'            => 'https://cdn.usefathom.com/script.js',
+	'matomo'            => 'https://cdn.matomo.cloud/acme/matomo.js',
+);
+foreach ( $cmp_cl_urls as $cmp_cl => $cmp_u ) {
+	$cmp_m = CMP_Services::script_service( $cmp_u, '', $cmp_cl_all );
+	cmp_assert( null !== $cmp_m && $cmp_cl === $cmp_m['id'], "{$cmp_cl}: its loader URL maps to it" );
+}
+foreach ( $cmp_cl_by as $cmp_id => $cmp_s ) {
+	if ( in_array( $cmp_id, array_merge( $cmp_cl_ids, array( 'matomo' ) ), true ) || 'script' !== $cmp_s['type'] ) {
+		continue;
+	}
+	foreach ( $cmp_s['hosts'] as $cmp_h ) {
+		foreach ( $cmp_cl_urls as $cmp_cl => $cmp_u ) {
+			cmp_assert( ! CMP_Services::host_matches( $cmp_u, $cmp_h ), "{$cmp_id} host {$cmp_h} does not own {$cmp_cl}" );
+		}
+	}
+}
+foreach ( array( 'https://www.clarity.ms/tag/x', 'https://static.hotjar.com/c/hotjar-1.js', 'https://www.googletagmanager.com/gtag/js?id=G-1', 'https://connect.facebook.net/en_US/fbevents.js' ) as $cmp_u ) {
+	$cmp_m = CMP_Services::script_service( $cmp_u, '', $cmp_cl_all );
+	cmp_assert( null !== $cmp_m && ! in_array( $cmp_m['id'], $cmp_cl_ids, true ), 'existing loader not taken by a cookieless tool: ' . $cmp_u );
+}

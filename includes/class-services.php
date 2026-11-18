@@ -200,6 +200,9 @@ class CMP_Services {
 				continue;
 			}
 			$id = isset( $s['id'] ) ? (string) $s['id'] : '';
+			if ( ! empty( $s['exempt_default'] ) ) {
+				$s['exempt'] = true;
+			}
 			if ( isset( $over[ $id ] ) && is_array( $over[ $id ] ) ) {
 				if ( isset( $over[ $id ]['category'] ) && '' !== (string) $over[ $id ]['category'] ) {
 					$s['category'] = (string) $over[ $id ]['category'];

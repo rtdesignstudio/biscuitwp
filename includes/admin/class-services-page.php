@@ -282,11 +282,15 @@ class CMP_Services_Page {
 				$cats[] = (string) $cat['slug'];
 			}
 		}
-		$ids      = array();
-		$lib_cats = array();
+		$ids        = array();
+		$lib_cats   = array();
+		$lib_exempt = array();
 		foreach ( CMP_Services::library() as $s ) {
-			$ids[]                 = $s['id'];
+			$ids[]                = $s['id'];
 			$lib_cats[ $s['id'] ] = $s['category'];
+			if ( ! empty( $s['exempt_default'] ) ) {
+				$lib_exempt[ $s['id'] ] = true;
+			}
 		}
 
 		// Did the user try to save a script they have no right to save?
@@ -323,7 +327,7 @@ class CMP_Services_Page {
 			}
 		}
 
-		$clean = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own );
+		$clean = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own, $lib_exempt );
 		update_option( 'cmp_services', $clean );
 		delete_transient( 'cmp_tracker_scan' );
 		// The Cookie Policy page renders [cmp_cookie_table] live, so it is not

@@ -194,8 +194,9 @@ class CMP_Sanitizer {
 	 * @param array $old            The stored cmp_services option.
 	 * @param array $library_categories Optional id => default category; overrides equal to the default are skipped.
 	 * @param string $own_host      The site's own host (home_url); it and its parent domain are dropped from custom hosts.
+	 * @param array $library_exempt Optional id => true for services exempt by default (exempt_default); an override equal to the default is skipped, exempt=false is kept.
 	 */
-	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array(), $own_host = '' ) {
+	public static function services( array $input, array $library_ids, array $category_slugs, $can_script, array $old, array $library_categories = array(), $own_host = '', array $library_exempt = array() ) {
 		$overrides = array();
 		$raw_over  = isset( $input['overrides'] ) && is_array( $input['overrides'] ) ? $input['overrides'] : array();
 		foreach ( $raw_over as $id => $o ) {
@@ -208,7 +209,8 @@ class CMP_Sanitizer {
 				$row['category'] = self::known_category( $cat, $category_slugs );
 			}
 			$row['exempt'] = self::flag( isset( $o['exempt'] ) ? $o['exempt'] : false );
-			if ( isset( $library_categories[ $id ] ) && ! $row['exempt']
+			$default_exempt = ! empty( $library_exempt[ $id ] );
+			if ( isset( $library_categories[ $id ] ) && $row['exempt'] === $default_exempt
 				&& ( ! isset( $row['category'] ) || $row['category'] === $library_categories[ $id ] ) ) {
 				continue;
 			}

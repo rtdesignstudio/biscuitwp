@@ -246,3 +246,15 @@ cmp_assert_eq( $cmp_r6['seq'], 4, 'M6: seq updated' );
 cmp_assert_eq( CMP_Sanitizer::legal_meta( array( 'address' => '  str. X <b>1</b> ' ) )['address'], 'str. X 1', 'address stripped and trimmed' );
 cmp_assert_eq( strlen( CMP_Sanitizer::legal_meta( array( 'address' => str_repeat( 'a', 300 ) ) )['address'] ), 200, 'address capped at 200' );
 cmp_assert_eq( CMP_Sanitizer::legal_meta( array() )['address'], '', 'address defaults to empty' );
+
+// ---- B2 Task 1: three-state exempt override ----
+$cmp_xd  = array( 'umami' => 'statistics', 'clarity' => 'statistics' );
+$cmp_xe  = array( 'umami' => true );
+$cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'umami' => array( 'category' => '' ) ) ), array( 'umami', 'clarity' ), $cmp_sl, false, array(), $cmp_xd, '', $cmp_xe );
+cmp_assert_eq( $cmp_xs['overrides'], array( 'umami' => array( 'exempt' => false ) ), 'exempt unchecked on an exempt_default service is stored as false' );
+$cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'umami' => array( 'category' => 'statistics', 'exempt' => '1' ) ) ), array( 'umami', 'clarity' ), $cmp_sl, false, array(), $cmp_xd, '', $cmp_xe );
+cmp_assert_eq( $cmp_xs['overrides'], array(), 'row equal to the defaults (exempt on) is not stored' );
+$cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'category' => 'statistics' ) ) ), array( 'umami', 'clarity' ), $cmp_sl, false, array(), $cmp_xd, '', $cmp_xe );
+cmp_assert_eq( $cmp_xs['overrides'], array(), 'default row of a normal service is not stored' );
+$cmp_xs  = CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'exempt' => '1' ) ) ), array( 'umami', 'clarity' ), $cmp_sl, false, array(), $cmp_xd, '', $cmp_xe );
+cmp_assert_eq( $cmp_xs['overrides'], array( 'clarity' => array( 'exempt' => true ) ), 'exempt on a normal service still stored' );

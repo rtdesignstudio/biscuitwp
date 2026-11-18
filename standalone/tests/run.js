@@ -243,7 +243,7 @@ if (typeof rcView.svcFlat === 'function') {
 	eq(rcView.svcFlat(null), [], 'svcFlat: null -> []');
 	eq(rcView.svcFlat({ a: 'oops', b: ['z', 5] }), ['z'], 'svcFlat: non-array values and non-string ids skipped');
 }
-// Cookie size: 14 library ids + custom-1 … custom-50, all accepted, stays small.
+// Cookie size: 18 library ids + custom-1 … custom-50, all accepted, stays small.
 if (typeof rcBanner.svcSnapshot === 'function') {
 	var libSvc = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../../data/services.json'), 'utf8'));
 	libSvc = libSvc.services || libSvc;
@@ -251,11 +251,11 @@ if (typeof rcBanner.svcSnapshot === 'function') {
 	libSvc.forEach(function (x) { (bigMap[x.category] = bigMap[x.category] || []).push(x.id); });
 	for (var ci = 1; ci <= 50; ci++) { bigMap.marketing.push('custom-' + ci); }
 	var bigIds = Object.keys(bigMap).reduce(function (n, k) { return n + bigMap[k].length; }, 0);
-	eq(bigIds, 64, 'cookie size: 64 service ids in the test map');
+	eq(bigIds, 68, 'cookie size: 68 service ids in the test map');
 	var bigCats = Object.keys(bigMap);
 	var bigSnap = rcBanner.svcSnapshot(bigCats, bigMap);
 	var snapLen = encodeURIComponent(JSON.stringify(bigSnap)).length;
-	ok(snapLen < 2000, 'cookie size: snapshot of 64 ids under 2000 chars encoded (got ' + snapLen + ')');
+	ok(snapLen < 2000, 'cookie size: snapshot of 68 ids under 2000 chars encoded (got ' + snapLen + ')');
 	var bigCookie = { v: '12', id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', categories: bigCats, decision: 'accepted_all', ts: 1790000000, svc: bigSnap };
 	var cookieLen = encodeURIComponent(JSON.stringify(bigCookie)).length;
 	ok(cookieLen < 2000, 'cookie size: whole cmp_consent value under 2000 chars encoded (got ' + cookieLen + ')');
