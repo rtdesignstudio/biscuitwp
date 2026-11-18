@@ -97,6 +97,11 @@ class CMP_Plugin {
 				}
 			}
 		}
+		// B1: services that used to run freely now wait for consent. On existing
+		// installs, flag a one-time admin note (never on fresh installs).
+		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) && false === get_option( 'cmp_services_seen', false ) ) {
+			update_option( 'cmp_services_notice', 1 );
+		}
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 

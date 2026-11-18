@@ -9,3 +9,11 @@
 .cmp-admin .cmp-cookies table { width: 100%; border-collapse: collapse; margin-top: 8px; }
 .cmp-admin .cmp-cookies th, .cmp-admin .cmp-cookies td { text-align: left; padding: 4px 6px; }
 .cmp-admin .button-link-delete { color: #b32d2e; }
+
+.cmp-admin .cmp-svc-table { margin: 8px 0 16px; }
+.cmp-admin .cmp-svc-table td { vertical-align: top; }
+.cmp-admin .cmp-svc-name { width: 32%; }
+.cmp-admin .cmp-svc-status { color: #50575e; }
+.cmp-admin .cmp-svc-library { margin: 16px 0; }
+.cmp-admin .cmp-svc-library summary { cursor: pointer; }
+.cmp-admin .cmp-custom-row textarea.code { font-family: Menlo, Consolas, monospace; }

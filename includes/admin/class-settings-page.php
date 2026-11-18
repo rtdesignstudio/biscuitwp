@@ -19,16 +19,37 @@ class CMP_Settings_Page {
 			}
 			return implode( ', ', array_unique( $out ) );
 		};
+		// Prefer service names (from the scan by id) over category labels.
+		$svc_names = function ( $key ) use ( $scan ) {
+			if ( ! isset( $scan['services'][ $key ] ) ) {
+				return array();
+			}
+			$out = array();
+			foreach ( CMP_Services::active() as $svc ) {
+				if ( in_array( $svc['id'], (array) $scan['services'][ $key ], true ) ) {
+					$out[] = $svc['name'];
+				}
+			}
+			return $out;
+		};
+		$label_raw = function () use ( $scan, $label, $svc_names ) {
+			$n = $svc_names( 'raw' );
+			return $n ? implode( ', ', $n ) : $label( $scan['raw'] );
+		};
+		$label_all = function () use ( $scan, $label, $svc_names ) {
+			$n = array_unique( array_merge( $svc_names( 'raw' ), $svc_names( 'blocked' ) ) );
+			return $n ? implode( ', ', $n ) : $label( array_merge( $scan['raw'], $scan['blocked'] ) );
+		};
 		$mode = isset( $s['mode'] ) ? $s['mode'] : 'pro';
 		if ( 'light' === $mode && ( $scan['raw'] || $scan['blocked'] ) ) {
 			echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Modul Light nu poate cere acord.', 'consent-manager-pro' ) . '</strong> '
 				/* translators: %s: tracker names */
-				. esc_html( sprintf( __( 'Pe pagina principală am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro.', 'consent-manager-pro' ), $label( array_merge( $scan['raw'], $scan['blocked'] ) ) ) )
+				. esc_html( sprintf( __( 'Pe pagina principală am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro.', 'consent-manager-pro' ), $label_all() ) )
 				. '</p></div>';
 			if ( $scan['raw'] ) {
 				echo '<div class="notice notice-error"><p>'
 					/* translators: %s: tracker names */
-					. esc_html( sprintf( __( 'Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca (injectat ulterior din JavaScript). Verifică sursa lui.', 'consent-manager-pro' ), $label( $scan['raw'] ) ) )
+					. esc_html( sprintf( __( 'Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca (injectat ulterior din JavaScript). Verifică sursa lui.', 'consent-manager-pro' ), $label_raw() ) )
 					. '</p></div>';
 			}
 			return;
@@ -45,7 +66,7 @@ class CMP_Settings_Page {
 				/* translators: %s: tracker names */
 				: __( '%s se încarcă pe pagina principală înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui.', 'consent-manager-pro' );
 			echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Tracking fără acord.', 'consent-manager-pro' ) . '</strong> '
-				. esc_html( sprintf( $msg, $label( $scan['raw'] ) ) ) . '</p></div>';
+				. esc_html( sprintf( $msg, $label_raw() ) ) . '</p></div>';
 		}
 	}
 

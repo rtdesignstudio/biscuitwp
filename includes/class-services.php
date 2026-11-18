@@ -12,7 +12,11 @@ class CMP_Services {
 	/** Library path, relative to the plugin root. */
 	const FILE = 'data/services.json';
 
-	private static $cache = null;
+	/** Services 0.4.x already blocked (before the library existed). */
+	const LEGACY_IDS = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' );
+
+	private static $cache  = null;
+	private static $errors = array();
 
 	/** Defaults every service is completed with. */
 	private static function defaults() {
@@ -93,10 +97,38 @@ class CMP_Services {
 	/** The plugin's library (cached per request). */
 	public static function library() {
 		if ( null === self::$cache ) {
-			$r           = self::load_file( dirname( __DIR__ ) . '/' . self::FILE );
-			self::$cache = $r['services'];
+			$r             = self::load_file( dirname( __DIR__ ) . '/' . self::FILE );
+			self::$cache   = $r['services'];
+			self::$errors  = $r['errors'];
 		}
 		return self::$cache;
+	}
+
+	/** Problems found when the library was last loaded (empty = fine). */
+	public static function errors() {
+		self::library();
+		return self::$errors;
+	}
+
+	/**
+	 * Pure: of the found service ids, those that would now be blocked (not
+	 * necessary, not exempt) and that 0.4.x did not already block.
+	 */
+	public static function newly_blocked( array $found_ids, array $services ) {
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || ! isset( $s['id'] ) || ! in_array( $s['id'], $found_ids, true ) ) {
+				continue;
+			}
+			if ( ( isset( $s['category'] ) && 'necessary' === $s['category'] ) || ! empty( $s['exempt'] ) ) {
+				continue;
+			}
+			if ( in_array( $s['id'], self::LEGACY_IDS, true ) || in_array( $s['id'], $out, true ) ) {
+				continue;
+			}
+			$out[] = $s['id'];
+		}
+		return $out;
 	}
 
 	/**

@@ -191,6 +191,26 @@ class CMP_Blocker {
 	}
 
 	/**
+	 * Pure: ids of every service present on the page (live or already blocked),
+	 * exempt and necessary ones included. For the admin screen only.
+	 */
+	public static function found_ids( $html, array $services ) {
+		$open = array();
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) ) {
+				continue;
+			}
+			unset( $s['exempt'] );
+			if ( isset( $s['category'] ) && 'necessary' === $s['category'] ) {
+				$s['category'] = 'marketing';
+			}
+			$open[] = $s;
+		}
+		$d = self::detect_services( $html, $open );
+		return array_values( array_unique( array_merge( $d['raw'], $d['blocked'] ) ) );
+	}
+
+	/**
 	 * Scan the public homepage for trackers (cached 1 hour). Null when the page
 	 * could not be fetched. Used for the admin warnings only.
 	 */
@@ -199,13 +219,22 @@ class CMP_Blocker {
 		if ( is_array( $cached ) ) {
 			return $cached;
 		}
-		$res = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'redirection' => 3 ) );
-		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+		if ( ! $force && get_transient( 'cmp_tracker_scan_fail' ) ) {
 			return null;
 		}
+		$res = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'redirection' => 3 ) );
+		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+			set_transient( 'cmp_tracker_scan_fail', 1, 5 * MINUTE_IN_SECONDS );
+			return null;
+		}
+		delete_transient( 'cmp_tracker_scan_fail' );
 		$body                  = wp_remote_retrieve_body( $res );
 		$scan                  = self::detect_trackers( $body );
 		$scan['settings_link'] = self::has_settings_link( $body );
+		$svcs                  = self::default_services();
+		$scan['services']      = self::detect_services( $body, $svcs );
+		$scan['services']['found'] = self::found_ids( $body, $svcs );
+		$scan['time']          = time();
 		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
 		return $scan;
 	}

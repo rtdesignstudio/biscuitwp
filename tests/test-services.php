@@ -117,3 +117,23 @@ $cmp_exp = array_map(
 );
 cmp_assert_eq( $cmp_act, $cmp_exp, 'active() without WP equals library() plus source' );
 cmp_assert_eq( array_column( CMP_Services::all( $lib, array( 'seq' => 9 ), array() ), 'id' ), array_column( $lib, 'id' ), 'all() ignores seq' );
+
+// newly_blocked: found ids that 0.4.x did not already block.
+cmp_assert_eq( CMP_Services::newly_blocked( array( 'clarity', 'google-analytics', 'recaptcha' ), $cmp_act ), array( 'clarity' ), 'newly_blocked: legacy and necessary ids dropped' );
+$cmp_ex = CMP_Services::all( $lib, array( 'overrides' => array( 'clarity' => array( 'exempt' => true ) ) ), array() );
+cmp_assert_eq( CMP_Services::newly_blocked( array( 'clarity', 'hotjar' ), $cmp_ex ), array( 'hotjar' ), 'newly_blocked: exempt excluded' );
+$cmp_cu = CMP_Services::all( $lib, array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'Chat X', 'category' => 'marketing', 'hosts' => array( 'chatx.io' ) ) ) ), array() );
+cmp_assert_eq( CMP_Services::newly_blocked( array( 'custom-1' ), $cmp_cu ), array( 'custom-1' ), 'newly_blocked: custom service included' );
+cmp_assert_eq( CMP_Services::newly_blocked( array(), $cmp_act ), array(), 'newly_blocked: empty input' );
+cmp_assert_eq( CMP_Services::errors(), array(), 'errors(): none for the real library' );
+
+// found_ids (scan helper): lists every service on the page, exempt and necessary included.
+require_once __DIR__ . '/../includes/modules/class-blocker.php';
+$cmp_ex2  = CMP_Services::all( $lib, array( 'overrides' => array( 'tawk-to' => array( 'exempt' => true ) ) ), array() );
+$cmp_page = '<script src="https://embed.tawk.to/abc/default"></script><script src="https://www.google.com/recaptcha/api.js"></script><script src="https://www.clarity.ms/tag/x"></script>';
+$cmp_fnd  = CMP_Blocker::found_ids( $cmp_page, $cmp_ex2 );
+cmp_assert( in_array( 'tawk-to', $cmp_fnd, true ), 'found_ids: exempt tawk-to found' );
+cmp_assert( in_array( 'recaptcha', $cmp_fnd, true ), 'found_ids: necessary recaptcha found' );
+cmp_assert( in_array( 'clarity', $cmp_fnd, true ), 'found_ids: normal service found' );
+cmp_assert_eq( CMP_Blocker::detect_services( $cmp_page, $cmp_ex2 )['raw'], array( 'clarity' ), 'detect_services unchanged: raw excludes exempt and necessary' );
+cmp_assert_eq( CMP_Blocker::found_ids( '<p>hi</p>', $cmp_ex2 ), array(), 'found_ids: nothing on a clean page' );
