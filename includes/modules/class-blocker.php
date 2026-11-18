@@ -33,6 +33,33 @@ class CMP_Blocker {
 		),
 	);
 
+	// Third-party iframes that set cookies: replaced by a placeholder until consent.
+	// 'path' (optional) restricts a shared host (google.com) to the embed path;
+	// 'nocookie' loads YouTube from youtube-nocookie.com once allowed.
+	const EMBEDS = array(
+		array(
+			'name'     => 'YouTube',
+			'cat'      => 'marketing',
+			'hosts'    => array( 'youtube.com', 'youtube-nocookie.com', 'youtu.be' ),
+			'path'     => '',
+			'nocookie' => true,
+		),
+		array(
+			'name'     => 'Vimeo',
+			'cat'      => 'statistics',
+			'hosts'    => array( 'vimeo.com' ),
+			'path'     => '',
+			'nocookie' => false,
+		),
+		array(
+			'name'     => 'Google Maps',
+			'cat'      => 'marketing',
+			'hosts'    => array( 'google.com', 'google.md', 'google.ro' ),
+			'path'     => '/maps',
+			'nocookie' => false,
+		),
+	);
+
 	public static function register() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
 		add_filter( 'wp_resource_hints', array( __CLASS__, 'filter_hints' ), 10, 2 );
@@ -168,7 +195,7 @@ class CMP_Blocker {
 		$s    = CMP_Consent::get_settings();
 		$html = (string) $html;
 		if ( self::blocks_trackers( $s ) ) {
-			$html = self::rewrite( $html );
+			$html = self::rewrite( $html, self::embed_labels() );
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
@@ -177,16 +204,122 @@ class CMP_Blocker {
 		return $html;
 	}
 
-	/** Pure: neutralize tracker <script> tags, drop tracker <noscript> blocks and resource-hint <link> tags. */
-	public static function rewrite( $html ) {
+	/**
+	 * Pure: neutralize tracker <script> tags and third-party iframes, drop tracker
+	 * <noscript> blocks and resource-hint <link> tags. $labels: placeholder copy
+	 * (embed_text with %s for the service, embed_load, settings).
+	 */
+	public static function rewrite( $html, array $labels = array() ) {
 		$html = (string) $html;
 		$html = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
 			array( __CLASS__, 'rewrite_tag' ),
 			$html
 		);
+		$html = self::rewrite_embeds( (string) $html, $labels );
 		$html = self::strip_tracker_noscript( (string) $html, self::TRACKER_HOSTS );
 		return self::strip_hint_links( (string) $html, self::TRACKER_HOSTS );
+	}
+
+	/** Placeholder copy in the current page language. */
+	public static function embed_labels() {
+		if ( ! class_exists( 'CMP_Lang' ) ) {
+			return array();
+		}
+		$s = class_exists( 'CMP_Consent' ) ? CMP_Consent::get_settings() : array();
+		return array(
+			'embed_text' => CMP_Lang::text( 'embed_text' ),
+			'embed_load' => CMP_Lang::text( 'embed_load' ),
+			'settings'   => CMP_Lang::text( 'reopen' ),
+			'preset'     => isset( $s['preset'] ) ? (string) $s['preset'] : 'neutral',
+		);
+	}
+
+	/** Pure: true if $url's host is $host or a subdomain of it (parsed, not substring). */
+	public static function url_host_is( $url, $host ) {
+		$h = parse_url( (string) $url, PHP_URL_HOST );
+		if ( ! is_string( $h ) || '' === $h ) {
+			return false;
+		}
+		$h    = strtolower( $h );
+		$host = strtolower( (string) $host );
+		return $h === $host || substr( $h, -( strlen( $host ) + 1 ) ) === '.' . $host;
+	}
+
+	/** Pure: the EMBEDS entry an iframe URL belongs to, or null. */
+	public static function embed_for( $url ) {
+		$path = (string) parse_url( (string) $url, PHP_URL_PATH );
+		foreach ( self::EMBEDS as $embed ) {
+			foreach ( $embed['hosts'] as $host ) {
+				if ( self::url_host_is( $url, $host ) && ( '' === $embed['path'] || 0 === strpos( $path, $embed['path'] ) ) ) {
+					return $embed;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Pure: replace third-party <iframe>s with a consent placeholder. The original
+	 * iframe sits in a <template> (inert: the browser never loads it) and is put
+	 * back by banner.js once its category is accepted or the visitor clicks "load".
+	 */
+	public static function rewrite_embeds( $html, array $labels = array() ) {
+		$labels = array_merge(
+			array(
+				'embed_text' => 'Conținut de la %s. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.',
+				'embed_load' => 'Încarcă conținutul',
+				'settings'   => 'Setări cookie',
+			),
+			array_filter( $labels, 'strlen' )
+		);
+		return (string) preg_replace_callback(
+			'/<iframe\b([^>]*)>(.*?)<\/iframe>/is',
+			function ( $m ) use ( $labels ) {
+				$attrs = $m[1];
+				if ( false !== stripos( $attrs, 'data-cmp-keep' ) ) {
+					return $m[0];
+				}
+				if ( ! preg_match( '/(?:^|\s)src\s*=\s*(["\'])(.*?)\1/is', $attrs, $sm ) ) {
+					return $m[0];
+				}
+				$src   = html_entity_decode( $sm[2], ENT_QUOTES );
+				$embed = self::embed_for( $src );
+				if ( null === $embed ) {
+					return $m[0];
+				}
+
+				$iframe = $m[0];
+				if ( $embed['nocookie'] && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
+					$nocookie = preg_replace( '#^https?://(?:www\.)?youtube\.com/#i', 'https://www.youtube-nocookie.com/', $src );
+					$iframe   = str_replace( $sm[0], str_replace( $sm[2], htmlspecialchars( $nocookie, ENT_QUOTES, 'UTF-8' ), $sm[0] ), $iframe );
+				}
+
+				// Pixel sizes only ("560" or "560px"); a percentage width keeps 16/9.
+				$ratio = '16/9';
+				$max   = '';
+				if ( preg_match( '/\bwidth\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $wm ) && preg_match( '/\bheight\s*=\s*["\']?(\d+)(?:px)?["\'\s>]/i', $attrs . ' ', $hm ) && (int) $wm[1] > 0 && (int) $hm[1] > 0 ) {
+					$ratio = (int) $wm[1] . '/' . (int) $hm[1];
+					$max   = ';max-width:' . (int) $wm[1] . 'px';
+				}
+				$e    = function ( $v ) {
+					return htmlspecialchars( (string) $v, ENT_QUOTES, 'UTF-8' );
+				};
+				$text = str_replace( '%s', $e( $embed['name'] ), $e( $labels['embed_text'] ) );
+
+				$preset = isset( $labels['preset'] ) && in_array( $labels['preset'], array( 'neutral', 'warm', 'dark', 'egov' ), true ) ? ' cmp--' . $labels['preset'] : '';
+				return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $embed['cat'] ) . '" style="aspect-ratio:' . $ratio . $max . '">'
+					. '<div class="cmp-embed__inner">'
+					. '<p class="cmp-embed__text">' . $text . '</p>'
+					. '<p class="cmp-embed__actions">'
+					. '<button type="button" class="cmp-embed__btn" data-cmp-embed-load>' . $e( $labels['embed_load'] ) . '</button>'
+					. '<a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>' . $e( $labels['settings'] ) . '</a>'
+					. '</p></div>'
+					. '<template data-cmp-embed-src>' . $iframe . '</template>'
+					. '</div>';
+			},
+			(string) $html
+		);
 	}
 
 	/** Pure: drop dns-prefetch / preconnect <link> hints whose href matches one of $hosts. */

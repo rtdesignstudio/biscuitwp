@@ -9,7 +9,7 @@ cmp_assert_eq( CMP_Lang::normalize( 'zz' ), 'ro', 'unknown -> ro' );
 cmp_assert_eq( CMP_Lang::normalize( '' ), 'ro', 'empty -> ro' );
 
 // packs completeness: every text key + category present in all langs
-$keys = array( 'title','intro','prefs','reject','accept','prefs_title','save','badge','locked','back','reopen','light_intro','privacy' );
+$keys = array( 'title','intro','prefs','reject','accept','prefs_title','save','badge','locked','back','reopen','light_intro','privacy','embed_text','embed_load' );
 $slugs = array( 'necessary','statistics','marketing' );
 foreach ( array( 'ro','ru','en' ) as $l ) {
 	foreach ( $keys as $k ) {
@@ -19,6 +19,11 @@ foreach ( array( 'ro','ru','en' ) as $l ) {
 		cmp_assert( '' !== CMP_Lang::cat( $s, 'label', $l ), "cat $s label in $l" );
 		cmp_assert( '' !== CMP_Lang::cat( $s, 'description', $l ), "cat $s desc in $l" );
 	}
+}
+
+// embed placeholder text names the service through %s
+foreach ( array( 'ro','ru','en' ) as $l ) {
+	cmp_assert( false !== strpos( CMP_Lang::text( 'embed_text', $l ), '%s' ), "embed_text has %s in $l" );
 }
 
 // text picks the right language

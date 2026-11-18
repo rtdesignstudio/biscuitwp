@@ -186,6 +186,11 @@
 		};
 	}
 
+	// Pure: does an embed of this category load for the accepted categories?
+	function embedLoads(category, accepted) {
+		return !!category && (accepted || []).indexOf(category) !== -1;
+	}
+
 	// Pure: the Meta Pixel consent action for the accepted categories.
 	function fbqConsentFor(accepted) {
 		return (accepted || []).indexOf('marketing') !== -1 ? 'grant' : 'revoke';
@@ -429,6 +434,7 @@
 			showReopen();
 			pushConsent(accepted);
 			unblockScripts(accepted);
+			unblockEmbeds(accepted);
 			document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 			logConsent({ categories: accepted, decision: decision });
 			hide();
@@ -556,6 +562,28 @@
 			});
 		}
 
+		// Third-party embeds (YouTube, Vimeo, Maps): the original iframe waits in an
+		// inert <template> inside [data-cmp-embed] and replaces the placeholder once
+		// its category is accepted, or when the visitor clicks "load" on it.
+		function loadEmbed(box) {
+			var tpl = box && box.querySelector('template[data-cmp-embed-src]');
+			if (!tpl || !tpl.content || !box.parentNode) { return; }
+			box.parentNode.replaceChild(tpl.content.cloneNode(true), box);
+		}
+		function unblockEmbeds(accepted) {
+			document.querySelectorAll('[data-cmp-embed]').forEach(function (box) {
+				if (embedLoads(box.getAttribute('data-cmp-embed'), accepted)) { loadEmbed(box); }
+			});
+		}
+		function bindEmbeds() {
+			document.addEventListener('click', function (e) {
+				var btn = e.target.closest && e.target.closest('[data-cmp-embed-load]');
+				if (!btn) { return; }
+				e.preventDefault();
+				loadEmbed(btn.closest('[data-cmp-embed]'));
+			});
+		}
+
 		function setConsentModeDefaults() {
 			window.dataLayer = window.dataLayer || [];
 			if (typeof window.gtag !== 'function') {
@@ -611,7 +639,10 @@
 				window.CMP.openPreferences();
 			});
 
+			bindEmbeds();
 			if (cfg.mode === 'light') {
+				// Light has no preferences panel: drop the placeholders' settings link.
+				document.querySelectorAll('[data-cmp-embed] [data-cmp-settings]').forEach(function (a) { a.parentNode.removeChild(a); });
 				initLight();
 				return;
 			}
@@ -622,6 +653,7 @@
 				// back, as save() does; otherwise the signals stay on the defaults.
 				pushConsent(stored);
 				unblockScripts(stored);
+				unblockEmbeds(stored);
 				showReopen();
 				return;
 			}
@@ -635,6 +667,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

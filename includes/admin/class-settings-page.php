@@ -114,7 +114,7 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Blocare scripturi tracking', 'consent-manager-pro' ); ?></th>
 						<td>
 							<label><input type="checkbox" name="cmp[block_scripts]" value="1" <?php checked( ! empty( $s['block_scripts'] ) ); ?>> <?php esc_html_e( 'Blochează scripturile de tracking până la consimțământ', 'consent-manager-pro' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Recomandat: pornit. În modul Light, blocarea e mereu activă.', 'consent-manager-pro' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Video-urile YouTube și Vimeo și hărțile Google Maps apar ca un bloc cu butonul „Încarcă conținutul” până la acord. Recomandat: pornit. În modul Light, blocarea e mereu activă.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">

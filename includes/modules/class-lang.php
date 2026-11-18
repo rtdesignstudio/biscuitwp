@@ -36,6 +36,8 @@ class CMP_Lang {
 					'reopen'      => 'Setări cookie',
 					'light_intro' => 'Acest site folosește doar cookie-uri esențiale pentru funcționare.',
 					'privacy'     => 'Politica de confidențialitate',
+					'embed_text'  => 'Conținut de la %s. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.',
+					'embed_load'  => 'Încarcă conținutul',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Necesare',   'description' => 'Cookie-uri esențiale pentru funcționarea site-ului.' ),
@@ -58,6 +60,8 @@ class CMP_Lang {
 					'reopen'      => 'Настройки cookie',
 					'light_intro' => 'Этот сайт использует только необходимые для работы файлы cookie.',
 					'privacy'     => 'Политика конфиденциальности',
+					'embed_text'  => 'Контент от %s. Загружается только с вашего согласия, так как может устанавливать файлы cookie.',
+					'embed_load'  => 'Загрузить контент',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Необходимые', 'description' => 'Основные файлы cookie, необходимые для работы сайта.' ),
@@ -80,6 +84,8 @@ class CMP_Lang {
 					'reopen'      => 'Cookie settings',
 					'light_intro' => 'This website uses only cookies essential for its operation.',
 					'privacy'     => 'Privacy policy',
+					'embed_text'  => 'Content from %s. It loads only with your consent, because it may set cookies.',
+					'embed_load'  => 'Load content',
 				),
 				'categories' => array(
 					'necessary'  => array( 'label' => 'Necessary',  'description' => 'Essential cookies required for the website to function.' ),

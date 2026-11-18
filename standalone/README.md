@@ -139,6 +139,32 @@ Simply change `type="text/javascript"` (or omit it) to `type="text/plain"`:
 
 ---
 
+## Embeds (YouTube, Vimeo, Google Maps)
+
+Iframes set cookies as soon as they load, so wrap them in a placeholder. The
+iframe inside `<template>` is inert: the browser does not load it until the
+visitor accepts the category, or clicks the load button on that embed (which
+loads only that one embed and does not change the saved consent).
+
+```html
+<div class="cmp-embed" data-cmp-embed="marketing" style="aspect-ratio:560/315;max-width:560px">
+  <div class="cmp-embed__inner">
+    <p class="cmp-embed__text">Conținut de la YouTube. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.</p>
+    <p class="cmp-embed__actions">
+      <button type="button" class="cmp-embed__btn" data-cmp-embed-load>Încarcă conținutul</button>
+      <a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>Setări cookie</a>
+    </p>
+  </div>
+  <template data-cmp-embed-src>
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/VIDEO_ID" allowfullscreen></iframe>
+  </template>
+</div>
+```
+
+Categories: YouTube and Google Maps → `marketing`, Vimeo → `statistics`. Prefer
+`youtube-nocookie.com` for YouTube. The WordPress plugin generates this markup
+automatically.
+
 ## Public API
 
 ### Check consent for a category

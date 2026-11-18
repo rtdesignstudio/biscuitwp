@@ -64,6 +64,7 @@
 		writeCookie(data);
 		pushConsent(accepted);
 		unblockScripts(accepted);
+		unblockEmbeds(accepted);
 		showReopen();
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 		logConsent({ categories: accepted, decision: decision });
@@ -209,6 +210,29 @@
 		});
 	}
 
+	// Third-party embeds (YouTube, Vimeo, Maps): the server put the original iframe
+	// in an inert <template> inside [data-cmp-embed]; it replaces the placeholder
+	// once its category is accepted, or when the visitor clicks "load" on it.
+	function loadEmbed(box) {
+		var tpl = box && box.querySelector('template[data-cmp-embed-src]');
+		if (!tpl || !tpl.content || !box.parentNode) { return; }
+		box.parentNode.replaceChild(tpl.content.cloneNode(true), box);
+	}
+	function unblockEmbeds(accepted) {
+		document.querySelectorAll('[data-cmp-embed]').forEach(function (box) {
+			var cat = box.getAttribute('data-cmp-embed');
+			if (cat && accepted.indexOf(cat) !== -1) { loadEmbed(box); }
+		});
+	}
+	function bindEmbeds() {
+		document.addEventListener('click', function (e) {
+			var btn = e.target.closest && e.target.closest('[data-cmp-embed-load]');
+			if (!btn) { return; }
+			e.preventDefault();
+			loadEmbed(btn.closest('[data-cmp-embed]'));
+		});
+	}
+
 	// --- Public API ---
 	window.CMP = {
 		isAllowed: function (slug) {
@@ -223,7 +247,13 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
-		if (D.mode === 'light') { initLight(); return; }
+		bindEmbeds();
+		if (D.mode === 'light') {
+			// Light has no preferences panel: drop the placeholders' settings link.
+			document.querySelectorAll('[data-cmp-embed] [data-cmp-settings]').forEach(function (a) { a.parentNode.removeChild(a); });
+			initLight();
+			return;
+		}
 		bind();
 		var c = readCookie();
 		if (c && String(c.v) === String(D.version)) {
@@ -233,6 +263,7 @@
 			// and a returning visitor who accepted statistics is measured as refused.
 			pushConsent(c.categories || []);
 			unblockScripts(c.categories || []);
+			unblockEmbeds(c.categories || []);
 			showReopen();
 			return;
 		}
