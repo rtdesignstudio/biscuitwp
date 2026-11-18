@@ -179,10 +179,12 @@ class CMP_Services_Page {
 			<?php foreach ( CMP_Services::errors() as $err ) : ?>
 				<div class="notice notice-error"><p><?php echo esc_html( sprintf( /* translators: %s: error text */ __( 'Biblioteca de servicii: %s', 'consent-manager-pro' ), $err ) ); ?></p></div>
 			<?php endforeach; ?>
-			<?php if ( class_exists( 'WooCommerce' ) && ! function_exists( 'wp_has_consent' ) ) : ?>
+			<?php if ( class_exists( 'WooCommerce' ) && ! CMP_Consent_API::active() ) : ?>
 				<div class="notice notice-info"><p>
 					<?php esc_html_e( 'WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului.', 'consent-manager-pro' ); ?>
-					<a href="<?php echo esc_url( admin_url( 'plugin-install.php?s=WP+Consent+API&tab=search&type=term' ) ); ?>"><?php esc_html_e( 'Instalează WP Consent API', 'consent-manager-pro' ); ?></a>
+					<?php if ( current_user_can( 'install_plugins' ) ) : ?>
+						<a href="<?php echo esc_url( admin_url( 'plugin-install.php?s=wp-consent-api&tab=search&type=term' ) ); ?>"><?php esc_html_e( 'Instalează WP Consent API', 'consent-manager-pro' ); ?></a>
+					<?php endif; ?>
 				</p></div>
 			<?php endif; ?>
 

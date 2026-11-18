@@ -58,21 +58,33 @@ class CMP_Banner {
 			}
 		}
 
-		wp_localize_script(
-			'cmp-banner',
-			'CMP_DATA',
-			array(
-				'categories' => CMP_Consent::get_categories(),
-				'version'    => CMP_Consent::current_version(),
-				'mode'       => isset( $cmp_settings['mode'] ) ? $cmp_settings['mode'] : 'pro',
-				'cookieName' => CMP_Consent::COOKIE,
-				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
-				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
-				'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
-				'svcNames'   => (object) $svc_names,
-				'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
-			)
+		$cmp_data = array(
+			'categories' => CMP_Consent::get_categories(),
+			'version'    => CMP_Consent::current_version(),
+			'mode'       => isset( $cmp_settings['mode'] ) ? $cmp_settings['mode'] : 'pro',
+			'cookieName' => CMP_Consent::COOKIE,
+			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+			'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
+			'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
+			'svcNames'   => (object) $svc_names,
+			'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
 		);
+		// WP Consent API bridge: only present when that plugin is active.
+		if ( CMP_Consent_API::active() ) {
+			$cmp_data['wpConsent'] = (object) CMP_Consent_API::map( wp_list_pluck( (array) $cmp_data['categories'], 'slug' ) );
+			// wp-consent-api.js is enqueued at PHP_INT_MAX - 100, so add the dependency after that.
+			add_action( 'wp_enqueue_scripts', array( $this, 'depend_on_consent_api' ), PHP_INT_MAX - 90 );
+		}
+		wp_localize_script( 'cmp-banner', 'CMP_DATA', $cmp_data );
+	}
+
+	/** Make cmp-banner load after wp-consent-api, when that script is registered. */
+	public function depend_on_consent_api() {
+		$scripts = wp_scripts();
+		if ( wp_script_is( 'wp-consent-api', 'registered' ) && isset( $scripts->registered['cmp-banner'] )
+			&& ! in_array( 'wp-consent-api', $scripts->registered['cmp-banner']->deps, true ) ) {
+			$scripts->registered['cmp-banner']->deps[] = 'wp-consent-api';
+		}
 	}
 
 	public function render() {

@@ -41,6 +41,8 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
 		CMP_Fonts::register();
 		require_once CMP_PATH . 'includes/modules/class-lang.php';
+		require_once CMP_PATH . 'includes/modules/class-consent-api.php';
+		CMP_Consent_API::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();

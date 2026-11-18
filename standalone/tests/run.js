@@ -154,5 +154,27 @@ eq(cmp.consentIdFor({ id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e70' }, SID), '3f2b8
 ok(/^[0-9a-f-]{36}$/.test(cmp.consentIdFor(null, 'junk')), 'invalid fallback ignored');
 eq(cmp.fillName('Stop loading %s', 'A$&B'), 'Stop loading A$&B', 'fillName is literal');
 
+// wpConsentValues lives in assets/js/banner.js (an IIFE bound to the DOM, so it
+// cannot be required); the test extracts the function source and evaluates it.
+var bannerSrc = require('fs').readFileSync(require('path').join(__dirname, '../../assets/js/banner.js'), 'utf8');
+var wpM = bannerSrc.match(/\/\/ wpConsentValues:begin\n([\s\S]*?)\/\/ wpConsentValues:end/);
+ok(!!wpM, 'banner.js exposes the wpConsentValues block');
+var wpConsentValues = wpM ? new Function(wpM[1] + '\nreturn wpConsentValues;')() : function () { return {}; };
+var wpInitValues = wpM ? new Function(wpM[1] + '\nreturn wpInitValues;')() : function () { return null; };
+var WPMAP = { necessary: ['functional'], statistics: ['statistics', 'statistics-anonymous'], marketing: ['marketing'], preferences: ['preferences'] };
+eq(wpConsentValues(WPMAP, ['necessary', 'statistics', 'marketing', 'preferences']), { functional: 'allow', statistics: 'allow', 'statistics-anonymous': 'allow', marketing: 'allow', preferences: 'allow' }, 'wp consent: all accepted -> all allow');
+eq(wpConsentValues(WPMAP, ['necessary']), { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' }, 'wp consent: only necessary -> functional allow, rest deny');
+eq(wpConsentValues(WPMAP, []), { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' }, 'wp consent: functional always allow');
+eq(wpConsentValues(WPMAP, ['necessary', 'statistics']), { functional: 'allow', statistics: 'allow', 'statistics-anonymous': 'allow', marketing: 'deny', preferences: 'deny' }, 'wp consent: statistics allows statistics + statistics-anonymous');
+eq(wpConsentValues(WPMAP, ['necessary', 'custom_x', 'bogus']), { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' }, 'wp consent: unknown accepted slugs ignored');
+eq(wpConsentValues({ necessary: ['functional'], custom_x: ['marketing'], marketing: ['marketing'] }, ['custom_x']), { functional: 'allow', marketing: 'allow' }, 'wp consent: shared WP category allows if any mapped slug is accepted');
+eq(wpConsentValues({ necessary: ['functional'], a: ['marketing'], b: ['marketing'] }, []), { functional: 'allow', marketing: 'deny' }, 'wp consent: shared WP category denies when none accepted');
+eq(wpConsentValues(null, ['marketing']), {}, 'wp consent: no map -> nothing');
+
+eq(wpInitValues(WPMAP), { functional: 'allow' }, 'wp init: functional allowed before any decision');
+eq(wpInitValues({ marketing: ['marketing'] }), {}, 'wp init: no functional entry -> nothing');
+eq(wpInitValues(null), {}, 'wp init: no map -> nothing');
+ok(/pushWpInit\(\);\s*bindEmbeds\(\);/.test(bannerSrc), 'wp init runs at the top of DOMContentLoaded, before the Light-mode return');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

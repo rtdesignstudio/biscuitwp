@@ -91,7 +91,50 @@
 		return D.categories.filter(function (c) { return c.required; }).map(function (c) { return c.slug; });
 	}
 
+	// wpConsentValues:begin
+	// WP Consent API values: map = { cmpSlug: [wpCategory, ...] }. 'functional' is
+	// always allowed; a WP category is 'allow' if any mapped slug is accepted.
+	// Pure; tested in standalone/tests/run.js (source-extracted from this block).
+	function wpConsentValues(map, accepted) {
+		var out = {};
+		if (!map) { return out; }
+		Object.keys(map).forEach(function (slug) {
+			var on = (accepted || []).indexOf(slug) !== -1;
+			(map[slug] || []).forEach(function (wp) {
+				if (wp === 'functional' || on) { out[wp] = 'allow'; }
+				else if (out[wp] !== 'allow') { out[wp] = 'deny'; }
+			});
+		});
+		return out;
+	}
+	// What to send on every page view, before any decision: 'functional' is always allowed.
+	function wpInitValues(map) {
+		var has = false;
+		Object.keys(map || {}).forEach(function (slug) {
+			if ((map[slug] || []).indexOf('functional') !== -1) { has = true; }
+		});
+		return has ? { functional: 'allow' } : {};
+	}
+	// wpConsentValues:end
+
+	function pushWpConsent(accepted) {
+		if (!D.wpConsent || typeof window.wp_set_consent !== 'function') { return; }
+		var vals = wpConsentValues(D.wpConsent, accepted);
+		Object.keys(vals).forEach(function (cat) {
+			try { window.wp_set_consent(cat, vals[cat]); } catch (e) {}
+		});
+	}
+
+	function pushWpInit() {
+		if (!D.wpConsent || typeof window.wp_set_consent !== 'function') { return; }
+		var vals = wpInitValues(D.wpConsent);
+		Object.keys(vals).forEach(function (cat) {
+			try { window.wp_set_consent(cat, vals[cat]); } catch (e) {}
+		});
+	}
+
 	function pushConsent(accepted) {
+		pushWpConsent(accepted);
 		// Meta Pixel follows the marketing category, when it is already on the page:
 		// "grant" on consent, "revoke" when it is withdrawn (stops it immediately).
 		if (typeof window.fbq === 'function') {
@@ -422,6 +465,7 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
+		pushWpInit();
 		bindEmbeds();
 		if (D.mode === 'light') {
 			// Light has no preferences panel: drop the placeholders' settings link.
