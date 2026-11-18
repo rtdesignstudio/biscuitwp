@@ -33,6 +33,11 @@ class CMP_Settings_Page {
 			}
 			return;
 		}
+		if ( 'pro' === $mode && isset( $scan['settings_link'] ) && false === $scan['settings_link'] ) {
+			echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Lipsește linkul „Setări cookie”.', 'consent-manager-pro' ) . '</strong> '
+				. esc_html__( 'Pe pagina principală nu am găsit niciun link care redeschide preferințele. Vizitatorii trebuie să-și poată retrage acordul la fel de ușor cum l-au dat (Legea 195/2024 și GDPR, art. 7). Pune în footer shortcode-ul [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings.', 'consent-manager-pro' )
+				. '</p></div>';
+		}
 		if ( 'pro' === $mode && $scan['raw'] ) {
 			$msg = empty( $s['block_scripts'] )
 				/* translators: %s: tracker names */

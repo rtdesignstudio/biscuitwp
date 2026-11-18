@@ -167,6 +167,18 @@ class CMP_Blocker {
 	}
 
 	/**
+	 * Pure: does the page offer a way to reopen the cookie settings (shortcode
+	 * link, a link to #cmp-settings, any [data-cmp-settings] element, or the
+	 * floating button)? Withdrawing consent must be as easy as giving it. The
+	 * settings link inside an embed placeholder does not count: it disappears
+	 * once the embed loads.
+	 */
+	public static function has_settings_link( $html ) {
+		$html = (string) preg_replace( '/<a\b[^>]*\bcmp-embed__link\b[^>]*>.*?<\/a>/is', '', (string) $html );
+		return (bool) preg_match( '/data-cmp-settings|data-cmp-reopen|class\s*=\s*["\'][^"\']*\bcmp-(?:cookie-)?settings-link\b|href\s*=\s*["\'][^"\']*#cmp-settings["\']/i', $html );
+	}
+
+	/**
 	 * Scan the public homepage for trackers (cached 1 hour). Null when the page
 	 * could not be fetched. Used for the admin warnings only.
 	 */
@@ -179,7 +191,9 @@ class CMP_Blocker {
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 			return null;
 		}
-		$scan = self::detect_trackers( wp_remote_retrieve_body( $res ) );
+		$body                  = wp_remote_retrieve_body( $res );
+		$scan                  = self::detect_trackers( $body );
+		$scan['settings_link'] = self::has_settings_link( $body );
 		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
 		return $scan;
 	}

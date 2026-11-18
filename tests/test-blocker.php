@@ -155,3 +155,13 @@ $cmp_det2 = CMP_Blocker::detect_trackers( CMP_Blocker::rewrite( $cmp_page ) );
 cmp_assert_eq( $cmp_det2['raw'], array(), 'detect: after rewrite nothing is raw' );
 cmp_assert_eq( $cmp_det2['blocked'], array( 'statistics', 'marketing' ), 'detect: after rewrite both are blocked' );
 cmp_assert_eq( CMP_Blocker::detect_trackers( '<p>no trackers</p><script>gtag("consent","default",{})</script>' ), array( 'raw' => array(), 'blocked' => array() ), 'detect: consent stub alone is not a tracker' );
+
+// 0.4.1: is there a "cookie settings" control on the page (withdrawing consent
+// must be as easy as giving it)? Embed placeholders' own links do not count.
+cmp_assert_eq( CMP_Blocker::has_settings_link( '<footer><a href="#cmp-settings" class="cmp-settings-link cmp-cookie-settings-link" data-cmp-settings>Setări cookie</a></footer>' ), true, 'shortcode link found' );
+cmp_assert_eq( CMP_Blocker::has_settings_link( '<li class="menu-item"><a href="https://x.md/#cmp-settings">Cookies</a></li>' ), true, 'menu link to #cmp-settings found' );
+cmp_assert_eq( CMP_Blocker::has_settings_link( '<button data-cmp-settings>Cookie</button>' ), true, 'any data-cmp-settings element found' );
+cmp_assert_eq( CMP_Blocker::has_settings_link( '<button type="button" class="cmp-reopen" data-cmp-reopen hidden></button>' ), true, 'floating reopen button counts' );
+cmp_assert_eq( CMP_Blocker::has_settings_link( '<footer><a href="/privacy/">Privacy</a></footer>' ), false, 'no settings control -> false' );
+$cmp_embed_only = CMP_Blocker::rewrite( '<iframe src="https://www.youtube.com/embed/a"></iframe>' );
+cmp_assert_eq( CMP_Blocker::has_settings_link( $cmp_embed_only ), false, 'embed placeholder link does not count' );
