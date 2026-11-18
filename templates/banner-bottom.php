@@ -50,11 +50,13 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 		<!-- View 2: granular preferences -->
 		<div class="cmp__prefs" data-cmp-view="prefs">
 			<div class="cmp__prefs-header">
-				<h2 class="cmp__title"><?php echo esc_html( $cmp_text( 'prefs_title', CMP_Lang::text( 'prefs_title' ) ) ); ?></h2>
+				<?php // Re-consent (B4): JS swaps this title for data-cmp-reconsent-title and shows the text below. ?>
+				<h2 id="cmp-prefs-title" class="cmp__title" data-cmp-prefs-title data-cmp-reconsent-title="<?php echo esc_attr( CMP_Lang::text( 'reconsent_title' ) ); ?>"><?php echo esc_html( $cmp_text( 'prefs_title', CMP_Lang::text( 'prefs_title' ) ) ); ?></h2>
 				<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="<?php echo esc_attr( CMP_Lang::text( 'back' ) ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>
 				</button>
 			</div>
+			<p id="cmp-reconsent-text" class="cmp__text cmp__reconsent-text" data-cmp-reconsent-text hidden><?php echo esc_html( CMP_Lang::text( 'reconsent_text' ) ); ?></p>
 
 			<div class="cmp__cats">
 				<?php foreach ( $categories as $cmp_cat ) :
@@ -68,6 +70,12 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 								<span class="cmp__cat-label"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_label', CMP_Lang::localize_seed( $cmp_slug, 'label', $cmp_cat['label'] ) ) ); ?></span>
 								<?php if ( $cmp_locked ) : ?>
 									<span class="cmp__cat-badge"><?php echo esc_html( CMP_Lang::text( 'badge' ) ); ?></span>
+								<?php else : ?>
+									<?php // Re-consent: shown by JS next to a category that gained services, with their names. ?>
+									<span class="cmp__cat-new" data-cmp-cat-new="<?php echo esc_attr( $cmp_slug ); ?>" hidden>
+										<span class="cmp__cat-badge cmp__cat-badge--new"><?php echo esc_html( CMP_Lang::text( 'svc_new' ) ); ?></span>
+										<span class="cmp__cat-new-names" data-cmp-cat-new-names></span>
+									</span>
 								<?php endif; ?>
 							</div>
 							<div class="cmp__cat-desc"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_desc', CMP_Lang::localize_seed( $cmp_slug, 'description', $cmp_cat['description'] ) ) ); ?></div>

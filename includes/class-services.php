@@ -277,13 +277,16 @@ class CMP_Services {
 
 	/**
 	 * Pure: {category slug: [service ids]} of the services that can be blocked
-	 * (not necessary, not exempt) and were seen on the site or are custom.
+	 * (not necessary, not in a required category, not exempt) and were seen on
+	 * the site or are custom. A required category is always on, so a new
+	 * service there must never make it "affected" by re-consent.
 	 * Ids sorted; categories without services are left out.
 	 */
-	public static function svc_by_cat( array $services, array $seen ) {
-		$out = array();
+	public static function svc_by_cat( array $services, array $seen, array $required_slugs = array() ) {
+		$out  = array();
+		$skip = array_merge( array( 'necessary' ), array_map( 'strval', $required_slugs ) );
 		foreach ( $services as $s ) {
-			if ( ! is_array( $s ) || empty( $s['id'] ) || empty( $s['category'] ) || 'necessary' === $s['category'] || ! empty( $s['exempt'] ) ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) || empty( $s['category'] ) || in_array( (string) $s['category'], $skip, true ) || ! empty( $s['exempt'] ) ) {
 				continue;
 			}
 			$custom = isset( $s['source'] ) && 'custom' === $s['source'];
@@ -295,6 +298,40 @@ class CMP_Services {
 			$ids = array_values( array_unique( $ids ) );
 			sort( $ids );
 			$out[ $slug ] = $ids;
+		}
+		return $out;
+	}
+
+	/** Pure: the slugs of the categories marked required (always on). */
+	public static function required_slugs( array $categories ) {
+		$out = array();
+		foreach ( $categories as $cat ) {
+			if ( is_array( $cat ) && ! empty( $cat['required'] ) && ! empty( $cat['slug'] ) ) {
+				$out[] = (string) $cat['slug'];
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure: display names for every id in a svcByCat map ({slug: [ids]}), for
+	 * the "new" marker of the re-consent banner. The id stands in for an empty
+	 * name. Same for every visitor, so cache-safe.
+	 */
+	public static function svc_labels( array $services, array $by_cat ) {
+		$ids = array();
+		foreach ( $by_cat as $list ) {
+			foreach ( (array) $list as $id ) {
+				$ids[ (string) $id ] = true;
+			}
+		}
+		$out = array();
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) || ! isset( $ids[ (string) $s['id'] ] ) || isset( $out[ (string) $s['id'] ] ) ) {
+				continue;
+			}
+			$name                     = isset( $s['name'] ) ? trim( (string) $s['name'] ) : '';
+			$out[ (string) $s['id'] ] = '' !== $name ? $name : (string) $s['id'];
 		}
 		return $out;
 	}

@@ -71,7 +71,10 @@ class CMP_Banner {
 		// snapshot (legacy behaviour) and never trigger re-consent.
 		$cmp_seen = CMP_Services::history_or_found( get_option( 'cmp_services_history', false ), get_option( 'cmp_services_found', false ) );
 		if ( null !== $cmp_seen ) {
-			$cmp_data['svcByCat'] = (object) CMP_Services::svc_by_cat( CMP_Services::active(), $cmp_seen );
+			$cmp_by_cat           = CMP_Services::svc_by_cat( CMP_Services::active(), $cmp_seen, CMP_Services::required_slugs( (array) $cmp_data['categories'] ) );
+			$cmp_data['svcByCat'] = (object) $cmp_by_cat;
+			// Names for the "new" marker of the re-consent view (svcNames covers embeds only).
+			$cmp_data['svcLabels'] = (object) CMP_Services::svc_labels( CMP_Services::active(), $cmp_by_cat );
 		}
 		// WP Consent API bridge: only present when that plugin is active.
 		if ( CMP_Consent_API::active() ) {

@@ -124,3 +124,17 @@ cmp_assert( in_array( substr( $trunc['services'], strrpos( ',' . $trunc['service
 cmp_assert_eq( CMP_Audit::parse_request( array( 'decision' => 'service_allow', 'categories' => '[]', 'services' => '["bogus"]' ), $slugs, '1' ), 'bad_services', 'service_allow with no known service is rejected' );
 cmp_assert_eq( CMP_Audit::parse_request( array( 'decision' => 'service_withdraw', 'categories' => '[]' ), $slugs, '1' ), 'bad_services', 'service_withdraw without services is rejected' );
 cmp_assert( is_array( CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '[]' ), $slugs, '1' ) ), 'category decisions need no services' );
+
+// --- B4: category decisions log the services of the accepted categories. ---
+$b4_all = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '["necessary","marketing"]', 'services' => '["meta-pixel","bogus","tiktok-pixel"]' ), $slugs, '1', array( 'meta-pixel', 'tiktok-pixel' ) );
+cmp_assert( is_array( $b4_all ), 'B4 accepted_all with services is accepted' );
+cmp_assert_eq( $b4_all['services'], 'meta-pixel,tiktok-pixel', 'B4 accepted_all keeps only the active service ids, as CSV' );
+$b4_part = CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '["necessary","statistics"]', 'services' => '["google-analytics","gone"]' ), $slugs, '1', array( 'google-analytics' ) );
+cmp_assert_eq( $b4_part['services'], 'google-analytics', 'B4 partial keeps only the active service ids' );
+$b4_empty = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '["necessary"]', 'services' => '[]' ), $slugs, '1', array( 'meta-pixel' ) );
+cmp_assert( is_array( $b4_empty ), 'B4 accepted_all with an empty services list is allowed' );
+cmp_assert_eq( $b4_empty['services'], '', 'B4 empty services list logs an empty column' );
+$b4_unknown = CMP_Audit::parse_request( array( 'decision' => 'partial', 'categories' => '["necessary"]', 'services' => '["bogus"]' ), $slugs, '1', array( 'meta-pixel' ) );
+cmp_assert( is_array( $b4_unknown ) && '' === $b4_unknown['services'], 'B4 partial with only unknown services is allowed, logged empty' );
+$b4_rej = CMP_Audit::parse_request( array( 'decision' => 'rejected_all', 'categories' => '["necessary"]', 'services' => '[]' ), $slugs, '1', array( 'meta-pixel' ) );
+cmp_assert( is_array( $b4_rej ), 'B4 rejected_all with an empty services list is allowed' );

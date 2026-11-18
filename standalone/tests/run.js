@@ -215,6 +215,101 @@ var rcBanner = rcM ? new Function(rcM[1] + '\nreturn { svcSnapshot: svcSnapshot,
 	eq(h.newServices({ categories: ['marketing'], svc: {} }, { marketing: ['b', 'a', 'c'] }), { marketing: ['b', 'a', 'c'] }, n + 'ids keep map order');
 });
 
+// B4 Task 3: reconsentView + svcFlat (banner.js only; same extracted block).
+var rcView = rcM ? new Function(rcM[1] + '\nreturn { reconsentView: typeof reconsentView === "function" ? reconsentView : null, svcFlat: typeof svcFlat === "function" ? svcFlat : null };')() : {};
+ok(typeof rcView.reconsentView === 'function', 'reconsentView present in the banner.js reconsent block');
+ok(typeof rcView.svcFlat === 'function', 'svcFlat present in the banner.js reconsent block');
+if (typeof rcView.reconsentView === 'function') {
+	var rv = rcView.reconsentView;
+	var RVMAP = { statistics: ['google-analytics'], marketing: ['meta-pixel', 'tiktok-pixel'] };
+	var rvCk = { v: '1', categories: ['necessary', 'statistics', 'marketing'], svc: { statistics: ['google-analytics'], marketing: ['meta-pixel'] } };
+	eq(rv(rvCk, RVMAP), { show: true, newIds: { marketing: ['tiktok-pixel'] }, preselect: ['necessary', 'statistics'] }, 'reconsentView: new service in accepted category -> show, affected category not preselected');
+	eq(rv({ v: '1', categories: ['necessary', 'statistics', 'marketing'] }, RVMAP), { show: false, newIds: {}, preselect: ['necessary', 'statistics', 'marketing'] }, 'reconsentView: old cookie without svc -> no show');
+	eq(rv(null, RVMAP), { show: false, newIds: {}, preselect: [] }, 'reconsentView: no cookie -> no show (the normal banner handles it)');
+	eq(rv(rvCk, undefined), { show: false, newIds: {}, preselect: ['necessary', 'statistics', 'marketing'] }, 'reconsentView: unknown map -> no show');
+	eq(rv(rvCk, null).show, false, 'reconsentView: null map -> no show');
+	eq(rv({ v: '1', categories: ['necessary', 'statistics'], svc: { statistics: ['google-analytics'] } }, RVMAP).show, false, 'reconsentView: new service in a refused category -> no show');
+	eq(rv({ v: '1', categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel', 'tiktok-pixel'] } }, RVMAP).show, false, 'reconsentView: every service already known -> no show');
+	eq(rv({ v: '1', categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel', 'tiktok-pixel', 'gone'] } }, RVMAP).show, false, 'reconsentView: removed service -> no show');
+	eq(rv('junk', RVMAP), { show: false, newIds: {}, preselect: [] }, 'reconsentView: non-object cookie -> no show');
+	var rvTwo = rv({ v: '1', categories: ['necessary', 'statistics', 'marketing'], svc: { statistics: [], marketing: ['meta-pixel'] } }, RVMAP);
+	eq(rvTwo.newIds, { statistics: ['google-analytics'], marketing: ['tiktok-pixel'] }, 'reconsentView: every affected category listed');
+	eq(rvTwo.preselect, ['necessary'], 'reconsentView: every affected category left unchecked');
+}
+if (typeof rcView.svcFlat === 'function') {
+	eq(rcView.svcFlat({ statistics: ['google-analytics'], marketing: ['meta-pixel', 'tiktok-pixel'] }), ['google-analytics', 'meta-pixel', 'tiktok-pixel'], 'svcFlat: flattened ids');
+	eq(rcView.svcFlat({ a: ['x'], b: ['x', 'y'] }), ['x', 'y'], 'svcFlat: no duplicates');
+	eq(rcView.svcFlat({}), [], 'svcFlat: empty snapshot -> []');
+	eq(rcView.svcFlat(null), [], 'svcFlat: null -> []');
+	eq(rcView.svcFlat({ a: 'oops', b: ['z', 5] }), ['z'], 'svcFlat: non-array values and non-string ids skipped');
+}
+// Cookie size: 14 library ids + custom-1 … custom-50, all accepted, stays small.
+if (typeof rcBanner.svcSnapshot === 'function') {
+	var libSvc = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../../data/services.json'), 'utf8'));
+	libSvc = libSvc.services || libSvc;
+	var bigMap = {};
+	libSvc.forEach(function (x) { (bigMap[x.category] = bigMap[x.category] || []).push(x.id); });
+	for (var ci = 1; ci <= 50; ci++) { bigMap.marketing.push('custom-' + ci); }
+	var bigIds = Object.keys(bigMap).reduce(function (n, k) { return n + bigMap[k].length; }, 0);
+	eq(bigIds, 64, 'cookie size: 64 service ids in the test map');
+	var bigCats = Object.keys(bigMap);
+	var bigSnap = rcBanner.svcSnapshot(bigCats, bigMap);
+	var snapLen = encodeURIComponent(JSON.stringify(bigSnap)).length;
+	ok(snapLen < 2000, 'cookie size: snapshot of 64 ids under 2000 chars encoded (got ' + snapLen + ')');
+	var bigCookie = { v: '12', id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', categories: bigCats, decision: 'accepted_all', ts: 1790000000, svc: bigSnap };
+	var cookieLen = encodeURIComponent(JSON.stringify(bigCookie)).length;
+	ok(cookieLen < 2000, 'cookie size: whole cmp_consent value under 2000 chars encoded (got ' + cookieLen + ')');
+}
+// banner.js wiring (source checks): every read of the visitor's categories goes
+// through effectiveCategories; save() stores the snapshot only when it is known.
+ok(/function save\(accepted, decision\) \{[\s\S]*?var snap = svcSnapshot\(accepted, D\.svcByCat\);[\s\S]*?if \(snap !== null\) \{ data\.svc = snap; \}[\s\S]*?writeCookie\(data\);/.test(bannerSrc), 'banner.js save(): svc written from svcSnapshot only when not null');
+ok(/function save\(accepted, decision\) \{[^]*?logConsent\(\{ id: data\.id, categories: accepted, decision: decision, services: snap === null \? null : svcFlat\(snap\) \}\);/.test(bannerSrc), 'banner.js save(): the log carries the flattened snapshot');
+ok(/function consentedCategories\(\) \{[^}]*effectiveCategories\(c, D\.svcByCat[,)]/.test(bannerSrc), 'banner.js: consentedCategories() reads through effectiveCategories');
+ok(!/c\.categories \|\| \[\]/.test(bannerSrc), 'banner.js: no raw `c.categories || []` read left');
+ok(!/pushConsent\(c\.categories|unblockScripts\(c\.categories|unblockEmbeds\(c\.categories/.test(bannerSrc), 'banner.js: the replay does not use the raw cookie categories');
+ok(/isAllowed: function \(slug\) \{[\s\S]*?consentedCategories\(\)\.indexOf\(slug\)/.test(bannerSrc), 'banner.js: isAllowed uses the effective categories');
+ok(/getConsent: function \(\) \{[\s\S]*?effectiveCategories\(/.test(bannerSrc), 'banner.js: getConsent reports the effective categories');
+ok(/reconsentView\(c, D\.svcByCat[,)]/.test(bannerSrc), 'banner.js: init computes the re-consent view');
+
+// Fix round 1 (I1): a required category is never removed / never prompts, even with an old map.
+if (typeof rcBanner.effectiveCategories === 'function') {
+	var reqCk = { v: '1', categories: ['necessary', 'functional', 'marketing'], svc: { functional: ['a'], marketing: ['meta-pixel'] } };
+	var reqMap = { functional: ['a', 'b'], marketing: ['meta-pixel'] };
+	eq(rcBanner.effectiveCategories(reqCk, reqMap, ['necessary', 'functional']), ['necessary', 'functional', 'marketing'], 'I1: effectiveCategories keeps a required category that gained a service');
+	eq(rcBanner.effectiveCategories(reqCk, reqMap), ['necessary', 'marketing'], 'I1: without required slugs the category is still dropped (shared semantics)');
+}
+if (typeof rcView.reconsentView === 'function') {
+	var reqCk2 = { v: '1', categories: ['necessary', 'functional', 'marketing'], svc: { functional: ['a'], marketing: ['meta-pixel'] } };
+	eq(rcView.reconsentView(reqCk2, { functional: ['a', 'b'], marketing: ['meta-pixel'] }, ['necessary', 'functional']), { show: false, newIds: {}, preselect: ['necessary', 'functional', 'marketing'] }, 'I1: reconsentView ignores a required category');
+	eq(rcView.reconsentView(reqCk2, { functional: ['a', 'b'], marketing: ['meta-pixel', 'tiktok-pixel'] }, ['necessary', 'functional']), { show: true, newIds: { marketing: ['tiktok-pixel'] }, preselect: ['necessary', 'functional'] }, 'I1: reconsentView lists only optional categories');
+}
+ok(/function consentedCategories\(\) \{[^}]*effectiveCategories\(c, D\.svcByCat, requiredSlugs\(\)\)/.test(bannerSrc), 'I1: consentedCategories passes the required slugs');
+ok(/reconsentView\(c, D\.svcByCat, requiredSlugs\(\)\)/.test(bannerSrc), 'I1: pendingReconsent passes the required slugs');
+ok(/getConsent: function \(\) \{[\s\S]*?effectiveCategories\(c, D\.svcByCat, requiredSlugs\(\)\)/.test(bannerSrc), 'I1: getConsent passes the required slugs');
+// M3: pushWpInit computes the values once.
+ok(/function pushWpInit\(\) \{[^]*?var vals = [^;]*\? wpConsentValues\(D\.wpConsent, consentedCategories\(\)\) : wpInitValues\(D\.wpConsent, readCookie\(\), D\.version, D\.mode, requiredSlugs\(\)\);/.test(bannerSrc), 'M3: pushWpInit computes the values in one expression');
+ok(!/vals = wpConsentValues\(D\.wpConsent, consentedCategories\(\)\);/.test(bannerSrc), 'M3: no second assignment of vals');
+// M1: during a re-consent the back button is hidden; the dialog is named by the visible title.
+ok(/function renderReconsent\(view\) \{[\s\S]*?\[data-cmp-action="back"\][\s\S]*?\.hidden = on;/.test(bannerSrc), 'M1: back button hidden while re-consent is pending');
+ok(/function openPrefs\(\) \{[\s\S]*?setAttribute\('aria-labelledby', 'cmp-prefs-title'\)/.test(bannerSrc), 'M1: open prefs -> aria-labelledby = prefs title');
+ok(/function closePrefs\(\) \{[^\n]*setAttribute\('aria-labelledby', 'cmp-title'\)[^\n]*removeAttribute\('aria-describedby'\)/.test(bannerSrc), 'M1: close prefs -> aria-labelledby = main title, no description');
+// M2: the focus trap wraps on the visible controls of the active view.
+var ftM = bannerSrc.match(/\/\/ focusTrap:begin\n([\s\S]*?)\/\/ focusTrap:end/);
+ok(!!ftM, 'M2: banner.js exposes the focusTrap block');
+if (ftM) {
+	var trapStep = new Function(ftM[1] + '\nreturn trapStep;')();
+	var A = { n: 'back' }, B = { n: 'toggle' }, C = { n: 'save' }, DLG = { n: 'dialog' }, OUT = { n: 'page' };
+	var L = [A, B, C];
+	eq(trapStep(L, A, true, DLG), C, 'M2: Shift+Tab from the first control wraps to the last');
+	eq(trapStep(L, C, false, DLG), A, 'M2: Tab from the last control wraps to the first');
+	eq(trapStep(L, DLG, true, DLG), C, 'M2: Shift+Tab from the dialog itself wraps to the last');
+	eq(trapStep(L, B, false, DLG), null, 'M2: Tab in the middle -> browser default');
+	eq(trapStep(L, B, true, DLG), null, 'M2: Shift+Tab in the middle -> browser default');
+	eq(trapStep(L, OUT, false, DLG), A, 'M2: focus outside the list -> back to the first');
+	eq(trapStep([], A, false, DLG), null, 'M2: nothing focusable -> nothing');
+}
+ok(/function focusable\(\) \{[\s\S]*?is-prefs-open[\s\S]*?getClientRects\(\)\.length/.test(bannerSrc), 'M2: focusable() scopes to the active view and keeps only rendered controls');
+
 // Final fix wave I2: without a valid decision every mapped category is pushed
 // (functional allow, the rest deny), so stale 'allow' values never survive.
 var WPDENY = { functional: 'allow', statistics: 'deny', 'statistics-anonymous': 'deny', marketing: 'deny', preferences: 'deny' };

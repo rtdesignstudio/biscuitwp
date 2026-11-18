@@ -24,3 +24,27 @@ cmp_assert_eq( CMP_Services::history_or_found( false, array( 'b' ) ), array( 'b'
 cmp_assert_eq( CMP_Services::history_or_found( false, false ), null, 'history_or_found: neither -> null' );
 cmp_assert_eq( CMP_Services::history_or_found( 1, array( 'b' ) ), array( 'b' ), 'history_or_found: non-array history -> found' );
 cmp_assert_eq( CMP_Services::history_or_found( array(), false ), array(), 'history_or_found: empty array history is a known (empty) list' );
+
+// B4 Task 3: display names for every id of svcByCat (the "new" marker).
+$cmp_lbl_svcs = array(
+	array( 'id' => 'meta-pixel', 'name' => 'Meta Pixel', 'category' => 'marketing' ),
+	array( 'id' => 'custom-1', 'name' => '', 'category' => 'marketing', 'source' => 'custom' ),
+	array( 'id' => 'google-analytics', 'name' => 'Google Analytics', 'category' => 'statistics' ),
+);
+cmp_assert_eq(
+	CMP_Services::svc_labels( $cmp_lbl_svcs, array( 'marketing' => array( 'meta-pixel', 'custom-1' ) ) ),
+	array( 'meta-pixel' => 'Meta Pixel', 'custom-1' => 'custom-1' ),
+	'svc_labels: names for the ids of svcByCat only, id when the name is empty'
+);
+cmp_assert_eq( CMP_Services::svc_labels( $cmp_lbl_svcs, array() ), array(), 'svc_labels: empty map -> empty' );
+
+// Fix round 1 (I1): a category marked required is never "affected".
+$cmp_req_svcs = array(
+	array( 'id' => 'f1', 'category' => 'functional', 'source' => 'library' ),
+	array( 'id' => 'm1', 'category' => 'marketing', 'source' => 'library' ),
+	array( 'id' => 'n1', 'category' => 'necessary', 'source' => 'library' ),
+);
+cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' ), array( 'functional' ) ), array( 'marketing' => array( 'm1' ) ), 'svc_by_cat I1: a required category with a seen service is absent' );
+cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' ) ), array( 'functional' => array( 'f1' ), 'marketing' => array( 'm1' ) ), 'svc_by_cat I1: without required slugs only necessary is omitted' );
+cmp_assert_eq( CMP_Services::svc_by_cat( $cmp_req_svcs, array( 'f1', 'm1', 'n1' ), array( 'marketing' ) ), array( 'functional' => array( 'f1' ) ), 'svc_by_cat I1: necessary is always omitted, even when not listed as required' );
+cmp_assert_eq( CMP_Services::required_slugs( array( array( 'slug' => 'necessary', 'required' => true ), array( 'slug' => 'functional', 'required' => 1 ), array( 'slug' => 'marketing', 'required' => false ), array( 'slug' => 'stats' ), 'junk' ) ), array( 'necessary', 'functional' ), 'required_slugs I1: slugs of the categories marked required' );

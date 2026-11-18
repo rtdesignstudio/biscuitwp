@@ -160,13 +160,52 @@
 		});
 		return out;
 	}
-	// The cookie's categories minus those that gained a service.
-	function effectiveCategories(cookie, svcByCat) {
+	// The cookie's categories minus those that gained a service. A slug in
+	// `required` (always-on categories) is never removed, even by an old map.
+	function effectiveCategories(cookie, svcByCat, required) {
 		if (!cookie || typeof cookie !== 'object') { return []; }
-		var fresh = newServices(cookie, svcByCat);
-		return rcList(cookie.categories).filter(function (s) { return !Object.prototype.hasOwnProperty.call(fresh, s); });
+		var fresh = newServices(cookie, svcByCat), req = rcList(required);
+		return rcList(cookie.categories).filter(function (s) { return req.indexOf(s) !== -1 || !Object.prototype.hasOwnProperty.call(fresh, s); });
+	}
+	// The snapshot's ids as one list (no duplicates), for the consent log.
+	function svcFlat(snap) {
+		var out = [], map = rcMap(snap);
+		if (!map) { return out; }
+		Object.keys(map).forEach(function (slug) {
+			rcList(map[slug]).forEach(function (id) {
+				if (typeof id === 'string' && out.indexOf(id) === -1) { out.push(id); }
+			});
+		});
+		return out;
+	}
+	// What the re-consent banner shows: show = a category the visitor accepted
+	// gained a service; newIds = those services per category; preselect = the
+	// toggles to pre-check (the effective categories: the affected ones stay
+	// off until the visitor confirms them). No cookie / old cookie / unknown
+	// map -> show false (the normal banner, or nothing, handles it). Required
+	// categories are never affected.
+	function reconsentView(cookie, svcByCat, required) {
+		var all = newServices(cookie, svcByCat), req = rcList(required), fresh = {};
+		Object.keys(all).forEach(function (slug) { if (req.indexOf(slug) === -1) { fresh[slug] = all[slug]; } });
+		return { show: Object.keys(fresh).length > 0, newIds: fresh, preselect: effectiveCategories(cookie, svcByCat, req) };
 	}
 	// reconsent:end
+
+	// The visitor's categories for the current policy version, minus those that
+	// gained a service since the decision: such a category counts as refused
+	// everywhere (scripts, embeds, Consent Mode, WP Consent API, the public API)
+	// until the visitor decides again. The cookie is rewritten only then.
+	function consentedCategories() {
+		var c = readCookie();
+		return (c && String(c.v) === String(D.version)) ? effectiveCategories(c, D.svcByCat, requiredSlugs()) : [];
+	}
+	// True when the stored decision (this policy version) has a category that is
+	// currently refused because it gained a service.
+	function pendingAffected() {
+		var c = readCookie();
+		if (!c || String(c.v) !== String(D.version)) { return false; }
+		return Object.keys(reconsentView(c, D.svcByCat, requiredSlugs()).newIds).length > 0;
+	}
 
 	function pushWpConsent(accepted) {
 		if (!D.wpConsent || typeof window.wp_set_consent !== 'function') { return; }
@@ -178,7 +217,11 @@
 
 	function pushWpInit() {
 		if (!D.wpConsent || typeof window.wp_set_consent !== 'function') { return; }
-		var vals = wpInitValues(D.wpConsent, readCookie(), D.version, D.mode, requiredSlugs());
+		// B4: while a category is affected by re-consent, push the effective
+		// categories (it is denied until the visitor decides again); otherwise the
+		// usual init values. Computed once.
+		var affected = D.mode !== 'light' && pendingAffected();
+		var vals = affected ? wpConsentValues(D.wpConsent, consentedCategories()) : wpInitValues(D.wpConsent, readCookie(), D.version, D.mode, requiredSlugs());
 		Object.keys(vals).forEach(function (cat) {
 			try { window.wp_set_consent(cat, vals[cat]); } catch (e) {}
 		});
@@ -222,14 +265,18 @@
 	function save(accepted, decision) {
 		var reload = firstDecision && !!D.reloadOnDecision;
 		firstDecision = false;
+		// B4: the services of the accepted categories at this decision, so a service
+		// added later can be detected. None when the map is unknown (no scan yet).
+		var snap = svcSnapshot(accepted, D.svcByCat);
 		var data = { v: D.version, id: consentIdFor(readCookie(), (readSvc() || {}).id), categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
+		if (snap !== null) { data.svc = snap; }
 		writeCookie(data);
 		pushConsent(accepted);
 		unblockScripts(accepted);
 		unblockEmbeds(accepted);
 		showReopen();
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
-		logConsent({ id: data.id, categories: accepted, decision: decision });
+		logConsent({ id: data.id, categories: accepted, decision: decision, services: snap === null ? null : svcFlat(snap) });
 		hide();
 		// Load-time animations ran behind the overlay; reload so they play visibly.
 		if (reload) { window.location.reload(); }
@@ -265,17 +312,31 @@
 
 	// --- Focus trap (WCAG 2.1 AA) ---
 	var lastFocus = null;
+	// The controls of the view on screen (main or prefs) that are rendered: the
+	// other view is display:none, and so are hidden rows / buttons.
 	function focusable() {
-		return banner.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])');
+		var m = modal();
+		var scope = banner.querySelector(m && m.classList.contains('is-prefs-open') ? '[data-cmp-view="prefs"]' : '[data-cmp-view="main"]') || banner;
+		return Array.prototype.filter.call(scope.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])'), function (el) {
+			return el.getClientRects().length > 0;
+		});
 	}
+	// focusTrap:begin
+	// Pure: where Tab / Shift+Tab must go to stay in the dialog, or null for the
+	// browser default. Focus starts on the dialog itself (see trapFocus):
+	// Shift+Tab from there wraps to the end; focus outside the list comes back.
+	// Tested in standalone/tests/run.js (source-extracted).
+	function trapStep(list, active, shift, dialog) {
+		if (!list.length) { return null; }
+		var first = list[0], last = list[list.length - 1], inside = list.indexOf(active) !== -1;
+		if (shift) { return (active === first || active === dialog || !inside) ? last : null; }
+		return (active === last || (!inside && active !== dialog)) ? first : null;
+	}
+	// focusTrap:end
 	function onKeydown(e) {
 		if (e.key !== 'Tab') { return; }
-		var f = focusable();
-		if (!f.length) { return; }
-		var first = f[0], last = f[f.length - 1];
-		// Focus starts on the dialog itself (see trapFocus): Shift+Tab from there wraps to the end.
-		if (e.shiftKey && (document.activeElement === first || document.activeElement === modal())) { e.preventDefault(); last.focus(); }
-		else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+		var target = trapStep(focusable(), document.activeElement, e.shiftKey, modal());
+		if (target) { e.preventDefault(); target.focus(); }
 	}
 	function trapFocus(on) {
 		if (on) {
@@ -295,11 +356,12 @@
 	function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
 	// Optional toggles reflect the saved choice for the current policy version,
 	// and start OFF when there is none (pre-ticked boxes are not valid consent).
+	// A category that gained a service starts OFF too (re-consent preselect).
 	function syncToggles() {
 		var c = readCookie();
-		var valid = c && String(c.v) === String(D.version);
+		var accepted = consentedCategories();
 		banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) {
-			b.checked = !!valid && (c.categories || []).indexOf(b.value) !== -1;
+			b.checked = accepted.indexOf(b.value) !== -1;
 		});
 		// Show the visitor their consent ID (to quote it in a request about their data).
 		var idEl = banner.querySelector('[data-cmp-consent-id]');
@@ -310,8 +372,65 @@
 			if (code) { code.textContent = id; }
 		}
 	}
-	function openPrefs() { var m = modal(); if (m) { syncToggles(); renderAlways(); m.classList.add('is-prefs-open'); } }
-	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
+	function openPrefs() {
+		var m = modal();
+		if (!m) { return; }
+		syncToggles();
+		renderAlways();
+		renderReconsent(pendingReconsent());
+		m.classList.add('is-prefs-open');
+		// The dialog is named by the title on screen.
+		m.setAttribute('aria-labelledby', 'cmp-prefs-title');
+	}
+
+	// --- Re-consent (B4) ---
+	// The re-consent view for the stored decision, if it is for this policy
+	// version and a category it accepted (and the banner shows) gained a service.
+	var NO_RECONSENT = { show: false, newIds: {}, preselect: [] };
+	function pendingReconsent() {
+		var c = readCookie();
+		if (!c || String(c.v) !== String(D.version)) { return NO_RECONSENT; }
+		var view = reconsentView(c, D.svcByCat, requiredSlugs());
+		var optional = D.categories.filter(function (x) { return !x.required; }).map(function (x) { return x.slug; });
+		// A category the banner cannot show could never be confirmed: do not ask forever.
+		var shown = Object.keys(view.newIds).some(function (slug) { return optional.indexOf(slug) !== -1; });
+		return shown ? view : NO_RECONSENT;
+	}
+	function svcLabel(id) {
+		if (D.svcLabels && typeof D.svcLabels[id] === 'string' && D.svcLabels[id]) { return D.svcLabels[id]; }
+		return serviceName(id);
+	}
+	// Prefs header: the "new services" title and reason while a re-consent is
+	// pending, the normal title otherwise; "new" marker + names (textContent)
+	// next to each affected category.
+	var prefsTitleText = null;
+	function renderReconsent(view) {
+		if (!banner) { return; }
+		var on = !!(view && view.show);
+		var title = banner.querySelector('[data-cmp-prefs-title]');
+		var text = banner.querySelector('[data-cmp-reconsent-text]');
+		if (title) {
+			if (prefsTitleText === null) { prefsTitleText = title.textContent; }
+			title.textContent = on ? (title.getAttribute('data-cmp-reconsent-title') || prefsTitleText) : prefsTitleText;
+		}
+		if (text) { text.hidden = !on; }
+		// No way back to the main view while re-consent is pending: it would hide
+		// the reason (and "decide later" is not offered). The decision buttons stay.
+		banner.querySelectorAll('[data-cmp-view="prefs"] [data-cmp-action="back"]').forEach(function (b) { b.hidden = on; });
+		var m = modal();
+		if (m) {
+			// Described by the reason while it is on screen.
+			if (on && text && text.id) { m.setAttribute('aria-describedby', text.id); } else { m.removeAttribute('aria-describedby'); }
+		}
+		banner.querySelectorAll('[data-cmp-cat-new]').forEach(function (el) {
+			var slug = el.getAttribute('data-cmp-cat-new');
+			var ids = on && Object.prototype.hasOwnProperty.call(view.newIds, slug) ? view.newIds[slug] : [];
+			var names = el.querySelector('[data-cmp-cat-new-names]');
+			if (names) { names.textContent = ids.map(svcLabel).join(', '); }
+			el.hidden = !ids.length;
+		});
+	}
+	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); m.setAttribute('aria-labelledby', 'cmp-title'); m.removeAttribute('aria-describedby'); } }
 
 	function bind() {
 		// Any "cookie settings" control reopens the preferences: the shortcode link,
@@ -427,12 +546,8 @@
 		if (c && typeof c.id === 'string' && UUID_RE.test(c.id)) { return c.id; }
 		return (svcCookie && svcCookie.id) || '';
 	}
-	function currentCategories() {
-		var c = readCookie();
-		return (c && String(c.v) === String(D.version) && Array.isArray(c.categories)) ? c.categories : [];
-	}
 	function logService(decision, id, cookie) {
-		logConsent(svcLogPayload(decision, id, currentCategories(), svcLogId(cookie)));
+		logConsent(svcLogPayload(decision, id, consentedCategories(), svcLogId(cookie)));
 	}
 	// "Always load": load this embed and every other one of the same service, remember
 	// the choice and log it. The banner and the category consent are left alone.
@@ -485,7 +600,7 @@
 		var next = svcAfterReject(cur, D.version);
 		writeSvc(next);
 		if (gone.length) {
-			var payload = svcLogPayload('service_withdraw', gone[0], currentCategories(), svcLogId(next));
+			var payload = svcLogPayload('service_withdraw', gone[0], consentedCategories(), svcLogId(next));
 			payload.services = gone;
 			logConsent(payload);
 		}
@@ -521,14 +636,22 @@
 	// --- Public API ---
 	window.CMP = {
 		isAllowed: function (slug) {
-			var c = readCookie();
 			var cat = D.categories.filter(function (x) { return x.slug === slug; })[0];
 			if (cat && cat.required) { return true; }
-			if (!c || String(c.v) !== String(D.version)) { return false; }
-			return (c.categories || []).indexOf(slug) !== -1;
+			return consentedCategories().indexOf(slug) !== -1;
 		},
-		getConsent: function () { return readCookie(); },
-		openPreferences: function () { show(); openPrefs(); }
+		// The stored decision, with the effective categories: one that gained a
+		// service is not reported as consented until the visitor decides again.
+		getConsent: function () {
+			var c = readCookie();
+			if (!c || typeof c !== 'object' || !Array.isArray(c.categories)) { return c; }
+			var out = {};
+			Object.keys(c).forEach(function (k) { out[k] = c[k]; });
+			out.categories = effectiveCategories(c, D.svcByCat, requiredSlugs());
+			return out;
+		},
+		// Prefs first, so the dialog has its final name when show() focuses it.
+		openPreferences: function () { openPrefs(); show(); }
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
@@ -548,9 +671,20 @@
 			// as save() does. Without it the signals stay on the `denied` defaults
 			// printed in wp_head (the gtag stub there is data-cmp-keep, so it exists),
 			// and a returning visitor who accepted statistics is measured as refused.
-			pushConsent(c.categories || []);
-			unblockScripts(c.categories || []);
-			unblockEmbeds(c.categories || []);
+			// B4: a category that gained a service stays refused until the visitor decides again.
+			var accepted = consentedCategories();
+			pushConsent(accepted);
+			unblockScripts(accepted);
+			unblockEmbeds(accepted);
+			if (pendingReconsent().show) {
+				// Re-consent: like a first visit (overlay, none on the policy pages),
+				// straight on the preferences, on every page until the decision.
+				// No "decide later": it would be tacit consent to the new service.
+				firstDecision = true;
+				openPrefs();
+				show();
+				return;
+			}
 			showReopen();
 			return;
 		}

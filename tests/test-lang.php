@@ -44,3 +44,19 @@ foreach ( array( 'ro','ru','en' ) as $l ) {
 cmp_assert_eq( CMP_Lang::text( 'embed_always', 'ro' ), 'Încarcă mereu', 'ro embed_always' );
 cmp_assert_eq( CMP_Lang::text( 'always_loaded', 'en' ), 'Always loaded:', 'en always_loaded' );
 cmp_assert_eq( CMP_Lang::text( 'always_remove', 'ru' ), 'Больше не загружать %s', 'ru always_remove' );
+
+// B4: re-consent copy in every language.
+foreach ( array( 'ro','ru','en' ) as $l ) {
+	foreach ( array( 'reconsent_title','reconsent_text','svc_new' ) as $k ) {
+		cmp_assert( '' !== CMP_Lang::text( $k, $l ), "text $k present in $l" );
+	}
+}
+cmp_assert_eq( CMP_Lang::text( 'reconsent_title', 'ro' ), 'Am adăugat servicii noi', 'ro reconsent_title' );
+cmp_assert_eq( CMP_Lang::text( 'svc_new', 'ro' ), 'nou', 'ro svc_new' );
+cmp_assert_eq( CMP_Lang::text( 'reconsent_text', 'ro' ), 'Pe site au apărut servicii noi în categoriile pe care le-ai acceptat. Alege din nou.', 'ro reconsent_text' );
+cmp_assert_eq( CMP_Lang::text( 'reconsent_title', 'ru' ), 'Мы добавили новые сервисы', 'ru reconsent_title' );
+cmp_assert_eq( CMP_Lang::text( 'svc_new', 'ru' ), 'новый', 'ru svc_new' );
+cmp_assert_eq( CMP_Lang::text( 'reconsent_text', 'ru' ), 'На сайте появились новые сервисы в принятых вами категориях. Сделайте выбор снова.', 'ru reconsent_text' );
+cmp_assert_eq( CMP_Lang::text( 'reconsent_title', 'en' ), 'We added new services', 'en reconsent_title' );
+cmp_assert_eq( CMP_Lang::text( 'svc_new', 'en' ), 'new', 'en svc_new' );
+cmp_assert_eq( CMP_Lang::text( 'reconsent_text', 'en' ), 'New services were added to categories you accepted. Please choose again.', 'en reconsent_text' );
