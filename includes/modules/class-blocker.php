@@ -45,6 +45,15 @@ class CMP_Blocker {
 		return self::strip_hints( $urls, $hosts );
 	}
 
+	/** Pure: does $text contain $host on a name boundary (not inside another word; a subdomain dot is fine)? */
+	public static function has_host( $text, $host ) {
+		$host = (string) $host;
+		if ( '' === $host ) {
+			return false;
+		}
+		return 1 === preg_match( '/(?<![a-z0-9-])' . preg_quote( $host, '/' ) . '(?![a-z0-9-])/i', (string) $text );
+	}
+
 	/** Pure: drop resource-hint entries (string or ['href'=>…]) whose URL matches a host. */
 	public static function strip_hints( array $urls, array $hosts ) {
 		$out = array();
@@ -52,7 +61,7 @@ class CMP_Blocker {
 			$href = is_array( $u ) ? ( isset( $u['href'] ) ? (string) $u['href'] : '' ) : (string) $u;
 			$skip = false;
 			foreach ( $hosts as $host ) {
-				if ( '' !== $href && false !== stripos( $href, $host ) ) {
+				if ( '' !== $href && self::has_host( $href, $host ) ) {
 					$skip = true;
 					break;
 				}
@@ -386,7 +395,7 @@ class CMP_Blocker {
 					return $tag;
 				}
 				foreach ( $hosts as $host ) {
-					if ( false !== stripos( $tag, $host ) ) {
+					if ( self::has_host( $tag, $host ) ) {
 						return '';
 					}
 				}
@@ -404,7 +413,7 @@ class CMP_Blocker {
 			'/<noscript\b[^>]*>.*?<\/noscript>/is',
 			function ( $m ) use ( $hosts ) {
 				foreach ( $hosts as $host ) {
-					if ( false !== stripos( $m[0], $host ) ) {
+					if ( self::has_host( $m[0], $host ) ) {
 						return '';
 					}
 				}
@@ -437,7 +446,7 @@ class CMP_Blocker {
 				foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
 					$slash = strpos( (string) $h, '/' );
 					$host  = false === $slash ? (string) $h : substr( (string) $h, 0, $slash );
-					if ( '' !== $host && false !== stripos( $body, $host ) ) {
+					if ( '' !== $host && self::has_host( $body, $host ) ) {
 						return $s;
 					}
 				}

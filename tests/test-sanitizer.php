@@ -119,3 +119,125 @@ cmp_assert_eq( $cmp_meta['contact_email'], '', 'invalid email dropped' );
 cmp_assert_eq( CMP_Sanitizer::legal_meta( array( 'contact_email' => 'a@b.md' ) )['contact_email'], 'a@b.md', 'valid email kept' );
 cmp_assert( ! array_key_exists( 'x', $cmp_meta ), 'unknown keys dropped' );
 cmp_assert_eq( array_keys( $cmp_meta ), array( 'company', 'contact_email', 'dpo', 'jurisdiction' ), 'exactly the four operator fields' );
+
+// ---- Task 4: services / normalize_host ----
+cmp_assert_eq( CMP_Sanitizer::normalize_host( ' https://Chat.IO/ ' ), 'chat.io', 'normalize_host: scheme, case, trailing slash' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'chat.io/widget?x=1' ), 'chat.io/widget', 'normalize_host: strips query' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'chat.io/widget#a' ), 'chat.io/widget', 'normalize_host: strips fragment' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'javascript:alert(1)' ), '', 'normalize_host: javascript: rejected' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'data:text/html,x' ), '', 'normalize_host: data: rejected' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'a b.com' ), '', 'normalize_host: inner space rejected' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( '' ), '', 'normalize_host: empty' );
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'localhost' ), '', 'normalize_host: no dot rejected' );
+
+$cmp_ids = array( 'clarity', 'hotjar' );
+$cmp_sl  = array( 'necessary', 'statistics', 'marketing' );
+$cmp_sv  = CMP_Sanitizer::services(
+	array( 'overrides' => array(
+		'clarity' => array( 'category' => 'Statistics', 'exempt' => '1', 'junk' => 'x' ),
+		'nope'    => array( 'category' => 'marketing' ),
+	) ),
+	$cmp_ids, $cmp_sl, false, array()
+);
+cmp_assert_eq( $cmp_sv['overrides'], array( 'clarity' => array( 'category' => 'statistics', 'exempt' => true ) ), 'override kept, unknown id and extra keys dropped' );
+cmp_assert_eq( $cmp_sv['custom'], array(), 'no custom' );
+
+$cmp_old = array( 'custom' => array(
+	array( 'id' => 'custom-3', 'name' => 'Old', 'category' => 'marketing', 'exempt' => false, 'hosts' => array( 'old.io' ), 'cookies' => array(), 'script' => '<script>old</script>' ),
+	array( 'id' => 'custom-5', 'name' => 'Gone', 'category' => 'marketing', 'exempt' => false, 'hosts' => array( 'gone.io' ), 'cookies' => array(), 'script' => '' ),
+) );
+$cmp_in = array( 'custom' => array(
+	array( 'id' => 'custom-3', 'name' => ' <b>Old2</b> ', 'category' => 'foo', 'exempt' => '', 'hosts' => array( 'https://Old.io/', 'javascript:x', 'bb.io/p?q=1' ), 'cookies' => array( array( 'name' => '<i>c</i>', 'duration' => '1d', 'purpose' => 'p' ), array( 'name' => '', 'duration' => 'x', 'purpose' => 'y' ) ), 'script' => '<script>new</script>' ),
+	array( 'id' => 'custom-99', 'name' => 'New', 'category' => 'statistics', 'hosts' => array( 'new.io' ), 'script' => '<script>n</script>' ),
+	array( 'id' => '', 'name' => '', 'hosts' => array( 'javascript:1' ) ),
+) );
+$cmp_sv = CMP_Sanitizer::services( $cmp_in, $cmp_ids, $cmp_sl, false, $cmp_old );
+cmp_assert_eq( count( $cmp_sv['custom'] ), 2, 'empty custom dropped, absent old one deleted' );
+$c0 = $cmp_sv['custom'][0];
+cmp_assert_eq( $c0['id'], 'custom-3', 'existing id preserved' );
+cmp_assert_eq( $c0['name'], 'Old2', 'name stripped and trimmed' );
+cmp_assert_eq( $c0['category'], 'marketing', 'unknown custom category -> marketing' );
+cmp_assert_eq( $c0['exempt'], false, 'exempt bool' );
+cmp_assert_eq( $c0['hosts'], array( 'old.io' ), 'scripted service keeps old hosts (I1)' );
+cmp_assert_eq( CMP_Sanitizer::services( array( 'custom' => array( array( 'name' => 'N', 'hosts' => array( 'https://Old.io/', 'javascript:x', 'bb.io/p?q=1' ) ) ) ), array(), array(), false, array() )['custom'][0]['hosts'], array( 'old.io', 'bb.io/p' ), 'hosts normalized, invalid dropped' );
+cmp_assert_eq( $c0['cookies'], array( array( 'name' => 'c', 'duration' => '1d', 'purpose' => 'p' ) ), 'cookies sanitized, nameless dropped, plain strings' );
+cmp_assert_eq( $c0['script'], '<script>old</script>', 'no can_script: script from $old kept' );
+cmp_assert_eq( $cmp_sv['custom'][1]['id'], 'custom-100', 'unknown incoming id -> next free (max of old+incoming + 1)' );
+cmp_assert_eq( $cmp_sv['custom'][1]['script'], '', 'no can_script and no old: empty script' );
+$cmp_sv = CMP_Sanitizer::services( $cmp_in, $cmp_ids, $cmp_sl, true, $cmp_old );
+cmp_assert_eq( $cmp_sv['custom'][0]['script'], '<script>new</script>', 'can_script: raw script stored' );
+$cmp_sv = CMP_Sanitizer::services( array( 'custom' => array( array( 'name' => 'A', 'hosts' => array( 'a.io' ) ) ) ), array(), array(), false, $cmp_old );
+cmp_assert_eq( $cmp_sv['custom'][0]['id'], 'custom-6', 'next id is max(old)+1' );
+cmp_assert_eq( $cmp_sv['custom'][0]['category'], 'marketing', 'missing category -> marketing' );
+$cmp_many = array();
+for ( $i = 0; $i < 60; $i++ ) {
+	$cmp_many[] = array( 'name' => 'S' . $i, 'hosts' => array( 'h' . $i . '.io' ) );
+}
+cmp_assert_eq( count( CMP_Sanitizer::services( array( 'custom' => $cmp_many ), array(), array(), false, array() )['custom'] ), 50, 'custom services capped at 50' );
+$cmp_h = array();
+for ( $i = 0; $i < 30; $i++ ) {
+	$cmp_h[] = 'h' . $i . '.io';
+}
+$cmp_ck = array();
+for ( $i = 0; $i < 40; $i++ ) {
+	$cmp_ck[] = array( 'name' => 'c' . $i );
+}
+$cmp_cap = CMP_Sanitizer::services( array( 'custom' => array( array( 'name' => str_repeat( 'x', 150 ), 'hosts' => $cmp_h, 'cookies' => $cmp_ck ) ) ), array(), array(), false, array() )['custom'][0];
+cmp_assert_eq( count( $cmp_cap['hosts'] ), 20, 'hosts capped at 20' );
+cmp_assert_eq( count( $cmp_cap['cookies'] ), 30, 'cookies capped at 30' );
+cmp_assert_eq( strlen( $cmp_cap['name'] ), 100, 'name capped at 100' );
+
+// ---- Task 4 fix round 1 ----
+// I1: no unfiltered_html -> a stored script keeps its old category/exempt/hosts.
+$cmp_o1 = array( 'seq' => 2, 'custom' => array(
+	array( 'id' => 'custom-1', 'name' => 'A', 'category' => 'marketing', 'exempt' => false, 'hosts' => array( 'a.io' ), 'cookies' => array(), 'script' => '<script>A</script>' ),
+	array( 'id' => 'custom-2', 'name' => 'B', 'category' => 'statistics', 'exempt' => false, 'hosts' => array( 'b.io' ), 'cookies' => array(), 'script' => '<script>B</script>' ),
+) );
+$cmp_r = CMP_Sanitizer::services( array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A2', 'category' => 'necessary', 'exempt' => '1', 'hosts' => array( 'evil.io' ), 'cookies' => array( array( 'name' => 'k' ) ) ) ) ), array(), $cmp_sl, false, $cmp_o1 );
+cmp_assert_eq( $cmp_r['custom'][0]['category'], 'marketing', 'I1: scripted category stays' );
+cmp_assert_eq( $cmp_r['custom'][0]['exempt'], false, 'I1: scripted exempt stays' );
+cmp_assert_eq( $cmp_r['custom'][0]['hosts'], array( 'a.io' ), 'I1: scripted hosts stay' );
+cmp_assert_eq( $cmp_r['custom'][0]['name'], 'A2', 'I1: name still editable' );
+cmp_assert_eq( $cmp_r['custom'][0]['cookies'][0]['name'], 'k', 'I1: cookies still editable' );
+cmp_assert_eq( $cmp_r['custom'][0]['script'], '<script>A</script>', 'I1: script kept' );
+$cmp_r = CMP_Sanitizer::services( array( 'custom' => array(
+	array( 'id' => 'custom-1', 'name' => 'B', 'category' => 'statistics', 'hosts' => array( 'b.io' ) ),
+	array( 'id' => 'custom-2', 'name' => 'A', 'category' => 'marketing', 'hosts' => array( 'a.io' ) ),
+) ), array(), $cmp_sl, false, $cmp_o1 );
+cmp_assert_eq( array( $cmp_r['custom'][0]['script'], $cmp_r['custom'][0]['category'], $cmp_r['custom'][0]['hosts'] ), array( '<script>A</script>', 'marketing', array( 'a.io' ) ), 'I1: swap keeps script A with its category and hosts' );
+cmp_assert_eq( array( $cmp_r['custom'][1]['script'], $cmp_r['custom'][1]['category'], $cmp_r['custom'][1]['hosts'] ), array( '<script>B</script>', 'statistics', array( 'b.io' ) ), 'I1: swap keeps script B with its category and hosts' );
+$cmp_r = CMP_Sanitizer::services( array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A2', 'category' => 'necessary', 'exempt' => '1', 'hosts' => array( 'new.io' ) ) ) ), array(), $cmp_sl, true, $cmp_o1 );
+cmp_assert_eq( array( $cmp_r['custom'][0]['category'], $cmp_r['custom'][0]['exempt'], $cmp_r['custom'][0]['hosts'] ), array( 'necessary', true, array( 'new.io' ) ), 'I1: privileged user can change everything' );
+
+// I2a
+foreach ( array( 'co.uk', 'com.md', '1.2.3.4', 'gov.uk', 'com.ua' ) as $cmp_bad ) {
+	cmp_assert_eq( CMP_Sanitizer::normalize_host( $cmp_bad ), '', "I2: {$cmp_bad} rejected" );
+}
+foreach ( array( 'x.com', 't.co', 'a.co' ) as $cmp_ok ) {
+	cmp_assert_eq( CMP_Sanitizer::normalize_host( $cmp_ok ), $cmp_ok, "I2: {$cmp_ok} accepted" );
+}
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'foo.co.uk' ), 'foo.co.uk', 'I2: registrable domain under public suffix kept' );
+// M3
+cmp_assert_eq( CMP_Sanitizer::normalize_host( 'Chat.IO/Widget' ), 'chat.io/Widget', 'M3: path keeps case' );
+// M1
+foreach ( array( 'off', 'no', '', '0', 'false' ) as $cmp_f ) {
+	cmp_assert_eq( CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'category' => 'marketing', 'exempt' => $cmp_f ) ) ), $cmp_ids, $cmp_sl, false, array() )['overrides']['clarity']['exempt'], false, "M1: '{$cmp_f}' is false" );
+}
+foreach ( array( true, 1, '1', 'on', 'true', 'yes' ) as $cmp_f ) {
+	cmp_assert_eq( CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'category' => 'marketing', 'exempt' => $cmp_f ) ) ), $cmp_ids, $cmp_sl, false, array() )['overrides']['clarity']['exempt'], true, 'M1: ' . var_export( $cmp_f, true ) . ' is true' );
+}
+// M4
+$cmp_big = CMP_Sanitizer::services( array( 'custom' => array( array( 'name' => 'A', 'hosts' => array( 'a.io' ), 'script' => str_repeat( 'x', 70000 ) ) ) ), array(), array(), true, array() );
+cmp_assert_eq( strlen( $cmp_big['custom'][0]['script'] ), 65535, 'M4: script capped' );
+// M5
+$cmp_lib_cat = array( 'clarity' => 'marketing' );
+$cmp_r = CMP_Sanitizer::services( array( 'overrides' => array( 'clarity' => array( 'category' => 'marketing', 'exempt' => '' ), 'hotjar' => array( 'category' => 'marketing', 'exempt' => '1' ) ) ), $cmp_ids, $cmp_sl, false, array(), array( 'clarity' => 'marketing', 'hotjar' => 'marketing' ) );
+cmp_assert( ! isset( $cmp_r['overrides']['clarity'] ), 'M5: default-equal override skipped' );
+cmp_assert( isset( $cmp_r['overrides']['hotjar'] ), 'M5: real override kept' );
+// M6
+$cmp_o6 = array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A', 'hosts' => array( 'a.io' ) ), array( 'id' => 'custom-3', 'name' => 'C', 'hosts' => array( 'c.io' ) ) ) );
+$cmp_r6 = CMP_Sanitizer::services( array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A', 'hosts' => array( 'a.io' ) ) ) ), array(), array(), false, $cmp_o6 );
+cmp_assert_eq( $cmp_r6['seq'], 3, 'M6: seq carried from max existing' );
+$cmp_r6 = CMP_Sanitizer::services( array( 'custom' => array( array( 'id' => 'custom-1', 'name' => 'A', 'hosts' => array( 'a.io' ) ), array( 'name' => 'N', 'hosts' => array( 'n.io' ) ) ) ), array(), array(), false, $cmp_r6 );
+cmp_assert_eq( $cmp_r6['custom'][1]['id'], 'custom-4', 'M6: deleted highest id not reused' );
+cmp_assert_eq( $cmp_r6['seq'], 4, 'M6: seq updated' );

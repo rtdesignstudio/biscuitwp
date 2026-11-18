@@ -99,6 +99,89 @@ class CMP_Services {
 		return self::$cache;
 	}
 
+	/**
+	 * Pure: the library with stored overrides applied, plus custom services.
+	 * An empty $category_slugs means "unknown": categories are not remapped.
+	 */
+	public static function all( array $library, array $stored, array $category_slugs ) {
+		$over = isset( $stored['overrides'] ) && is_array( $stored['overrides'] ) ? $stored['overrides'] : array();
+		$out  = array();
+		foreach ( $library as $s ) {
+			if ( ! is_array( $s ) ) {
+				continue;
+			}
+			$id = isset( $s['id'] ) ? (string) $s['id'] : '';
+			if ( isset( $over[ $id ] ) && is_array( $over[ $id ] ) ) {
+				if ( isset( $over[ $id ]['category'] ) && '' !== (string) $over[ $id ]['category'] ) {
+					$s['category'] = (string) $over[ $id ]['category'];
+				}
+				if ( array_key_exists( 'exempt', $over[ $id ] ) ) {
+					$s['exempt'] = (bool) $over[ $id ]['exempt'];
+				}
+			}
+			$s['source'] = 'library';
+			$out[]       = $s;
+		}
+		$custom = isset( $stored['custom'] ) && is_array( $stored['custom'] ) ? $stored['custom'] : array();
+		foreach ( $custom as $c ) {
+			if ( ! is_array( $c ) ) {
+				continue;
+			}
+			$cookies = array();
+			foreach ( (array) ( isset( $c['cookies'] ) ? $c['cookies'] : array() ) as $ck ) {
+				if ( ! is_array( $ck ) ) {
+					continue;
+				}
+				$d         = isset( $ck['duration'] ) ? (string) $ck['duration'] : '';
+				$p         = isset( $ck['purpose'] ) ? (string) $ck['purpose'] : '';
+				$cookies[] = array(
+					'name'     => isset( $ck['name'] ) ? (string) $ck['name'] : '',
+					'duration' => array( 'ro' => $d, 'ru' => $d, 'en' => $d ),
+					'purpose'  => array( 'ro' => $p, 'ru' => $p, 'en' => $p ),
+				);
+			}
+			$row = array_merge(
+				self::defaults(),
+				array(
+					'id'       => isset( $c['id'] ) ? (string) $c['id'] : '',
+					'name'     => isset( $c['name'] ) ? (string) $c['name'] : '',
+					'type'     => 'script',
+					'category' => isset( $c['category'] ) ? (string) $c['category'] : 'marketing',
+					'exempt'   => ! empty( $c['exempt'] ),
+					'hosts'    => array_values( (array) ( isset( $c['hosts'] ) ? $c['hosts'] : array() ) ),
+					'inline'   => array(),
+					'cookies'  => $cookies,
+					'script'   => isset( $c['script'] ) ? (string) $c['script'] : '',
+					'source'   => 'custom',
+				)
+			);
+			$out[] = $row;
+		}
+		if ( $category_slugs ) {
+			foreach ( $out as $i => $s ) {
+				$cat = isset( $s['category'] ) ? (string) $s['category'] : '';
+				if ( 'necessary' !== $cat && ! in_array( $cat, $category_slugs, true ) ) {
+					$out[ $i ]['category'] = 'marketing';
+				}
+			}
+		}
+		return $out;
+	}
+
+	/** WordPress wrapper: library + cmp_services option + current category slugs. */
+	public static function active() {
+		$stored = function_exists( 'get_option' ) ? get_option( 'cmp_services', array() ) : array();
+		$slugs  = array();
+		if ( function_exists( 'get_option' ) && class_exists( 'CMP_Consent' ) ) {
+			foreach ( (array) CMP_Consent::get_categories() as $cat ) {
+				if ( is_array( $cat ) && ! empty( $cat['slug'] ) ) {
+					$slugs[] = (string) $cat['slug'];
+				}
+			}
+		}
+		return self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs );
+	}
+
 	/** Pure: does a URL's parsed host (exact or subdomain) and path prefix match 'host' or 'host/path'? */
 	public static function host_matches( $url, $pattern ) {
 		$pattern = strtolower( (string) $pattern );
