@@ -140,6 +140,42 @@ class CMP_Legal {
 		return $out;
 	}
 
+	/**
+	 * Pure: what the cookie table lists in a mode. Light loads only necessary
+	 * and exempt services (library or custom) and blocks the rest for good, so
+	 * only those are listed, and the manually declared cookies only of the
+	 * required categories (the optional ones' are dropped; labels stay). Pro
+	 * (or any other mode): unchanged.
+	 *
+	 * @return array{categories: array, services: array}
+	 */
+	public static function table_for_mode( array $categories, array $services, $mode ) {
+		if ( 'light' !== $mode ) {
+			return array( 'categories' => $categories, 'services' => $services );
+		}
+		$svcs = array();
+		foreach ( $services as $s ) {
+			if ( is_array( $s ) && ( ( isset( $s['category'] ) && 'necessary' === $s['category'] ) || ! empty( $s['exempt'] ) ) ) {
+				$svcs[] = $s;
+			}
+		}
+		$cats = array();
+		foreach ( $categories as $cat ) {
+			if ( is_array( $cat ) && empty( $cat['required'] ) && ! ( isset( $cat['slug'] ) && 'necessary' === $cat['slug'] ) ) {
+				$cat['cookies'] = array();
+			}
+			$cats[] = $cat;
+		}
+		return array( 'categories' => $cats, 'services' => $svcs );
+	}
+
+	/** WP: the cookie table for the current mode, in $lang. */
+	private static function current_table_html( $lang ) {
+		$s     = CMP_Consent::get_settings();
+		$table = self::table_for_mode( (array) CMP_Consent::get_categories(), self::current_table_services(), isset( $s['mode'] ) ? $s['mode'] : 'pro' );
+		return self::cookie_table_html( $table['categories'], $table['services'], $lang );
+	}
+
 	/** WP: table services from the last scan (stored ids, never scans) and the active services. */
 	public static function current_table_services() {
 		$found = get_option( 'cmp_services_found', array() );
@@ -193,7 +229,7 @@ class CMP_Legal {
 	}
 
 	public static function sc_cookie_table() {
-		return self::cookie_table_html( CMP_Consent::get_categories(), self::current_table_services(), CMP_Lang::current() );
+		return self::current_table_html( CMP_Lang::current() );
 	}
 
 	private static function esc( $value ) {
@@ -241,7 +277,7 @@ class CMP_Legal {
 		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
 			return;
 		}
-		$table = self::cookie_table_html( CMP_Consent::get_categories(), self::current_table_services(), 'ro' );
+		$table = self::current_table_html( 'ro' );
 		wp_add_privacy_policy_content(
 			'Consent Manager Pro',
 			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
@@ -277,11 +313,49 @@ class CMP_Legal {
 		return isset( $s['legal_meta'] ) && is_array( $s['legal_meta'] ) ? $s['legal_meta'] : array();
 	}
 
+	/** Opening words of the generated-document header (0.3.x-0.4.x and RO/RU/EN since 0.5.0). */
+	const GENERATED_HEADERS = array(
+		'Document generat automat de Consent Manager Pro',
+		'Документ автоматически создан Consent Manager Pro',
+		'Document generated automatically by Consent Manager Pro',
+	);
+
+	/** Pure: does the page text start with the plugin's generated-document header? */
+	public static function has_generated_header( $content ) {
+		if ( ! is_string( $content ) || '' === $content ) {
+			return false;
+		}
+		// Block comments and tags out, then the first visible words.
+		$text = preg_replace( '/<!--.*?-->/s', '', substr( $content, 0, 2000 ) );
+		$text = html_entity_decode( strip_tags( (string) $text ), ENT_QUOTES, 'UTF-8' );
+		$text = ltrim( $text, " \t\n\r\0\x0B\xC2\xA0" );
+		foreach ( self::GENERATED_HEADERS as $h ) {
+			if ( 0 === strpos( $text, $h ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Pure: may regeneration overwrite this linked translation? Yes when it
+	 * carries the mark for this type, or when it has no mark and starts with
+	 * the generated-document header (a copy 0.4.x made, before the mark
+	 * existed). Never a page marked for another type, never an admin's page.
+	 */
+	public static function refreshable_translation( $mark, $type, $content ) {
+		if ( $mark === $type ) {
+			return true;
+		}
+		return ( '' === $mark || false === $mark || null === $mark ) && self::has_generated_header( $content );
+	}
+
 	/**
 	 * WP: one translation of a legal page, built from its own language's
 	 * template. A new page is a draft marked with _cmp_legal_type; an existing
-	 * translation is refreshed only when it carries that mark (the plugin made
-	 * it), never otherwise. Returns the page id, or 0.
+	 * linked translation is refreshed only when the plugin made it (the mark,
+	 * or the generated-document header of a 0.4.x copy, which then gets the
+	 * mark), never otherwise. Returns the page id, or 0.
 	 */
 	private static function sync_translation( $existing_id, $type, $code ) {
 		if ( ! class_exists( 'CMP_Legal_Page' ) ) {
@@ -290,8 +364,10 @@ class CMP_Legal {
 		$lang = self::page_lang_for( $code );
 		$meta = self::stored_meta();
 		if ( $existing_id ) {
-			if ( get_post_meta( $existing_id, '_cmp_legal_type', true ) === $type ) {
+			$post = get_post( $existing_id );
+			if ( $post && self::refreshable_translation( get_post_meta( $existing_id, '_cmp_legal_type', true ), $type, (string) $post->post_content ) ) {
 				wp_update_post( array( 'ID' => $existing_id, 'post_content' => CMP_Legal_Page::build_content( $type, $meta, $lang ) ) );
+				update_post_meta( $existing_id, '_cmp_legal_type', $type );
 			}
 			return (int) $existing_id;
 		}

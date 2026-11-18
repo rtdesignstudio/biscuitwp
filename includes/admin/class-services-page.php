@@ -354,7 +354,7 @@ class CMP_Services_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		$found = get_option( 'cmp_services_found', array() );
-		update_option( 'cmp_services_history', CMP_Services::merge_seen( array(), is_array( $found ) ? $found : array() ), false );
+		update_option( 'cmp_services_history', CMP_Services::merge_seen( array(), is_array( $found ) ? $found : array() ), true );
 		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG, 'cmp_reset' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

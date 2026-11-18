@@ -305,7 +305,7 @@ if ( method_exists( 'CMP_Legal_Page', 'operator_note_html' ) ) {
 	$t7_closed = CMP_Legal_Page::operator_note_html( false );
 	foreach ( array( 'Ce face pluginul', 'Ce rămâne la tine', 'Ce face pluginul și ce rămâne la tine',
 		'bannerul de cookie-uri', 'blocarea serviciilor până la acord', 'registrul de consimțăminte', 'șabloanele paginilor legale', 'tabelul de cookie-uri', 're-consimțământul la servicii noi',
-		'registrul activităților de prelucrare (art. 30)', 'responsabil cu protecția datelor (DPO)', 'temeiul legal pentru transferurile de date în afara țării', 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'verificarea textelor de către un jurist', 'notificarea CNPDCP', 'serviciile pe care pluginul nu le recunoaște' ) as $t7_needle ) {
+		'registrul activităților de prelucrare', 'responsabil cu protecția datelor (DPO)', 'temeiul legal pentru transferurile de date în afara țării', 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'verificarea textelor de către un jurist', 'notificarea CNPDCP', 'serviciile pe care pluginul nu le recunoaște' ) as $t7_needle ) {
 		cmp_assert( false !== strpos( $t7_open, $t7_needle ), "operator note contains: $t7_needle" );
 	}
 	cmp_assert( 1 === preg_match( '/<details class="cmp-operator-note" open>/', $t7_open ), 'operator note: $open=true -> <details ... open>' );

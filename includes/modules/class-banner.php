@@ -69,9 +69,9 @@ class CMP_Banner {
 		// services alone are not a known map either: a partial map would re-prompt
 		// everyone once the first scan lands. The JS must then store no `svc`
 		// snapshot (legacy behaviour) and never trigger re-consent.
-		$cmp_seen = CMP_Services::history_or_found( get_option( 'cmp_services_history', false ), get_option( 'cmp_services_found', false ) );
-		if ( null !== $cmp_seen ) {
-			$cmp_by_cat           = CMP_Services::svc_by_cat( CMP_Services::active(), $cmp_seen, CMP_Services::required_slugs( (array) $cmp_data['categories'] ) );
+		// Same map as CMP_Consent::is_allowed() (one shared, memoised helper).
+		$cmp_by_cat = CMP_Services::current_svc_by_cat( (array) $cmp_data['categories'] );
+		if ( null !== $cmp_by_cat ) {
 			$cmp_data['svcByCat'] = (object) $cmp_by_cat;
 			// Names for the "new" marker of the re-consent view (svcNames covers embeds only).
 			$cmp_data['svcLabels'] = (object) CMP_Services::svc_labels( CMP_Services::active(), $cmp_by_cat );

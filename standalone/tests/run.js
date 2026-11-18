@@ -443,5 +443,63 @@ if (ftC && ftM) {
 ok(/function focusable\(\) \{[\s\S]*?is-prefs-open[\s\S]*?getClientRects\(\)\.length/.test(cmpSrc), 'T4: cmp.js focusable() scopes to the active view');
 ok(/trapStep\(focusable\(\), document\.activeElement, e\.shiftKey, modal\(\)\)/.test(cmpSrc), 'T4: cmp.js onKeydown uses trapStep');
 
+// B4 final fix (I3/R1): silent baseline adoption. A valid cookie without `svc`
+// gets the current snapshot, nothing else changes; later additions re-prompt.
+var rcBf = rcM ? new Function(rcM[1] + '\nreturn typeof backfillSvc === "function" ? backfillSvc : null;')() : null;
+[['banner', rcBf], ['standalone', cmp.backfillSvc]].forEach(function (pair) {
+	var n = 'backfillSvc ' + pair[0] + ': ', bf = pair[1];
+	ok(typeof bf === 'function', n + 'present');
+	if (typeof bf !== 'function') { return; }
+	var BFMAP = { statistics: ['google-analytics'], marketing: ['meta-pixel'] };
+	var legacy = { v: '3', id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', categories: ['necessary', 'marketing'], decision: 'custom', ts: 1700000000 };
+	var legacyCopy = JSON.stringify(legacy);
+	var out = bf(legacy, BFMAP);
+	eq(out, { v: '3', id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', categories: ['necessary', 'marketing'], decision: 'custom', ts: 1700000000, svc: { marketing: ['meta-pixel'] } }, n + 'legacy cookie gets the snapshot of its accepted categories, rest unchanged');
+	eq(JSON.stringify(legacy), legacyCopy, n + 'input cookie not mutated');
+	ok(out !== null && cmp.newServices(out, BFMAP) && Object.keys(cmp.newServices(out, BFMAP)).length === 0, n + 'after adoption nothing is new (no prompt)');
+	eq(cmp.effectiveCategories(out, BFMAP, ['necessary']), ['necessary', 'marketing'], n + 'after adoption the categories stay effective');
+	eq(cmp.newServices(out, { marketing: ['meta-pixel', 'tiktok-pixel'] }), { marketing: ['tiktok-pixel'] }, n + 'a service added after adoption is new');
+	eq(bf({ v: '3', categories: ['necessary'], decision: 'rejected_all', ts: 1 }, BFMAP), { v: '3', categories: ['necessary'], decision: 'rejected_all', ts: 1, svc: {} }, n + 'refused all -> empty snapshot written');
+	eq(bf({ v: '3', categories: ['marketing'], svc: { marketing: ['meta-pixel'] } }, BFMAP), null, n + 'cookie with svc -> nothing to write');
+	eq(bf({ v: '3', categories: ['marketing'], svc: {} }, BFMAP), null, n + 'cookie with empty svc -> nothing to write');
+	eq(bf({ v: '3', categories: ['marketing'], svc: 'junk' }, BFMAP), null, n + 'cookie with a junk svc -> left alone');
+	eq(bf(legacy, undefined), null, n + 'unknown map -> nothing to write');
+	eq(bf(legacy, null), null, n + 'null map -> nothing to write');
+	eq(bf(legacy, 'x'), null, n + 'non-object map -> nothing to write');
+	eq(bf(null, BFMAP), null, n + 'no cookie -> null');
+	eq(bf('str', BFMAP), null, n + 'non-object cookie -> null');
+	eq(bf({ v: '3', categories: 'marketing' }, BFMAP), null, n + 'categories not an array -> null');
+});
+// Wiring: init adopts the baseline (only for a valid cookie of this version,
+// Pro only), through writeCookie (same attributes), with no prompt and no log.
+ok(/var adopted = backfillSvc\(c, D\.svcByCat\);\n\t\t\tvar left = adopted \? remainingMaxAge\(c, D\.cookieDays, Math\.floor\(Date\.now\(\) \/ 1000\)\) : 0;\n\t\t\tif \(adopted && left > 0\) \{ writeCookie\(adopted, left\); c = adopted; \}\n/.test(bannerSrc), 'R1/N1: banner.js init writes the backfilled cookie through writeCookie with the remaining lifetime');
+ok(/if \(storedCategories\(readCookie\(\), VERSION\)\) \{\n[^\n]*\n\t\t\t\tvar adopted = backfillSvc\(readCookie\(\), cfg\.services\);\n\t\t\t\tvar left = adopted \? remainingMaxAge\(adopted, cfg\.cookieDays, Math\.floor\(Date\.now\(\) \/ 1000\)\) : 0;\n\t\t\t\tif \(adopted && left > 0\) \{ writeCookie\(adopted, left\); \}\n\t\t\t\}/.test(cmpSrc), 'R1/N1: cmp.js init writes the backfilled cookie with the remaining lifetime, before the stored categories are read');
+// N1: adoption keeps the original lifetime (13-month cap); expired / no ts -> no write.
+var rcRm = rcM ? new Function(rcM[1] + '\nreturn typeof remainingMaxAge === "function" ? remainingMaxAge : null;')() : null;
+[['banner', rcRm], ['standalone', cmp.remainingMaxAge]].forEach(function (pair) {
+	var n = 'N1 remainingMaxAge ' + pair[0] + ': ', rm = pair[1];
+	ok(typeof rm === 'function', n + 'present');
+	if (typeof rm !== 'function') { return; }
+	var NOW = 1790000000;
+	eq(rm({ ts: NOW }, 180, NOW), 180 * 86400, n + 'fresh ts -> full lifetime');
+	eq(rm({ ts: NOW - 60 }, 180, NOW), 180 * 86400 - 60, n + 'ts a minute ago -> about the full lifetime');
+	eq(rm({ ts: NOW - (396 * 86400 - 3600) }, 396, NOW), 3600, n + 'ts near expiry -> small remaining value');
+	eq(rm({ ts: NOW - 396 * 86400 }, 396, NOW), 0, n + 'exactly expired -> 0');
+	eq(rm({ ts: NOW - 400 * 86400 }, 396, NOW), 0, n + 'expired ts -> 0 (nothing written)');
+	eq(rm({ v: '1' }, 180, NOW), 0, n + 'missing ts -> 0');
+	eq(rm({ ts: '1790000000' }, 180, NOW), 0, n + 'string ts -> 0');
+	eq(rm({ ts: NaN }, 180, NOW), 0, n + 'NaN ts -> 0');
+	eq(rm({ ts: 0 }, 180, NOW), 0, n + 'zero ts -> 0');
+	eq(rm({ ts: NOW + 100 }, 180, NOW), 0, n + 'future ts -> 0');
+	eq(rm(null, 180, NOW), 0, n + 'no cookie -> 0');
+	eq(rm({ ts: NOW - 10 }, undefined, NOW), 180 * 86400 - 10, n + 'no cookieDays -> 180 days default');
+});
+ok(/function writeCookie\(obj, maxAge\) \{[^}]*if \(!\(typeof maxAge === 'number' && maxAge > 0\)\) \{ maxAge = 60 \* 60 \* 24 \* days; \}/.test(bannerSrc), 'N1: banner.js writeCookie takes an optional max-age, default unchanged');
+ok(/function writeCookie\(obj, maxAge\) \{[^}]*if \(!\(typeof maxAge === 'number' && maxAge > 0\)\) \{ maxAge = 60 \* 60 \* 24 \* \(cfg\.cookieDays \|\| 180\); \}/.test(cmpSrc), 'N1: cmp.js writeCookie takes an optional max-age, default unchanged');
+ok(!/backfillSvc\([^\n]*\n[^\n]*(logConsent|save\(|show\(\))/.test(bannerSrc) && !/backfillSvc\([^\n]*\n[^\n]*(logConsent|save\(|show\(\))/.test(cmpSrc), 'R1: adoption neither logs nor prompts');
+// The two reconsent blocks stay identical (textual, modulo indentation).
+var rcC = cmpSrc.match(/\/\/ reconsent:begin\n([\s\S]*?)\/\/ reconsent:end/);
+ok(!!rcM && !!rcC && rcM[1].replace(/^\t+/gm, '') === rcC[1].replace(/^\t+/gm, ''), 'reconsent blocks identical in banner.js and cmp.js');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

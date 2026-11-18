@@ -13,10 +13,11 @@
 		try { return JSON.parse(decodeURIComponent(m[1])); } catch (e) { return null; }
 	}
 
-	function writeCookie(obj) {
+	// maxAge: optional override in seconds (the remaining lifetime on adoption).
+	function writeCookie(obj, maxAge) {
 		var v = encodeURIComponent(JSON.stringify(obj));
 		var days = (D.cookieDays && D.cookieDays > 0) ? D.cookieDays : 180;
-		var maxAge = 60 * 60 * 24 * days;
+		if (!(typeof maxAge === 'number' && maxAge > 0)) { maxAge = 60 * 60 * 24 * days; }
 		document.cookie = D.cookieName + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 	}
 
@@ -166,6 +167,30 @@
 		if (!cookie || typeof cookie !== 'object') { return []; }
 		var fresh = newServices(cookie, svcByCat), req = rcList(required);
 		return rcList(cookie.categories).filter(function (s) { return req.indexOf(s) !== -1 || !Object.prototype.hasOwnProperty.call(fresh, s); });
+	}
+	// Silent baseline adoption: a cookie without `svc` (saved before the map was
+	// known, e.g. by 0.4.x) gets the snapshot of its own categories, so later
+	// additions re-prompt. Categories, decision, id and ts are kept; no prompt,
+	// no log. Returns the cookie to write, or null when there is nothing to write.
+	function backfillSvc(cookie, svcByCat) {
+		if (!cookie || typeof cookie !== 'object' || Array.isArray(cookie) || !Array.isArray(cookie.categories)) { return null; }
+		if (Object.prototype.hasOwnProperty.call(cookie, 'svc')) { return null; }
+		var snap = svcSnapshot(cookie.categories, svcByCat);
+		if (snap === null) { return null; }
+		var out = {};
+		Object.keys(cookie).forEach(function (k) { out[k] = cookie[k]; });
+		out.svc = snap;
+		return out;
+	}
+	// Seconds left of a stored decision's lifetime (cookieDays from its ts), for
+	// rewriting the cookie without restarting it. 0 = skip the rewrite: ts
+	// missing, invalid or in the future, or the lifetime is used up.
+	function remainingMaxAge(cookie, cookieDays, nowSec) {
+		if (!cookie || typeof cookie !== 'object') { return 0; }
+		var ts = cookie.ts, days = (typeof cookieDays === 'number' && cookieDays > 0) ? cookieDays : 180;
+		if (typeof ts !== 'number' || !isFinite(ts) || ts <= 0 || typeof nowSec !== 'number' || ts > nowSec) { return 0; }
+		var left = Math.floor(days * 86400 - (nowSec - ts));
+		return left > 0 ? left : 0;
 	}
 	// The snapshot's ids as one list (no duplicates), for the consent log.
 	function svcFlat(snap) {
@@ -667,6 +692,11 @@
 		unblockServices();
 		var c = readCookie();
 		if (c && String(c.v) === String(D.version)) {
+			// B4: a cookie without `svc` adopts the current services silently (see backfillSvc).
+			// Written with the remaining lifetime, so the consent duration is not restarted.
+			var adopted = backfillSvc(c, D.svcByCat);
+			var left = adopted ? remainingMaxAge(c, D.cookieDays, Math.floor(Date.now() / 1000)) : 0;
+			if (adopted && left > 0) { writeCookie(adopted, left); c = adopted; }
 			// Replay the stored consent to Consent Mode before the scripts come back,
 			// as save() does. Without it the signals stay on the `denied` defaults
 			// printed in wp_head (the gtag stub there is data-cmp-keep, so it exists),

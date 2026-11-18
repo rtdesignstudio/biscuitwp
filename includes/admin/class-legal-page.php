@@ -87,6 +87,27 @@ class CMP_Legal_Page {
 		wp_update_post( array( 'ID' => $pid, 'post_content' => self::build_content( 'cookie', $meta, CMP_Legal::primary_lang() ) ) );
 	}
 
+	/**
+	 * Pure: the document types regenerated since the templates update, plus
+	 * $type. Unknown entries are dropped; template order kept.
+	 */
+	public static function regenerated_types( $stored, $type ) {
+		$have = is_array( $stored ) ? $stored : array();
+		$have[] = $type;
+		$out = array();
+		foreach ( $have as $t ) {
+			if ( is_string( $t ) && in_array( $t, CMP_Legal::TYPES, true ) && ! in_array( $t, $out, true ) ) {
+				$out[] = $t;
+			}
+		}
+		return $out;
+	}
+
+	/** Pure: have all three documents been regenerated (the templates notice may go)? */
+	public static function all_regenerated( array $done ) {
+		return ! array_diff( CMP_Legal::TYPES, $done );
+	}
+
 	/** Stored operator data, with defaults for a first visit. */
 	private static function meta() {
 		$s    = CMP_Consent::get_settings();
@@ -149,7 +170,7 @@ class CMP_Legal_Page {
 			__( 're-consimțământul la servicii noi', 'consent-manager-pro' ),
 		);
 		$stays = array(
-			__( 'registrul activităților de prelucrare (art. 30)', 'consent-manager-pro' ),
+			__( 'registrul activităților de prelucrare', 'consent-manager-pro' ),
 			__( 'numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu', 'consent-manager-pro' ),
 			__( 'temeiul legal pentru transferurile de date în afara țării', 'consent-manager-pro' ),
 			__( 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'consent-manager-pro' ),
@@ -189,7 +210,7 @@ class CMP_Legal_Page {
 		<div class="wrap cmp-admin">
 			<h1><?php esc_html_e( 'Consent Manager — Pagini legale', 'consent-manager-pro' ); ?></h1>
 			<?php if ( get_option( 'cmp_templates_notice' ) ) : ?>
-				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează paginile ca să le preiei.', 'consent-manager-pro' ); ?>
+				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi.', 'consent-manager-pro' ); ?>
 					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_templates_notice' ), 'cmp_dismiss_templates_notice' ) ); ?>"><?php esc_html_e( 'Închide', 'consent-manager-pro' ); ?></a></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['generated'] ) ) : ?>
@@ -274,7 +295,7 @@ class CMP_Legal_Page {
 					</tbody>
 				</table>
 
-				<p class="description"><?php esc_html_e( 'Regenerarea suprascrie și traducerile create de plugin; paginile create de tine nu sunt atinse.', 'consent-manager-pro' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: cele marcate de plugin și cele care încep cu rândul „Document generat automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte traduceri nu sunt atinse.', 'consent-manager-pro' ); ?></p>
 				<?php submit_button( __( 'Salvează', 'consent-manager-pro' ) ); ?>
 			</form>
 		</div>
@@ -311,7 +332,16 @@ class CMP_Legal_Page {
 		if ( in_array( $type, CMP_Legal::TYPES, true ) ) {
 			update_option( 'cmp_settings', $settings ); // translations read the operator data from the stored settings
 			$post_id = self::generate_page( $type, $settings );
-			delete_option( 'cmp_templates_notice' );
+			if ( ! is_wp_error( $post_id ) && get_option( 'cmp_templates_notice' ) ) {
+				// The notice goes once all three documents were regenerated since the update.
+				$done = self::regenerated_types( get_option( 'cmp_templates_regenerated', array() ), $type );
+				if ( self::all_regenerated( $done ) ) {
+					delete_option( 'cmp_templates_notice' );
+					delete_option( 'cmp_templates_regenerated' );
+				} else {
+					update_option( 'cmp_templates_regenerated', $done, false );
+				}
+			}
 			if ( ! is_wp_error( $post_id ) ) {
 				update_option( 'cmp_operator_note_seen', 1 );
 			}
@@ -335,6 +365,7 @@ class CMP_Legal_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		delete_option( 'cmp_templates_notice' );
+		delete_option( 'cmp_templates_regenerated' );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-legal' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

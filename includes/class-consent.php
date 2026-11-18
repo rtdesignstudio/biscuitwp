@@ -103,8 +103,79 @@ class CMP_Consent {
 		return is_array( $decoded ) ? $decoded : null;
 	}
 
-	public static function is_allowed( $slug ) {
-		$map = self::evaluate( self::read_cookie(), self::get_categories(), self::current_version() );
+	/**
+	 * Pure PHP port of the banner's effectiveCategories(): the cookie's
+	 * categories minus every non-required category that gained a service since
+	 * the decision (an id of $svc_by_cat[slug] missing from cookie.svc[slug]).
+	 * An unknown map (null) or an old cookie (no `svc`, or a non-map `svc`)
+	 * leaves the categories unchanged. One PHP-only reading: json_decode turns
+	 * both `{}` and `[]` into array(); the banner only ever writes `{}`, so an
+	 * empty array counts as an empty snapshot.
+	 *
+	 * @param array      $cookie     Decoded consent cookie.
+	 * @param array|null $svc_by_cat {slug: [ids]} as published to the banner, or null.
+	 * @param array      $required   Slugs of the required (always on) categories.
+	 * @return array
+	 */
+	public static function effective_categories( array $cookie, ?array $svc_by_cat, array $required ): array {
+		$cats = isset( $cookie['categories'] ) && is_array( $cookie['categories'] ) ? array_values( $cookie['categories'] ) : array();
+		if ( null === $svc_by_cat || ! array_key_exists( 'svc', $cookie ) ) {
+			return $cats;
+		}
+		$svc = $cookie['svc'];
+		if ( ! is_array( $svc ) || ( $svc && array_keys( $svc ) === range( 0, count( $svc ) - 1 ) ) ) {
+			return $cats; // not a {slug: [ids]} map: like an old cookie.
+		}
+		$out = array();
+		foreach ( $cats as $slug ) {
+			if ( ! is_string( $slug ) || in_array( $slug, $required, true ) || ! isset( $svc_by_cat[ $slug ] ) || ! is_array( $svc_by_cat[ $slug ] ) ) {
+				$out[] = $slug;
+				continue;
+			}
+			$known = isset( $svc[ $slug ] ) && is_array( $svc[ $slug ] ) ? $svc[ $slug ] : array();
+			$fresh = false;
+			foreach ( $svc_by_cat[ $slug ] as $id ) {
+				if ( ! in_array( $id, $known, true ) ) {
+					$fresh = true;
+					break;
+				}
+			}
+			if ( ! $fresh ) {
+				$out[] = $slug;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure core of is_allowed(): evaluate() on the effective categories, so a
+	 * category that gained a service is refused server-side too, until the
+	 * visitor decides again (same rule as CMP.isAllowed in the banner).
+	 */
+	public static function allowed_from( $slug, $cookie, array $categories, $current_version, ?array $svc_by_cat ) {
+		if ( is_array( $cookie ) && isset( $cookie['categories'] ) && is_array( $cookie['categories'] ) ) {
+			$required = array();
+			foreach ( $categories as $cat ) {
+				if ( is_array( $cat ) && ! empty( $cat['required'] ) && isset( $cat['slug'] ) ) {
+					$required[] = (string) $cat['slug'];
+				}
+			}
+			$cookie['categories'] = self::effective_categories( $cookie, $svc_by_cat, $required );
+		}
+		$map = self::evaluate( $cookie, $categories, $current_version );
 		return ! empty( $map[ $slug ] );
+	}
+
+	public static function is_allowed( $slug ) {
+		$cookie     = self::read_cookie();
+		$categories = self::get_categories();
+		$categories = is_array( $categories ) ? $categories : array();
+		$version    = self::current_version();
+		$by_cat     = null;
+		// The map is read only for a cookie of this version (the only case where it matters).
+		if ( is_array( $cookie ) && isset( $cookie['v'] ) && (string) $cookie['v'] === (string) $version && class_exists( 'CMP_Services' ) ) {
+			$by_cat = CMP_Services::current_svc_by_cat( $categories );
+		}
+		return self::allowed_from( $slug, $cookie, $categories, $version, $by_cat );
 	}
 }

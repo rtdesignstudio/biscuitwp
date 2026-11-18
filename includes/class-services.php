@@ -19,6 +19,8 @@ class CMP_Services {
 	private static $errors   = array();
 	private static $fallback = false;
 	private static $active   = null;
+	private static $by_cat   = null;
+	private static $by_cat_done = false;
 
 	/** Defaults every service is completed with. */
 	private static function defaults() {
@@ -154,7 +156,9 @@ class CMP_Services {
 
 	/** Drop the per-request active() cache (hooked to the cmp_services / cmp_categories option changes). */
 	public static function flush() {
-		self::$active = null;
+		self::$active      = null;
+		self::$by_cat      = null;
+		self::$by_cat_done = false;
 	}
 
 	/** Problems found when the library was last loaded (empty = fine). */
@@ -273,6 +277,39 @@ class CMP_Services {
 			return $history;
 		}
 		return is_array( $found ) ? $found : null;
+	}
+
+	/**
+	 * Pure: like history_or_found(), but the found list is read (through
+	 * $read_found) only when there is no history array, so the common path
+	 * costs no extra option read.
+	 */
+	public static function seen_lazy( $history, callable $read_found ) {
+		if ( is_array( $history ) ) {
+			return $history;
+		}
+		return self::history_or_found( false, call_user_func( $read_found ) );
+	}
+
+	/**
+	 * WP: the svcByCat map the banner publishes, or null when unknown (no scan
+	 * ever ran). Shared by the banner (CMP_DATA) and CMP_Consent::is_allowed(),
+	 * memoised per request. cmp_services_history is autoloaded; the
+	 * non-autoloaded cmp_services_found is read only when the history is absent.
+	 */
+	public static function current_svc_by_cat( array $categories ) {
+		if ( self::$by_cat_done ) {
+			return self::$by_cat;
+		}
+		$seen = self::seen_lazy(
+			get_option( 'cmp_services_history', false ),
+			function () {
+				return get_option( 'cmp_services_found', false );
+			}
+		);
+		self::$by_cat      = null === $seen ? null : self::svc_by_cat( self::active(), $seen, self::required_slugs( $categories ) );
+		self::$by_cat_done = true;
+		return self::$by_cat;
 	}
 
 	/**

@@ -250,7 +250,7 @@ class CMP_Blocker {
 		$scan['time']          = time();
 		update_option( 'cmp_services_found', $scan['services']['found'], false );
 		$history = get_option( 'cmp_services_history', array() );
-		update_option( 'cmp_services_history', CMP_Services::merge_seen( is_array( $history ) ? $history : array(), (array) $scan['services']['found'] ), false );
+		update_option( 'cmp_services_history', CMP_Services::merge_seen( is_array( $history ) ? $history : array(), (array) $scan['services']['found'] ), true );
 		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
 		return $scan;
 	}

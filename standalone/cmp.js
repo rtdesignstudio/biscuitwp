@@ -301,6 +301,30 @@
 		var fresh = newServices(cookie, svcByCat), req = rcList(required);
 		return rcList(cookie.categories).filter(function (s) { return req.indexOf(s) !== -1 || !Object.prototype.hasOwnProperty.call(fresh, s); });
 	}
+	// Silent baseline adoption: a cookie without `svc` (saved before the map was
+	// known, e.g. by 0.4.x) gets the snapshot of its own categories, so later
+	// additions re-prompt. Categories, decision, id and ts are kept; no prompt,
+	// no log. Returns the cookie to write, or null when there is nothing to write.
+	function backfillSvc(cookie, svcByCat) {
+		if (!cookie || typeof cookie !== 'object' || Array.isArray(cookie) || !Array.isArray(cookie.categories)) { return null; }
+		if (Object.prototype.hasOwnProperty.call(cookie, 'svc')) { return null; }
+		var snap = svcSnapshot(cookie.categories, svcByCat);
+		if (snap === null) { return null; }
+		var out = {};
+		Object.keys(cookie).forEach(function (k) { out[k] = cookie[k]; });
+		out.svc = snap;
+		return out;
+	}
+	// Seconds left of a stored decision's lifetime (cookieDays from its ts), for
+	// rewriting the cookie without restarting it. 0 = skip the rewrite: ts
+	// missing, invalid or in the future, or the lifetime is used up.
+	function remainingMaxAge(cookie, cookieDays, nowSec) {
+		if (!cookie || typeof cookie !== 'object') { return 0; }
+		var ts = cookie.ts, days = (typeof cookieDays === 'number' && cookieDays > 0) ? cookieDays : 180;
+		if (typeof ts !== 'number' || !isFinite(ts) || ts <= 0 || typeof nowSec !== 'number' || ts > nowSec) { return 0; }
+		var left = Math.floor(days * 86400 - (nowSec - ts));
+		return left > 0 ? left : 0;
+	}
 	// The snapshot's ids as one list (no duplicates), for the consent log.
 	function svcFlat(snap) {
 		var out = [], map = rcMap(snap);
@@ -618,9 +642,10 @@
 			return parseSvcCookie(m[1]);
 		}
 
-		function writeCookie(obj) {
+		// maxAge: optional override in seconds (the remaining lifetime on adoption).
+		function writeCookie(obj, maxAge) {
 			var v = encodeURIComponent(serializeConsent(obj));
-			var maxAge = 60 * 60 * 24 * (cfg.cookieDays || 180);
+			if (!(typeof maxAge === 'number' && maxAge > 0)) { maxAge = 60 * 60 * 24 * (cfg.cookieDays || 180); }
 			document.cookie = COOKIE_NAME + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 		}
 
@@ -1061,6 +1086,13 @@
 			}
 
 			unblockServices();
+			// B4: a cookie without `svc` adopts the current services silently (see backfillSvc).
+			if (storedCategories(readCookie(), VERSION)) {
+				// Written with the remaining lifetime, so the consent duration is not restarted.
+				var adopted = backfillSvc(readCookie(), cfg.services);
+				var left = adopted ? remainingMaxAge(adopted, cfg.cookieDays, Math.floor(Date.now() / 1000)) : 0;
+				if (adopted && left > 0) { writeCookie(adopted, left); }
+			}
 			// B4: a category that gained a service stays refused until the visitor decides again.
 			var stored = storedCategories(readCookie(), VERSION) ? consentedCategories() : null;
 			if (stored) {
@@ -1091,6 +1123,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl, svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories, reconsentView: reconsentView, svcFlat: svcFlat, nameMap: nameMap };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl, svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories, reconsentView: reconsentView, backfillSvc: backfillSvc, remainingMaxAge: remainingMaxAge, svcFlat: svcFlat, nameMap: nameMap };
 	}
 })();

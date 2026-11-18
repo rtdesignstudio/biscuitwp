@@ -120,13 +120,20 @@ class CMP_Plugin {
 		// note on "Pagini legale" for existing installs only.
 		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) ) {
 			update_option( 'cmp_templates_notice', 1 );
+			delete_option( 'cmp_templates_regenerated' ); // documents regenerated since this update
+		}
+		// B4: the history is read on every front-end page: autoload it. update_option()
+		// changes autoload only when the value changes, so flip an existing one
+		// explicitly (WP 6.4+; on older WP the next changed write does it).
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( 'cmp_services_history', false ) ) {
+			wp_set_option_autoload( 'cmp_services_history', true );
 		}
 		// B4: seed the cumulative services list from the last scan, so the first
 		// admin scan after the update does not re-prompt every visitor at once.
 		if ( false === get_option( 'cmp_services_history', false ) ) {
 			$seed = CMP_Services::history_or_found( false, get_option( 'cmp_services_found', false ) );
 			if ( null !== $seed ) {
-				update_option( 'cmp_services_history', $seed, false );
+				update_option( 'cmp_services_history', $seed, true );
 			}
 		}
 		update_option( 'cmp_db_version', CMP_VERSION );
