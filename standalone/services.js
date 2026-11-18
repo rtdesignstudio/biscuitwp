@@ -43,6 +43,19 @@ window.CMP_SERVICES = {
             "ru": "Различает посетителей в течение суток.",
             "en": "Distinguishes visitors within a day."
           }
+        },
+        {
+          "name": "_ga_*",
+          "duration": {
+            "ro": "2 ani",
+            "ru": "2 года",
+            "en": "2 years"
+          },
+          "purpose": {
+            "ro": "Păstrează starea sesiunii în Google Analytics 4.",
+            "ru": "Сохраняет состояние сессии в Google Analytics 4.",
+            "en": "Persists session state in Google Analytics 4."
+          }
         }
       ],
       "transfer": "US",
@@ -143,7 +156,7 @@ window.CMP_SERVICES = {
     {
       "id": "vimeo",
       "name": "Vimeo",
-      "provider": "Vimeo, Inc.",
+      "provider": "Vimeo.com, Inc.",
       "type": "embed",
       "category": "statistics",
       "hosts": [
@@ -162,10 +175,23 @@ window.CMP_SERVICES = {
             "ru": "Статистика просмотров видео.",
             "en": "Video playback statistics."
           }
+        },
+        {
+          "name": "player",
+          "duration": {
+            "ro": "1 an",
+            "ru": "1 год",
+            "en": "1 year"
+          },
+          "purpose": {
+            "ro": "Stochează preferințele playerului (volum, calitate, subtitrări).",
+            "ru": "Хранит настройки плеера (громкость, качество, субтитры).",
+            "en": "Stores player preferences (volume, quality, captions)."
+          }
         }
       ],
       "transfer": "US",
-      "privacy_url": "https://vimeo.com/privacy"
+      "privacy_url": "https://vimeo.com/legal/privacy/policy"
     },
     {
       "id": "google-maps",
@@ -240,9 +266,9 @@ window.CMP_SERVICES = {
         {
           "name": "MUID",
           "duration": {
-            "ro": "1 an",
-            "ru": "1 год",
-            "en": "1 year"
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
           },
           "purpose": {
             "ro": "Identificator Microsoft al browserului, folosit pentru analiză și publicitate.",
@@ -357,9 +383,35 @@ window.CMP_SERVICES = {
             "ru": "Показывает, что cookie TikTok включены в браузере.",
             "en": "Indicates that TikTok cookies are enabled in the browser."
           }
+        },
+        {
+          "name": "ttcsid_*",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Identifică sesiunea de navigare pentru măsurarea reclamelor TikTok.",
+            "ru": "Идентифицирует сессию просмотра для измерения рекламы TikTok.",
+            "en": "Identifies the browsing session for TikTok ad measurement."
+          }
+        },
+        {
+          "name": "ttclid",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Stochează identificatorul clicului pe o reclamă TikTok pentru atribuirea conversiilor.",
+            "ru": "Хранит идентификатор клика по рекламе TikTok для атрибуции конверсий.",
+            "en": "Stores the TikTok ad click ID for conversion attribution."
+          }
         }
       ],
-      "transfer": "US, CN, SG",
+      "transfer": "US, MY, SG",
       "privacy_url": "https://www.tiktok.com/legal/page/eea/privacy-policy/en"
     },
     {
@@ -415,6 +467,32 @@ window.CMP_SERVICES = {
             "ro": "Sincronizează ID-urile pentru reclame LinkedIn.",
             "ru": "Синхронизирует идентификаторы для рекламы LinkedIn.",
             "en": "Syncs IDs for LinkedIn ad targeting."
+          }
+        },
+        {
+          "name": "li_sugr",
+          "duration": {
+            "ro": "90 de zile",
+            "ru": "90 дней",
+            "en": "90 days"
+          },
+          "purpose": {
+            "ro": "Potrivește probabilistic identitatea utilizatorului.",
+            "ru": "Вероятностно сопоставляет личность пользователя.",
+            "en": "Makes a probabilistic match of a user's identity."
+          }
+        },
+        {
+          "name": "AnalyticsSyncHistory",
+          "duration": {
+            "ro": "30 de zile",
+            "ru": "30 дней",
+            "en": "30 days"
+          },
+          "purpose": {
+            "ro": "Înregistrează momentul sincronizării cu cookie-ul lms_analytics.",
+            "ru": "Фиксирует время синхронизации с cookie lms_analytics.",
+            "en": "Records when a sync with the lms_analytics cookie occurred."
           }
         }
       ],
@@ -480,6 +558,32 @@ window.CMP_SERVICES = {
             "ru": "Отслеживает текущую сессию.",
             "en": "Tracks the current session."
           }
+        },
+        {
+          "name": "__hssrc",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Indică dacă vizitatorul a repornit browserul.",
+            "ru": "Показывает, перезапускал ли посетитель браузер.",
+            "en": "Indicates whether the visitor has restarted their browser."
+          }
+        },
+        {
+          "name": "messagesUtk",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Recunoaște vizitatorul care revine în chatul HubSpot.",
+            "ru": "Узнаёт вернувшегося посетителя в чате HubSpot.",
+            "en": "Recognizes a returning visitor in the HubSpot chat."
+          }
         }
       ],
       "transfer": "US",
@@ -501,19 +605,6 @@ window.CMP_SERVICES = {
       "gtm": false,
       "cookies": [
         {
-          "name": "__tawkuuid",
-          "duration": {
-            "ro": "6 luni",
-            "ru": "6 месяцев",
-            "en": "6 months"
-          },
-          "purpose": {
-            "ro": "Identifică vizitatorul în widgetul de chat.",
-            "ru": "Идентифицирует посетителя в виджете чата.",
-            "en": "Identifies the visitor in the chat widget."
-          }
-        },
-        {
           "name": "TawkConnectionTime",
           "duration": {
             "ro": "Sesiune",
@@ -524,6 +615,32 @@ window.CMP_SERVICES = {
             "ro": "Coordonează încărcarea widgetului de chat între filele deschise.",
             "ru": "Согласует загрузку виджета чата между открытыми вкладками.",
             "en": "Coordinates loading of the chat widget across open tabs."
+          }
+        },
+        {
+          "name": "tawk_uuid_*",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Urmărește vizitatorul în widgetul de chat.",
+            "ru": "Отслеживает посетителя в виджете чата.",
+            "en": "Tracks the visitor in the chat widget."
+          }
+        },
+        {
+          "name": "twk_idm_key",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Gestionează conexiunea vizitatorului la widgetul de chat.",
+            "ru": "Управляет подключением посетителя к виджету чата.",
+            "en": "Manages the visitor's connection to the chat widget."
           }
         }
       ],

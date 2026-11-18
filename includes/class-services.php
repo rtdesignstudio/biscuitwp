@@ -109,7 +109,7 @@ class CMP_Services {
 			array( 'id' => 'google-tag-manager', 'name' => 'Google Tag Manager', 'provider' => $g, 'type' => 'script', 'category' => 'statistics', 'hosts' => array( 'googletagmanager.com' ), 'inline' => array(), 'gtm' => true ),
 			array( 'id' => 'meta-pixel', 'name' => 'Meta Pixel', 'provider' => 'Meta Platforms Ireland Ltd.', 'type' => 'script', 'category' => 'marketing', 'hosts' => array( 'connect.facebook.net' ), 'inline' => array( "fbq('init'", 'fbq("init"', "fbq('track'", 'fbq("track"' ), 'gtm' => false ),
 			array( 'id' => 'youtube', 'name' => 'YouTube', 'provider' => $g, 'type' => 'embed', 'category' => 'marketing', 'hosts' => array( 'youtube.com', 'youtube-nocookie.com', 'youtu.be' ), 'nocookie' => true ),
-			array( 'id' => 'vimeo', 'name' => 'Vimeo', 'provider' => 'Vimeo, Inc.', 'type' => 'embed', 'category' => 'statistics', 'hosts' => array( 'vimeo.com' ) ),
+			array( 'id' => 'vimeo', 'name' => 'Vimeo', 'provider' => 'Vimeo.com, Inc.', 'type' => 'embed', 'category' => 'statistics', 'hosts' => array( 'vimeo.com' ) ),
 			array( 'id' => 'google-maps', 'name' => 'Google Maps', 'provider' => $g, 'type' => 'embed', 'category' => 'marketing', 'hosts' => array( 'google.com', 'google.md', 'google.ro' ), 'path' => '/maps' ),
 		);
 		$out = array();
