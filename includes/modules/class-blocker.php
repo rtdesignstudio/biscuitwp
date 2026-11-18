@@ -235,6 +235,7 @@ class CMP_Blocker {
 		$scan['services']      = self::detect_services( $body, $svcs );
 		$scan['services']['found'] = self::found_ids( $body, $svcs );
 		$scan['time']          = time();
+		update_option( 'cmp_services_found', $scan['services']['found'], false );
 		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
 		return $scan;
 	}

@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// Standalone-loadable for tests; WP-only methods guarded at call time.
 }
 
+require_once __DIR__ . '/class-lang.php';
+
 class CMP_Legal {
 
 	const TYPES = array( 'privacy', 'terms', 'cookie' );
@@ -45,10 +47,84 @@ class CMP_Legal {
 		return is_readable( $path ) ? (string) file_get_contents( $path ) : '';
 	}
 
-	public static function cookie_table_html( array $categories ) {
-		$rows = '';
+	/** Pure: a per-language value ({ro,ru,en}) in $lang, falling back to ro. */
+	private static function loc( $value, $lang ) {
+		if ( ! is_array( $value ) ) {
+			return (string) $value;
+		}
+		if ( isset( $value[ $lang ] ) && '' !== (string) $value[ $lang ] ) {
+			return (string) $value[ $lang ];
+		}
+		return isset( $value['ro'] ) ? (string) $value['ro'] : '';
+	}
+
+	/**
+	 * Pure: the services to list in the cookie table: the ones found on the site
+	 * (in found order, any category), then the custom services not found. Each
+	 * once; services without cookies and unknown ids are skipped.
+	 */
+	public static function table_services( array $found_ids, array $services ) {
+		$by_id = array();
+		foreach ( $services as $s ) {
+			if ( is_array( $s ) && isset( $s['id'] ) && is_string( $s['id'] ) && ! isset( $by_id[ $s['id'] ] ) ) {
+				$by_id[ $s['id'] ] = $s;
+			}
+		}
+		$out  = array();
+		$seen = array();
+		$add  = function ( $s ) use ( &$out, &$seen ) {
+			if ( isset( $seen[ $s['id'] ] ) || empty( $s['cookies'] ) || ! is_array( $s['cookies'] ) ) {
+				return;
+			}
+			$seen[ $s['id'] ] = true;
+			$out[]            = $s;
+		};
+		foreach ( $found_ids as $id ) {
+			if ( is_string( $id ) && isset( $by_id[ $id ] ) ) {
+				$add( $by_id[ $id ] );
+			}
+		}
+		foreach ( $by_id as $s ) {
+			if ( isset( $s['source'] ) && 'custom' === $s['source'] ) {
+				$add( $s );
+			}
+		}
+		return $out;
+	}
+
+	/** WP: table services from the last scan (stored ids, never scans) and the active services. */
+	public static function current_table_services() {
+		$found = get_option( 'cmp_services_found', array() );
+		return self::table_services( is_array( $found ) ? $found : array(), CMP_Services::active() );
+	}
+
+	public static function cookie_table_html( array $categories, array $services = array(), $lang = 'ro' ) {
+		$lang  = in_array( $lang, array( 'ro', 'ru', 'en' ), true ) ? $lang : 'ro';
+		$none  = CMP_Lang::text( 'tbl_none', $lang );
+		$labels = array();
 		foreach ( $categories as $cat ) {
-			$cat_label = isset( $cat['label'] ) ? $cat['label'] : ( isset( $cat['slug'] ) ? $cat['slug'] : '' );
+			if ( isset( $cat['slug'] ) ) {
+				$labels[ $cat['slug'] ] = CMP_Lang::localize_seed( $cat['slug'], 'label', isset( $cat['label'] ) ? $cat['label'] : $cat['slug'], $lang );
+			}
+		}
+		$rows = '';
+		foreach ( $services as $svc ) {
+			$slug  = isset( $svc['category'] ) ? $svc['category'] : '';
+			$label = isset( $labels[ $slug ] ) ? $labels[ $slug ] : $slug;
+			$tr    = isset( $svc['transfer'] ) && '' !== (string) $svc['transfer'] ? $svc['transfer'] : $none;
+			foreach ( (array) ( isset( $svc['cookies'] ) ? $svc['cookies'] : array() ) as $ck ) {
+				$rows .= '<tr>'
+					. '<td>' . self::esc( isset( $ck['name'] ) ? $ck['name'] : '' ) . '</td>'
+					. '<td>' . self::esc( isset( $svc['provider'] ) ? $svc['provider'] : '' ) . '</td>'
+					. '<td>' . self::esc( self::loc( isset( $ck['duration'] ) ? $ck['duration'] : '', $lang ) ) . '</td>'
+					. '<td>' . self::esc( self::loc( isset( $ck['purpose'] ) ? $ck['purpose'] : '', $lang ) ) . '</td>'
+					. '<td>' . self::esc( $label ) . '</td>'
+					. '<td>' . self::esc( $tr ) . '</td>'
+					. '</tr>';
+			}
+		}
+		foreach ( $categories as $cat ) {
+			$cat_label = isset( $cat['slug'] ) && isset( $labels[ $cat['slug'] ] ) ? $labels[ $cat['slug'] ] : ( isset( $cat['label'] ) ? $cat['label'] : '' );
 			foreach ( (array) ( isset( $cat['cookies'] ) ? $cat['cookies'] : array() ) as $ck ) {
 				$rows .= '<tr>'
 					. '<td>' . self::esc( isset( $ck['name'] ) ? $ck['name'] : '' ) . '</td>'
@@ -56,15 +132,20 @@ class CMP_Legal {
 					. '<td>' . self::esc( isset( $ck['duration'] ) ? $ck['duration'] : '' ) . '</td>'
 					. '<td>' . self::esc( isset( $ck['purpose'] ) ? $ck['purpose'] : '' ) . '</td>'
 					. '<td>' . self::esc( $cat_label ) . '</td>'
+					. '<td>' . self::esc( $none ) . '</td>'
 					. '</tr>';
 			}
 		}
 		if ( '' === $rows ) {
-			return '<p>Nu au fost definite cookie-uri.</p>';
+			return '<p>' . self::esc( CMP_Lang::text( 'tbl_empty', $lang ) ) . '</p>';
 		}
 		return '<table><thead><tr>'
-			. '<th>Nume</th><th>Furnizor</th><th>Durată</th><th>Scop</th><th>Categorie</th>'
+			. '<th>' . self::esc( CMP_Lang::text( 'tbl_name', $lang ) ) . '</th><th>' . self::esc( CMP_Lang::text( 'tbl_provider', $lang ) ) . '</th><th>' . self::esc( CMP_Lang::text( 'tbl_duration', $lang ) ) . '</th><th>' . self::esc( CMP_Lang::text( 'tbl_purpose', $lang ) ) . '</th><th>' . self::esc( CMP_Lang::text( 'tbl_category', $lang ) ) . '</th><th>' . self::esc( CMP_Lang::text( 'tbl_transfer', $lang ) ) . '</th>'
 			. '</tr></thead><tbody>' . $rows . '</tbody></table>';
+	}
+
+	public static function sc_cookie_table() {
+		return self::cookie_table_html( CMP_Consent::get_categories(), self::current_table_services(), CMP_Lang::current() );
 	}
 
 	private static function esc( $value ) {
@@ -74,6 +155,7 @@ class CMP_Legal {
 	public static function register() {
 		add_shortcode( 'cmp_privacy_link', array( __CLASS__, 'sc_privacy' ) );
 		add_shortcode( 'cmp_terms_link', array( __CLASS__, 'sc_terms' ) );
+		add_shortcode( 'cmp_cookie_table', array( __CLASS__, 'sc_cookie_table' ) );
 		add_shortcode( 'cmp_cookie_settings_link', array( __CLASS__, 'sc_cookie_settings' ) );
 		add_action( 'admin_init', array( __CLASS__, 'privacy_guide' ) );
 		add_action( 'cmp_legal_page_created', array( __CLASS__, 'on_page_created' ), 10, 2 );
@@ -106,7 +188,7 @@ class CMP_Legal {
 		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
 			return;
 		}
-		$table = self::cookie_table_html( CMP_Consent::get_categories() );
+		$table = self::cookie_table_html( CMP_Consent::get_categories(), self::current_table_services(), 'ro' );
 		wp_add_privacy_policy_content(
 			'Consent Manager Pro',
 			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )

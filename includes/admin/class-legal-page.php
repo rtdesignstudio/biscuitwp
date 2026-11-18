@@ -26,7 +26,6 @@ class CMP_Legal_Page {
 			'dpo'            => isset( $meta['dpo'] ) ? $meta['dpo'] : '',
 			'jurisdiction'   => isset( $meta['jurisdiction'] ) ? $meta['jurisdiction'] : '',
 			'effective_date' => date_i18n( get_option( 'date_format' ) ),
-			'cookie_table'   => 'cookie' === $type ? CMP_Legal::cookie_table_html( CMP_Consent::get_categories() ) : '',
 		);
 		return CMP_Legal::fill_template( CMP_Legal::load_template( $type ), $vars );
 	}
