@@ -86,3 +86,66 @@ $al_anon = CMP_Blocker::rewrite( '<iframe data-cmp-category="marketing" src="htt
 cmp_assert( false !== strpos( $al_anon, 'data-cmp-embed="marketing"' ) && false === strpos( $al_anon, 'data-cmp-embed-always' ), 'anonymous embed has no "always load" button' );
 $al_def = CMP_Blocker::rewrite( $yt );
 cmp_assert( false !== strpos( $al_def, 'data-cmp-embed-always' ), 'default labels give the always button too' );
+
+// ---- Task 9: local YouTube thumbnail behind the placeholder ----
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9WgXcQ?si=1' ), 'dQw4w9WgXcQ', 'youtube_id: plain embed' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ' ), 'dQw4w9WgXcQ', 'youtube_id: nocookie embed' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://youtube-nocookie.com/embed/dQw4w9WgXcQ' ), 'dQw4w9WgXcQ', 'youtube_id: bare nocookie host' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://m.youtube.com/embed/dQw4w9WgXcQ' ), 'dQw4w9WgXcQ', 'youtube_id: m.youtube.com' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://YouTube.com/embed/dQw4w9WgXcQ' ), 'dQw4w9WgXcQ', 'youtube_id: host is case-insensitive' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://youtube.com/embed/dQw4w9WgXcQ#t=1' ), 'dQw4w9WgXcQ', 'youtube_id: bare host with fragment' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/../../x' ), '', 'youtube_id: path traversal rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9WgXcQ/extra' ), '', 'youtube_id: extra path segment rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9WgXcQ/' ), '', 'youtube_id: trailing slash rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9WgXc' ), '', 'youtube_id: 10 chars rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9WgXcQx' ), '', 'youtube_id: 12 chars rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/embed/dQw4w9Wg.cQ' ), '', 'youtube_id: bad char rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' ), '', 'youtube_id: non-embed path rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://evil.com/embed/dQw4w9WgXcQ' ), '', 'youtube_id: foreign host rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://youtube.com.evil.com/embed/dQw4w9WgXcQ' ), '', 'youtube_id: lookalike host rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://evil.com/youtube.com/embed/dQw4w9WgXcQ' ), '', 'youtube_id: host in path rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( 'https://player.youtube.com/embed/dQw4w9WgXcQ' ), '', 'youtube_id: unlisted subdomain rejected' );
+cmp_assert_eq( CMP_Blocker::youtube_id( '' ), '', 'youtube_id: empty' );
+
+$ytid = '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=1"></iframe>';
+$calls = array();
+$cb    = function ( $id ) use ( &$calls ) {
+	$calls[] = $id;
+	return 'https://site.md/up/cmp-thumbs/' . $id . '.jpg';
+};
+$out = CMP_Blocker::rewrite( $ytid, $labels, null, $cb );
+cmp_assert_eq( $calls, array( 'dQw4w9WgXcQ' ), 'thumb callback called once with the YouTube id' );
+cmp_assert( false !== strpos( $out, "background-image:url('https://site.md/up/cmp-thumbs/dQw4w9WgXcQ.jpg')" ), 'placeholder carries the local thumbnail as background-image' );
+cmp_assert( false !== strpos( $out, 'cmp-embed--thumb' ), 'placeholder gets the cmp-embed--thumb class' );
+cmp_assert( false !== strpos( $out, 'aspect-ratio:560/315' ), 'aspect ratio kept next to the thumbnail' );
+cmp_assert( 0 === preg_match( '/ytimg|i\.ytimg/i', cmp_live_html( $out ) ), 'no ytimg reference in the live markup' );
+
+$out = CMP_Blocker::rewrite( $ytid, $labels, null, function () { return ''; } );
+cmp_assert( false === strpos( $out, 'background-image' ) && false === strpos( $out, 'cmp-embed--thumb' ), 'empty thumb URL: plain placeholder' );
+$out = CMP_Blocker::rewrite( $ytid, $labels );
+cmp_assert( false === strpos( $out, 'background-image' ), 'no callback: no background-image' );
+
+$calls = array();
+$out   = CMP_Blocker::rewrite( '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"></iframe>', $labels, null, $cb );
+cmp_assert_eq( $calls, array( 'dQw4w9WgXcQ' ), 'nocookie embed also asks for the thumbnail' );
+
+$calls = array();
+CMP_Blocker::rewrite( '<iframe src="https://www.youtube.com/embed/abc123"></iframe>', $labels, null, $cb );
+cmp_assert_eq( $calls, array(), 'invalid YouTube id: thumb callback not called' );
+
+$calls = array();
+$out   = CMP_Blocker::rewrite(
+	'<iframe src="https://player.vimeo.com/video/76979871"></iframe><iframe src="https://www.google.com/maps/embed?pb=1"></iframe>',
+	$labels,
+	null,
+	$cb
+);
+cmp_assert_eq( $calls, array(), 'thumb callback not called for Vimeo or Maps' );
+cmp_assert( false === strpos( $out, 'background-image' ), 'Vimeo / Maps placeholders have no background-image' );
+
+// A hostile URL cannot break out of the attribute or the CSS url().
+$out = CMP_Blocker::rewrite( $ytid, $labels, null, function () { return "https://x.md/a.jpg') ;background:red;\" onload=\"x"; } );
+cmp_assert( 1 === preg_match( '/<div class="cmp-embed[^"]*"[^>]*>/', $out, $dm ), 'placeholder div found' );
+$div = $dm[0];
+cmp_assert( 1 === preg_match( '/^<div class="cmp-embed[^"]*" data-cmp-embed="marketing"[^>]* style="([^"]*)">$/', $div, $sm2 ), 'placeholder div tag stays well-formed (no attribute injected)' );
+cmp_assert( 1 === preg_match( "/^aspect-ratio:560\\/315;max-width:560px;background-image:url\\('([^'()\\s\"]*)'\\)\$/", html_entity_decode( $sm2[1], ENT_QUOTES ), $um ), 'hostile URL stays inside a single quoted url() with no quote, paren or space' );

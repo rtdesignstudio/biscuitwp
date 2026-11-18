@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// Standalone-loadable for tests; rewrite() is pure. WP-only methods guarded.
 }
 require_once dirname( __DIR__ ) . '/class-services.php';
+require_once __DIR__ . '/class-thumbs.php';
 
 /**
  * Prior blocking of Google Analytics / Tag Manager / Meta Pixel: rewrites their
@@ -251,7 +252,8 @@ class CMP_Blocker {
 		$s    = CMP_Consent::get_settings();
 		$html = (string) $html;
 		if ( self::blocks_trackers( $s ) ) {
-			$html = self::rewrite( $html, self::embed_labels() ); // services: active() when available, else the library
+			$thumb = class_exists( 'CMP_Thumbs' ) ? array( 'CMP_Thumbs', 'url' ) : null;
+			$html  = self::rewrite( $html, self::embed_labels(), null, $thumb ); // services: active() when available, else the library
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
@@ -302,10 +304,11 @@ class CMP_Blocker {
 	 * Pure: neutralize tracker <script> tags and third-party iframes, drop tracker
 	 * <noscript> blocks and resource-hint <link> tags. $labels: placeholder copy
 	 * (embed_text with %s for the service, embed_load, settings). $services: the
-	 * rules to apply (null = active services, else the library). $thumb: reserved
-	 * for embed thumbnails.
+	 * rules to apply (null = active services, else the library). $thumb: optional
+	 * callable( $youtube_id ): local thumbnail URL or '' (YouTube embeds only).
 	 */
 	public static function rewrite( $html, array $labels = array(), ?array $services = null, $thumb = null ) {
+		$thumb    = is_callable( $thumb ) ? $thumb : null;
 		$html     = (string) $html;
 		$services = self::rewritable( null === $services ? self::default_services() : $services );
 		$html     = preg_replace_callback(
@@ -315,7 +318,7 @@ class CMP_Blocker {
 			},
 			$html
 		);
-		$html  = self::rewrite_embeds( (string) $html, $labels, $services );
+		$html  = self::rewrite_embeds( (string) $html, $labels, $services, $thumb );
 		$hosts = self::tracker_hosts( $services );
 		$html  = self::strip_tracker_noscript( (string) $html, $hosts );
 		return self::strip_hint_links( (string) $html, $hosts );
@@ -362,7 +365,7 @@ class CMP_Blocker {
 	 * iframe sits in a <template> (inert: the browser never loads it) and is put
 	 * back by banner.js once its category is accepted or the visitor clicks "load".
 	 */
-	public static function rewrite_embeds( $html, array $labels = array(), ?array $services = null ) {
+	public static function rewrite_embeds( $html, array $labels = array(), ?array $services = null, $thumb = null ) {
 		$services = self::rewritable( null === $services ? self::default_services() : $services );
 		$labels = array_merge(
 			array(
@@ -375,7 +378,7 @@ class CMP_Blocker {
 		);
 		return (string) preg_replace_callback(
 			'/(<template\b[^>]*\bdata-cmp-embed-src\b[^>]*>.*?<\/template>)|<iframe\b([^>]*)>(.*?)<\/iframe>/is',
-			function ( $m ) use ( $labels, $services ) {
+			function ( $m ) use ( $labels, $services, $thumb ) {
 				if ( ! empty( $m[1] ) ) {
 					return $m[1]; // an iframe already held in a consent placeholder
 				}
@@ -404,10 +407,39 @@ class CMP_Blocker {
 				if ( null === $embed ) {
 					return $m[0];
 				}
-				return self::embed_placeholder( $m[0], $attrs, $sm, $src, $embed['category'], $embed['id'], $embed['name'], $labels, ! empty( $embed['nocookie'] ) );
+				$thumb_url = '';
+				if ( null !== $thumb && 'youtube' === $embed['id'] ) {
+					$yid = self::youtube_id( $src );
+					if ( '' !== $yid ) {
+						$thumb_url = (string) call_user_func( $thumb, $yid );
+					}
+				}
+				return self::embed_placeholder( $m[0], $attrs, $sm, $src, $embed['category'], $embed['id'], $embed['name'], $labels, ! empty( $embed['nocookie'] ), $thumb_url );
 			},
 			(string) $html
 		);
+	}
+
+	/**
+	 * Pure: the YouTube video id of an embed URL (/embed/<id> on a YouTube host), or ''.
+	 * Strict on purpose: the id later names a local file.
+	 */
+	public static function youtube_id( $src ) {
+		$parts = parse_url( trim( (string) $src ) );
+		if ( ! is_array( $parts ) || empty( $parts['host'] ) || empty( $parts['path'] ) ) {
+			return '';
+		}
+		$hosts = array( 'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com' );
+		if ( ! in_array( strtolower( $parts['host'] ), $hosts, true ) ) {
+			return '';
+		}
+		return 1 === preg_match( '#\A/embed/([A-Za-z0-9_-]{11})\z#', $parts['path'], $m ) ? $m[1] : '';
+	}
+
+	/** Pure: a thumbnail URL made safe for an HTML attribute and a CSS url('...'), or ''. */
+	private static function thumb_css_url( $url ) {
+		$url = strtr( trim( (string) $url ), array( "'" => '%27', '"' => '%22', '(' => '%28', ')' => '%29', '\\' => '%5C', ' ' => '%20', "\t" => '%09', "\n" => '%0A', "\r" => '%0D', "\f" => '%0C', '<' => '%3C', '>' => '%3E' ) );
+		return function_exists( 'esc_url' ) ? (string) esc_url( $url ) : htmlspecialchars( $url, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -439,7 +471,7 @@ class CMP_Blocker {
 	}
 
 	/** Pure: the consent placeholder wrapping an iframe ($service_id null = anonymous). */
-	private static function embed_placeholder( $iframe, $attrs, array $sm, $src, $category, $service_id, $name, array $labels, $nocookie ) {
+	private static function embed_placeholder( $iframe, $attrs, array $sm, $src, $category, $service_id, $name, array $labels, $nocookie, $thumb_url = '' ) {
 		if ( $nocookie && preg_match( '#^https?://(?:www\.)?youtube\.com/embed/#i', $src ) ) {
 			$nc     = preg_replace( '#^https?://(?:www\.)?youtube\.com/#i', 'https://www.youtube-nocookie.com/', $src );
 			$iframe = str_replace( $sm[0], str_replace( $sm[2], htmlspecialchars( $nc, ENT_QUOTES, 'UTF-8' ), $sm[0] ), $iframe );
@@ -463,7 +495,10 @@ class CMP_Blocker {
 		$always = ( null === $service_id || ! empty( $labels['light'] ) )
 			? ''
 			: '<button type="button" class="cmp-embed__always" data-cmp-embed-always aria-label="' . $e( $labels['embed_always'] . ': ' . $name ) . '">' . $e( $labels['embed_always'] ) . '</button>';
-		return '<div class="cmp-embed' . $preset . '" data-cmp-embed="' . $e( $category ) . '"' . $service . ' style="aspect-ratio:' . $ratio . $max . '">'
+		$thumb_css = '' === (string) $thumb_url ? '' : self::thumb_css_url( $thumb_url );
+		$bg        = '' === $thumb_css ? '' : ";background-image:url('" . $thumb_css . "')";
+		$thumb_cls = '' === $bg ? '' : ' cmp-embed--thumb';
+		return '<div class="cmp-embed' . $preset . $thumb_cls . '" data-cmp-embed="' . $e( $category ) . '"' . $service . ' style="aspect-ratio:' . $ratio . $max . $bg . '">'
 			. '<div class="cmp-embed__inner">'
 			. '<p class="cmp-embed__text">' . $text . '</p>'
 			. '<p class="cmp-embed__actions">'

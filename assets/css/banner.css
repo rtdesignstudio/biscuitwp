@@ -441,3 +441,27 @@ body.cmp-has-banner { overflow: hidden; }
 	text-underline-offset: 2px;
 	text-decoration-thickness: 1px;
 }
+
+/* Local YouTube thumbnail behind the placeholder: the dark overlay keeps the text
+   and buttons readable whatever the picture. */
+.cmp-embed--thumb {
+	position: relative;
+	background-color: #1d2327;
+	background-size: cover;
+	background-position: center;
+	color: #fff;
+}
+.cmp-embed--thumb::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: rgba(0, 0, 0, 0.68);
+}
+.cmp-embed--thumb .cmp-embed__inner { position: relative; }
+.cmp-embed--thumb .cmp-embed__text { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.cmp-embed--thumb .cmp-embed__always { background: #fff; border-color: #fff; color: #1d2327; }
+.cmp-embed--thumb .cmp-embed__always:hover { background: var(--cmp-primary); border-color: var(--cmp-primary); color: var(--cmp-primary-text); }
+.cmp .cmp-embed--thumb .cmp-embed__link, .cmp-embed--thumb .cmp-embed__link,
+.cmp-embed--thumb .cmp-embed__link:hover, .cmp-embed--thumb .cmp-embed__link:focus { color: #fff; }
+.cmp-embed--thumb .cmp-embed__btn:focus-visible, .cmp-embed--thumb .cmp-embed__always:focus-visible, .cmp-embed--thumb .cmp-embed__link:focus-visible { outline-color: #fff; }

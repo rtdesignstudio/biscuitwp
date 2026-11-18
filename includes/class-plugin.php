@@ -34,6 +34,8 @@ class CMP_Plugin {
 		CMP_I18n::register();
 		require_once CMP_PATH . 'includes/modules/class-updater.php';
 		CMP_Updater::register();
+		require_once CMP_PATH . 'includes/modules/class-thumbs.php';
+		CMP_Thumbs::register();
 		require_once CMP_PATH . 'includes/modules/class-blocker.php';
 		CMP_Blocker::register();
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
