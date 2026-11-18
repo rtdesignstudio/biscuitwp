@@ -65,7 +65,9 @@ class CMP_Audit_Page {
 						<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $cur, $k ); ?>><?php echo esc_html( $lbl ); ?></option>
 					<?php endforeach; ?>
 				</select>
+				<input type="search" name="cid" value="<?php echo esc_attr( isset( $_GET['cid'] ) ? sanitize_text_field( wp_unslash( $_GET['cid'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'ID consimțământ', 'consent-manager-pro' ); ?>" class="regular-text" style="max-width:22em">
 				<?php submit_button( __( 'Filtrează', 'consent-manager-pro' ), '', '', false ); ?>
+				<p class="description"><?php esc_html_e( 'Vizitatorul își vede ID-ul în „Setări cookie”, sub preferințe. Caută după el ca să găsești istoricul alegerilor lui.', 'consent-manager-pro' ); ?></p>
 			</form>
 
 			<?php $list->display(); ?>

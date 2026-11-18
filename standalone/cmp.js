@@ -49,7 +49,8 @@
 					privacy: 'Politica de confidențialitate',
 					back: 'Înapoi',
 					dialogLabel: 'Informații despre cookie-uri',
-					reopen: 'Setări cookie'
+					reopen: 'Setări cookie',
+					consent_id: 'ID-ul consimțământului'
 				}
 			},
 			ru: {
@@ -80,7 +81,8 @@
 					privacy: 'Политика конфиденциальности',
 					back: 'Назад',
 					dialogLabel: 'Информация о файлах cookie',
-					reopen: 'Настройки cookie'
+					reopen: 'Настройки cookie',
+					consent_id: 'ID согласия'
 				}
 			},
 			en: {
@@ -111,7 +113,8 @@
 					privacy: 'Privacy policy',
 					back: 'Back',
 					dialogLabel: 'Cookie information',
-					reopen: 'Cookie settings'
+					reopen: 'Cookie settings',
+					consent_id: 'Consent ID'
 				}
 			}
 		}
@@ -184,6 +187,25 @@
 			categories: categories,
 			texts: texts
 		};
+	}
+
+	// Consent ID: a random v4 UUID kept in the consent cookie and in the consent
+	// log, so a visitor's choice can be found and demonstrated (GDPR / Law
+	// 195/2024 art. 7(1)). It is not linked to any other data about the visitor.
+	var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+	function makeConsentId() {
+		var b = [];
+		var c = (typeof crypto !== 'undefined' && crypto.getRandomValues) ? crypto : null;
+		if (c) { b = Array.prototype.slice.call(c.getRandomValues(new Uint8Array(16))); }
+		else { for (var i = 0; i < 16; i++) { b.push(Math.floor(Math.random() * 256)); } }
+		b[6] = (b[6] & 0x0f) | 0x40;
+		b[8] = (b[8] & 0x3f) | 0x80;
+		var h = b.map(function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+		return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+	}
+	// Pure (given the RNG): the visitor's existing ID, or a new one.
+	function consentIdFor(existing) {
+		return (existing && typeof existing.id === 'string' && UUID_RE.test(existing.id)) ? existing.id : makeConsentId();
 	}
 
 	// Pure: does the browser send Global Privacy Control? Read client-side so a
@@ -349,6 +371,7 @@
 				'<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
 				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save">' + escapeHtml(cfg.texts.save) + '</button>' +
 				'</div>' +
+				'<p class="cmp__consent-id" data-cmp-consent-id hidden>' + escapeHtml(cfg.texts.consent_id || 'Consent ID') + ': <code></code></p>' +
 				'</div>' +
 				'</div>';
 
@@ -436,7 +459,7 @@
 		function save(accepted, decision) {
 			var reload = firstDecision && cfg.reloadOnDecision;
 			firstDecision = false;
-			var data = { v: VERSION, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
+			var data = { v: VERSION, id: consentIdFor(readCookie()), categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 			writeCookie(data);
 			showReopen();
 			pushConsent(accepted);
@@ -507,6 +530,16 @@
 		function syncToggles() {
 			var c = readCookie();
 			banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) { b.checked = isToggleOn(b.value, c, VERSION); });
+			showConsentId(c);
+		}
+		// Show the visitor their consent ID (to quote it in a request about their data).
+		function showConsentId(c) {
+			var el = banner.querySelector('[data-cmp-consent-id]');
+			if (!el) { return; }
+			var id = c && typeof c.id === 'string' ? c.id : '';
+			el.hidden = !id;
+			var code = el.querySelector('code');
+			if (code) { code.textContent = id; }
 		}
 		function openPrefs() { var m = modal(); if (m) { syncToggles(); m.classList.add('is-prefs-open'); } }
 		function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }
@@ -674,6 +707,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

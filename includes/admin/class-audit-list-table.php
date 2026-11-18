@@ -11,6 +11,7 @@ class CMP_Audit_List_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'ts'         => __( 'Dată', 'consent-manager-pro' ),
+			'consent_id' => __( 'ID consimțământ', 'consent-manager-pro' ),
 			'decision'   => __( 'Decizie', 'consent-manager-pro' ),
 			'categories' => __( 'Categorii', 'consent-manager-pro' ),
 			'lang'       => __( 'Limbă', 'consent-manager-pro' ),
@@ -36,6 +37,12 @@ class CMP_Audit_List_Table extends WP_List_Table {
 		if ( in_array( $dec, array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn' ), true ) ) {
 			$where   .= ' AND decision = %s';
 			$params[] = $dec;
+		}
+
+		$cid = isset( $_GET['cid'] ) ? strtolower( trim( sanitize_text_field( wp_unslash( $_GET['cid'] ) ) ) ) : '';
+		if ( preg_match( '/^[0-9a-f-]{8,36}$/', $cid ) ) {
+			$where   .= ' AND consent_id LIKE %s';
+			$params[] = $wpdb->esc_like( $cid ) . '%';
 		}
 
 		$total_sql = "SELECT COUNT(*) FROM {$table} WHERE {$where}";

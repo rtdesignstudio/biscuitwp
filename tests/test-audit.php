@@ -1,11 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/modules/class-audit.php';
 
-// Dedup: same decision within 24h window => dedup true.
-cmp_assert_eq( CMP_Audit::should_dedup( 1000, 1000 + 3600, 86400 ), true, 'same decision within 24h dedups' );
-cmp_assert_eq( CMP_Audit::should_dedup( 1000, 1000 + 90000, 86400 ), false, 'beyond 24h does not dedup' );
-cmp_assert_eq( CMP_Audit::should_dedup( null, 1000, 86400 ), false, 'no prior entry never dedups' );
-
 // IP hash is deterministic sha256 with salt.
 $h1 = CMP_Audit::hash_ip( '1.2.3.4', 'salt' );
 $h2 = CMP_Audit::hash_ip( '1.2.3.4', 'salt' );
@@ -69,3 +64,24 @@ cmp_assert_eq( CMP_Audit::same_origin( 'null', 'https://example.md/' ), false, '
 cmp_assert_eq( CMP_Audit::throttled( 30, 30 ), false, 'at the limit still allowed' );
 cmp_assert_eq( CMP_Audit::throttled( 31, 30 ), true, 'over the limit throttled' );
 cmp_assert_eq( CMP_Audit::same_origin( 'https://example.md', 'http://example.md/' ), true, 'http home URL served over https still allowed' );
+
+// --- 0.4.1: per-visitor consent ID (GDPR / Law 195 art. 7(1): demonstrate consent). ---
+$cid = '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f';
+$withid = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]', 'consent_id' => strtoupper( $cid ) ), $slugs, '1' );
+cmp_assert_eq( $withid['consent_id'], $cid, 'valid consent ID kept (lowercased)' );
+$badid = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]', 'consent_id' => "x' OR 1=1" ), $slugs, '1' );
+cmp_assert_eq( $badid['consent_id'], '', 'malformed consent ID dropped' );
+$noid = CMP_Audit::parse_request( array( 'decision' => 'accepted_all', 'categories' => '[]' ), $slugs, '1' );
+cmp_assert_eq( $noid['consent_id'], '', 'missing consent ID is empty (old cached script)' );
+
+// Repeat of the same choice by the same visitor is skipped; any change is logged.
+$last = array( 'consent_id' => $cid, 'decision' => 'partial', 'categories' => 'necessary,statistics', 'version' => '1' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last, $last ), true, 'identical choice from same ID is a repeat' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last, array_merge( $last, array( 'categories' => 'necessary' ) ) ), false, 'changed categories are logged' );
+cmp_assert_eq( CMP_Audit::is_repeat( $last, array_merge( $last, array( 'version' => '2' ) ) ), false, 'new policy version is logged' );
+cmp_assert_eq( CMP_Audit::is_repeat( null, $last ), false, 'first record is never a repeat' );
+cmp_assert_eq( CMP_Audit::is_repeat( array_merge( $last, array( 'consent_id' => '' ) ), array_merge( $last, array( 'consent_id' => '' ) ) ), false, 'rows without ID are never merged' );
+
+// Exports carry the consent ID.
+$cmp_csv2 = CMP_Audit::to_csv( array( array( 'id' => 2, 'consent_id' => $cid, 'decision' => 'partial' ) ) );
+cmp_assert( false !== strpos( $cmp_csv2, 'consent_id' ) && false !== strpos( $cmp_csv2, $cid ), 'CSV export includes consent_id' );

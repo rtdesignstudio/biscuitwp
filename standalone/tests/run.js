@@ -36,6 +36,13 @@ eq(cmp.storedCategories({ v: '0', categories: ['statistics'] }, '1'), null, 'sta
 eq(JSON.stringify(cmp.storedCategories({ v: '1', categories: ['necessary', 'statistics'] }, '1')), '["necessary","statistics"]', 'valid consent -> its categories');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['statistics'] }, '1')).analytics_storage, 'granted', 'returning accept -> analytics granted');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['necessary'] }, '1')).analytics_storage, 'denied', 'returning reject -> analytics denied');
+// consentIdFor: keep the visitor's ID across changes, create a v4 UUID otherwise
+var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+var fresh = cmp.consentIdFor(null);
+ok(UUID.test(fresh), 'new consent ID is a v4 UUID (got ' + fresh + ')');
+ok(cmp.consentIdFor(null) !== fresh, 'two new IDs differ');
+eq(cmp.consentIdFor({ id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f' }), '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', 'existing ID kept');
+ok(UUID.test(cmp.consentIdFor({ id: 'garbage' })), 'malformed stored ID replaced');
 // gpcOn: Global Privacy Control read in the browser (cache-safe); DNT is ignored
 eq(cmp.gpcOn({ globalPrivacyControl: true }), true, 'GPC true -> refuse');
 eq(cmp.gpcOn({ globalPrivacyControl: false }), false, 'GPC false -> ask');

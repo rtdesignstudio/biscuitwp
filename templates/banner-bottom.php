@@ -85,6 +85,7 @@ $cmp_privacy_url = $cmp_privacy_id ? get_permalink( $cmp_privacy_id ) : '';
 				<button type="button" class="cmp__btn cmp__btn--outline" data-cmp-action="reject"><?php echo esc_html( $cmp_text( 'reject', CMP_Lang::text( 'reject' ) ) ); ?></button>
 				<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="save"><?php echo esc_html( $cmp_text( 'save', CMP_Lang::text( 'save' ) ) ); ?></button>
 			</div>
+			<p class="cmp__consent-id" data-cmp-consent-id hidden><?php echo esc_html( CMP_Lang::text( 'consent_id' ) ); ?>: <code></code></p>
 		</div>
 
 	</div>

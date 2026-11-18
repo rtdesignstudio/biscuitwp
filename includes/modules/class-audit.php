@@ -16,12 +16,6 @@ class CMP_Audit {
 		}
 	}
 
-	public static function should_dedup( $last_ts, $now_ts, $window_seconds ) {
-		if ( null === $last_ts ) {
-			return false;
-		}
-		return ( $now_ts - (int) $last_ts ) < (int) $window_seconds;
-	}
 
 	public static function hash_ip( $ip, $salt ) {
 		return hash( 'sha256', (string) $ip . '|' . (string) $salt );
@@ -100,7 +94,12 @@ class CMP_Audit {
 		if ( ! preg_match( '/^[A-Za-z0-9._-]{1,20}$/', $version ) ) {
 			$version = (string) $current_version;
 		}
+		$cid = isset( $post['consent_id'] ) ? strtolower( (string) $post['consent_id'] ) : '';
+		if ( ! preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $cid ) ) {
+			$cid = '';
+		}
 		return array(
+			'consent_id' => $cid,
 			'decision'   => $decision,
 			'categories' => implode( ',', $cats ),
 			'version'    => $version,
@@ -122,12 +121,29 @@ class CMP_Audit {
 		return is_string( $o ) && is_string( $h ) && '' !== $o && strtolower( $o ) === strtolower( $h );
 	}
 
+	/**
+	 * Pure: is $new the same choice as $last from the same visitor (same consent
+	 * ID, decision, categories and policy version)? Then it is not logged again.
+	 * Rows without an ID are never merged.
+	 */
+	public static function is_repeat( $last, array $new ) {
+		if ( ! is_array( $last ) || empty( $new['consent_id'] ) ) {
+			return false;
+		}
+		foreach ( array( 'consent_id', 'decision', 'categories', 'version' ) as $k ) {
+			if ( (string) ( isset( $last[ $k ] ) ? $last[ $k ] : '' ) !== (string) ( isset( $new[ $k ] ) ? $new[ $k ] : '' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** Pure: over the per-IP limit? */
 	public static function throttled( $hits, $max ) {
 		return (int) $hits > (int) $max;
 	}
 
-	/** Insert a consent row. Returns true on write (or dedup skip), false if the DB write failed. */
+	/** Insert a consent row. Returns true on write (or repeat skip), false if the DB write failed. */
 	public static function record( array $row ) {
 		global $wpdb;
 		$table   = $wpdb->prefix . 'cmp_consent_log';
@@ -136,20 +152,23 @@ class CMP_Audit {
 		$ua      = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
 		$ua_hash = self::hash_ua( $ua, wp_salt( 'auth' ) );
 
-		// Dedup: same (ip_hash, decision) within 24h.
-		$last = $wpdb->get_var( $wpdb->prepare(
-			"SELECT UNIX_TIMESTAMP(ts) FROM {$table} WHERE ip_hash = %s AND decision = %s ORDER BY ts DESC LIMIT 1",
-			$ip_hash,
-			$row['decision']
-		) );
-		if ( self::should_dedup( null !== $last ? (int) $last : null, $now, DAY_IN_SECONDS ) ) {
-			return true;
+		// Same visitor repeating the same choice (e.g. saving preferences twice): skip.
+		$row['consent_id'] = isset( $row['consent_id'] ) ? (string) $row['consent_id'] : '';
+		if ( '' !== $row['consent_id'] ) {
+			$last = $wpdb->get_row( $wpdb->prepare(
+				"SELECT consent_id, decision, categories, version FROM {$table} WHERE consent_id = %s ORDER BY id DESC LIMIT 1",
+				$row['consent_id']
+			), ARRAY_A );
+			if ( self::is_repeat( $last, $row ) ) {
+				return true;
+			}
 		}
 
 		$done = $wpdb->insert(
 			$table,
 			array(
 				'ts'         => gmdate( 'Y-m-d H:i:s', $now ),
+				'consent_id' => $row['consent_id'],
 				'decision'   => $row['decision'],
 				'categories' => $row['categories'],
 				'lang'       => $row['lang'],
@@ -158,13 +177,13 @@ class CMP_Audit {
 				'url'        => $row['url'],
 				'version'    => $row['version'],
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 		return false !== $done;
 	}
 
 	public static function to_csv( array $rows ) {
-		$cols = array( 'id', 'ts', 'decision', 'categories', 'lang', 'ip_hash', 'ua_hash', 'url', 'version' );
+		$cols = array( 'id', 'ts', 'consent_id', 'decision', 'categories', 'lang', 'ip_hash', 'ua_hash', 'url', 'version' );
 		$out  = "\xEF\xBB\xBF"; // UTF-8 BOM
 		$out .= implode( ',', $cols ) . "\r\n";
 		foreach ( $rows as $r ) {

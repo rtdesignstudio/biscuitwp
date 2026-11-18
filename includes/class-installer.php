@@ -48,18 +48,16 @@ class CMP_Installer {
 		);
 	}
 
-	public static function install() {
-		global $wpdb;
-
-		add_option( 'cmp_categories', self::default_categories() );
-		add_option( 'cmp_settings', self::default_settings() );
-
-		$table   = $wpdb->prefix . 'cmp_consent_log';
-		$charset = $wpdb->get_charset_collate();
-
-		$sql = "CREATE TABLE {$table} (
+	/**
+	 * Pure: the consent log table (dbDelta format: two spaces after PRIMARY KEY).
+	 * consent_id (0.4.1) is the random per-visitor ID also kept in the consent
+	 * cookie, so a visitor's choice can be found and demonstrated.
+	 */
+	public static function log_table_sql( $table, $charset ) {
+		return "CREATE TABLE {$table} (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			ts DATETIME NOT NULL,
+			consent_id CHAR(36) NOT NULL DEFAULT '',
 			decision VARCHAR(20) NOT NULL,
 			categories VARCHAR(255) NOT NULL,
 			lang VARCHAR(8) NOT NULL,
@@ -69,9 +67,19 @@ class CMP_Installer {
 			version VARCHAR(20) NOT NULL,
 			PRIMARY KEY  (id),
 			KEY ts (ts),
+			KEY consent_id (consent_id),
 			KEY decision (decision),
 			KEY ip_hash (ip_hash)
 		) {$charset};";
+	}
+
+	public static function install() {
+		global $wpdb;
+
+		add_option( 'cmp_categories', self::default_categories() );
+		add_option( 'cmp_settings', self::default_settings() );
+
+		$sql = self::log_table_sql( $wpdb->prefix . 'cmp_consent_log', $wpdb->get_charset_collate() );
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );

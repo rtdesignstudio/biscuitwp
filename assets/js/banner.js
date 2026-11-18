@@ -20,6 +20,23 @@
 		document.cookie = D.cookieName + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
 	}
 
+	// Consent ID: a random v4 UUID kept in the consent cookie and in the consent
+	// log, so a visitor's choice can be found and demonstrated (GDPR / Law
+	// 195/2024 art. 7(1)). It is not linked to any other data about the visitor.
+	var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+	function makeConsentId() {
+		var b = [];
+		if (window.crypto && window.crypto.getRandomValues) { b = Array.prototype.slice.call(window.crypto.getRandomValues(new Uint8Array(16))); }
+		else { for (var i = 0; i < 16; i++) { b.push(Math.floor(Math.random() * 256)); } }
+		b[6] = (b[6] & 0x0f) | 0x40;
+		b[8] = (b[8] & 0x3f) | 0x80;
+		var h = b.map(function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+		return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+	}
+	function consentIdFor(existing) {
+		return (existing && typeof existing.id === 'string' && UUID_RE.test(existing.id)) ? existing.id : makeConsentId();
+	}
+
 	function requiredSlugs() {
 		return D.categories.filter(function (c) { return c.required; }).map(function (c) { return c.slug; });
 	}
@@ -48,6 +65,7 @@
 		body.set('decision', payload.decision);
 		body.set('categories', JSON.stringify(payload.categories));
 		body.set('version', D.version);
+		body.set('consent_id', payload.id || '');
 		// keepalive: the request survives an immediate page reload (reloadOnDecision).
 		fetch(D.ajaxUrl, { method: 'POST', body: body, credentials: 'same-origin', keepalive: true }).catch(function () {});
 	}
@@ -59,14 +77,14 @@
 	function save(accepted, decision) {
 		var reload = firstDecision && !!D.reloadOnDecision;
 		firstDecision = false;
-		var data = { v: D.version, categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
+		var data = { v: D.version, id: consentIdFor(readCookie()), categories: accepted, decision: decision, ts: Math.floor(Date.now() / 1000) };
 		writeCookie(data);
 		pushConsent(accepted);
 		unblockScripts(accepted);
 		unblockEmbeds(accepted);
 		showReopen();
 		document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
-		logConsent({ categories: accepted, decision: decision });
+		logConsent({ id: data.id, categories: accepted, decision: decision });
 		hide();
 		// Load-time animations ran behind the overlay; reload so they play visibly.
 		if (reload) { window.location.reload(); }
@@ -135,6 +153,14 @@
 		banner.querySelectorAll('[data-cmp-cat]').forEach(function (b) {
 			b.checked = !!valid && (c.categories || []).indexOf(b.value) !== -1;
 		});
+		// Show the visitor their consent ID (to quote it in a request about their data).
+		var idEl = banner.querySelector('[data-cmp-consent-id]');
+		if (idEl) {
+			var id = c && typeof c.id === 'string' ? c.id : '';
+			idEl.hidden = !id;
+			var code = idEl.querySelector('code');
+			if (code) { code.textContent = id; }
+		}
 	}
 	function openPrefs() { var m = modal(); if (m) { syncToggles(); m.classList.add('is-prefs-open'); } }
 	function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); } }

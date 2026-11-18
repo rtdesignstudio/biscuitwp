@@ -22,3 +22,9 @@ cmp_assert_eq( $settings['position'], 'bottom', 'default position is bottom' );
 // 0.4.0: tracker blocking is on by default on new installs.
 $cmp_ds = CMP_Installer::default_settings();
 cmp_assert( ! empty( $cmp_ds['block_scripts'] ), 'default_settings: block_scripts on' );
+
+// 0.4.1: the log table stores a per-visitor consent ID (proof of consent).
+$cmp_sql = CMP_Installer::log_table_sql( 'wp_cmp_consent_log', 'DEFAULT CHARSET=utf8mb4' );
+cmp_assert( false !== strpos( $cmp_sql, 'consent_id CHAR(36)' ), 'log table has a consent_id column' );
+cmp_assert( false !== strpos( $cmp_sql, 'KEY consent_id (consent_id)' ), 'consent_id is indexed' );
+cmp_assert( false !== strpos( $cmp_sql, 'CREATE TABLE wp_cmp_consent_log' ), 'table name used' );
