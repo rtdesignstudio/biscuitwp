@@ -43,6 +43,13 @@ ok(UUID.test(fresh), 'new consent ID is a v4 UUID (got ' + fresh + ')');
 ok(cmp.consentIdFor(null) !== fresh, 'two new IDs differ');
 eq(cmp.consentIdFor({ id: '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f' }), '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f', 'existing ID kept');
 ok(UUID.test(cmp.consentIdFor({ id: 'garbage' })), 'malformed stored ID replaced');
+// isPolicyPage: the privacy policy page itself shows the banner without overlay
+eq(cmp.isPolicyPage('https://lp.md/privacy/', 'https://lp.md/privacy/#top'), true, 'same page (hash ignored)');
+eq(cmp.isPolicyPage('https://lp.md/privacy', 'https://lp.md/privacy/?utm=x'), true, 'trailing slash and query ignored');
+eq(cmp.isPolicyPage('/privacy.html', 'https://lp.md/privacy.html'), true, 'relative privacyUrl resolved against the page');
+eq(cmp.isPolicyPage('https://lp.md/privacy/', 'https://lp.md/'), false, 'home page is not the policy page');
+eq(cmp.isPolicyPage('https://other.md/privacy/', 'https://lp.md/privacy/'), false, 'other host is not');
+eq(cmp.isPolicyPage('', 'https://lp.md/'), false, 'no privacyUrl -> never');
 // gpcOn: Global Privacy Control read in the browser (cache-safe); DNT is ignored
 eq(cmp.gpcOn({ globalPrivacyControl: true }), true, 'GPC true -> refuse');
 eq(cmp.gpcOn({ globalPrivacyControl: false }), false, 'GPC false -> ask');

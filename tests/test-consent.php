@@ -39,3 +39,11 @@ cmp_assert_eq( $u['analytics_storage'], 'granted', 'update: analytics granted wh
 cmp_assert_eq( $u['ad_storage'], 'denied', 'update: ad_storage denied when marketing not accepted' );
 cmp_assert_eq( $u['security_storage'], 'granted', 'update: security_storage always granted (required)' );
 
+
+// 0.4.1: on the policy pages the banner must not block reading the policy.
+$cmp_ps = array( 'privacy_page_id' => 12, 'cookie_page_id' => 14, 'terms_page_id' => 0 );
+cmp_assert_eq( CMP_Consent::is_policy_page( 12, $cmp_ps, 0 ), true, 'privacy page from settings is a policy page' );
+cmp_assert_eq( CMP_Consent::is_policy_page( 14, $cmp_ps, 0 ), true, 'cookie page is a policy page' );
+cmp_assert_eq( CMP_Consent::is_policy_page( 3, $cmp_ps, 3 ), true, "WordPress' own privacy policy page counts" );
+cmp_assert_eq( CMP_Consent::is_policy_page( 7, $cmp_ps, 3 ), false, 'any other page is not' );
+cmp_assert_eq( CMP_Consent::is_policy_page( 0, $cmp_ps, 0 ), false, 'no page (archive, 404) is not, even with unset ids' );

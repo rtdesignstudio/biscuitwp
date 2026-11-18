@@ -99,12 +99,15 @@
 		return out;
 	}
 
+	// On the policy pages the banner has no overlay (.cmp--no-overlay): no scroll
+	// lock and no focus trap, so the visitor can read the policy before deciding.
+	function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
 	function show() {
 		if (!banner) { return; }
 		banner.hidden = false;
-		document.body.classList.add('cmp-has-banner');
+		if (blocking()) { document.body.classList.add('cmp-has-banner'); }
 		hideReopen();
-		trapFocus(true);
+		if (blocking()) { trapFocus(true); }
 	}
 	function hide() {
 		if (!banner) { return; }

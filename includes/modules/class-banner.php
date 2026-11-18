@@ -67,6 +67,11 @@ class CMP_Banner {
 			include CMP_PATH . 'templates/banner-light.php';
 			return;
 		}
+		$no_overlay = CMP_Consent::is_policy_page(
+			is_singular() ? get_queried_object_id() : 0,
+			is_array( $settings ) ? $settings : array(),
+			(int) get_option( 'wp_page_for_privacy_policy' )
+		);
 		include CMP_PATH . 'templates/banner-bottom.php';
 
 		$reopen = ! empty( $settings['reopen_button'] );

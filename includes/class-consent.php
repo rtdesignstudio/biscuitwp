@@ -31,6 +31,23 @@ class CMP_Consent {
 		return $out;
 	}
 
+	/**
+	 * Pure: is this page one of the policy pages (privacy / cookies / terms from
+	 * the settings, or WordPress' own privacy policy page)? There the banner shows
+	 * without the blocking overlay, so the visitor can read before deciding.
+	 */
+	public static function is_policy_page( $page_id, array $settings, $wp_privacy_page_id ) {
+		$page_id = (int) $page_id;
+		if ( $page_id <= 0 ) {
+			return false;
+		}
+		$ids = array( (int) $wp_privacy_page_id );
+		foreach ( array( 'privacy_page_id', 'cookie_page_id', 'terms_page_id' ) as $k ) {
+			$ids[] = isset( $settings[ $k ] ) ? (int) $settings[ $k ] : 0;
+		}
+		return in_array( $page_id, $ids, true );
+	}
+
 	public static function get_settings() {
 		return get_option( 'cmp_settings', array() );
 	}

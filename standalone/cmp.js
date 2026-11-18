@@ -208,6 +208,19 @@
 		return (existing && typeof existing.id === 'string' && UUID_RE.test(existing.id)) ? existing.id : makeConsentId();
 	}
 
+	// Pure: is the current page the privacy policy (privacyUrl)? There the banner
+	// shows without the blocking overlay, so the visitor can read it first.
+	// Compares host + path; query, hash and a trailing slash are ignored.
+	function isPolicyPage(privacyUrl, href) {
+		if (!privacyUrl || !href) { return false; }
+		try {
+			var p = new URL(privacyUrl, href);
+			var h = new URL(href);
+			var strip = function (s) { return s.replace(/\/+$/, '') || '/'; };
+			return p.host === h.host && strip(p.pathname) === strip(h.pathname);
+		} catch (e) { return false; }
+	}
+
 	// Pure: does the browser send Global Privacy Control? Read client-side so a
 	// cached page never carries one visitor's signal to everyone. DNT is ignored
 	// (abandoned standard).
@@ -313,7 +326,8 @@
 		function renderPro(cfg) {
 			var root = document.createElement('div');
 			root.id = 'cmp-overlay';
-			root.className = 'cmp cmp--' + cfg.preset + ' cmp--pos-' + cfg.position;
+			var noOverlay = isPolicyPage(cfg.privacyUrl, window.location.href);
+			root.className = 'cmp cmp--' + cfg.preset + ' cmp--pos-' + cfg.position + (noOverlay ? ' cmp--no-overlay' : '');
 			root.setAttribute('data-cmp', '');
 			root.hidden = true;
 
@@ -348,7 +362,7 @@
 			});
 
 			root.innerHTML =
-				'<div class="cmp__modal" role="dialog" aria-modal="true" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>' +
+				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay ? 'false' : 'true') + '" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>' +
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
 				'<p class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
@@ -485,12 +499,14 @@
 			return out;
 		}
 
+		// Policy page (.cmp--no-overlay): no scroll lock and no focus trap.
+		function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
 		function show() {
 			if (!banner) { return; }
 			hideReopen();
 			banner.hidden = false;
-			document.body.classList.add('cmp-has-banner');
-			trapFocus(true);
+			if (blocking()) { document.body.classList.add('cmp-has-banner'); }
+			if (blocking()) { trapFocus(true); }
 		}
 		function hide() {
 			if (!banner) { return; }
@@ -711,6 +727,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

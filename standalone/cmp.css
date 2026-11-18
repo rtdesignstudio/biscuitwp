@@ -58,6 +58,24 @@
 .cmp--pos-top-right .cmp__modal,
 .cmp--pos-bottom-right .cmp__modal { margin-inline: auto 0; }
 
+/* Policy pages: no overlay. The page stays readable, scrollable and clickable;
+   the banner sits at the bottom whatever the configured position. */
+.cmp.cmp--no-overlay {
+	background: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	pointer-events: none;
+	align-items: flex-end;
+	overflow: visible;
+}
+.cmp.cmp--no-overlay .cmp__modal {
+	pointer-events: auto;
+	margin-inline: auto;
+	max-height: calc(100vh - 48px);
+	overflow-y: auto;
+	box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.18), 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
 /* Scroll lock while the banner is open (class added by JS). */
 body.cmp-has-banner { overflow: hidden; }
 
