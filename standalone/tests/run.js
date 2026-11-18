@@ -176,5 +176,12 @@ eq(wpInitValues({ marketing: ['marketing'] }), {}, 'wp init: no functional entry
 eq(wpInitValues(null), {}, 'wp init: no map -> nothing');
 ok(/pushWpInit\(\);\s*bindEmbeds\(\);/.test(bannerSrc), 'wp init runs at the top of DOMContentLoaded, before the Light-mode return');
 
+// stripAlwaysButtons: Light mode drops the "Always load" buttons
+var rm = [], fakeBtn = function () { return { parentNode: { removeChild: function (x) { rm.push(x); } } }; };
+var b1 = fakeBtn(), b2 = fakeBtn();
+eq(cmp.stripAlwaysButtons({ querySelectorAll: function (sel) { return sel === '[data-cmp-embed-always]' ? [b1, b2] : []; } }), 2, 'stripAlwaysButtons removes every always button');
+ok(rm.length === 2 && rm[0] === b1 && rm[1] === b2, 'stripAlwaysButtons removes via the parent');
+eq(cmp.stripAlwaysButtons({ querySelectorAll: function () { return []; } }), 0, 'stripAlwaysButtons: none present');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

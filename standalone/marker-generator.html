@@ -37,16 +37,30 @@
   <p class="sub">Transformă un tracker într-un <code>&lt;script type="text/plain"&gt;</code> pe care CMP îl activează doar după consimțământ. Totul se calculează local, nimic nu pleacă de pe pagină.</p>
 
   <div class="card">
+    <div id="svcBox" hidden>
+      <label for="svc">Serviciu</label>
+      <select id="svc"><option value="">— alege un serviciu (opțional) —</option></select>
+      <p class="hint" id="svcNote" hidden></p>
+    </div>
+
     <label>Tip tracker</label>
     <div class="radio" id="type">
       <button data-type="external" aria-pressed="true">Extern (are un URL, ex. GA/GTM/Meta)</button>
       <button data-type="inline" aria-pressed="false">Inline (cod propriu, ex. fbq/gtag)</button>
+      <button data-type="embed" aria-pressed="false">Embed (iframe, ex. YouTube/Maps)</button>
     </div>
 
     <div id="externalBox">
       <label for="url">URL-ul trackerului</label>
       <input type="text" id="url" placeholder="https://www.googletagmanager.com/gtag/js?id=G-XXXX">
       <div class="check"><input type="checkbox" id="enc" checked><label for="enc" style="margin:0;font-weight:500">Ascunde domeniul (base64) — recomandat pentru scanere GDPR</label></div>
+    </div>
+
+    <div id="embedBox" hidden>
+      <label for="embedUrl">URL-ul iframe-ului (src)</label>
+      <input type="text" id="embedUrl" placeholder="https://www.youtube-nocookie.com/embed/VIDEO_ID">
+      <p class="hint">Se generează placeholderul cu butonul „Încarcă conținutul”. Dacă alegi un serviciu de tip embed, se adaugă <code>data-cmp-service</code> și butonul „Încarcă mereu”.</p>
+      <div class="check"><input type="checkbox" id="lightMode"><label for="lightMode" style="margin:0;font-weight:500">Site-ul folosește modul Light (fără „Încarcă mereu”)</label></div>
     </div>
 
     <div id="inlineBox" hidden>
@@ -79,6 +93,7 @@
   </div>
 </div>
 
+<script src="services.js"></script>
 <script>
 (function () {
   'use strict';
@@ -93,15 +108,102 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function rawService() {
+    var id = $('svc').value, list = (window.CMP_SERVICES && window.CMP_SERVICES.services) || [];
+    for (var i = 0; i < list.length; i++) { if (list[i].id === id) { return list[i]; } }
+    return null;
+  }
+  // The chosen service, only when it fits the current type: embed services in
+  // the embed type, script services in the script types.
+  function service() {
+    var sv = rawService();
+    if (!sv) { return null; }
+    return (sv.type === 'embed') === (state.type === 'embed') ? sv : null;
+  }
+  var DEFAULT_URL_PH = $('url').getAttribute('placeholder');
+  function setPlaceholder() {
+    var sv = rawService();
+    $('url').setAttribute('placeholder', sv && sv.type === 'script' && sv.hosts && sv.hosts.length
+      ? 'https://' + sv.hosts[0] + '/… (exemplu: înlocuiește cu URL-ul tău)' : DEFAULT_URL_PH);
+  }
+
+  function setType(type) {
+    state.type = type;
+    [].forEach.call($('type').querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-type') === type ? 'true' : 'false'); });
+    $('externalBox').hidden = type !== 'external';
+    $('inlineBox').hidden = type !== 'inline';
+    $('embedBox').hidden = type !== 'embed';
+    setPlaceholder();
+  }
+
+  function initServices() {
+    var data = window.CMP_SERVICES, list = data && data.services;
+    if (!list || !list.length) { return; }
+    var groups = { script: document.createElement('optgroup'), embed: document.createElement('optgroup') };
+    groups.script.label = 'Scripturi';
+    groups.embed.label = 'Embed-uri';
+    list.forEach(function (sv) {
+      var o = document.createElement('option');
+      o.value = sv.id;
+      o.textContent = sv.name + ' (' + sv.category + ')';
+      (groups[sv.type] || groups.script).appendChild(o);
+    });
+    $('svc').appendChild(groups.script);
+    $('svc').appendChild(groups.embed);
+    $('svcBox').hidden = false;
+    $('svc').addEventListener('change', function () {
+      var sv = rawService();
+      setPlaceholder();
+      if (!sv) { render(); return; }
+      $('cat').value = sv.category;
+      if (sv.type === 'embed') {
+        setType('embed');
+      } else if (state.type === 'embed') {
+        setType('external');
+      }
+      render();
+    });
+  }
+
   function render() {
     var cat = $('cat').value;
     var warn = '';
     var markup = '';
+    var sv = service();
+    var note = $('svcNote');
+    var plain = cat === 'necessary';
+    note.hidden = !plain;
+    if (plain) { note.textContent = 'Categoria „necessary” nu se marchează. Lasă scriptul original, neschimbat (un marcaj ar bloca scriptul până la decizia vizitatorului, iar în modul Light nu s-ar încărca deloc).'; }
+    if (state.type === 'embed') {
+      var src = $('embedUrl').value.trim();
+      if (!src) { $('output').textContent = '// introdu URL-ul iframe-ului sus'; $('warn').textContent = ''; return; }
+      if (!/^https?:\/\//i.test(src)) { warn = 'Atenție: URL-ul ar trebui să înceapă cu http:// sau https://'; }
+      if (plain) { $('output').textContent = '<iframe src="' + esc(src) + '"></iframe>'; $('warn').textContent = warn; return; }
+      var label = sv ? sv.name : 'terți';
+      markup = '<div class="cmp-embed" data-cmp-embed="' + cat + '"' +
+        (sv ? ' data-cmp-service="' + esc(sv.id) + '" data-cmp-service-name="' + esc(sv.name) + '"' : '') +
+        ' style="aspect-ratio:560/315;max-width:560px">\n' +
+        '  <div class="cmp-embed__inner">\n' +
+        '    <p class="cmp-embed__text">Conținut de la ' + esc(label) + '. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.</p>\n' +
+        '    <p class="cmp-embed__actions">\n' +
+        '      <button type="button" class="cmp-embed__btn" data-cmp-embed-load>Încarcă conținutul</button>\n' +
+        (sv && !$('lightMode').checked ? '      <button type="button" class="cmp-embed__always" data-cmp-embed-always aria-label="' + esc('Încarcă mereu: ' + sv.name) + '">Încarcă mereu</button>\n' : '') +
+        '      <a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>Setări cookie</a>\n' +
+        '    </p>\n  </div>\n' +
+        '  <template data-cmp-embed-src>\n' +
+        '    <iframe width="560" height="315" src="' + esc(src) + '" allowfullscreen></iframe>\n' +
+        '  </template>\n</div>';
+      $('output').textContent = markup;
+      $('warn').textContent = warn;
+      return;
+    }
     if (state.type === 'external') {
       var url = $('url').value.trim();
       if (!url) { $('output').textContent = '// introdu URL-ul trackerului sus'; $('warn').textContent = ''; return; }
       if (!/^https?:\/\//i.test(url)) { warn = 'Atenție: URL-ul ar trebui să înceapă cu http:// sau https://'; }
-      if ($('enc').checked) {
+      if (plain) {
+        markup = '<script src="' + esc(url) + '"><\/script>';
+      } else if ($('enc').checked) {
         markup = '<script type="text/plain" data-cmp-block="' + cat + '" data-cmp-enc="1"\n        data-cmp-src="' + b64(url) + '"><\/script>';
       } else {
         markup = '<script type="text/plain" data-cmp-block="' + cat + '"\n        data-cmp-src="' + esc(url) + '"><\/script>';
@@ -109,7 +211,9 @@
     } else {
       var code = $('code').value;
       if (!code.trim()) { $('output').textContent = '// lipește codul inline sus'; $('warn').textContent = ''; return; }
-      if ($('encInline').checked) {
+      if (plain) {
+        markup = '<script>\n' + code + '\n<\/script>';
+      } else if ($('encInline').checked) {
         if (/[^\x00-\x7F]/.test(code)) { warn = 'Codul conține caractere non-ASCII — pentru siguranță, lasă base64 debifat la inline.'; }
         markup = '<script type="text/plain" data-cmp-block="' + cat + '" data-cmp-enc="1" data-cmp-body="' + b64(code) + '"><\/script>';
       } else {
@@ -122,14 +226,11 @@
 
   document.getElementById('type').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) { return; }
-    state.type = b.getAttribute('data-type');
-    [].forEach.call(this.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-    $('externalBox').hidden = state.type !== 'external';
-    $('inlineBox').hidden = state.type !== 'inline';
+    setType(b.getAttribute('data-type'));
     render();
   });
 
-  ['url', 'code', 'cat', 'enc', 'encInline'].forEach(function (id) {
+  ['url', 'code', 'cat', 'enc', 'encInline', 'embedUrl', 'lightMode'].forEach(function (id) {
     $(id).addEventListener('input', render);
     $(id).addEventListener('change', render);
   });
@@ -142,6 +243,7 @@
     });
   });
 
+  initServices();
   render();
 })();
 </script>

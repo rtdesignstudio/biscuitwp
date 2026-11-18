@@ -27,6 +27,7 @@ Configure under **WP Admin → Consent Manager** (a "Settings" link is also show
 - **Settings** — banner position, preset, policy version, log retention, legal page mapping, **banner texts**.
 - **Categories** — CRUD for categories + cookies + Consent Mode signals.
 - **Consent log** — filterable list, summary, export, purge.
+- **Services** — the services library: category overrides, disabling, custom services.
 - **Legal pages** — generation wizard.
 
 > **Policy version:** bump it whenever you change which cookies/purposes you use — older consent cookies become stale and the banner reappears for re-confirmation (a GDPR requirement when the purpose changes).
@@ -60,7 +61,54 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 [cmp_privacy_link]           Link to the Privacy Policy
 [cmp_terms_link]             Link to the Terms & Conditions
 [cmp_cookie_settings_link]   "Cookie settings" link (reopens preferences) — put it in the footer
+[cmp_cookie_table]           Cookie table built from the detected and custom services
 ```
+
+## Services library
+
+`data/services.json` holds 14 known services, each with provider, hosts, cookies and a default category. The blocker matches the host of each `<script>`/`<iframe>` (parsed, with boundaries) and tags it with `data-cmp-service`; it stays blocked until the category is accepted. Manage it under **WP Admin → Consent Manager → Services** (override a category, disable a service, add custom ones).
+
+| Default category | Services |
+|---|---|
+| statistics | Google Analytics, Google Tag Manager, Vimeo, Microsoft Clarity, Hotjar |
+| marketing | Meta Pixel, YouTube, Google Maps, TikTok Pixel, LinkedIn Insight Tag, HubSpot, Tawk.to, Crisp |
+| necessary | Google reCAPTCHA |
+
+### Custom services and `data-cmp-category`
+
+- A custom service has a name, hosts, category and cookies; it can also carry a script, printed in the footer and blocked until consent. Saving a script requires the `unfiltered_html` capability.
+- `data-cmp-category="<slug>"` works on any `<script>` or `<iframe>` and forces its category. `necessary` leaves the tag unchanged. An invalid slug falls through to normal library handling. A valid slug that matches no configured category is blocked on purpose (fail-safe). On an `<iframe>` the attribute turns it into a consent placeholder, named after the iframe's host. `data-cmp-keep` always wins.
+
+### Cookie table
+
+`[cmp_cookie_table]` renders a table built from the detected and custom services (plus cookies entered by hand per category). The generated Cookie Policy page uses it.
+
+### "Încarcă mereu" (Always load)
+
+Embed placeholders get a second button next to "Încarcă conținutul". The choice is stored in its own `cmp_svc` cookie, separate from the category consent (it does not close the banner and does not count as a refusal), and can be withdrawn from the preferences panel ("Încărcate mereu: YouTube ×"). Each grant/withdrawal is logged as `service_allow` / `service_withdraw`, with a `services` column in the register. Not available in Light mode.
+
+### YouTube thumbnail
+
+The thumbnail is stored locally in `uploads/cmp-thumbs/` and downloaded in the background through WP-Cron, so no request goes to YouTube before consent. This needs WP-Cron working (or a system cron hitting `wp-cron.php`); until the download completes, the plain placeholder is shown.
+
+### WP Consent API
+
+Optional. If present, the plugin registers itself and sends `wp_set_consent()` on each decision and on return visits. Mapping: necessary → functional, statistics → statistics + statistics-anonymous, marketing → marketing, preferences → preferences. Custom categories are not sent.
+
+### Limit: GTM and injected JavaScript
+
+Only what is in the page HTML is blocked. Anything that GTM or other JavaScript injects later must be controlled from GTM (Consent Mode).
+
+### Standalone
+
+`standalone/cmp.js` does not load the library: on landing pages markers are added by hand (see `standalone/marker-generator.html`; services in `necessary`, like reCAPTCHA, are not marked at all). It supports "Încarcă mereu" for embeds that carry `data-cmp-service`; it keeps no consent log. See `standalone/README.md`.
+
+## Release notes (batch B)
+
+- Cookie pages generated earlier keep their old static table until regenerated from **Legal pages**.
+- The release version must be ≥ 0.5.0, otherwise the post-update notice is not shown (it appears only when updating from a version below 0.5.0).
+- "Reject all" does not clear "Încarcă mereu": it is a separate choice, withdrawn on its own from the preferences panel.
+- On update, services that used to run freely (Clarity, Hotjar, chat widgets, etc.) start waiting for consent.
 
 ## Updates & releases
 

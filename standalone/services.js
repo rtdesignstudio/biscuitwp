@@ -1,0 +1,597 @@
+window.CMP_SERVICES = {
+  "version": 1,
+  "services": [
+    {
+      "id": "google-analytics",
+      "name": "Google Analytics",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "google-analytics.com",
+        "googletagmanager.com/gtag/js"
+      ],
+      "inline": [
+        "gtag('config'",
+        "gtag(\"config\"",
+        "ga('create'"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_ga",
+          "duration": {
+            "ro": "2 ani",
+            "ru": "2 года",
+            "en": "2 years"
+          },
+          "purpose": {
+            "ro": "Distinge vizitatorii unici.",
+            "ru": "Различает уникальных посетителей.",
+            "en": "Distinguishes unique visitors."
+          }
+        },
+        {
+          "name": "_gid",
+          "duration": {
+            "ro": "24 de ore",
+            "ru": "24 часа",
+            "en": "24 hours"
+          },
+          "purpose": {
+            "ro": "Distinge vizitatorii pe durata unei zile.",
+            "ru": "Различает посетителей в течение суток.",
+            "en": "Distinguishes visitors within a day."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "google-tag-manager",
+      "name": "Google Tag Manager",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "googletagmanager.com"
+      ],
+      "inline": [],
+      "gtm": true,
+      "cookies": [],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "meta-pixel",
+      "name": "Meta Pixel",
+      "provider": "Meta Platforms Ireland Ltd.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "connect.facebook.net"
+      ],
+      "inline": [
+        "fbq('init'",
+        "fbq(\"init\"",
+        "fbq('track'",
+        "fbq(\"track\""
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_fbp",
+          "duration": {
+            "ro": "3 luni",
+            "ru": "3 месяца",
+            "en": "3 months"
+          },
+          "purpose": {
+            "ro": "Identifică browserul pentru măsurarea reclamelor.",
+            "ru": "Идентифицирует браузер для измерения рекламы.",
+            "en": "Identifies the browser for ad measurement."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://www.facebook.com/privacy/policy/"
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "provider": "Google Ireland Ltd.",
+      "type": "embed",
+      "category": "marketing",
+      "hosts": [
+        "youtube.com",
+        "youtube-nocookie.com",
+        "youtu.be"
+      ],
+      "nocookie": true,
+      "cookies": [
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Estimează lățimea de bandă a utilizatorului.",
+            "ru": "Оценивает пропускную способность пользователя.",
+            "en": "Estimates the user's bandwidth."
+          }
+        },
+        {
+          "name": "YSC",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Identifică vizionările video în sesiune.",
+            "ru": "Идентифицирует просмотры видео за сессию.",
+            "en": "Identifies video views during the session."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "vimeo",
+      "name": "Vimeo",
+      "provider": "Vimeo, Inc.",
+      "type": "embed",
+      "category": "statistics",
+      "hosts": [
+        "vimeo.com"
+      ],
+      "cookies": [
+        {
+          "name": "vuid",
+          "duration": {
+            "ro": "2 ani",
+            "ru": "2 года",
+            "en": "2 years"
+          },
+          "purpose": {
+            "ro": "Statistici privind vizionările video.",
+            "ru": "Статистика просмотров видео.",
+            "en": "Video playback statistics."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://vimeo.com/privacy"
+    },
+    {
+      "id": "google-maps",
+      "name": "Google Maps",
+      "provider": "Google Ireland Ltd.",
+      "type": "embed",
+      "category": "marketing",
+      "hosts": [
+        "google.com",
+        "google.md",
+        "google.ro"
+      ],
+      "path": "/maps",
+      "cookies": [
+        {
+          "name": "NID",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Stochează preferințele și personalizează reclamele.",
+            "ru": "Хранит предпочтения и персонализирует рекламу.",
+            "en": "Stores preferences and personalizes ads."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "clarity",
+      "name": "Microsoft Clarity",
+      "provider": "Microsoft Corporation",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "clarity.ms"
+      ],
+      "inline": [
+        "www.clarity.ms/tag/"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_clck",
+          "duration": {
+            "ro": "1 an",
+            "ru": "1 год",
+            "en": "1 year"
+          },
+          "purpose": {
+            "ro": "Păstrează ID-ul utilizatorului și preferințele Clarity pentru sesiunile următoare.",
+            "ru": "Сохраняет ID пользователя и настройки Clarity для следующих сессий.",
+            "en": "Persists the Clarity user ID and preferences for later sessions."
+          }
+        },
+        {
+          "name": "_clsk",
+          "duration": {
+            "ro": "1 zi",
+            "ru": "1 день",
+            "en": "1 day"
+          },
+          "purpose": {
+            "ro": "Leagă mai multe vizualizări de pagină într-o singură înregistrare a sesiunii.",
+            "ru": "Связывает несколько просмотров страниц в одну запись сессии.",
+            "en": "Connects multiple page views into a single session recording."
+          }
+        },
+        {
+          "name": "MUID",
+          "duration": {
+            "ro": "1 an",
+            "ru": "1 год",
+            "en": "1 year"
+          },
+          "purpose": {
+            "ro": "Identificator Microsoft al browserului, folosit pentru analiză și publicitate.",
+            "ru": "Идентификатор браузера Microsoft для аналитики и рекламы.",
+            "en": "Microsoft browser identifier used for analytics and advertising."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://privacy.microsoft.com/privacystatement"
+    },
+    {
+      "id": "hotjar",
+      "name": "Hotjar",
+      "provider": "Hotjar Ltd.",
+      "type": "script",
+      "category": "statistics",
+      "hosts": [
+        "static.hotjar.com",
+        "script.hotjar.com",
+        "contentsquare.net"
+      ],
+      "inline": [
+        "static.hotjar.com/c/hotjar-",
+        "_hjSettings"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_hjSessionUser_*",
+          "duration": {
+            "ro": "1 an",
+            "ru": "1 год",
+            "en": "1 year"
+          },
+          "purpose": {
+            "ro": "Păstrează ID-ul utilizatorului Hotjar pentru acest site.",
+            "ru": "Сохраняет ID пользователя Hotjar для этого сайта.",
+            "en": "Stores the Hotjar user ID for this site."
+          }
+        },
+        {
+          "name": "_hjSession_*",
+          "duration": {
+            "ro": "30 de minute",
+            "ru": "30 минут",
+            "en": "30 minutes"
+          },
+          "purpose": {
+            "ro": "Păstrează datele sesiunii curente.",
+            "ru": "Хранит данные текущей сессии.",
+            "en": "Holds the current session data."
+          }
+        },
+        {
+          "name": "_hjFirstSeen",
+          "duration": {
+            "ro": "30 de minute",
+            "ru": "30 минут",
+            "en": "30 minutes"
+          },
+          "purpose": {
+            "ro": "Identifică prima sesiune a unui utilizator nou.",
+            "ru": "Определяет первую сессию нового пользователя.",
+            "en": "Identifies a new user's first session."
+          }
+        }
+      ],
+      "transfer": "EU",
+      "privacy_url": "https://www.hotjar.com/legal/policies/privacy/"
+    },
+    {
+      "id": "tiktok-pixel",
+      "name": "TikTok Pixel",
+      "provider": "TikTok Technology Limited",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "analytics.tiktok.com",
+        "analytics-sg.tiktok.com",
+        "analytics-va.tiktok.com",
+        "analytics-ie.tiktok.com"
+      ],
+      "inline": [
+        "analytics.tiktok.com",
+        "ttq.load"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_ttp",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Măsoară și îmbunătățește performanța reclamelor TikTok.",
+            "ru": "Измеряет и улучшает эффективность рекламы TikTok.",
+            "en": "Measures and improves the performance of TikTok ads."
+          }
+        },
+        {
+          "name": "_tt_enable_cookie",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Indică faptul că cookie-urile TikTok sunt activate în browser.",
+            "ru": "Показывает, что cookie TikTok включены в браузере.",
+            "en": "Indicates that TikTok cookies are enabled in the browser."
+          }
+        }
+      ],
+      "transfer": "US, CN, SG",
+      "privacy_url": "https://www.tiktok.com/legal/page/eea/privacy-policy/en"
+    },
+    {
+      "id": "linkedin-insight",
+      "name": "LinkedIn Insight Tag",
+      "provider": "LinkedIn Ireland Unlimited Company",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "snap.licdn.com",
+        "px.ads.linkedin.com"
+      ],
+      "inline": [
+        "snap.licdn.com",
+        "_linkedin_partner_id"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "bcookie",
+          "duration": {
+            "ro": "1 an",
+            "ru": "1 год",
+            "en": "1 year"
+          },
+          "purpose": {
+            "ro": "Identificator al browserului LinkedIn.",
+            "ru": "Идентификатор браузера LinkedIn.",
+            "en": "LinkedIn browser identifier."
+          }
+        },
+        {
+          "name": "lidc",
+          "duration": {
+            "ro": "24 de ore",
+            "ru": "24 часа",
+            "en": "24 hours"
+          },
+          "purpose": {
+            "ro": "Direcționează cererile către centrul de date LinkedIn.",
+            "ru": "Направляет запросы в центр обработки данных LinkedIn.",
+            "en": "Routes requests to the LinkedIn data center."
+          }
+        },
+        {
+          "name": "UserMatchHistory",
+          "duration": {
+            "ro": "30 de zile",
+            "ru": "30 дней",
+            "en": "30 days"
+          },
+          "purpose": {
+            "ro": "Sincronizează ID-urile pentru reclame LinkedIn.",
+            "ru": "Синхронизирует идентификаторы для рекламы LinkedIn.",
+            "en": "Syncs IDs for LinkedIn ad targeting."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://www.linkedin.com/legal/privacy-policy"
+    },
+    {
+      "id": "hubspot",
+      "name": "HubSpot",
+      "provider": "HubSpot, Inc.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "hs-scripts.com",
+        "hs-analytics.net",
+        "hsadspixel.net",
+        "hs-banner.com",
+        "usemessages.com",
+        "hsleadflows.net",
+        "hscollectedforms.net"
+      ],
+      "inline": [
+        "js.hs-scripts.com",
+        "window._hsq"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "__hstc",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Urmărește vizitatorii (domeniu, prima și ultima vizită, număr de vizite).",
+            "ru": "Отслеживает посетителей (домен, первый и последний визит, число визитов).",
+            "en": "Tracks visitors (domain, first and last visit, number of visits)."
+          }
+        },
+        {
+          "name": "hubspotutk",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Identifică vizitatorul și îl asociază cu un contact la trimiterea formularelor.",
+            "ru": "Идентифицирует посетителя и связывает его с контактом при отправке форм.",
+            "en": "Identifies the visitor and links them to a contact on form submission."
+          }
+        },
+        {
+          "name": "__hssc",
+          "duration": {
+            "ro": "30 de minute",
+            "ru": "30 минут",
+            "en": "30 minutes"
+          },
+          "purpose": {
+            "ro": "Urmărește sesiunea curentă.",
+            "ru": "Отслеживает текущую сессию.",
+            "en": "Tracks the current session."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://legal.hubspot.com/privacy-policy"
+    },
+    {
+      "id": "tawk-to",
+      "name": "Tawk.to",
+      "provider": "tawk.to inc.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "embed.tawk.to"
+      ],
+      "inline": [
+        "embed.tawk.to",
+        "Tawk_API"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "__tawkuuid",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Identifică vizitatorul în widgetul de chat.",
+            "ru": "Идентифицирует посетителя в виджете чата.",
+            "en": "Identifies the visitor in the chat widget."
+          }
+        },
+        {
+          "name": "TawkConnectionTime",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Coordonează încărcarea widgetului de chat între filele deschise.",
+            "ru": "Согласует загрузку виджета чата между открытыми вкладками.",
+            "en": "Coordinates loading of the chat widget across open tabs."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://www.tawk.to/privacy-policy/"
+    },
+    {
+      "id": "crisp",
+      "name": "Crisp",
+      "provider": "Crisp IM SAS",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "client.crisp.chat"
+      ],
+      "inline": [
+        "client.crisp.chat",
+        "CRISP_WEBSITE_ID"
+      ],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "crisp-client/session/*",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Păstrează conversația de chat a vizitatorului între vizite.",
+            "ru": "Сохраняет чат посетителя между визитами.",
+            "en": "Keeps the visitor's chat conversation across visits."
+          }
+        }
+      ],
+      "transfer": "EU, US, UK, SG",
+      "privacy_url": "https://crisp.chat/en/privacy/"
+    },
+    {
+      "id": "recaptcha",
+      "name": "Google reCAPTCHA",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "necessary",
+      "hosts": [
+        "www.google.com/recaptcha",
+        "www.gstatic.com/recaptcha",
+        "recaptcha.net/recaptcha"
+      ],
+      "inline": [],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "_GRECAPTCHA",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Distinge utilizatorii reali de roboți pentru protejarea formularelor.",
+            "ru": "Отличает реальных пользователей от ботов для защиты форм.",
+            "en": "Tells real users from bots to protect forms."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    }
+  ]
+};

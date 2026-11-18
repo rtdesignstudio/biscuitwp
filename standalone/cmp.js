@@ -226,6 +226,15 @@
 	// banner nor counts as a refusal; save() never touches it). `id` is a UUID made
 	// on the first click.
 	var SVC_ID_RE = /^[a-z0-9-]+$/;
+	// Removes the "Always load" buttons from a document (Light mode keeps no cookie).
+	// Returns how many were removed.
+	function stripAlwaysButtons(doc) {
+		var list = doc.querySelectorAll('[data-cmp-embed-always]'), n = 0;
+		for (var i = 0; i < list.length; i++) {
+			if (list[i].parentNode) { list[i].parentNode.removeChild(list[i]); n++; }
+		}
+		return n;
+	}
 	// Pure: the allowed service ids, [] unless the cookie is for this policy version.
 	function svcAllowed(c, version) {
 		if (!c || typeof c !== 'object' || String(c.v) !== String(version) || !Array.isArray(c.svc)) { return []; }
@@ -850,6 +859,8 @@
 			if (cfg.mode === 'light') {
 				// Light has no preferences panel: drop the placeholders' settings link.
 				document.querySelectorAll('[data-cmp-embed] [data-cmp-settings]').forEach(function (a) { a.parentNode.removeChild(a); });
+				// Light stores no cookie, so there is no "Always load" either.
+				stripAlwaysButtons(document);
 				initLight();
 				return;
 			}
@@ -875,6 +886,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, withSvc: withSvc, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

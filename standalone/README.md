@@ -133,7 +133,7 @@ Simply change `type="text/javascript"` (or omit it) to `type="text/plain"`:
 
 ### Supported categories
 
-- `"necessary"` — Always included, cannot be toggled. Use for scripts that are legally required.
+- `"necessary"` — Always included, cannot be toggled. Scripts that are legally required are left unmarked, as normal `<script>` tags. A `text/plain` marker with `necessary` would only run after the visitor decides, and never runs in Light mode.
 - `"statistics"` — Analytics and performance monitoring (Google Analytics, Hotjar, etc.).
 - `"marketing"` — Advertising and retargeting pixels (Facebook, LinkedIn, etc.).
 
@@ -162,8 +162,45 @@ loads only that one embed and does not change the saved consent).
 ```
 
 Categories: YouTube and Google Maps → `marketing`, Vimeo → `statistics`. Prefer
-`youtube-nocookie.com` for YouTube. The WordPress plugin generates this markup
-automatically.
+`youtube-nocookie.com` for YouTube. The WordPress plugin generates a similar
+markup automatically (the generator's output follows it).
+
+### "Încarcă mereu" (Always load)
+
+Add `data-cmp-service="<id>"` (and optionally `data-cmp-service-name="YouTube"`,
+used in the preferences panel) on the `.cmp-embed` wrapper, plus a button with
+`data-cmp-embed-always` next to the load button (use the class
+`cmp-embed__always` and an `aria-label`, as the plugin does):
+
+```html
+<div class="cmp-embed" data-cmp-embed="marketing" data-cmp-service="youtube" data-cmp-service-name="YouTube"
+     style="aspect-ratio:560/315;max-width:560px">
+  <div class="cmp-embed__inner">
+    <p class="cmp-embed__text">Conținut de la YouTube. Se încarcă doar cu acordul tău, pentru că poate seta cookie-uri.</p>
+    <p class="cmp-embed__actions">
+      <button type="button" class="cmp-embed__btn" data-cmp-embed-load>Încarcă conținutul</button>
+      <button type="button" class="cmp-embed__always" data-cmp-embed-always aria-label="Încarcă mereu: YouTube">Încarcă mereu</button>
+      <a href="#cmp-settings" class="cmp-embed__link" data-cmp-settings>Setări cookie</a>
+    </p>
+  </div>
+  <template data-cmp-embed-src>
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/VIDEO_ID" allowfullscreen></iframe>
+  </template>
+</div>
+```
+
+- Clicking "Încarcă mereu" loads this embed and every other embed with the same
+  `data-cmp-service` on the page, and remembers the choice in the **`cmp_svc`**
+  cookie (`{"v":"<policy version>","svc":["youtube"],"id":"<uuid>"}`, same lifetime as
+  `cmp_consent`). On later visits those embeds load on their own.
+- It is separate from the category consent: it does not close the banner and does
+  not count as accepting or rejecting categories.
+- **Withdrawal:** the preferences panel shows a row "Încărcate mereu: YouTube ×".
+  Clicking × removes the service. Embeds already loaded stay until the next page load.
+- A different policy version ignores an older `cmp_svc`.
+- In `mode: "light"` (no cookie) the button is removed at init; leave it out of the markup there.
+- This build keeps no consent log: nothing is recorded for these choices.
+- Without `data-cmp-service` the embed behaves as before (no "Încarcă mereu").
 
 ## Public API
 
@@ -244,6 +281,32 @@ The `cmp.css` file is kept in sync with the WordPress plugin's banner styles via
 ```
 
 This ensures the standalone bundle always matches the plugin's visual design.
+It also produces, from `data/services.json`:
+
+- `services.json`, an identical copy of the library;
+- `services.js`, containing `window.CMP_SERVICES = <json>;`, which the marker
+  generator loads with a plain `<script>` so it works when opened from `file://`
+  (where fetching a local JSON file fails).
+
+`cmp.js` does not load the library; on landing pages the markup is added by hand.
+
+### Marker generator
+
+`marker-generator.html` (open it in a browser, no server needed) has a "Serviciu"
+select at the top, with the library grouped as "Scripturi" and "Embed-uri":
+Google Analytics, Google Tag Manager, Meta Pixel, Microsoft Clarity, Hotjar,
+TikTok Pixel, LinkedIn Insight Tag, HubSpot, Tawk.to, Crisp, Google reCAPTCHA
+(scripts) and YouTube, Vimeo, Google Maps (embeds). Choosing one sets the
+category; for a script it fills the URL field with an example on the service's
+first host (if empty); for an embed it switches to the Embed type and adds
+`data-cmp-service` to the markup, so "Încarcă mereu" works. If `services.js` is
+missing, the select is hidden and the generator works as before.
+
+reCAPTCHA is `necessary`: do not mark it. A `text/plain` marker is only
+activated after the visitor decides (and never in Light mode), so a marked
+reCAPTCHA would stay dead until then. Leave the original `<script>` as it is;
+the generator then outputs the original tag unchanged and says so. The
+standalone bundle blocks only what you mark.
 
 ---
 
