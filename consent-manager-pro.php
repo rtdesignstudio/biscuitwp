@@ -5,7 +5,7 @@
  * Description: Displays a GDPR-compliant cookie consent banner, generates the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent audit log. Quick to configure, multilingual-ready.
  * Version: 0.4.2
  * Requires PHP: 7.4
- * Author: Sergiu Pascaru
+ * Author: RT.md
  * Author URI: https://rt.md
  * License: GPL-2.0-or-later
  * Text Domain: consent-manager-pro

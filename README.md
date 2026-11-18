@@ -2,7 +2,7 @@
 
 WordPress plugin for GDPR cookie consent, legal page generation and a consent audit log. Theme-agnostic, no jQuery, no external dependencies.
 
-- **Author:** Sergiu Pascaru — [rt.md](https://rt.md)
+- **Author:** [RT.md](https://rt.md)
 - **License:** GPL-2.0-or-later
 - **Requires:** WordPress ~6.x, PHP 7.4+
 
