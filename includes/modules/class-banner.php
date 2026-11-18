@@ -51,10 +51,6 @@ class CMP_Banner {
 				'cookieName' => CMP_Consent::COOKIE,
 				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 				'nonce'      => wp_create_nonce( 'cmp_log_consent' ),
-				'autoReject' => CMP_Consent::should_autoreject( array(
-					'DNT'     => isset( $_SERVER['HTTP_DNT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_DNT'] ) ) : '',
-					'Sec-GPC' => isset( $_SERVER['HTTP_SEC_GPC'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_GPC'] ) ) : '',
-				) ),
 				'reopenButton' => ! empty( $cmp_settings['reopen_button'] ),
 				'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
 				'cookieDays' => isset( $cmp_settings['cookie_days'] ) ? (int) $cmp_settings['cookie_days'] : 180,

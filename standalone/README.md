@@ -73,7 +73,7 @@ All keys are **optional**. Defaults are applied if not specified.
 | `categories` | array | `["necessary", "statistics", "marketing"]` | Consent categories to offer. `"necessary"` is always required and locked. |
 | `privacyUrl` | string | — | URL to privacy/cookie policy. URLs starting with `javascript:` or `data:` are stripped for security. |
 | `texts` | object | — | Override default text strings. Supported keys: `title`, `intro`, `prefs`, `reject`, `accept`, `prefs_title`, `save`, `badge`, `locked`, `privacy`, `back`, `dialogLabel` |
-| `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (DNT) and auto-reject non-necessary consent |
+| `respectGPC` | boolean | `false` | If `true`, honor Global Privacy Control (`navigator.globalPrivacyControl`) and auto-reject non-necessary consent. Do-Not-Track is ignored. |
 | `reopenButton` | boolean | `false` | Auto-render a floating round "cookie settings" button (bottom-left) after the visitor decides; set `true` to enable. Pro mode only. Recommended: leave it off and put a "Cookie settings" link in the footer (see below). |
 | `cookieDays` | number | `180` | Number of days the consent choice is remembered before the banner reappears. Clamped to 1-3650, else falls back to 180. |
 

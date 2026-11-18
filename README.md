@@ -13,7 +13,7 @@ WordPress plugin for GDPR cookie consent, legal page generation and a consent au
 - **Dynamic categories** — N categories (Necessary/Statistics/Marketing by default), each with cookies (name/provider/duration/purpose) and Consent Mode signals.
 - **Consent audit log (GDPR)** — logging with 24h dedup, SHA-256 IP hash + salt, cron-based retention, CSV (BOM) / JSON export, purge.
 - **Legal pages wizard** — generates Privacy Policy / Terms & Conditions / Cookie Policy as WP pages; integrates with the native WordPress privacy policy page and the Privacy Policy Guide.
-- **DNT / GPC** — honors `Do-Not-Track` / `Sec-GPC`: automatically rejects optional cookies without showing the banner.
+- **GPC** — honors Global Privacy Control (`navigator.globalPrivacyControl`, read in the browser so it works with page caching): automatically rejects optional cookies without showing the banner. Do-Not-Track is ignored (abandoned standard).
 - **Multilingual** — WPML / Polylang (string translation + legal page duplication) plus native i18n (`.pot`).
 
 ## Installation

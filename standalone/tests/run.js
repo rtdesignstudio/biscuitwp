@@ -36,6 +36,11 @@ eq(cmp.storedCategories({ v: '0', categories: ['statistics'] }, '1'), null, 'sta
 eq(JSON.stringify(cmp.storedCategories({ v: '1', categories: ['necessary', 'statistics'] }, '1')), '["necessary","statistics"]', 'valid consent -> its categories');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['statistics'] }, '1')).analytics_storage, 'granted', 'returning accept -> analytics granted');
 eq(cmp.signalsFor([{ slug: 'statistics', signals: ['analytics_storage'] }], cmp.storedCategories({ v: '1', categories: ['necessary'] }, '1')).analytics_storage, 'denied', 'returning reject -> analytics denied');
+// gpcOn: Global Privacy Control read in the browser (cache-safe); DNT is ignored
+eq(cmp.gpcOn({ globalPrivacyControl: true }), true, 'GPC true -> refuse');
+eq(cmp.gpcOn({ globalPrivacyControl: false }), false, 'GPC false -> ask');
+eq(cmp.gpcOn({ doNotTrack: '1' }), false, 'DNT alone no longer refuses');
+eq(cmp.gpcOn(null), false, 'no navigator -> ask');
 // embedLoads: an embed comes back only when its category was accepted
 eq(cmp.embedLoads('marketing', ['necessary', 'marketing']), true, 'embed loads when its category is accepted');
 eq(cmp.embedLoads('marketing', ['necessary']), false, 'embed stays blocked without its category');

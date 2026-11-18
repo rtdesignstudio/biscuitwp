@@ -76,11 +76,6 @@ class CMP_Consent {
 		return $signals;
 	}
 
-	public static function should_autoreject( array $headers ) {
-		$dnt = isset( $headers['DNT'] ) ? (string) $headers['DNT'] : '';
-		$gpc = isset( $headers['Sec-GPC'] ) ? (string) $headers['Sec-GPC'] : '';
-		return '1' === $dnt || '1' === $gpc;
-	}
 
 	private static function read_cookie() {
 		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {

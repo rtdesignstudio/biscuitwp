@@ -186,6 +186,13 @@
 		};
 	}
 
+	// Pure: does the browser send Global Privacy Control? Read client-side so a
+	// cached page never carries one visitor's signal to everyone. DNT is ignored
+	// (abandoned standard).
+	function gpcOn(nav) {
+		return !!nav && nav.globalPrivacyControl === true;
+	}
+
 	// Pure: does an embed of this category load for the accepted categories?
 	function embedLoads(category, accepted) {
 		return !!category && (accepted || []).indexOf(category) !== -1;
@@ -657,7 +664,7 @@
 				showReopen();
 				return;
 			}
-			if (cfg.respectGPC && (navigator.globalPrivacyControl === true || navigator.doNotTrack === '1')) {
+			if (cfg.respectGPC && gpcOn(navigator)) {
 				save(requiredSlugs(), 'rejected_all');
 			} else {
 				firstDecision = true;
@@ -667,6 +674,6 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
+		module.exports = { CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl };
 	}
 })();

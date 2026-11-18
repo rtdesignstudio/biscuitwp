@@ -267,8 +267,10 @@
 			showReopen();
 			return;
 		}
-		if (D.autoReject) {
-			// Global Privacy Control / Do-Not-Track: record refusal without prompting.
+		if (navigator.globalPrivacyControl === true) {
+			// Global Privacy Control: record refusal without prompting. Read in the
+			// browser, not from request headers in PHP: a cached page would otherwise
+			// replay the first visitor's signal to everyone. DNT is ignored.
 			save(requiredSlugs(), 'rejected_all');
 		} else {
 			firstDecision = true;
