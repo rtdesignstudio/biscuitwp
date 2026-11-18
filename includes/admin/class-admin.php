@@ -33,6 +33,7 @@ class CMP_Admin {
 		require_once CMP_PATH . 'includes/admin/class-legal-page.php';
 		add_action( 'admin_post_cmp_legal', array( 'CMP_Legal_Page', 'handle' ) );
 		add_action( 'admin_post_cmp_dismiss_templates_notice', array( 'CMP_Legal_Page', 'dismiss_templates_notice' ) );
+		add_action( 'admin_post_cmp_dismiss_operator_note', array( 'CMP_Legal_Page', 'dismiss_operator_note' ) );
 
 		add_action( 'admin_post_cmp_check_updates', array( $this, 'check_updates' ) );
 		add_action( 'admin_notices', array( $this, 'update_check_notice' ) );

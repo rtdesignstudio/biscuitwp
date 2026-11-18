@@ -17,3 +17,7 @@
 .cmp-admin .cmp-svc-library { margin: 16px 0; }
 .cmp-admin .cmp-svc-library summary { cursor: pointer; }
 .cmp-admin .cmp-custom-row textarea.code { font-family: Menlo, Consolas, monospace; }
+.cmp-admin .cmp-operator-note { max-width: 1100px; margin: 12px 0 16px; padding: 10px 16px; background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #2271b1; border-radius: 4px; }
+.cmp-admin .cmp-operator-note summary { cursor: pointer; font-weight: 600; }
+.cmp-admin .cmp-operator-note h3 { margin: 14px 0 6px; font-size: 13px; }
+.cmp-admin .cmp-operator-note ul { margin: 0 0 0 18px; list-style: disc; }

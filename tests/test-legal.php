@@ -281,3 +281,39 @@ foreach ( array( 'ro' => 'tratată ca refuzată', 'ru' => 'считается о
 foreach ( array( 'ro' => 'marcat ca excepție', 'ru' => 'отметил как исключение', 'en' => 'marked as exempt' ) as $l => $needle ) {
 	cmp_assert( false !== strpos( $t6_render[ $l ]['cookie']['light'], $needle ) && false !== strpos( $t6_render[ $l ]['privacy']['light'], $needle ), "$l/light: exempt services mentioned" );
 }
+
+// B4 Task 7: operator responsibilities note.
+foreach ( array(
+	'__'         => 'return $t;',
+	'esc_html'   => 'return htmlspecialchars( $t, ENT_QUOTES, "UTF-8" );',
+	'esc_html__' => 'return htmlspecialchars( $t, ENT_QUOTES, "UTF-8" );',
+	'esc_url'    => 'return htmlspecialchars( $t, ENT_QUOTES, "UTF-8" );',
+	'admin_url'  => 'return "http://example.test/wp-admin/" . $t;',
+) as $t7_fn => $t7_body ) {
+	if ( ! function_exists( $t7_fn ) ) {
+		eval( "function $t7_fn( \$t ) { $t7_body }" );
+	}
+}
+if ( ! function_exists( 'wp_nonce_url' ) ) {
+	function wp_nonce_url( $url, $action ) {
+		return $url . '&_wpnonce=test';
+	}
+}
+cmp_assert( method_exists( 'CMP_Legal_Page', 'operator_note_html' ), 'CMP_Legal_Page::operator_note_html exists' );
+if ( method_exists( 'CMP_Legal_Page', 'operator_note_html' ) ) {
+	$t7_open   = CMP_Legal_Page::operator_note_html( true );
+	$t7_closed = CMP_Legal_Page::operator_note_html( false );
+	foreach ( array( 'Ce face pluginul', 'Ce rămâne la tine', 'Ce face pluginul și ce rămâne la tine',
+		'bannerul de cookie-uri', 'blocarea serviciilor până la acord', 'registrul de consimțăminte', 'șabloanele paginilor legale', 'tabelul de cookie-uri', 're-consimțământul la servicii noi',
+		'registrul activităților de prelucrare (art. 30)', 'responsabil cu protecția datelor (DPO)', 'temeiul legal pentru transferurile de date în afara țării', 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'verificarea textelor de către un jurist', 'notificarea CNPDCP', 'serviciile pe care pluginul nu le recunoaște' ) as $t7_needle ) {
+		cmp_assert( false !== strpos( $t7_open, $t7_needle ), "operator note contains: $t7_needle" );
+	}
+	cmp_assert( 1 === preg_match( '/<details class="cmp-operator-note" open>/', $t7_open ), 'operator note: $open=true -> <details ... open>' );
+	cmp_assert( 1 === preg_match( '/<details class="cmp-operator-note">/', $t7_closed ) && ! preg_match( '/<details[^>]*\bopen\b/', $t7_closed ), 'operator note: $open=false -> no open attribute' );
+	cmp_assert( 1 === substr_count( $t7_open, '<summary>' ) && 2 === substr_count( $t7_open, '<ul' ) && 1 === substr_count( $t7_open, '</details>' ), 'operator note: one summary, two lists' );
+	cmp_assert( false === strpos( $t7_open, '<script' ) && false === strpos( $t7_open, 'onclick' ), 'operator note: no script / inline handlers' );
+	cmp_assert( false !== strpos( $t7_open, 'cmp_dismiss_operator_note' ) && false !== strpos( $t7_open, '_wpnonce' ), 'operator note: nonce dismiss link' );
+}
+$t7_src = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
+cmp_assert( false !== strpos( $t7_src, "get_option( 'cmp_operator_note_seen' )" ) && false !== strpos( $t7_src, "update_option( 'cmp_operator_note_seen'" ), 'legal screen: note seen option read and set' );
+cmp_assert( false !== strpos( (string) file_get_contents( __DIR__ . '/../uninstall.php' ), "'cmp_operator_note_seen'" ), 'uninstall removes cmp_operator_note_seen' );

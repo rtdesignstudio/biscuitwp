@@ -134,6 +134,45 @@ class CMP_Legal_Page {
 		return $out;
 	}
 
+	/**
+	 * Pure: the operator note, escaped HTML. A collapsible box with what the
+	 * plugin covers and what stays with the site operator. $open renders it
+	 * expanded (until the admin has seen it).
+	 */
+	public static function operator_note_html( $open = false ) {
+		$does = array(
+			__( 'bannerul de cookie-uri', 'consent-manager-pro' ),
+			__( 'blocarea serviciilor până la acord', 'consent-manager-pro' ),
+			__( 'registrul de consimțăminte', 'consent-manager-pro' ),
+			__( 'șabloanele paginilor legale', 'consent-manager-pro' ),
+			__( 'tabelul de cookie-uri', 'consent-manager-pro' ),
+			__( 're-consimțământul la servicii noi', 'consent-manager-pro' ),
+		);
+		$stays = array(
+			__( 'registrul activităților de prelucrare (art. 30)', 'consent-manager-pro' ),
+			__( 'numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu', 'consent-manager-pro' ),
+			__( 'temeiul legal pentru transferurile de date în afara țării', 'consent-manager-pro' ),
+			__( 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'consent-manager-pro' ),
+			__( 'verificarea textelor de către un jurist', 'consent-manager-pro' ),
+			__( 'notificarea CNPDCP, unde e cazul', 'consent-manager-pro' ),
+			__( 'serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)', 'consent-manager-pro' ),
+		);
+		$li = function ( $items ) {
+			$out = '';
+			foreach ( $items as $item ) {
+				$out .= '<li>' . esc_html( $item ) . '</li>';
+			}
+			return $out;
+		};
+		$url = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_operator_note' ), 'cmp_dismiss_operator_note' );
+		return '<details class="cmp-operator-note"' . ( $open ? ' open' : '' ) . '>'
+			. '<summary>' . esc_html( __( 'Ce face pluginul și ce rămâne la tine', 'consent-manager-pro' ) ) . '</summary>'
+			. '<h3>' . esc_html( __( 'Ce face pluginul', 'consent-manager-pro' ) ) . '</h3><ul>' . $li( $does ) . '</ul>'
+			. '<h3>' . esc_html( __( 'Ce rămâne la tine', 'consent-manager-pro' ) ) . '</h3><ul>' . $li( $stays ) . '</ul>'
+			. '<p><a href="' . esc_url( $url ) . '">' . esc_html( __( 'Am înțeles, restrânge', 'consent-manager-pro' ) ) . '</a></p>'
+			. '</details>';
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -161,6 +200,8 @@ class CMP_Legal_Page {
 
 			<div class="notice notice-warning inline"><p><?php esc_html_e( 'Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare.', 'consent-manager-pro' ); ?></p></div>
 			<div class="notice notice-info inline"><p><?php esc_html_e( 'Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale.', 'consent-manager-pro' ); ?> <?php esc_html_e( 'După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale.', 'consent-manager-pro' ); ?></p></div>
+
+			<?php echo self::operator_note_html( ! get_option( 'cmp_operator_note_seen' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_legal">
@@ -271,6 +312,9 @@ class CMP_Legal_Page {
 			update_option( 'cmp_settings', $settings ); // translations read the operator data from the stored settings
 			$post_id = self::generate_page( $type, $settings );
 			delete_option( 'cmp_templates_notice' );
+			if ( ! is_wp_error( $post_id ) ) {
+				update_option( 'cmp_operator_note_seen', 1 );
+			}
 			if ( is_wp_error( $post_id ) ) {
 				wp_die( esc_html__( 'Nu am putut crea pagina.', 'consent-manager-pro' ) );
 			}
@@ -291,6 +335,15 @@ class CMP_Legal_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		delete_option( 'cmp_templates_notice' );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-legal' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	public static function dismiss_operator_note() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_operator_note' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+		}
+		update_option( 'cmp_operator_note_seen', 1 );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-legal' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
