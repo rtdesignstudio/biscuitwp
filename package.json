@@ -1,0 +1,12 @@
+{
+  "name": "consent-manager-pro-dev",
+  "private": true,
+  "description": "Development-only tooling (browser e2e test). Not shipped in the plugin zip.",
+  "scripts": {
+    "test:e2e": "bash bin/e2e.sh",
+    "test:e2e:match": "node tests/e2e/match.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.59.1"
+  }
+}

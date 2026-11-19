@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMP e2e — standalone</title>
+<!--
+  E2E template (B7.1). bin/e2e.sh fills the two markers below from
+  data/services.json (tests/e2e/fixture.js) and serves the filled copy from a
+  temp directory, next to standalone/cmp.min.js. Do not open this file as is.
+-->
+<link rel="stylesheet" href="../../standalone/cmp.min.css">
+<script>
+window.CMP_CONFIG = {
+	mode: 'pro',
+	lang: 'ro',
+	categories: /*CMP-E2E-CATEGORIES*/[],
+	privacyUrl: '/privacy.html'
+};
+</script>
+<script src="../../standalone/cmp.min.js" defer></script>
+</head>
+<body>
+<h1 data-cmp-e2e-fixture>CMP e2e — standalone</h1>
+<!--CMP-E2E-FRAGMENTS-->
+</body>
+</html>

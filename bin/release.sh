@@ -30,10 +30,16 @@ if ! php tests/run.php >/tmp/cmp-release-tests.log 2>&1; then
 fi
 echo "Tests passed."
 
+# 2c. Browser test (B7.1): no tracker may load before consent. Real Chromium
+#     against WordPress Playground + the standalone bundle; see bin/e2e.sh.
+if ! bash bin/e2e.sh; then
+	echo "E2E failed: a tracker loads before consent (see report above)"; exit 1
+fi
+
 # 3. Build a clean zip (runtime files only).
 rm -rf dist && mkdir -p "dist/$SLUG"
 rsync -a --exclude 'docs' --exclude 'tests' --exclude 'bin' --exclude 'dist' \
-	--exclude 'proxy' --exclude 'package.json' --exclude 'node_modules' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
+	--exclude 'proxy' --exclude 'package.json' --exclude 'package-lock.json' --exclude 'node_modules' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
 	./ "dist/$SLUG/"
 ( cd dist && zip -qr "$SLUG.zip" "$SLUG" )
 echo "Built dist/$SLUG.zip"

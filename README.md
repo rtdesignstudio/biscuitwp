@@ -131,6 +131,25 @@ The pure logic (consent evaluation, signals, sanitization, audit, i18n, legal) h
 php tests/run.php
 ```
 
+### Rulare teste în browser (e2e)
+
+`bin/e2e.sh` verifică într-un Chromium real că **niciun tracker nu face cereri înainte de acord**, pentru fiecare serviciu din `data/services.json`: WordPress (Pro Strict și Advanced: vizitator nou, „Acceptă tot”, „Doar necesare”) și standalone. Pornește un WordPress Playground de unică folosință (pluginul ca în zip + mu-plugin-ul din `tests/e2e/fixture/`) și un server static pentru `tests/e2e/standalone.html`. Toate cererile spre alte origini sunt înregistrate și oprite: nu pleacă trafic spre terți. `bin/release.sh` refuză release-ul dacă testul pică.
+
+```bash
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install   # o singură dată; playwright 1.59.1, fără browsere
+bash bin/e2e.sh                                  # ~45 s; cod 0 = verde
+node tests/e2e/match.test.js                     # testele pure (potrivire cerere → serviciu, fixture)
+```
+
+- Cere Chromium pentru Playwright 1.59.1 în cache-ul local (`~/Library/Caches/ms-playwright`, revizia 1217), `python3` și `npx` (Playground CLI din cache-ul npm). Scriptul nu descarcă browsere; dacă lipsesc, iese cu mesaj și cod 1.
+- Raportul: `serviciu | scenariu | ok/LEAK/MISSING | url`. LEAK = cerere înainte de acord (sau după „Doar necesare”); MISSING = un serviciu permis înainte de acord nu s-a încărcat, sau nu s-a încărcat după „Acceptă tot”. Scenariul `control:unblocked` rulează cu blocarea oprită și dovedește că testul vede fiecare fragment (NOFIRE = testul e orb).
+- Ce are voie înainte de acord vine din plugin (`/?cmp_e2e_expect=1`, doar în fixture): `necessary` sau `exempt`; în Advanced și GA4/GTM.
+- Un serviciu nou în `data/services.json` intră automat în fixture și în verificare.
+- Înainte de decizie și după „Doar necesare”, orice cerere externă pe care testul nu o poate atribui unui serviciu din bibliotecă e tot LEAK (`(unattributed)`).
+- Plasă fixă, independentă de plugin: Meta Pixel, TikTok, LinkedIn, Clarity, Hotjar, YouTube, Vimeo, Google Maps, HubSpot, Tawk.to și Crisp nu au voie niciodată înainte de acord (Strict, Advanced, standalone); Advanced poate adăuga doar GA4/GTM; categoriile din plugin trebuie să fie cele din `data/services.json`.
+- Fixture-ul acoperă `<script src>`, scripturi inline (gtag, GTM, fbq, pixel `<img>` creat din JS, `navigator.sendBeacon`, `fetch`), `<noscript><img>` și `<iframe>`. Nu vede: preconnect/dns-prefetch (nu sunt cereri), WebSocket, service workers.
+- Variabile: `CMP_E2E_READY_TIMEOUT` (implicit 180 s), `CMP_E2E_RUN_TIMEOUT` (implicit 300 s, toată rularea în browser), `CMP_E2E_PG_PORT`, `CMP_E2E_PLAYGROUND_CLI` (implicit `@wp-playground/cli@3.1.65`), `CMP_E2E_SETTLE_MS` (implicit 1500).
+
 ## License
 
 GPL-2.0-or-later.
