@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Consent Manager Pro\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro\n"
-"POT-Creation-Date: 2026-11-19T12:25:48+00:00\n"
+"POT-Creation-Date: 2026-11-19T13:02:44+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: Consent Manager Pro\n"
 "Language-Team: ru_RU\n"
@@ -27,8 +27,15 @@ msgstr "https://github.com/rtgit003/consent-manager-pro"
 
 #. Description of the plugin
 #: consent-manager-pro.php
-msgid "Displays a GDPR-compliant cookie consent banner, generates the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent audit log. Quick to configure, multilingual-ready."
-msgstr "Показывает баннер согласия на cookie в соответствии с GDPR, создаёт юридические страницы (Политика конфиденциальности, Условия использования, Политика использования файлов cookie) и ведёт реестр согласий. Быстрая настройка, поддержка нескольких языков."
+msgid ""
+"Displays a GDPR-compliant cookie consent banner, generates the legal pages "
+"(Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent "
+"audit log. Quick to configure, multilingual-ready."
+msgstr ""
+"Показывает баннер согласия на cookie в соответствии с GDPR, создаёт "
+"юридические страницы (Политика конфиденциальности, Условия использования, "
+"Политика использования файлов cookie) и ведёт реестр согласий. Быстрая "
+"настройка, поддержка нескольких языков."
 
 #. Author of the plugin
 #: consent-manager-pro.php
@@ -40,48 +47,49 @@ msgstr "RT.md"
 msgid "https://rt.md"
 msgstr "https://rt.md"
 
-#: includes/admin/class-admin.php:55
-#: includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:56 includes/admin/class-admin.php:73
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr "Настройки"
 
-#: includes/admin/class-admin.php:57
+#: includes/admin/class-admin.php:58
 msgid "Caută actualizări"
 msgstr "Проверить обновления"
 
-#: includes/admin/class-admin.php:64
-#: includes/admin/class-admin.php:65
+#: includes/admin/class-admin.php:65 includes/admin/class-admin.php:66
 msgid "Consent Manager"
 msgstr "Consent Manager"
 
-#: includes/admin/class-admin.php:73
+#: includes/admin/class-admin.php:74
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr "Категории"
 
-#: includes/admin/class-admin.php:74
+#: includes/admin/class-admin.php:75
 #: includes/admin/class-audit-list-table.php:17
+#: includes/admin/class-guide.php:22
 msgid "Servicii"
 msgstr "Сервисы"
 
-#: includes/admin/class-admin.php:75
+#: includes/admin/class-admin.php:76
 msgid "Verificare"
 msgstr "Проверка"
 
-#: includes/admin/class-admin.php:76
-#: includes/admin/class-audit-page.php:43
+#: includes/admin/class-admin.php:77 includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr "Реестр согласий"
 
-#: includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:78 includes/admin/class-guide.php:25
 #: includes/admin/class-settings-page.php:260
 #: includes/admin/class-settings-page.php:386
 msgid "Pagini legale"
 msgstr "Юридические страницы"
 
-#: includes/admin/class-admin.php:95
-#: includes/admin/class-audit-page.php:106
+#: includes/admin/class-admin.php:79 includes/admin/class-guide.php:43
+msgid "Ghid"
+msgstr "Руководство"
+
+#: includes/admin/class-admin.php:97 includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
 #: includes/admin/class-check-page.php:486
@@ -93,39 +101,52 @@ msgstr "Юридические страницы"
 #: includes/admin/class-services-page.php:375
 #: includes/admin/class-services-page.php:395
 #: includes/admin/class-settings-page.php:314
-#: includes/modules/class-fonts.php:127
-#: includes/modules/class-fonts.php:186
+#: includes/modules/class-fonts.php:127 includes/modules/class-fonts.php:186
 msgid "Acțiune neautorizată."
 msgstr "Действие не разрешено."
 
-#: includes/admin/class-admin.php:121
-msgid "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul)."
-msgstr "Библиотека сервисов (data/services.json) отсутствует или повреждена. Пока вы её не восстановите, блокируются только Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo и Google Maps (переустановите плагин)."
-
-#: includes/admin/class-admin.php:122
-msgid "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect."
-msgstr "В библиотеке сервисов (data/services.json) есть ошибки. Некоторые сервисы могут блокироваться неправильно."
-
 #: includes/admin/class-admin.php:123
+msgid ""
+"Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm "
+"doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google "
+"Maps până o repari (reinstalează pluginul)."
+msgstr ""
+"Библиотека сервисов (data/services.json) отсутствует или повреждена. Пока вы "
+"её не восстановите, блокируются только Google Analytics, Tag Manager, Meta "
+"Pixel, YouTube, Vimeo и Google Maps (переустановите плагин)."
+
+#: includes/admin/class-admin.php:124
+msgid ""
+"Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să "
+"nu fie blocate corect."
+msgstr ""
+"В библиотеке сервисов (data/services.json) есть ошибки. Некоторые сервисы "
+"могут блокироваться неправильно."
+
+#: includes/admin/class-admin.php:125
 #: includes/admin/class-services-page.php:426
 msgid "Consent Manager Pro:"
 msgstr "Consent Manager Pro:"
 
-#: includes/admin/class-admin.php:125
+#: includes/admin/class-admin.php:127
 msgid "Detalii în „Servicii”"
 msgstr "Подробности в разделе «Сервисы»"
 
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:138
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr "Consent Manager Pro: у вас последняя версия (%s)."
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:142
+#: includes/admin/class-admin.php:144
 #, php-format
-msgid "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" din lista de mai jos."
-msgstr "Consent Manager Pro: доступна версия %s — нажмите «Обновить сейчас» в списке ниже."
+msgid ""
+"Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" "
+"din lista de mai jos."
+msgstr ""
+"Consent Manager Pro: доступна версия %s — нажмите «Обновить сейчас» в списке "
+"ниже."
 
 #: includes/admin/class-audit-list-table.php:13
 msgid "Dată"
@@ -201,8 +222,12 @@ msgid "Filtrează"
 msgstr "Фильтровать"
 
 #: includes/admin/class-audit-page.php:83
-msgid "Vizitatorul își vede ID-ul în „Setări cookie”, sub preferințe. Caută după el ca să găsești istoricul alegerilor lui."
-msgstr "Посетитель видит свой ID в «Настройках cookie», под предпочтениями. Найдите по нему историю его выборов."
+msgid ""
+"Vizitatorul își vede ID-ul în „Setări cookie”, sub preferințe. Caută după el "
+"ca să găsești istoricul alegerilor lui."
+msgstr ""
+"Посетитель видит свой ID в «Настройках cookie», под предпочтениями. Найдите "
+"по нему историю его выборов."
 
 #: includes/admin/class-audit-page.php:92
 msgid "Export CSV"
@@ -344,8 +369,11 @@ msgid "WordPress"
 msgstr "WordPress"
 
 #: includes/admin/class-check-page.php:83
-msgid "fișier de pe site (mu-plugins, uploads sau alt folder din afara pluginurilor și temelor)"
-msgstr "файл на сайте (mu-plugins, uploads или другая папка вне плагинов и тем)"
+msgid ""
+"fișier de pe site (mu-plugins, uploads sau alt folder din afara pluginurilor "
+"și temelor)"
+msgstr ""
+"файл на сайте (mu-plugins, uploads или другая папка вне плагинов и тем)"
 
 #. translators: %s: host
 #: includes/admin/class-check-page.php:86
@@ -403,16 +431,24 @@ msgid "nu s-a putut verifica (bannerul lipsește pe pagină)"
 msgstr "не удалось проверить (на странице нет баннера)"
 
 #: includes/admin/class-check-page.php:142
-msgid "nu s-a putut verifica (altă origine decât adminul: subdomeniu, www sau http/https)"
-msgstr "не удалось проверить (другой источник, чем у админки: поддомен, www или http/https)"
+msgid ""
+"nu s-a putut verifica (altă origine decât adminul: subdomeniu, www sau http/"
+"https)"
+msgstr ""
+"не удалось проверить (другой источник, чем у админки: поддомен, www или http/"
+"https)"
 
 #: includes/admin/class-check-page.php:145
 msgid "nu s-a putut verifica (pagina nu a trimis date)"
 msgstr "не удалось проверить (страница не передала данные)"
 
 #: includes/admin/class-check-page.php:147
-msgid "nu s-a putut verifica (pagina nu a răspuns în 20 s sau nu permite încărcarea într-un cadru)"
-msgstr "не удалось проверить (страница не ответила за 20 с или не разрешает загрузку во фрейме)"
+msgid ""
+"nu s-a putut verifica (pagina nu a răspuns în 20 s sau nu permite încărcarea "
+"într-un cadru)"
+msgstr ""
+"не удалось проверить (страница не ответила за 20 с или не разрешает загрузку "
+"во фрейме)"
 
 #. translators: %s: cookie name
 #: includes/admin/class-check-page.php:160
@@ -468,11 +504,17 @@ msgstr "Список страниц сохранён. Сканирование �
 
 #. translators: %d: number of addresses
 #: includes/admin/class-check-page.php:241
-msgid "Am respins o adresă: doar paginile de pe domeniul site-ului pot fi verificate."
-msgid_plural "Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate."
+msgid ""
+"Am respins o adresă: doar paginile de pe domeniul site-ului pot fi "
+"verificate."
+msgid_plural ""
+"Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi "
+"verificate."
 msgstr[0] "Отклонён %d адрес: проверять можно только страницы на домене сайта."
-msgstr[1] "Отклонено %d адреса: проверять можно только страницы на домене сайта."
-msgstr[2] "Отклонено %d адресов: проверять можно только страницы на домене сайта."
+msgstr[1] ""
+"Отклонено %d адреса: проверять можно только страницы на домене сайта."
+msgstr[2] ""
+"Отклонено %d адресов: проверять можно только страницы на домене сайта."
 
 #. translators: %d — count
 #: includes/admin/class-check-page.php:244
@@ -492,8 +534,13 @@ msgstr "Проверяемые страницы"
 #. translators: %d: max pages
 #: includes/admin/class-check-page.php:251
 #, php-format
-msgid "Cel mult %d pagini de pe domeniul site-ului: pagina principală, paginile legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul."
-msgstr "Не более %d страниц на домене сайта: главная, юридические страницы, последняя опубликованная страница каждого типа, ваши адреса и карта сайта (sitemap)."
+msgid ""
+"Cel mult %d pagini de pe domeniul site-ului: pagina principală, paginile "
+"legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul."
+msgstr ""
+"Не более %d страниц на домене сайта: главная, юридические страницы, "
+"последняя опубликованная страница каждого типа, ваши адреса и карта сайта "
+"(sitemap)."
 
 #: includes/admin/class-check-page.php:263
 msgid "Adaugă pagini (una pe rând)"
@@ -504,8 +551,12 @@ msgid "Exclude pagini (una pe rând)"
 msgstr "Исключить страницы (по одной в строке)"
 
 #: includes/admin/class-check-page.php:268
-msgid "Doar adrese de pe domeniul site-ului (cu sau fără www, plus subdomeniile). Poți scrie și doar calea, de exemplu /contact/."
-msgstr "Только адреса на домене сайта (с www или без, а также поддомены). Можно указать и только путь, например /contact/."
+msgid ""
+"Doar adrese de pe domeniul site-ului (cu sau fără www, plus subdomeniile). "
+"Poți scrie și doar calea, de exemplu /contact/."
+msgstr ""
+"Только адреса на домене сайта (с www или без, а также поддомены). Можно "
+"указать и только путь, например /contact/."
 
 #: includes/admin/class-check-page.php:269
 msgid "Salvează lista"
@@ -531,8 +582,12 @@ msgid "Rescanează"
 msgstr "Пересканировать"
 
 #: includes/admin/class-check-page.php:287
-msgid "Serverul citește HTML-ul paginilor, ca un vizitator fără cookie-uri. Vede ce e în pagină, nu ce adaugă JavaScript-ul ulterior."
-msgstr "Сервер читает HTML страниц, как посетитель без cookie. Он видит то, что есть на странице, но не то, что JavaScript добавляет позже."
+msgid ""
+"Serverul citește HTML-ul paginilor, ca un vizitator fără cookie-uri. Vede ce "
+"e în pagină, nu ce adaugă JavaScript-ul ulterior."
+msgstr ""
+"Сервер читает HTML страниц, как посетитель без cookie. Он видит то, что есть "
+"на странице, но не то, что JavaScript добавляет позже."
 
 #: includes/admin/class-check-page.php:289
 #: includes/admin/class-services-page.php:220
@@ -576,72 +631,135 @@ msgid "niciuna"
 msgstr "нет"
 
 #: includes/admin/class-check-page.php:353
-msgid "Google Fonts trimite IP-ul vizitatorului la Google. Fonturile se pot servi de pe site, adunate din toate paginile scanate."
-msgstr "Google Fonts передаёт IP посетителя в Google. Шрифты можно раздавать с вашего сайта, собрав их со всех просканированных страниц."
+msgid ""
+"Google Fonts trimite IP-ul vizitatorului la Google. Fonturile se pot servi "
+"de pe site, adunate din toate paginile scanate."
+msgstr ""
+"Google Fonts передаёт IP посетителя в Google. Шрифты можно раздавать с "
+"вашего сайта, собрав их со всех просканированных страниц."
 
 #: includes/admin/class-check-page.php:359
 msgid "Localizează"
 msgstr "Локализовать"
 
 #: includes/admin/class-check-page.php:362
-msgid "Pornește întâi „Localizare Google Fonts” în Setări (doar în modul Pro), apoi revino aici."
-msgstr "Сначала включите «Локализация Google Fonts» в настройках (только в режиме Pro), затем вернитесь сюда."
+msgid ""
+"Pornește întâi „Localizare Google Fonts” în Setări (doar în modul Pro), apoi "
+"revino aici."
+msgstr ""
+"Сначала включите «Локализация Google Fonts» в настройках (только в режиме "
+"Pro), затем вернитесь сюда."
 
 #: includes/admin/class-check-page.php:367
-msgid "Adobe Fonts, Font Awesome și CDN-urile (jsDelivr, unpkg, cdnjs) trimit și ele IP-ul vizitatorului la un terț. Le poți găzdui pe site ca să nu mai fie nevoie de ele."
-msgstr "Adobe Fonts, Font Awesome и CDN (jsDelivr, unpkg, cdnjs) тоже передают IP посетителя третьей стороне. Вы можете разместить эти файлы на своём сайте, чтобы обойтись без них."
+msgid ""
+"Adobe Fonts, Font Awesome și CDN-urile (jsDelivr, unpkg, cdnjs) trimit și "
+"ele IP-ul vizitatorului la un terț. Le poți găzdui pe site ca să nu mai fie "
+"nevoie de ele."
+msgstr ""
+"Adobe Fonts, Font Awesome и CDN (jsDelivr, unpkg, cdnjs) тоже передают IP "
+"посетителя третьей стороне. Вы можете разместить эти файлы на своём сайте, "
+"чтобы обойтись без них."
 
 #: includes/admin/class-check-page.php:369
 msgid "Verificare în browser"
 msgstr "Проверка в браузере"
 
 #: includes/admin/class-check-page.php:371
-msgid "Modul Light nu cere acord: verificarea măsoară doar ce se încarcă înainte de acord."
-msgstr "Режим Light не запрашивает согласие: проверка измеряет только то, что загружается до согласия."
+msgid ""
+"Modul Light nu cere acord: verificarea măsoară doar ce se încarcă înainte de "
+"acord."
+msgstr ""
+"Режим Light не запрашивает согласие: проверка измеряет только то, что "
+"загружается до согласия."
 
 #: includes/admin/class-check-page.php:373
 msgid "Blocarea scripturilor e oprită: serviciile se încarcă fără acord"
 msgstr "Блокировка скриптов выключена: сервисы загружаются без согласия"
 
 #: includes/admin/class-check-page.php:375
-msgid "Încarcă pe rând, invizibil, paginile de mai sus și notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă tot” simulat."
-msgstr "Поочерёдно и незаметно загружает страницы выше и фиксирует, что загружается до согласия и что добавляется после имитации «Разрешить все»."
+msgid ""
+"Încarcă pe rând, invizibil, paginile de mai sus și notează ce se încarcă "
+"înainte de acord și ce apare în plus după un „Acceptă tot” simulat."
+msgstr ""
+"Поочерёдно и незаметно загружает страницы выше и фиксирует, что загружается "
+"до согласия и что добавляется после имитации «Разрешить все»."
 
 #: includes/admin/class-check-page.php:377
 msgid "Limitele verificării"
 msgstr "Ограничения проверки"
 
 #: includes/admin/class-check-page.php:379
-msgid "Rulează în browserul tău, ca administrator logat. Pluginurile care schimbă pagina pentru utilizatorii logați pot da alt rezultat decât pentru vizitatori."
-msgstr "Проверка выполняется в вашем браузере от имени вошедшего администратора. Плагины, которые меняют страницу для вошедших пользователей, могут дать другой результат, чем для посетителей."
+msgid ""
+"Rulează în browserul tău, ca administrator logat. Pluginurile care schimbă "
+"pagina pentru utilizatorii logați pot da alt rezultat decât pentru "
+"vizitatori."
+msgstr ""
+"Проверка выполняется в вашем браузере от имени вошедшего администратора. "
+"Плагины, которые меняют страницу для вошедших пользователей, могут дать "
+"другой результат, чем для посетителей."
 
 #: includes/admin/class-check-page.php:380
-msgid "Paginile care nu permit încărcarea într-un cadru (X-Frame-Options sau CSP frame-ancestors) nu pot fi verificate: rândul lor apare „nu s-a putut verifica”, nu verde."
-msgstr "Страницы, которые не разрешают загрузку во фрейме (X-Frame-Options или CSP frame-ancestors), проверить нельзя: в их строке будет «не удалось проверить», а не зелёный."
+msgid ""
+"Paginile care nu permit încărcarea într-un cadru (X-Frame-Options sau CSP "
+"frame-ancestors) nu pot fi verificate: rândul lor apare „nu s-a putut "
+"verifica”, nu verde."
+msgstr ""
+"Страницы, которые не разрешают загрузку во фрейме (X-Frame-Options или CSP "
+"frame-ancestors), проверить нельзя: в их строке будет «не удалось "
+"проверить», а не зелёный."
 
 #: includes/admin/class-check-page.php:381
-msgid "Cookie-urile puse de terți pe domeniile lor nu pot fi citite; se văd doar domeniile contactate."
-msgstr "Cookie, которые третьи стороны устанавливают на своих доменах, прочитать нельзя; видны только домены, к которым были обращения."
+msgid ""
+"Cookie-urile puse de terți pe domeniile lor nu pot fi citite; se văd doar "
+"domeniile contactate."
+msgstr ""
+"Cookie, которые третьи стороны устанавливают на своих доменах, прочитать "
+"нельзя; видны только домены, к которым были обращения."
 
 #: includes/admin/class-check-page.php:382
-msgid "Cookie-urile care erau deja în browserul tău înainte de verificare (de la un acord real sau de la o verificare anterioară) sunt arătate separat și nu schimbă rezultatul: pentru ele contează domeniile contactate. Pentru o verificare completă a cookie-urilor, folosește o fereastră privată în care te autentifici."
-msgstr "Cookie, которые уже были в вашем браузере до проверки (после реального согласия или предыдущей проверки), показываются отдельно и не влияют на результат: для них учитываются домены, к которым были обращения. Для полной проверки cookie используйте приватное окно и войдите в нём."
+msgid ""
+"Cookie-urile care erau deja în browserul tău înainte de verificare (de la un "
+"acord real sau de la o verificare anterioară) sunt arătate separat și nu "
+"schimbă rezultatul: pentru ele contează domeniile contactate. Pentru o "
+"verificare completă a cookie-urilor, folosește o fereastră privată în care "
+"te autentifici."
+msgstr ""
+"Cookie, которые уже были в вашем браузере до проверки (после реального "
+"согласия или предыдущей проверки), показываются отдельно и не влияют на "
+"результат: для них учитываются домены, к которым были обращения. Для полной "
+"проверки cookie используйте приватное окно и войдите в нём."
 
 #: includes/admin/class-check-page.php:383
-msgid "Se pot verifica doar paginile cu aceeași origine ca adminul (același www și http/https). Paginile de pe subdomenii apar „nu s-a putut verifica”."
-msgstr "Проверить можно только страницы с тем же источником, что и админка (тот же www и http/https). Для страниц на поддоменах будет «не удалось проверить»."
+msgid ""
+"Se pot verifica doar paginile cu aceeași origine ca adminul (același www și "
+"http/https). Paginile de pe subdomenii apar „nu s-a putut verifica”."
+msgstr ""
+"Проверить можно только страницы с тем же источником, что и админка (тот же "
+"www и http/https). Для страниц на поддоменах будет «не удалось проверить»."
 
 #: includes/admin/class-check-page.php:384
 msgid "Ce apare doar după interacțiune (clic, scroll) nu e prins."
-msgstr "То, что появляется только после действий пользователя (клик, прокрутка), не учитывается."
+msgstr ""
+"То, что появляется только после действий пользователя (клик, прокрутка), не "
+"учитывается."
 
 #: includes/admin/class-check-page.php:386
-msgid "„Acceptă tot” se apasă în browserul tău. Acordul tău real nu se schimbă, dar cookie-urile puse de servicii (de exemplu _ga) rămân în browser după verificare, chiar dacă alegerea ta e „refuz”."
-msgstr "«Разрешить все» нажимается в вашем браузере. Ваше реальное согласие не меняется, но cookie, установленные сервисами (например, _ga), останутся в браузере после проверки, даже если ваш выбор — «отказ»."
+msgid ""
+"„Acceptă tot” se apasă în browserul tău. Acordul tău real nu se schimbă, dar "
+"cookie-urile puse de servicii (de exemplu _ga) rămân în browser după "
+"verificare, chiar dacă alegerea ta e „refuz”."
+msgstr ""
+"«Разрешить все» нажимается в вашем браузере. Ваше реальное согласие не "
+"меняется, но cookie, установленные сервисами (например, _ga), останутся в "
+"браузере после проверки, даже если ваш выбор — «отказ»."
 
 #: includes/admin/class-check-page.php:387
-msgid "După acord, fiecare pagină verificată poate apărea ca o vizită în statisticile tale (Google Analytics și altele)."
-msgstr "После согласия каждая проверенная страница может появиться как посещение в вашей статистике (Google Analytics и других)."
+msgid ""
+"După acord, fiecare pagină verificată poate apărea ca o vizită în "
+"statisticile tale (Google Analytics și altele)."
+msgstr ""
+"После согласия каждая проверенная страница может появиться как посещение в "
+"вашей статистике (Google Analytics и других)."
 
 #: includes/admin/class-check-page.php:392
 msgid "Verifică în browser"
@@ -658,8 +776,12 @@ msgid "acum %s"
 msgstr "%s назад"
 
 #: includes/admin/class-check-page.php:405
-msgid "Raportul e făcut într-un alt mod decât cel de acum, așa că rezultatele nu mai sunt valabile. Verifică din nou."
-msgstr "Отчёт составлен в другом режиме, чем текущий, поэтому результаты больше не действительны. Проверьте заново."
+msgid ""
+"Raportul e făcut într-un alt mod decât cel de acum, așa că rezultatele nu "
+"mai sunt valabile. Verifică din nou."
+msgstr ""
+"Отчёт составлен в другом режиме, чем текущий, поэтому результаты больше не "
+"действительны. Проверьте заново."
 
 #: includes/admin/class-check-page.php:410
 msgid "Rezultat"
@@ -694,8 +816,19 @@ msgid "nimic în plus"
 msgstr "ничего дополнительно"
 
 #: includes/admin/class-check-page.php:458
-msgid "Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a încărcat înainte de acord. Galben: resurse care trimit IP-ul vizitatorului sau cookie-uri necunoscute. Excepțiile, serviciile necesare și, în Advanced, Google Analytics / Tag Manager apar separat și nu schimbă rezultatul. După acord, serviciile acceptate se încarcă normal: coloana e doar informativă."
-msgstr "Красный: сервис, которому нужно согласие, или неизвестный сторонний домен загрузился до согласия. Жёлтый: ресурсы, передающие IP посетителя, или неизвестные cookie. Исключения, необходимые сервисы и, в режиме Advanced, Google Analytics / Tag Manager показываются отдельно и не влияют на результат. После согласия принятые сервисы загружаются как обычно: эта колонка носит справочный характер."
+msgid ""
+"Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a "
+"încărcat înainte de acord. Galben: resurse care trimit IP-ul vizitatorului "
+"sau cookie-uri necunoscute. Excepțiile, serviciile necesare și, în Advanced, "
+"Google Analytics / Tag Manager apar separat și nu schimbă rezultatul. După "
+"acord, serviciile acceptate se încarcă normal: coloana e doar informativă."
+msgstr ""
+"Красный: сервис, которому нужно согласие, или неизвестный сторонний домен "
+"загрузился до согласия. Жёлтый: ресурсы, передающие IP посетителя, или "
+"неизвестные cookie. Исключения, необходимые сервисы и, в режиме Advanced, "
+"Google Analytics / Tag Manager показываются отдельно и не влияют на "
+"результат. После согласия принятые сервисы загружаются как обычно: эта "
+"колонка носит справочный характер."
 
 #. translators: 1: page number, 2: total pages
 #: includes/admin/class-check-page.php:475
@@ -715,13 +848,39 @@ msgstr "Готово."
 msgid "Raportul nu a putut fi salvat. Încearcă din nou."
 msgstr "Не удалось сохранить отчёт. Попробуйте ещё раз."
 
-#: includes/admin/class-legal-page.php:10
-#: includes/modules/class-legal.php:277
+#: includes/admin/class-guide.php:20
+msgid "Pornire în 5 minute"
+msgstr "Запуск за 5 минут"
+
+#: includes/admin/class-guide.php:21
+msgid "Ce mod alegi"
+msgstr "Какой режим выбрать"
+
+#: includes/admin/class-guide.php:23
+msgid "Exemple"
+msgstr "Примеры"
+
+#: includes/admin/class-guide.php:24
+msgid "Cum verifici blocarea"
+msgstr "Как проверить блокировку"
+
+#: includes/admin/class-guide.php:26
+msgid "După un update"
+msgstr "После обновления"
+
+#: includes/admin/class-guide.php:27
+msgid "Registru și date"
+msgstr "Реестр и данные"
+
+#: includes/admin/class-guide.php:28
+msgid "Pentru developeri"
+msgstr "Для разработчиков"
+
+#: includes/admin/class-legal-page.php:10 includes/modules/class-legal.php:277
 msgid "Politica de confidențialitate"
 msgstr "Политика конфиденциальности"
 
-#: includes/admin/class-legal-page.php:11
-#: includes/modules/class-legal.php:281
+#: includes/admin/class-legal-page.php:11 includes/modules/class-legal.php:281
 msgid "Termeni și condiții"
 msgstr "Условия использования"
 
@@ -785,7 +944,8 @@ msgstr "уведомление НЦЗПД, если это требуется"
 
 #: includes/admin/class-legal-page.php:257
 msgid "serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)"
-msgstr "сервисы, которые плагин не распознаёт (добавьте их в разделе «Сервисы»)"
+msgstr ""
+"сервисы, которые плагин не распознаёт (добавьте их в разделе «Сервисы»)"
 
 #: includes/admin/class-legal-page.php:268
 msgid "Ce face pluginul și ce rămâne la tine"
@@ -820,8 +980,16 @@ msgid "Consent Manager — Pagini legale"
 msgstr "Consent Manager — Юридические страницы"
 
 #: includes/admin/class-legal-page.php:304
-msgid "Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi."
-msgstr "Шаблоны обновлены (новые тексты для Молдовы на RO/RU/EN). Создайте каждый документ заново, чтобы их применить; переводы, созданные плагином, обновятся вместе с ним. Сообщение исчезнет, когда вы заново создадите все три документа или закроете его."
+msgid ""
+"Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). "
+"Regenerează fiecare document ca să le preiei; traducerile create de plugin "
+"se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele "
+"trei documente sau când îl închizi."
+msgstr ""
+"Шаблоны обновлены (новые тексты для Молдовы на RO/RU/EN). Создайте каждый "
+"документ заново, чтобы их применить; переводы, созданные плагином, обновятся "
+"вместе с ним. Сообщение исчезнет, когда вы заново создадите все три "
+"документа или закроете его."
 
 #: includes/admin/class-legal-page.php:305
 #: includes/admin/class-services-page.php:433
@@ -829,24 +997,42 @@ msgid "Închide"
 msgstr "Закрыть"
 
 #: includes/admin/class-legal-page.php:311
-msgid "Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor."
-msgstr "Страница создана. Если она новая, она сохранена как черновик: проверьте её и опубликуйте в редакторе."
+msgid ""
+"Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și "
+"public-o din editor."
+msgstr ""
+"Страница создана. Если она новая, она сохранена как черновик: проверьте её и "
+"опубликуйте в редакторе."
 
 #: includes/admin/class-legal-page.php:313
 msgid "Salvat."
 msgstr "Сохранено."
 
 #: includes/admin/class-legal-page.php:316
-msgid "Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare."
-msgstr "Шаблоны — информационная отправная точка, а НЕ юридическая консультация. Перед публикацией проверьте текст у специалиста."
+msgid ""
+"Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. "
+"Revizuiește textul cu un specialist înainte de publicare."
+msgstr ""
+"Шаблоны — информационная отправная точка, а НЕ юридическая консультация. "
+"Перед публикацией проверьте текст у специалиста."
 
 #: includes/admin/class-legal-page.php:317
-msgid "Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale."
-msgstr "Тексты зависят от режима, выбранного в настройках (Pro или Light), и от блокировки скриптов. После изменения режима или блокировки создайте юридические страницы заново."
+msgid ""
+"Textele depind de modul ales în Setări (Pro sau Light) și de blocarea "
+"scripturilor. După ce schimbi modul sau blocarea, regenerează paginile "
+"legale."
+msgstr ""
+"Тексты зависят от режима, выбранного в настройках (Pro или Light), и от "
+"блокировки скриптов. После изменения режима или блокировки создайте "
+"юридические страницы заново."
 
 #: includes/admin/class-legal-page.php:317
-msgid "După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale."
-msgstr "После изменения срока хранения согласия или реестра в настройках создайте юридические страницы заново."
+msgid ""
+"După ce schimbi durata acordului sau a registrului în Setări, regenerează "
+"paginile legale."
+msgstr ""
+"После изменения срока хранения согласия или реестра в настройках создайте "
+"юридические страницы заново."
 
 #: includes/admin/class-legal-page.php:325
 msgid "Datele operatorului"
@@ -854,7 +1040,9 @@ msgstr "Данные оператора"
 
 #: includes/admin/class-legal-page.php:326
 msgid "Apar în paginile generate. Se salvează, nu trebuie completate din nou."
-msgstr "Они появляются на созданных страницах. Данные сохраняются, вводить их заново не нужно."
+msgstr ""
+"Они появляются на созданных страницах. Данные сохраняются, вводить их заново "
+"не нужно."
 
 #: includes/admin/class-legal-page.php:328
 msgid "Denumire operator"
@@ -881,8 +1069,14 @@ msgid "Documente"
 msgstr "Документы"
 
 #: includes/admin/class-legal-page.php:341
-msgid "Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. Linkul „Politica de confidențialitate” din banner apare doar când pagina e publicată."
-msgstr "Выберите существующую страницу (в том числе черновик) или создайте её из шаблона. Ссылка «Политика конфиденциальности» в баннере появляется только после публикации страницы."
+msgid ""
+"Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. "
+"Linkul „Politica de confidențialitate” din banner apare doar când pagina e "
+"publicată."
+msgstr ""
+"Выберите существующую страницу (в том числе черновик) или создайте её из "
+"шаблона. Ссылка «Политика конфиденциальности» в баннере появляется только "
+"после публикации страницы."
 
 #: includes/admin/class-legal-page.php:344
 msgid "Document"
@@ -901,8 +1095,11 @@ msgid "— niciuna —"
 msgstr "— нет —"
 
 #: includes/admin/class-legal-page.php:367
-msgid "Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești."
-msgstr "Предложено: страница конфиденциальности WordPress. Сохраните, чтобы её использовать."
+msgid ""
+"Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești."
+msgstr ""
+"Предложено: страница конфиденциальности WordPress. Сохраните, чтобы её "
+"использовать."
 
 #: includes/admin/class-legal-page.php:370
 msgid "Folosește și ca pagina de confidențialitate a WordPress"
@@ -917,8 +1114,12 @@ msgid "Vezi"
 msgstr "Просмотр"
 
 #: includes/admin/class-legal-page.php:382
-msgid "Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în pagină se pierd. Continui?"
-msgstr "Текст страницы будет заменён шаблоном. Изменения, внесённые на странице вручную, будут потеряны. Продолжить?"
+msgid ""
+"Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în "
+"pagină se pierd. Continui?"
+msgstr ""
+"Текст страницы будет заменён шаблоном. Изменения, внесённые на странице "
+"вручную, будут потеряны. Продолжить?"
 
 #: includes/admin/class-legal-page.php:382
 msgid "Regenerează"
@@ -929,8 +1130,16 @@ msgid "Generează"
 msgstr "Создать"
 
 #: includes/admin/class-legal-page.php:392
-msgid "Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: cele marcate de plugin și cele care încep cu rândul „Document generat automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte traduceri nu sunt atinse."
-msgstr "При повторном создании перезаписываются и связанные переводы, созданные плагином: отмеченные плагином и начинающиеся со строки «Document generat automat de Consent Manager Pro» (копии, сделанные версиями 0.4.x). Остальные переводы не затрагиваются."
+msgid ""
+"Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: "
+"cele marcate de plugin și cele care încep cu rândul „Document generat "
+"automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). "
+"Celelalte traduceri nu sunt atinse."
+msgstr ""
+"При повторном создании перезаписываются и связанные переводы, созданные "
+"плагином: отмеченные плагином и начинающиеся со строки «Document generat "
+"automat de Consent Manager Pro» (копии, сделанные версиями 0.4.x). Остальные "
+"переводы не затрагиваются."
 
 #: includes/admin/class-legal-page.php:393
 msgid "Salvează"
@@ -949,8 +1158,12 @@ msgid "excepție"
 msgstr "исключение"
 
 #: includes/admin/class-services-page.php:48
-msgid "Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat ca să nu se strice formularele. Îl poți bloca dintr-un click."
-msgstr "Органы ЕС считают, что для reCAPTCHA нужно согласие. Он не блокируется, чтобы не сломать формы. Вы можете заблокировать его одним кликом."
+msgid ""
+"Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat "
+"ca să nu se strice formularele. Îl poți bloca dintr-un click."
+msgstr ""
+"Органы ЕС считают, что для reCAPTCHA нужно согласие. Он не блокируется, "
+"чтобы не сломать формы. Вы можете заблокировать его одним кликом."
 
 #: includes/admin/class-services-page.php:62
 #: includes/admin/class-services-page.php:66
@@ -958,8 +1171,12 @@ msgid "nu bloca (excepție)"
 msgstr "не блокировать (исключение)"
 
 #: includes/admin/class-services-page.php:63
-msgid "În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat»."
-msgstr "В режиме Advanced Google Analytics и Tag Manager загружаются всегда, с Consent Mode в состоянии «denied» (отказ)."
+msgid ""
+"În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu "
+"Consent Mode pe «refuzat»."
+msgstr ""
+"В режиме Advanced Google Analytics и Tag Manager загружаются всегда, с "
+"Consent Mode в состоянии «denied» (отказ)."
 
 #: includes/admin/class-services-page.php:64
 msgid "Setarea ta: nu bloca (se aplică și în Strict)."
@@ -969,7 +1186,7 @@ msgstr "Ваша настройка: не блокировать (действу
 msgid "Setarea ta: blocat până la acord (se aplică în Strict)."
 msgstr "Ваша настройка: блокировать до согласия (действует в режиме Strict)."
 
-#: includes/admin/class-services-page.php:89
+#: includes/admin/class-services-page.php:89 templates/admin/guide.php:90
 msgid "Serviciu personalizat"
 msgstr "Пользовательский сервис"
 
@@ -978,7 +1195,9 @@ msgid "Domenii (unul pe rând)"
 msgstr "Домены (по одному в строке)"
 
 #: includes/admin/class-services-page.php:108
-msgid "Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe aceste domenii."
+msgid ""
+"Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe "
+"aceste domenii."
 msgstr "Блокируются скрипты и iframe (видео, формы, календари) с этих доменов."
 
 #: includes/admin/class-services-page.php:111
@@ -991,7 +1210,8 @@ msgstr "Скрипт (необязательно, выполняется тол�
 
 #: includes/admin/class-services-page.php:138
 msgid "Are script (doar un administrator cu drept de cod îl poate modifica)"
-msgstr "Есть скрипт (изменить его может только администратор с правом добавлять код)"
+msgstr ""
+"Есть скрипт (изменить его может только администратор с правом добавлять код)"
 
 #: includes/admin/class-services-page.php:179
 msgid "Consent Manager — Servicii"
@@ -1006,12 +1226,20 @@ msgid "Lista a fost resetată."
 msgstr "Список сброшен."
 
 #: includes/admin/class-services-page.php:187
-msgid "Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate."
-msgstr "Скрипт не сохранён: у вашей учётной записи нет права добавлять код (unfiltered_html). Остальные изменения сохранены."
+msgid ""
+"Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod "
+"(unfiltered_html). Restul modificărilor au fost salvate."
+msgstr ""
+"Скрипт не сохранён: у вашей учётной записи нет права добавлять код "
+"(unfiltered_html). Остальные изменения сохранены."
 
 #: includes/admin/class-services-page.php:190
-msgid "Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar bloca scripturile site-ului). L-am scos din listă."
-msgstr "Домен вашего сайта не может быть доменом пользовательского сервиса (это заблокировало бы скрипты самого сайта). Он удалён из списка."
+msgid ""
+"Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar "
+"bloca scripturile site-ului). L-am scos din listă."
+msgstr ""
+"Домен вашего сайта не может быть доменом пользовательского сервиса (это "
+"заблокировало бы скрипты самого сайта). Он удалён из списка."
 
 #. translators: %s: error text
 #: includes/admin/class-services-page.php:193
@@ -1020,8 +1248,12 @@ msgid "Biblioteca de servicii: %s"
 msgstr "Библиотека сервисов: %s"
 
 #: includes/admin/class-services-page.php:197
-msgid "WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului."
-msgstr "WooCommerce активен, но плагин WP Consent API отсутствует: расширения WooCommerce не узнают выбор посетителя."
+msgid ""
+"WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile "
+"WooCommerce nu află alegerea vizitatorului."
+msgstr ""
+"WooCommerce активен, но плагин WP Consent API отсутствует: расширения "
+"WooCommerce не узнают выбор посетителя."
 
 #: includes/admin/class-services-page.php:199
 msgid "Instalează WP Consent API"
@@ -1066,24 +1298,35 @@ msgid "+ Adaugă serviciu"
 msgstr "+ Добавить сервис"
 
 #: includes/admin/class-services-page.php:260
-msgid "Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt JavaScript ulterior trebuie controlat din GTM (Consent Mode)."
-msgstr "Блокируется то, что есть в HTML страницы. То, что позже добавляет Google Tag Manager или другой JavaScript, нужно контролировать в GTM (Consent Mode)."
+msgid ""
+"Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt "
+"JavaScript ulterior trebuie controlat din GTM (Consent Mode)."
+msgstr ""
+"Блокируется то, что есть в HTML страницы. То, что позже добавляет Google Tag "
+"Manager или другой JavaScript, нужно контролировать в GTM (Consent Mode)."
 
 #: includes/admin/class-services-page.php:262
 msgid "Salvează serviciile"
 msgstr "Сохранить сервисы"
 
 #: includes/admin/class-services-page.php:270
-msgid "Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?"
-msgstr "В списке обнаруженных сервисов останется только то, что нашло последнее сканирование. Продолжить?"
+msgid ""
+"Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?"
+msgstr ""
+"В списке обнаруженных сервисов останется только то, что нашло последнее "
+"сканирование. Продолжить?"
 
 #: includes/admin/class-services-page.php:273
 msgid "Resetează lista serviciilor văzute"
 msgstr "Сбросить список обнаруженных сервисов"
 
 #: includes/admin/class-services-page.php:274
-msgid "Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) până o resetezi."
-msgstr "Сервисы, когда-либо найденные на сайте, остаются в списке (для повторного согласия), пока вы его не сбросите."
+msgid ""
+"Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) "
+"până o resetezi."
+msgstr ""
+"Сервисы, когда-либо найденные на сайте, остаются в списке (для повторного "
+"согласия), пока вы его не сбросите."
 
 #. translators: %s: service names
 #: includes/admin/class-services-page.php:428
@@ -1116,34 +1359,58 @@ msgstr "Режим Light не может запрашивать согласие
 #. translators: %s: tracker names
 #: includes/admin/class-settings-page.php:63
 #, php-format
-msgid "Pe site am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro."
-msgstr "На сайте найдено: %s. В режиме Light эти скрипты заблокированы постоянно и не выполняются. Если они вам нужны, перейдите в режим Pro."
+msgid ""
+"Pe site am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu "
+"rulează. Dacă ai nevoie de ele, treci pe modul Pro."
+msgstr ""
+"На сайте найдено: %s. В режиме Light эти скрипты заблокированы постоянно и "
+"не выполняются. Если они вам нужны, перейдите в режим Pro."
 
 #. translators: %s: tracker names
 #: includes/admin/class-settings-page.php:68
 #, php-format
-msgid "Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca (injectat ulterior din JavaScript). Verifică sursa lui."
-msgstr "Внимание: похоже, %s загружается скриптом, который плагин не может заблокировать (добавлен позже из JavaScript). Проверьте его источник."
+msgid ""
+"Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca "
+"(injectat ulterior din JavaScript). Verifică sursa lui."
+msgstr ""
+"Внимание: похоже, %s загружается скриптом, который плагин не может "
+"заблокировать (добавлен позже из JavaScript). Проверьте его источник."
 
 #: includes/admin/class-settings-page.php:74
 msgid "Lipsește linkul „Setări cookie”."
 msgstr "Нет ссылки «Настройки cookie»."
 
 #: includes/admin/class-settings-page.php:75
-msgid "Pe pagina principală nu am găsit niciun link care redeschide preferințele. Vizitatorii trebuie să-și poată retrage acordul la fel de ușor cum l-au dat (Legea 195/2024 și GDPR, art. 7). Pune în footer shortcode-ul [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
-msgstr "На главной странице не найдено ссылки, которая снова открывает настройки. Посетители должны иметь возможность отозвать согласие так же легко, как дали его (Закон 195/2024 и GDPR, ст. 7). Добавьте в подвал шорткод [cmp_cookie_settings_link] или пункт меню с URL #cmp-settings."
+msgid ""
+"Pe pagina principală nu am găsit niciun link care redeschide preferințele. "
+"Vizitatorii trebuie să-și poată retrage acordul la fel de ușor cum l-au dat "
+"(Legea 195/2024 și GDPR, art. 7). Pune în footer shortcode-ul "
+"[cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
+msgstr ""
+"На главной странице не найдено ссылки, которая снова открывает настройки. "
+"Посетители должны иметь возможность отозвать согласие так же легко, как дали "
+"его (Закон 195/2024 и GDPR, ст. 7). Добавьте в подвал шорткод "
+"[cmp_cookie_settings_link] или пункт меню с URL #cmp-settings."
 
 #. translators: %s: tracker names
 #: includes/admin/class-settings-page.php:81
 #, php-format
-msgid "%s se încarcă pe site înainte de acord. Bifează „Blochează scripturile de tracking până la consimțământ” mai jos."
-msgstr "%s загружается на сайте до согласия. Отметьте ниже «Блокировать скрипты отслеживания до согласия»."
+msgid ""
+"%s se încarcă pe site înainte de acord. Bifează „Blochează scripturile de "
+"tracking până la consimțământ” mai jos."
+msgstr ""
+"%s загружается на сайте до согласия. Отметьте ниже «Блокировать скрипты "
+"отслеживания до согласия»."
 
 #. translators: %s: tracker names
 #: includes/admin/class-settings-page.php:83
 #, php-format
-msgid "%s se încarcă pe site înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui."
-msgstr "%s загружается на сайте до согласия, хотя блокировка включена: вероятно, он добавляется позже из JavaScript. Проверьте его источник."
+msgid ""
+"%s se încarcă pe site înainte de acord, deși blocarea e activă: probabil e "
+"injectat ulterior din JavaScript. Verifică sursa lui."
+msgstr ""
+"%s загружается на сайте до согласия, хотя блокировка включена: вероятно, он "
+"добавляется позже из JavaScript. Проверьте его источник."
 
 #: includes/admin/class-settings-page.php:84
 msgid "Tracking fără acord."
@@ -1182,8 +1449,12 @@ msgid "Consent Manager — Setări"
 msgstr "Consent Manager — Настройки"
 
 #: includes/admin/class-settings-page.php:114
-msgid "Celelalte setări au fost salvate, dar modul Advanced nu a fost activat: bifează confirmarea de sub opțiune. Măsurarea a rămas pe Strict."
-msgstr "Остальные настройки сохранены, но режим Advanced не включён: отметьте подтверждение под этим параметром. Измерение осталось в режиме Strict."
+msgid ""
+"Celelalte setări au fost salvate, dar modul Advanced nu a fost activat: "
+"bifează confirmarea de sub opțiune. Măsurarea a rămas pe Strict."
+msgstr ""
+"Остальные настройки сохранены, но режим Advanced не включён: отметьте "
+"подтверждение под этим параметром. Измерение осталось в режиме Strict."
 
 #: includes/admin/class-settings-page.php:116
 msgid "Setări salvate."
@@ -1202,8 +1473,16 @@ msgid "Light — bară informativă, fără cookie-uri"
 msgstr "Light — информационная панель, без cookie"
 
 #: includes/admin/class-settings-page.php:132
-msgid "Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, Tag Manager și Meta Pixel sunt blocate permanent; dacă ai nevoie de ele, folosește Pro."
-msgstr "Light: сайт сразу доступен, показывается только уведомление и не сохраняется ни одного cookie. Light не может запрашивать согласие, поэтому Google Analytics, Tag Manager и Meta Pixel заблокированы постоянно; если они вам нужны, используйте Pro."
+msgid ""
+"Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se "
+"stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, "
+"Tag Manager și Meta Pixel sunt blocate permanent; dacă ai nevoie de ele, "
+"folosește Pro."
+msgstr ""
+"Light: сайт сразу доступен, показывается только уведомление и не сохраняется "
+"ни одного cookie. Light не может запрашивать согласие, поэтому Google "
+"Analytics, Tag Manager и Meta Pixel заблокированы постоянно; если они вам "
+"нужны, используйте Pro."
 
 #: includes/admin/class-settings-page.php:136
 msgid "Poziție banner"
@@ -1214,8 +1493,14 @@ msgid "Memorarea consimțământului (zile)"
 msgstr "Хранение согласия (дни)"
 
 #: includes/admin/class-settings-page.php:147
-msgid "Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de retenția registrului de consimțăminte."
-msgstr "Сколько дней браузер помнит выбор посетителя, прежде чем баннер появится снова (по умолчанию 180, максимум 396 = 13 месяцев, практика ЕС). Не путать со сроком хранения реестра согласий."
+msgid ""
+"Câte zile ține minte browserul alegerea vizitatorului înainte să reapară "
+"bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de "
+"retenția registrului de consimțăminte."
+msgstr ""
+"Сколько дней браузер помнит выбор посетителя, прежде чем баннер появится "
+"снова (по умолчанию 180, максимум 396 = 13 месяцев, практика ЕС). Не путать "
+"со сроком хранения реестра согласий."
 
 #: includes/admin/class-settings-page.php:151
 msgid "Preset design"
@@ -1230,8 +1515,18 @@ msgid "Blochează scripturile de tracking până la consimțământ"
 msgstr "Блокировать скрипты отслеживания до согласия"
 
 #: includes/admin/class-settings-page.php:162
-msgid "Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Video-urile YouTube și Vimeo și hărțile Google Maps apar ca un bloc cu butonul „Încarcă conținutul” până la acord. Recomandat: pornit. În modul Light, blocarea e mereu activă."
-msgstr "Google Analytics, Tag Manager и Meta Pixel вообще не загружаются до согласия: Google и Meta ничего не получают, даже IP (Consent Mode «basic»). Видео YouTube и Vimeo и карты Google Maps до согласия показываются блоком с кнопкой «Загрузить контент». Рекомендуется: включено. В режиме Light блокировка всегда включена."
+msgid ""
+"Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de "
+"Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode "
+"„basic”). Video-urile YouTube și Vimeo și hărțile Google Maps apar ca un "
+"bloc cu butonul „Încarcă conținutul” până la acord. Recomandat: pornit. În "
+"modul Light, blocarea e mereu activă."
+msgstr ""
+"Google Analytics, Tag Manager и Meta Pixel вообще не загружаются до "
+"согласия: Google и Meta ничего не получают, даже IP (Consent Mode «basic»). "
+"Видео YouTube и Vimeo и карты Google Maps до согласия показываются блоком с "
+"кнопкой «Загрузить контент». Рекомендуется: включено. В режиме Light "
+"блокировка всегда включена."
 
 #: includes/admin/class-settings-page.php:170
 msgid "Mod de măsurare"
@@ -1242,40 +1537,72 @@ msgid "Strict"
 msgstr "Strict"
 
 #: includes/admin/class-settings-page.php:173
-msgid "serviciile blocate nu se încarcă înainte de acord (excepțiile marcate, de ex. unelte de statistică fără cookie-uri, da). Recomandat."
-msgstr "заблокированные сервисы не загружаются до согласия (отмеченные исключения, например инструменты статистики без cookie, загружаются). Рекомендуется."
+msgid ""
+"serviciile blocate nu se încarcă înainte de acord (excepțiile marcate, de "
+"ex. unelte de statistică fără cookie-uri, da). Recomandat."
+msgstr ""
+"заблокированные сервисы не загружаются до согласия (отмеченные исключения, "
+"например инструменты статистики без cookie, загружаются). Рекомендуется."
 
 #: includes/admin/class-settings-page.php:174
 msgid "Advanced"
 msgstr "Advanced"
 
 #: includes/admin/class-settings-page.php:174
-msgid "Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat” până la acord. Google estimează vizitele celor care refuză. Google Ads (AW-), Floodlight (DC-) și Universal Analytics vechi (analytics.js) rămân blocate până la acord."
-msgstr "Google Analytics 4 и Tag Manager загружаются сразу, с Consent Mode в состоянии «denied» (отказ) до согласия. Google оценивает посещения тех, кто отказался. Google Ads (AW-), Floodlight (DC-) и старый Universal Analytics (analytics.js) остаются заблокированными до согласия."
+msgid ""
+"Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode "
+"pe „refuzat” până la acord. Google estimează vizitele celor care refuză. "
+"Google Ads (AW-), Floodlight (DC-) și Universal Analytics vechi "
+"(analytics.js) rămân blocate până la acord."
+msgstr ""
+"Google Analytics 4 и Tag Manager загружаются сразу, с Consent Mode в "
+"состоянии «denied» (отказ) до согласия. Google оценивает посещения тех, кто "
+"отказался. Google Ads (AW-), Floodlight (DC-) и старый Universal Analytics "
+"(analytics.js) остаются заблокированными до согласия."
 
 #: includes/admin/class-settings-page.php:176
-msgid "Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE."
-msgstr "Я понимаю, что Google получает данные до согласия. Это серая зона в Молдове (Закон 72/2025, ст. 116) и в ЕС."
+msgid ""
+"Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova "
+"(Legea 72/2025, art. 116) și în UE."
+msgstr ""
+"Я понимаю, что Google получает данные до согласия. Это серая зона в Молдове "
+"(Закон 72/2025, ст. 116) и в ЕС."
 
 #: includes/admin/class-settings-page.php:179
-msgid "Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu are niciun efect, iar alegerea salvată se păstrează."
-msgstr "Для Advanced нужен режим Pro с включённой блокировкой скриптов. Иначе параметр ни на что не влияет, а сохранённый выбор остаётся."
+msgid ""
+"Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu "
+"are niciun efect, iar alegerea salvată se păstrează."
+msgstr ""
+"Для Advanced нужен режим Pro с включённой блокировкой скриптов. Иначе "
+"параметр ни на что не влияет, а сохранённый выбор остаётся."
 
 #: includes/admin/class-settings-page.php:183
 msgid "Buton flotant redeschidere"
 msgstr "Плавающая кнопка повторного открытия"
 
 #: includes/admin/class-settings-page.php:185
-msgid "Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri"
-msgstr "Показывать круглую кнопку (слева внизу) для повторного открытия настроек cookie"
+msgid ""
+"Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de "
+"cookie-uri"
+msgstr ""
+"Показывать круглую кнопку (слева внизу) для повторного открытия настроек "
+"cookie"
 
 #: includes/admin/class-settings-page.php:186
-msgid "Recomandat: oprit, cu un link „Setări cookie-uri” în footer — shortcode [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
-msgstr "Рекомендуется: выключено, со ссылкой «Настройки cookie» в подвале — шорткод [cmp_cookie_settings_link] или пункт меню с URL #cmp-settings."
+msgid ""
+"Recomandat: oprit, cu un link „Setări cookie-uri” în footer — shortcode "
+"[cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
+msgstr ""
+"Рекомендуется: выключено, со ссылкой «Настройки cookie» в подвале — шорткод "
+"[cmp_cookie_settings_link] или пункт меню с URL #cmp-settings."
 
 #: includes/admin/class-settings-page.php:187
-msgid "Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în modul Pro."
-msgstr "Появляется после того, как посетитель сделал выбор. Действует только в режиме Pro."
+msgid ""
+"Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în "
+"modul Pro."
+msgstr ""
+"Появляется после того, как посетитель сделал выбор. Действует только в "
+"режиме Pro."
 
 #: includes/admin/class-settings-page.php:191
 msgid "Reîncărcare după alegere"
@@ -1286,8 +1613,16 @@ msgid "Reîncarcă pagina după alegerea din banner"
 msgstr "Перезагружать страницу после выбора в баннере"
 
 #: includes/admin/class-settings-page.php:194
-msgid "Pentru site-uri cu animații la încărcare, ascunse de overlay: după reîncărcare se văd de la început. Se aplică doar la prima alegere, din bannerul apărut la încărcare — nu și la schimbările făcute ulterior din linkul „Setări cookie-uri”."
-msgstr "Для сайтов с анимацией при загрузке, которую скрывает оверлей: после перезагрузки она видна с начала. Действует только при первом выборе в баннере, появившемся при загрузке, — но не при последующих изменениях через ссылку «Настройки cookie»."
+msgid ""
+"Pentru site-uri cu animații la încărcare, ascunse de overlay: după "
+"reîncărcare se văd de la început. Se aplică doar la prima alegere, din "
+"bannerul apărut la încărcare — nu și la schimbările făcute ulterior din "
+"linkul „Setări cookie-uri”."
+msgstr ""
+"Для сайтов с анимацией при загрузке, которую скрывает оверлей: после "
+"перезагрузки она видна с начала. Действует только при первом выборе в "
+"баннере, появившемся при загрузке, — но не при последующих изменениях через "
+"ссылку «Настройки cookie»."
 
 #: includes/admin/class-settings-page.php:198
 msgid "Localizare Google Fonts"
@@ -1298,8 +1633,14 @@ msgid "Servește Google Fonts local (fără request la Google)"
 msgstr "Раздавать Google Fonts локально (без запросов к Google)"
 
 #: includes/admin/class-settings-page.php:202
-msgid "După activare (și Salvează), apasă „Localizează fonturile\" de mai jos ca să descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în modul Pro."
-msgstr "После включения (и сохранения) нажмите ниже «Локализовать шрифты», чтобы скачать шрифты с просканированных страниц сайта. Действует только в режиме Pro."
+msgid ""
+"După activare (și Salvează), apasă „Localizează fonturile\" de mai jos ca să "
+"descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în "
+"modul Pro."
+msgstr ""
+"После включения (и сохранения) нажмите ниже «Локализовать шрифты», чтобы "
+"скачать шрифты с просканированных страниц сайта. Действует только в режиме "
+"Pro."
 
 #. translators: %d — count
 #: includes/admin/class-settings-page.php:206
@@ -1312,12 +1653,18 @@ msgid "Resurse terțe WordPress"
 msgstr "Сторонние ресурсы WordPress"
 
 #: includes/admin/class-settings-page.php:215
-msgid "Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către s.w.org)"
-msgstr "Отключить эмодзи WordPress (они больше не передают IP посетителей на s.w.org)"
+msgid ""
+"Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către "
+"s.w.org)"
+msgstr ""
+"Отключить эмодзи WordPress (они больше не передают IP посетителей на s.w.org)"
 
 #: includes/admin/class-settings-page.php:216
-msgid "Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash al emailului)"
-msgstr "Заменить Gravatar локальным аватаром (Gravatar передаёт IP и хеш email)"
+msgid ""
+"Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash "
+"al emailului)"
+msgstr ""
+"Заменить Gravatar локальным аватаром (Gravatar передаёт IP и хеш email)"
 
 #: includes/admin/class-settings-page.php:220
 msgid "Versiune politică"
@@ -1391,8 +1738,14 @@ msgid "Șterge toate datele la dezinstalare"
 msgstr "Удалить все данные при удалении плагина"
 
 #: includes/admin/class-settings-page.php:283
-msgid "Include registrul de consimțăminte, care e dovada legală a alegerilor vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să ștergi pluginul cu această bifă pornită."
-msgstr "Сюда входит реестр согласий — юридическое доказательство выбора посетителей. Храните его столько, сколько требует закон (например, 13 месяцев), прежде чем удалять плагин с включённым параметром."
+msgid ""
+"Include registrul de consimțăminte, care e dovada legală a alegerilor "
+"vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să "
+"ștergi pluginul cu această bifă pornită."
+msgstr ""
+"Сюда входит реестр согласий — юридическое доказательство выбора посетителей. "
+"Храните его столько, сколько требует закон (например, 13 месяцев), прежде "
+"чем удалять плагин с включённым параметром."
 
 #: includes/admin/class-settings-page.php:287
 msgid "Salvează setările"
@@ -1403,8 +1756,14 @@ msgid "Fonturi localizate șterse."
 msgstr "Локализованные шрифты удалены."
 
 #: includes/admin/class-settings-page.php:297
-msgid "Descarcă fonturile Google folosite pe paginile scanate ale site-ului și servește-le local. Activează întâi opțiunea „Localizare Google Fonts\" de mai sus și salvează."
-msgstr "Скачивает шрифты Google, используемые на просканированных страницах сайта, и раздаёт их локально. Сначала включите выше параметр «Локализация Google Fonts» и сохраните."
+msgid ""
+"Descarcă fonturile Google folosite pe paginile scanate ale site-ului și "
+"servește-le local. Activează întâi opțiunea „Localizare Google Fonts\" de "
+"mai sus și salvează."
+msgstr ""
+"Скачивает шрифты Google, используемые на просканированных страницах сайта, и "
+"раздаёт их локально. Сначала включите выше параметр «Локализация Google "
+"Fonts» и сохраните."
 
 #: includes/admin/class-settings-page.php:301
 msgid "Localizează fonturile"
@@ -1415,30 +1774,51 @@ msgid "Șterge fonturile localizate"
 msgstr "Удалить локализованные шрифты"
 
 #: includes/admin/class-settings-page.php:374
-msgid "Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag Manager ca etichetele să respecte Consent Mode."
-msgstr "Вы перешли на Advanced. Теперь Google получает пинги без cookie от всех посетителей и оценивает посещения тех, кто отказался. Проверьте в Tag Manager, что теги учитывают Consent Mode."
+msgid ""
+"Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de "
+"la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag "
+"Manager ca etichetele să respecte Consent Mode."
+msgstr ""
+"Вы перешли на Advanced. Теперь Google получает пинги без cookie от всех "
+"посетителей и оценивает посещения тех, кто отказался. Проверьте в Tag "
+"Manager, что теги учитывают Consent Mode."
 
 #: includes/admin/class-settings-page.php:376
-msgid "Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care refuză, deci statisticile vor arăta mai puține vizite."
-msgstr "Вы перешли на Strict. Теперь вы не получаете данные от посетителей, которые отказались, поэтому статистика покажет меньше посещений."
+msgid ""
+"Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care "
+"refuză, deci statisticile vor arăta mai puține vizite."
+msgstr ""
+"Вы перешли на Strict. Теперь вы не получаете данные от посетителей, которые "
+"отказались, поэтому статистика покажет меньше посещений."
 
 #: includes/admin/class-settings-page.php:378
-msgid "Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii»."
-msgstr "Google Analytics / Tag Manager остаются незаблокированными из-за настройки в разделе «Сервисы»."
+msgid ""
+"Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii»."
+msgstr ""
+"Google Analytics / Tag Manager остаются незаблокированными из-за настройки в "
+"разделе «Сервисы»."
 
 #: includes/admin/class-settings-page.php:384
 msgid "Regenerează paginile legale."
 msgstr "Создайте юридические страницы заново."
 
 #: includes/modules/class-legal.php:302
-msgid "Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:"
-msgstr "Этот сайт использует файлы cookie, управляемые через Consent Manager Pro. Используемые файлы cookie:"
+msgid ""
+"Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-"
+"urile utilizate:"
+msgstr ""
+"Этот сайт использует файлы cookie, управляемые через Consent Manager Pro. "
+"Используемые файлы cookie:"
 
 #. translators: 1: pages scanned, 2: pages in the list
 #: includes/modules/class-scanner.php:1177
 #, php-format
-msgid "Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui ecran"
-msgstr "Идёт сканирование (%1$d/%2$d) — оно продолжается при каждом открытии этого экрана"
+msgid ""
+"Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui "
+"ecran"
+msgstr ""
+"Идёт сканирование (%1$d/%2$d) — оно продолжается при каждом открытии этого "
+"экрана"
 
 #. translators: 1: pages scanned, 2: pages in the list
 #: includes/modules/class-scanner.php:1179
@@ -1453,8 +1833,1364 @@ msgstr "Не удалось скачать пакет обновления."
 
 #: includes/modules/class-updater.php:218
 msgid "Pachetul de update nu are o semnătură validă și nu a fost instalat."
-msgstr "У пакета обновления нет действительной подписи, и он не был установлен."
+msgstr ""
+"У пакета обновления нет действительной подписи, и он не был установлен."
 
 #: includes/modules/class-updater.php:242
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
 msgstr "Пакет обновления превышает максимально допустимый размер."
+
+#: templates/admin/guide.php:32
+msgid "Consent Manager — Ghid"
+msgstr "Consent Manager — Руководство"
+
+#: templates/admin/guide.php:33
+msgid ""
+"Ghidul te duce de la instalare la un site care cere acord corect. Citește-l "
+"o dată de la cap la coadă, apoi revino la secțiunea de care ai nevoie."
+msgstr ""
+"Руководство проведёт вас от установки до сайта, который правильно "
+"запрашивает согласие. Прочитайте его один раз от начала до конца, а потом "
+"возвращайтесь к нужному разделу."
+
+#: templates/admin/guide.php:34
+msgid ""
+"Fiecare ecran al pluginului are sus un link „Ghid”. El te aduce direct la "
+"secțiunea despre acel ecran."
+msgstr ""
+"На каждом экране плагина вверху есть ссылка «Руководство». Она ведёт прямо к "
+"разделу об этом экране."
+
+#: templates/admin/guide.php:37
+msgid "Cuprins"
+msgstr "Содержание"
+
+#: templates/admin/guide.php:48
+msgid "Cinci pași pentru un site care cere acord corect. Fă-i în ordine."
+msgstr ""
+"Пять шагов к сайту, который правильно запрашивает согласие. Выполните их по "
+"порядку."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:50
+#, php-format
+msgid ""
+"%1$sSetări%2$s: alege „Mod afișare”. Pentru majoritatea site-urilor, Pro. "
+"Lasă bifat „Blochează scripturile de tracking până la consimțământ” și „Mod "
+"de măsurare” pe Strict. Apasă „Salvează setările”."
+msgstr ""
+"%1$sНастройки%2$s: выберите «Режим отображения». Для большинства сайтов — "
+"Pro. Оставьте отмеченным «Блокировать скрипты отслеживания до согласия», а "
+"«Режим измерения» — Strict. Нажмите «Сохранить настройки»."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:51
+#, php-format
+msgid ""
+"%1$sServicii%2$s: uită-te la lista „Găsite pe site”. Pluginul scanează "
+"singur paginile site-ului. Dacă lista e goală, apasă „Rescanează”. Verifică "
+"să nu lipsească nimic din ce știi că folosește site-ul."
+msgstr ""
+"%1$sСервисы%2$s: посмотрите список «Найдены на сайте». Плагин сам сканирует "
+"страницы сайта. Если список пуст, нажмите «Пересканировать». Убедитесь, что "
+"в нём есть всё, что, как вы знаете, использует сайт."
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:52
+#, php-format
+msgid ""
+"%1$sPagini legale%2$s: completează „Datele operatorului”, apoi apasă "
+"„Generează” la fiecare document (sau „Regenerează”, dacă documentul are deja "
+"o pagină: textul ei va fi înlocuit). O pagină nouă se salvează ca ciornă: "
+"citește-o și publică-o din editor."
+msgstr ""
+"%1$sЮридические страницы%2$s: заполните «Данные оператора», затем нажмите "
+"«Создать» для каждого документа (или «Создать заново», если у документа уже "
+"есть страница: её текст будет заменён). Новая страница сохраняется как "
+"черновик: прочитайте её и опубликуйте из редактора."
+
+#. translators: 1: the shortcode, 2: the menu link URL
+#: templates/admin/guide.php:53
+#, php-format
+msgid ""
+"Pune în footer linkul „Setări cookie”: shortcode-ul %1$s sau un link de "
+"meniu cu URL-ul %2$s. Prin el vizitatorul își schimbă sau își retrage "
+"acordul."
+msgstr ""
+"Добавьте в подвал ссылку «Настройки cookie»: шорткод %1$s или пункт меню с "
+"URL %2$s. Через неё посетитель меняет или отзывает согласие."
+
+#. translators: 1: the shortcode, 2: the menu link URL
+#: templates/admin/guide.php:54
+msgid ""
+"În modul Pro, dacă linkul lipsește de pe pagina principală, ecranul Setări "
+"arată avertismentul „Lipsește linkul „Setări cookie””. În loc de link poți "
+"porni „Buton flotant redeschidere” (doar în Pro), dar linkul din footer e "
+"varianta recomandată."
+msgstr ""
+"В режиме Pro, если на главной странице нет ссылки, экран «Настройки» "
+"показывает предупреждение «Нет ссылки «Настройки cookie»». Вместо ссылки "
+"можно включить «Плавающая кнопка повторного открытия» (только в Pro), но "
+"ссылка в подвале — рекомендуемый вариант."
+
+#. translators: %1$s, %2$s: link to the Verificare screen; %3$s, %4$s: link to the "Cum verifici blocarea" section
+#: templates/admin/guide.php:55
+#, php-format
+msgid ""
+"%1$sVerificare%2$s: apasă „Verifică în browser”. Nicio pagină nu trebuie să "
+"iasă roșie. Galbenul nu e o blocare ratată, dar merită citit. Dacă o pagină "
+"e roșie, citește %3$sCum verifici blocarea%4$s."
+msgstr ""
+"%1$sПроверка%2$s: нажмите «Проверить в браузере». Ни одна страница не должна "
+"получиться красной. Жёлтый — это не пропущенная блокировка, но его стоит "
+"прочитать. Если страница красная, прочитайте раздел %3$sКак проверить "
+"блокировку%4$s."
+
+#: templates/admin/guide.php:57
+msgid "Secțiunile de mai jos explică fiecare pas pe larg."
+msgstr "Разделы ниже подробно объясняют каждый шаг."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:63
+#, php-format
+msgid ""
+"Modurile se aleg în %1$sSetări%2$s. Sunt două alegeri: Pro sau Light („Mod "
+"afișare”), apoi, în Pro, Strict sau Advanced („Mod de măsurare”)."
+msgstr ""
+"Режимы выбираются в %1$sНастройках%2$s. Нужно сделать два выбора: Pro или "
+"Light («Режим отображения»), затем, в Pro, Strict или Advanced («Режим "
+"измерения»)."
+
+#: templates/admin/guide.php:65
+msgid "Pro sau Light"
+msgstr "Pro или Light"
+
+#: templates/admin/guide.php:66
+msgid ""
+"Pro afișează un banner cu butoane de acceptare, de refuz și de alegere pe "
+"categorii. Pluginul ține minte alegerea vizitatorului și o scrie în "
+"registru. Alege Pro dacă folosești statistici, publicitate, un chat sau "
+"video încorporat."
+msgstr ""
+"Pro показывает баннер с кнопками согласия, отказа и выбора по категориям. "
+"Плагин запоминает выбор посетителя и записывает его в реестр. Выберите Pro, "
+"если используете статистику, рекламу, чат или встроенное видео."
+
+#: templates/admin/guide.php:67
+msgid ""
+"Dacă browserul vizitatorului trimite semnalul Global Privacy Control (GPC), "
+"pluginul înregistrează automat refuzul („Doar cele necesare”) și nu mai "
+"arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”."
+msgstr ""
+"Если браузер посетителя отправляет сигнал Global Privacy Control (GPC), "
+"плагин автоматически записывает отказ («Только необходимые») и не показывает "
+"баннер. Посетитель может в любой момент дать согласие в «Настройках cookie»."
+
+#: templates/admin/guide.php:68
+msgid ""
+"Light afișează doar o bară informativă. Nu cere acord și nu pune cookie-uri. "
+"De aceea serviciile care cer acord sunt blocate permanent: Google Analytics, "
+"Tag Manager, Meta Pixel și celelalte nu rulează deloc, în afară de "
+"excepțiile marcate de tine. Video-urile și hărțile se încarcă doar dacă "
+"vizitatorul apasă „Încarcă conținutul”."
+msgstr ""
+"Light показывает только информационную панель. Он не запрашивает согласие и "
+"не устанавливает cookie. Поэтому сервисы, которым нужно согласие, "
+"заблокированы постоянно: Google Analytics, Tag Manager, Meta Pixel и "
+"остальные не работают совсем, кроме отмеченных вами исключений. Видео и "
+"карты загружаются, только если посетитель нажмёт «Загрузить контент»."
+
+#: templates/admin/guide.php:69
+msgid ""
+"Alege Light pentru un site de prezentare fără tracking. Dacă în Light "
+"pluginul găsește scripturi de tracking pe site, ecranul Setări te "
+"avertizează."
+msgstr ""
+"Выберите Light для сайта-визитки без отслеживания. Если в режиме Light "
+"плагин найдёт на сайте скрипты отслеживания, экран «Настройки» вас "
+"предупредит."
+
+#: templates/admin/guide.php:71
+msgid "Strict sau Advanced"
+msgstr "Strict или Advanced"
+
+#: templates/admin/guide.php:72
+msgid ""
+"„Mod de măsurare” contează doar în modul Pro, cu blocarea scripturilor "
+"pornită."
+msgstr ""
+"«Режим измерения» имеет значение только в режиме Pro при включённой "
+"блокировке скриптов."
+
+#: templates/admin/guide.php:73
+msgid ""
+"Strict: serviciile blocate nu se încarcă deloc înainte de acord. Google nu "
+"primește nimic de la vizitatorii care refuză, deci statisticile arată mai "
+"puține vizite. E alegerea recomandată."
+msgstr ""
+"Strict: заблокированные сервисы совсем не загружаются до согласия. Google "
+"ничего не получает от посетителей, которые отказались, поэтому статистика "
+"показывает меньше посещений. Это рекомендуемый выбор."
+
+#: templates/admin/guide.php:74
+msgid ""
+"Advanced: Google Analytics 4 și Tag Manager se încarcă de la început, cu "
+"Consent Mode pe „refuzat”. Fără acord, Google primește ping-uri fără cookie-"
+"uri și estimează vizitele celor care refuză. Ce câștigi: statistici mai "
+"complete."
+msgstr ""
+"Advanced: Google Analytics 4 и Tag Manager загружаются сразу, с Consent Mode "
+"в состоянии «denied» (отказ). Без согласия Google получает пинги без cookie "
+"и оценивает посещения тех, кто отказался. Что вы получаете: более полную "
+"статистику."
+
+#: templates/admin/guide.php:75
+msgid ""
+"În Advanced, Google Ads (AW-), Floodlight (DC-), vechiul Universal Analytics "
+"și celelalte servicii rămân blocate până la acord. Tag Manager poate încărca "
+"și alte etichete: verifică în Tag Manager că ele respectă Consent Mode."
+msgstr ""
+"В Advanced Google Ads (AW-), Floodlight (DC-), старый Universal Analytics и "
+"остальные сервисы остаются заблокированными до согласия. Tag Manager может "
+"загружать и другие теги: проверьте в Tag Manager, что они учитывают Consent "
+"Mode."
+
+#: templates/admin/guide.php:76
+msgid ""
+"Ce riști: Google primește adresa IP și datele browserului înainte de acord. "
+"E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE. De aceea "
+"Advanced se activează doar după ce bifezi confirmarea de sub opțiune."
+msgstr ""
+"Чем вы рискуете: Google получает IP-адрес и данные браузера до согласия. Это "
+"серая зона в Молдове (Закон 72/2025, ст. 116) и в ЕС. Поэтому Advanced "
+"включается, только когда вы отметите подтверждение под этим вариантом."
+
+#: templates/admin/guide.php:77
+msgid ""
+"Ce spune textul legal: în Advanced, dacă pe site s-au găsit Google Analytics "
+"sau Tag Manager (sau dacă site-ul nu a fost încă scanat), Politica de cookie-"
+"uri descrie măsurarea fără cookie-uri, iar Politica de confidențialitate îi "
+"dă temeiul: interesul legitim. După ce schimbi modul, regenerează paginile "
+"legale. Ecranul Setări îți amintește printr-un mesaj."
+msgstr ""
+"Что говорит юридический текст: в Advanced, если на сайте были найдены Google "
+"Analytics или Tag Manager (или сайт ещё не сканировался), Политика "
+"использования файлов cookie описывает измерение без cookie, а Политика "
+"конфиденциальности указывает его правовое основание: законный интерес. После "
+"смены режима создайте юридические страницы заново. Экран «Настройки» "
+"напомнит об этом сообщением."
+
+#: templates/admin/guide.php:84
+msgid "Biblioteca"
+msgstr "Библиотека"
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:85
+#, php-format
+msgid ""
+"Pluginul recunoaște singur serviciile din bibliotecă: Google Analytics, Meta "
+"Pixel, YouTube, Clarity, Hotjar, Tawk.to, Crisp și altele. Lista completă e "
+"la „Toată biblioteca”, pe ecranul %1$sServicii%2$s."
+msgstr ""
+"Плагин сам распознаёт сервисы из библиотеки: Google Analytics, Meta Pixel, "
+"YouTube, Clarity, Hotjar, Tawk.to, Crisp и другие. Полный список — в разделе "
+"«Вся библиотека» на экране %1$sСервисы%2$s."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:86
+msgid ""
+"„Găsite pe site” arată serviciile din ultima scanare. Pluginul rescanează "
+"site-ul o dată pe zi și după fiecare salvare a setărilor sau a serviciilor. "
+"„Rescanează” pornește o scanare nouă pe loc."
+msgstr ""
+"«Найдены на сайте» показывает сервисы из последнего сканирования. Плагин "
+"пересканирует сайт раз в день и после каждого сохранения настроек или "
+"сервисов. «Пересканировать» сразу запускает новое сканирование."
+
+#: templates/admin/guide.php:87
+msgid ""
+"La fiecare serviciu poți schimba categoria de acord. Bifa „nu bloca "
+"(excepție)” îl lasă să se încarce fără acord. Folosește-o doar pentru unelte "
+"care nu pun cookie-uri și nu urmăresc vizitatorul, de exemplu statistici "
+"fără cookie-uri."
+msgstr ""
+"Для каждого сервиса можно изменить категорию согласия. Флажок «не "
+"блокировать (исключение)» позволяет ему загружаться без согласия. "
+"Используйте его только для инструментов, которые не устанавливают cookie и "
+"не отслеживают посетителя, например для статистики без cookie."
+
+#: templates/admin/guide.php:88
+msgid ""
+"Scanarea vede doar ce e în HTML-ul paginii. Ce adaugă ulterior Google Tag "
+"Manager sau alt JavaScript trebuie controlat din Tag Manager, cu Consent "
+"Mode."
+msgstr ""
+"Сканирование видит только то, что есть в HTML страницы. То, что позже "
+"добавляет Google Tag Manager или другой JavaScript, нужно контролировать в "
+"Tag Manager через Consent Mode."
+
+#: templates/admin/guide.php:91
+msgid ""
+"Dacă un serviciu lipsește din bibliotecă, apasă „+ Adaugă serviciu” la "
+"„Servicii personalizate” și completează:"
+msgstr ""
+"Если сервиса нет в библиотеке, нажмите «+ Добавить сервис» в разделе "
+"«Пользовательские сервисы» и заполните:"
+
+#: templates/admin/guide.php:93
+msgid "Nume: numele serviciului, așa cum îl văd vizitatorii."
+msgstr "Название: имя сервиса, как его видят посетители."
+
+#: templates/admin/guide.php:94
+msgid "Categorie: categoria de acord de care depinde serviciul."
+msgstr "Категория: категория согласия, от которой зависит сервис."
+
+#: templates/admin/guide.php:95
+msgid ""
+"Domenii (unul pe rând): pluginul blochează până la acord scripturile și "
+"iframe-urile de pe aceste domenii."
+msgstr ""
+"Домены (по одному в строке): плагин блокирует до согласия скрипты и iframe с "
+"этих доменов."
+
+#: templates/admin/guide.php:96
+msgid ""
+"Cookie-uri: numele, durata și scopul fiecărui cookie. Apar în tabelul din "
+"Politica de cookie-uri."
+msgstr ""
+"Файлы cookie: название, срок и цель каждого cookie. Они появляются в таблице "
+"в Политике использования файлов cookie."
+
+#: templates/admin/guide.php:97
+msgid ""
+"Script (opțional): cod care rulează doar după acord. Câmpul apare doar "
+"pentru administratorii care au dreptul de a adăuga cod (unfiltered_html)."
+msgstr ""
+"Скрипт (необязательно): код, который выполняется только после согласия. Поле "
+"видят только администраторы, у которых есть право добавлять код "
+"(unfiltered_html)."
+
+#: templates/admin/guide.php:99
+msgid ""
+"Apoi apasă „Salvează serviciile”. Domeniul site-ului tău nu poate fi "
+"domeniul unui serviciu, pentru că ar bloca site-ul însuși."
+msgstr ""
+"Затем нажмите «Сохранить сервисы». Домен вашего сайта не может быть доменом "
+"сервиса, потому что тогда заблокировался бы сам сайт."
+
+#: templates/admin/guide.php:101
+msgid "Scripturi proprii: atributul data-cmp-category"
+msgstr "Собственные скрипты: атрибут data-cmp-category"
+
+#. translators: %s: the data-cmp-category attribute
+#: templates/admin/guide.php:102
+#, php-format
+msgid ""
+"Ai un script pus în temă sau într-un plugin, pe care pluginul nu îl "
+"recunoaște? Adaugă-i atributul %s, cu slug-ul categoriei:"
+msgstr ""
+"У вас есть скрипт в теме или в плагине, который плагин не распознаёт? "
+"Добавьте ему атрибут %s со slug категории:"
+
+#: templates/admin/guide.php:104
+msgid ""
+"Scriptul nu rulează până când vizitatorul acceptă categoria. Atributul merge "
+"la fel pe un iframe."
+msgstr ""
+"Скрипт не выполняется, пока посетитель не примет категорию. Атрибут так же "
+"работает на iframe."
+
+#. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
+#: templates/admin/guide.php:105
+#, php-format
+msgid ""
+"Slug-urile sunt pe ecranul %1$sCategorii%2$s. Implicit: %3$s, %4$s și %5$s. "
+"Cu valoarea %3$s scriptul rulează mereu. O valoare pe care pluginul nu o "
+"înțelege blochează scriptul, ca să nu scape nimic."
+msgstr ""
+"Slug категорий указаны на экране %1$sКатегории%2$s. По умолчанию: %3$s, %4$s "
+"и %5$s. Со значением %3$s скрипт выполняется всегда. Значение, которое "
+"плагин не понимает, блокирует скрипт, чтобы ничего не проскочило."
+
+#. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
+#: templates/admin/guide.php:106
+msgid ""
+"Atributul contează doar când blocarea e activă: în Pro, cu „Blochează "
+"scripturile de tracking până la consimțământ” bifat; în Light, mereu."
+msgstr ""
+"Атрибут работает, только когда блокировка активна: в Pro — при отмеченном "
+"«Блокировать скрипты отслеживания до согласия», в Light — всегда."
+
+#: templates/admin/guide.php:108
+msgid "„Încarcă mereu” la embed-uri"
+msgstr "«Загружать всегда» у встроенного контента"
+
+#: templates/admin/guide.php:109
+msgid ""
+"Până la acord, video-urile YouTube și Vimeo, hărțile Google Maps și iframe-"
+"urile serviciilor tale apar ca un bloc cu butonul „Încarcă conținutul”. El "
+"încarcă doar acel conținut, pe pagina curentă."
+msgstr ""
+"До согласия видео YouTube и Vimeo, карты Google Maps и iframe ваших сервисов "
+"показываются как блок с кнопкой «Загрузить контент». Она загружает только "
+"этот контент и только на текущей странице."
+
+#: templates/admin/guide.php:110
+msgid ""
+"Butonul „Încarcă mereu” ține minte alegerea pentru acel serviciu, pe tot "
+"site-ul, fără să accepte toată categoria. Alegerea se scrie în registru ca "
+"„Serviciu permis („Încarcă mereu”)”."
+msgstr ""
+"Кнопка «Загружать всегда» запоминает выбор для этого сервиса на всём сайте, "
+"не принимая всю категорию. Выбор записывается в реестр как «Сервис разрешён "
+"(«Загружать всегда»)»."
+
+#: templates/admin/guide.php:111
+msgid ""
+"Vizitatorul retrage alegerea din „Setări cookie”, din lista serviciilor "
+"încărcate mereu. „Încarcă mereu” nu există în modul Light, pentru că Light "
+"nu pune cookie-uri."
+msgstr ""
+"Посетитель отзывает выбор в «Настройках cookie», в списке сервисов, которые "
+"загружаются всегда. В режиме Light «Загружать всегда» нет, потому что Light "
+"не устанавливает cookie."
+
+#: templates/admin/guide.php:112
+msgid ""
+"„Încarcă mereu” apare doar la conținutul unui serviciu din bibliotecă sau al "
+"unui serviciu personalizat, nu și la un iframe marcat cu atributul data-cmp-"
+"category."
+msgstr ""
+"«Загружать всегда» появляется только у контента сервиса из библиотеки или "
+"пользовательского сервиса, но не у iframe, отмеченного атрибутом data-cmp-"
+"category."
+
+#: templates/admin/guide.php:118
+msgid "Cazuri frecvente, fiecare cu pașii de urmat."
+msgstr "Частые случаи, у каждого — шаги, которые нужно выполнить."
+
+#: templates/admin/guide.php:120
+msgid "„Am Clarity (sau alt tracker) pus direct în temă”"
+msgstr "«Clarity (или другой трекер) добавлен прямо в тему»"
+
+#: templates/admin/guide.php:121
+msgid ""
+"Problema: codul de tracking e lipit în tema site-ului, de exemplu în "
+"header.php sau într-un câmp pentru cod din setările temei. Vrei să nu ruleze "
+"înainte de acord."
+msgstr ""
+"Проблема: код отслеживания вставлен в тему сайта, например в header.php или "
+"в поле для кода в настройках темы. Вы хотите, чтобы он не выполнялся до "
+"согласия."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:123
+#, php-format
+msgid ""
+"În %1$sSetări%2$s, verifică că modul e Pro și că „Blochează scripturile de "
+"tracking până la consimțământ” e bifat."
+msgstr ""
+"В %1$sНастройках%2$s проверьте, что выбран режим Pro и отмечено «Блокировать "
+"скрипты отслеживания до согласия»."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:124
+#, php-format
+msgid ""
+"În %1$sServicii%2$s, apasă „Rescanează”. Clarity e în bibliotecă, deci "
+"trebuie să apară la „Găsite pe site”, cu starea „blocat până la acord”."
+msgstr ""
+"В %1$sСервисах%2$s нажмите «Пересканировать». Clarity есть в библиотеке, "
+"поэтому он должен появиться в списке «Найдены на сайте» со статусом "
+"«заблокирован до согласия»."
+
+#. translators: %s: the attribute with a category
+#: templates/admin/guide.php:125
+#, php-format
+msgid ""
+"Dacă trackerul nu apare (nu e în bibliotecă sau codul lui arată altfel), "
+"adaugă în temă, pe tag-ul lui script, atributul %s. Sau adaugă un serviciu "
+"personalizat cu domeniul lui."
+msgstr ""
+"Если трекер не появился (его нет в библиотеке или его код выглядит иначе), "
+"добавьте в теме к его тегу script атрибут %s. Или добавьте пользовательский "
+"сервис с его доменом."
+
+#. translators: %s: the attribute with a category
+#: templates/admin/guide.php:126
+msgid ""
+"Dacă trackerul vine din Google Tag Manager, nu din temă, pluginul nu îl vede "
+"în pagină. Setează în Tag Manager eticheta să ceară consimțământ (Consent "
+"Mode)."
+msgstr ""
+"Если трекер подключён через Google Tag Manager, а не в теме, плагин не видит "
+"его на странице. Настройте в Tag Manager, чтобы тег требовал согласия "
+"(Consent Mode)."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:127
+#, php-format
+msgid ""
+"Rulează %1$sVerificare%2$s. Pagina trebuie să fie verde, iar Clarity să "
+"apară doar în coloana „După „Acceptă tot””."
+msgstr ""
+"Запустите %1$sПроверку%2$s. Страница должна быть зелёной, а Clarity должен "
+"появляться только в колонке «После «Разрешить все»»."
+
+#: templates/admin/guide.php:130
+msgid "„Am un chat (Tawk.to, Crisp)”"
+msgstr "«У меня есть чат (Tawk.to, Crisp)»"
+
+#: templates/admin/guide.php:131
+msgid ""
+"Problema: widgetul de chat pune cookie-uri și contactează serverele "
+"furnizorului imediat ce se încarcă. Tawk.to și Crisp sunt în bibliotecă, în "
+"categoria Marketing."
+msgstr ""
+"Проблема: виджет чата устанавливает cookie и обращается к серверам "
+"поставщика сразу после загрузки. Tawk.to и Crisp есть в библиотеке, в "
+"категории «Маркетинг»."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:133
+#, php-format
+msgid ""
+"În %1$sServicii%2$s, apasă „Rescanează” și verifică că chatul apare la "
+"„Găsite pe site”, cu starea „blocat până la acord”."
+msgstr ""
+"В %1$sСервисах%2$s нажмите «Пересканировать» и проверьте, что чат появился в "
+"списке «Найдены на сайте» со статусом «заблокирован до согласия»."
+
+#. translators: %1$s, %2$s: link to the Categorii screen
+#: templates/admin/guide.php:134
+#, php-format
+msgid ""
+"Vrei ca chatul să depindă de o categorie separată? Creeaz-o în "
+"%1$sCategorii%2$s („+ Adaugă categorie”, apoi „Salvează categoriile”). Alege-"
+"o apoi în lista de lângă serviciu și apasă „Salvează serviciile”."
+msgstr ""
+"Хотите, чтобы чат зависел от отдельной категории? Создайте её в "
+"%1$sКатегориях%2$s («+ Добавить категорию», затем «Сохранить категории»). "
+"Потом выберите её в списке рядом с сервисом и нажмите «Сохранить сервисы»."
+
+#. translators: %1$s, %2$s: link to the Categorii screen
+#: templates/admin/guide.php:135
+msgid ""
+"Fără acord, bula de chat nu apare. Spune-le vizitatorilor asta, de exemplu "
+"pe pagina de contact: pentru chat, trebuie acceptată categoria lui din "
+"„Setări cookie”."
+msgstr ""
+"Без согласия значок чата не появляется. Сообщите об этом посетителям, "
+"например на странице контактов: чтобы пользоваться чатом, нужно принять его "
+"категорию в «Настройках cookie»."
+
+#: templates/admin/guide.php:136
+msgid ""
+"Pentru un furnizor de chat care nu e în bibliotecă, adaugă un serviciu "
+"personalizat cu domeniile lui."
+msgstr ""
+"Для поставщика чата, которого нет в библиотеке, добавьте пользовательский "
+"сервис с его доменами."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:137
+#, php-format
+msgid ""
+"Rulează %1$sVerificare%2$s. Domeniile chatului nu trebuie să apară în "
+"coloana „Înainte de acord”."
+msgstr ""
+"Запустите %1$sПроверку%2$s. Домены чата не должны появляться в колонке «До "
+"согласия»."
+
+#: templates/admin/guide.php:140
+msgid "„Am YouTube în articole”"
+msgstr "«У меня YouTube в статьях»"
+
+#: templates/admin/guide.php:141
+msgid ""
+"Problema: un video YouTube încorporat pune cookie-uri chiar dacă vizitatorul "
+"nu apasă play."
+msgstr ""
+"Проблема: встроенное видео YouTube устанавливает cookie, даже если "
+"посетитель не нажимает «воспроизвести»."
+
+#: templates/admin/guide.php:143
+msgid ""
+"Nu schimbi nimic în articole. Cu blocarea pornită, pluginul înlocuiește "
+"singur fiecare video cu un bloc „Încarcă conținutul”. Imaginea video-ului, "
+"când există, se servește de pe site-ul tău, deci YouTube nu e contactat "
+"înainte de acord."
+msgstr ""
+"В статьях ничего менять не нужно. При включённой блокировке плагин сам "
+"заменяет каждое видео блоком «Загрузить контент». Картинка видео, если она "
+"есть, загружается с вашего сайта, поэтому к YouTube нет обращений до "
+"согласия."
+
+#: templates/admin/guide.php:144
+msgid ""
+"Vizitatorul poate încărca un singur video („Încarcă conținutul”) sau toate "
+"video-urile YouTube („Încarcă mereu”). Dacă acceptă în banner categoria lui "
+"YouTube, video-urile se încarcă direct."
+msgstr ""
+"Посетитель может загрузить одно видео («Загрузить контент») или все видео "
+"YouTube («Загружать всегда»). Если он примет в баннере категорию YouTube, "
+"видео загружаются сразу."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:145
+#, php-format
+msgid ""
+"YouTube e în categoria Marketing. Dacă vrei altă categorie, schimb-o la "
+"YouTube, în %1$sServicii%2$s."
+msgstr ""
+"YouTube находится в категории «Маркетинг». Если нужна другая категория, "
+"измените её у YouTube в %1$sСервисах%2$s."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:146
+#, php-format
+msgid ""
+"Deschide un articol cu video într-o fereastră privată și uită-te la bloc. "
+"Apoi rulează %1$sVerificare%2$s."
+msgstr ""
+"Откройте статью с видео в приватном окне и посмотрите на блок. Затем "
+"запустите %1$sПроверку%2$s."
+
+#: templates/admin/guide.php:149
+msgid "„Folosesc Google Fonts din temă”"
+msgstr "«Я использую Google Fonts из темы»"
+
+#: templates/admin/guide.php:150
+msgid ""
+"Problema: tema încarcă fonturile de la fonts.googleapis.com. La fiecare "
+"vizită, Google primește IP-ul vizitatorului. Soluția e să servești fonturile "
+"de pe site-ul tău."
+msgstr ""
+"Проблема: тема загружает шрифты с fonts.googleapis.com. При каждом посещении "
+"Google получает IP посетителя. Решение — отдавать шрифты с вашего сайта."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:152
+#, php-format
+msgid ""
+"Funcția merge doar în modul Pro. În %1$sSetări%2$s, bifează „Localizare "
+"Google Fonts” și apasă „Salvează setările”."
+msgstr ""
+"Функция работает только в режиме Pro. В %1$sНастройках%2$s отметьте "
+"«Локализация Google Fonts» и нажмите «Сохранить настройки»."
+
+#. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
+#: templates/admin/guide.php:153
+#, php-format
+msgid ""
+"Apasă „Localizează fonturile”, în secțiunea Google Fonts de jos din "
+"%1$sSetări%2$s. Sau apasă „Localizează” în %3$sVerificare%4$s: butonul apare "
+"acolo când scanarea găsește Google Fonts și opțiunea „Localizare Google "
+"Fonts” e pornită."
+msgstr ""
+"Нажмите «Локализовать шрифты» в разделе Google Fonts внизу экрана "
+"%1$sНастройки%2$s. Или нажмите «Локализовать» на экране %3$sПроверка%4$s: "
+"кнопка появляется там, когда сканирование находит Google Fonts и включена "
+"опция «Локализация Google Fonts»."
+
+#. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
+#: templates/admin/guide.php:154
+msgid ""
+"Pluginul descarcă fonturile găsite pe paginile scanate și pe pagina "
+"principală. Apoi trimite vizitatorii la copia de pe site, nu la Google."
+msgstr ""
+"Плагин скачивает шрифты, найденные на просканированных страницах и на "
+"главной странице. Затем посетители получают копию с вашего сайта, а не с "
+"Google."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:155
+#, php-format
+msgid ""
+"În %1$sVerificare%2$s, apasă „Rescanează”. Google Fonts nu mai trebuie să "
+"apară la „Resurse care trimit IP-ul”."
+msgstr ""
+"В %1$sПроверке%2$s нажмите «Пересканировать». Google Fonts больше не должен "
+"появляться в колонке «Ресурсы, передающие IP»."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:156
+msgid ""
+"Pluginul înlocuiește doar fonturile încărcate cu un tag link în HTML. Dacă "
+"tema le încarcă din CSS (@import) sau din JavaScript, ele rămân la Google. "
+"Atunci găzduiește fonturile din temă."
+msgstr ""
+"Плагин заменяет только шрифты, подключённые тегом link в HTML. Если тема "
+"загружает их из CSS (@import) или из JavaScript, они продолжают загружаться "
+"с Google. В этом случае разместите шрифты в самой теме."
+
+#: templates/admin/guide.php:157
+msgid ""
+"Dacă schimbi fonturile temei, apasă din nou „Localizează fonturile”. „Șterge "
+"fonturile localizate” te întoarce la fonturile de la Google."
+msgstr ""
+"Если вы меняете шрифты темы, снова нажмите «Локализовать шрифты». «Удалить "
+"локализованные шрифты» возвращает шрифты с Google."
+
+#: templates/admin/guide.php:165
+msgid "Ecranul Verificare"
+msgstr "Экран «Проверка»"
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:166
+#, php-format
+msgid "Ecranul %1$sVerificare%2$s face două lucruri:"
+msgstr "Экран %1$sПроверка%2$s делает две вещи:"
+
+#: templates/admin/guide.php:168
+msgid ""
+"„Scanarea pe server” citește HTML-ul paginilor ca un vizitator fără cookie-"
+"uri. Arată, pe fiecare pagină, serviciile găsite, starea lor și de unde vin "
+"(temă, plugin, cod în pagină). Arată și resursele care trimit IP-ul "
+"vizitatorului: Google Fonts, Adobe Fonts, Font Awesome, CDN-uri, Gravatar, "
+"emoji WordPress."
+msgstr ""
+"«Сканирование на сервере» читает HTML страниц как посетитель без cookie. Для "
+"каждой страницы оно показывает найденные сервисы, их статус и источник "
+"(тема, плагин, код на странице). Оно также показывает ресурсы, передающие IP "
+"посетителя: Google Fonts, Adobe Fonts, Font Awesome, CDN, Gravatar, эмодзи "
+"WordPress."
+
+#: templates/admin/guide.php:169
+msgid ""
+"„Verifică în browser” încarcă pe rând, invizibil, paginile în browserul tău. "
+"Notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă "
+"tot” simulat."
+msgstr ""
+"«Проверить в браузере» по очереди и незаметно загружает страницы в вашем "
+"браузере. Проверка отмечает, что загружается до согласия и что добавляется "
+"после имитации «Разрешить все»."
+
+#. translators: %d: max pages
+#: templates/admin/guide.php:171
+#, php-format
+msgid ""
+"Se verifică cel mult %d de pagini: pagina principală, paginile legale, "
+"ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul. Adaugi "
+"sau scoți pagini în „Adaugă pagini (una pe rând)” și „Exclude pagini (una pe "
+"rând)”, apoi apeși „Salvează lista”."
+msgstr ""
+"Проверяется не более %d страниц: главная, юридические страницы, последняя "
+"опубликованная страница каждого типа, ваши адреса и sitemap. Страницы "
+"добавляются и исключаются в полях «Добавить страницы (по одной в строке)» и "
+"«Исключить страницы (по одной в строке)», затем нажмите «Сохранить список»."
+
+#. translators: %d: max pages
+#: templates/admin/guide.php:172
+msgid "Ce înseamnă culorile din raport:"
+msgstr "Что означают цвета в отчёте:"
+
+#: templates/admin/guide.php:174
+msgid ""
+"Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a "
+"încărcat înainte de acord. Asta trebuie reparat."
+msgstr ""
+"Красный: сервис, которому нужно согласие, или неизвестный сторонний домен "
+"загрузился до согласия. Это нужно исправить."
+
+#: templates/admin/guide.php:175
+msgid ""
+"Galben: pagina folosește resurse care trimit IP-ul vizitatorului la terți, "
+"sau cookie-uri pe care pluginul nu le cunoaște. Nu e o blocare ratată, dar "
+"merită verificat."
+msgstr ""
+"Жёлтый: страница использует ресурсы, передающие IP посетителя третьим лицам, "
+"или cookie, которые плагин не знает. Это не пропущенная блокировка, но это "
+"стоит проверить."
+
+#: templates/admin/guide.php:176
+msgid "Verde: nimic din ce cere acord nu s-a încărcat înainte de acord."
+msgstr ""
+"Зелёный: ничто из того, что требует согласия, не загрузилось до согласия."
+
+#: templates/admin/guide.php:177
+msgid ""
+"„nu s-a putut verifica”: pagina nu a răspuns, nu permite încărcarea într-un "
+"cadru, e pe altă origine decât adminul sau nu are bannerul. Nu înseamnă "
+"verde: verific-o manual."
+msgstr ""
+"«не удалось проверить»: страница не ответила, не разрешает загрузку во "
+"фрейме, находится на другом источнике (origin), чем админка, или на ней нет "
+"баннера. Это не значит «зелёный»: проверьте её вручную."
+
+#: templates/admin/guide.php:179
+msgid ""
+"Excepțiile, serviciile necesare și, în Advanced, Google Analytics și Tag "
+"Manager apar separat și nu schimbă culoarea."
+msgstr ""
+"Исключения, необходимые сервисы и, в режиме Advanced, Google Analytics и Tag "
+"Manager показываются отдельно и не влияют на цвет."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:180
+#, php-format
+msgid ""
+"Pentru emoji și Gravatar, bifează opțiunile din „Resurse terțe WordPress”, "
+"în %1$sSetări%2$s."
+msgstr ""
+"Для эмодзи и Gravatar отметьте варианты в «Сторонние ресурсы WordPress» на "
+"экране %1$sНастройки%2$s."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:181
+msgid "Limitele verificării, pe scurt:"
+msgstr "Ограничения проверки вкратце:"
+
+#: templates/admin/guide.php:183
+msgid ""
+"Rulează ca administrator logat. Pluginurile care schimbă pagina pentru "
+"utilizatorii logați pot da alt rezultat decât pentru vizitatori."
+msgstr ""
+"Проверка выполняется от имени вошедшего администратора. Плагины, которые "
+"меняют страницу для вошедших пользователей, могут дать другой результат, чем "
+"для посетителей."
+
+#: templates/admin/guide.php:184
+msgid "Ce apare doar după un clic sau după scroll nu e prins."
+msgstr "То, что появляется только после клика или прокрутки, не учитывается."
+
+#: templates/admin/guide.php:185
+msgid ""
+"Cookie-urile puse de terți pe domeniile lor nu se pot citi. Se văd doar "
+"domeniile contactate."
+msgstr ""
+"Cookie, которые третьи лица устанавливают на своих доменах, прочитать "
+"нельзя. Видны только домены, к которым были обращения."
+
+#: templates/admin/guide.php:186
+msgid ""
+"După „Acceptă tot”, cookie-urile serviciilor rămân în browserul tău, iar "
+"paginile verificate pot apărea ca vizite în statistici."
+msgstr ""
+"После «Разрешить все» cookie сервисов остаются в вашем браузере, а "
+"проверенные страницы могут появиться в статистике как посещения."
+
+#: templates/admin/guide.php:188
+msgid "Lista completă e pe ecran, la „Limitele verificării”."
+msgstr "Полный список — на экране, в блоке «Ограничения проверки»."
+
+#: templates/admin/guide.php:190
+msgid "Verificarea manuală cu DevTools"
+msgstr "Ручная проверка через DevTools"
+
+#: templates/admin/guide.php:191
+msgid ""
+"DevTools sunt uneltele pentru dezvoltatori din browser. Le deschizi cu tasta "
+"F12 sau cu clic dreapta pe pagină, apoi „Inspect” („Inspectează”)."
+msgstr ""
+"DevTools — это встроенные в браузер инструменты разработчика. Они "
+"открываются клавишей F12 или правым кликом по странице и пунктом «Inspect» "
+"(«Просмотреть код»)."
+
+#: templates/admin/guide.php:192
+msgid ""
+"Tab-ul Network („Rețea”) din DevTools arată fiecare cerere a paginii: "
+"fiecare fișier, script sau imagine, cu domeniul de la care vine."
+msgstr ""
+"Вкладка Network («Сеть») в DevTools показывает каждый запрос страницы: "
+"каждый файл, скрипт или изображение и домен, с которого он загружается."
+
+#: templates/admin/guide.php:194
+msgid ""
+"Deschide o fereastră privată (incognito) în Chrome sau Firefox. Așa pornești "
+"fără cookie-uri și fără un acord salvat. Folosește un browser fără GPC (sau "
+"oprește-l): Brave și DuckDuckGo îl trimit, iar atunci pluginul înregistrează "
+"automat refuzul și bannerul nu apare."
+msgstr ""
+"Откройте приватное окно (инкогнито) в Chrome или Firefox. Так вы начинаете "
+"без cookie и без сохранённого согласия. Используйте браузер без GPC (или "
+"отключите его): Brave и DuckDuckGo его отправляют, и тогда плагин "
+"автоматически записывает отказ, а баннер не появляется."
+
+#: templates/admin/guide.php:195
+msgid "Deschide DevTools, mergi la tab-ul Network și bifează „Disable cache”."
+msgstr ""
+"Откройте DevTools, перейдите на вкладку Network и отметьте «Disable cache»."
+
+#: templates/admin/guide.php:196
+msgid "Intră pe site. Nu apăsa nimic în banner."
+msgstr "Зайдите на сайт. Ничего не нажимайте в баннере."
+
+#: templates/admin/guide.php:197
+msgid ""
+"În câmpul de filtrare din Network, scrie pe rând domeniile serviciilor tale, "
+"de exemplu google-analytics.com, googletagmanager.com, facebook.net, "
+"clarity.ms, youtube.com. Nu trebuie să apară nicio cerere spre ele."
+msgstr ""
+"В поле фильтра на вкладке Network по очереди введите домены ваших сервисов, "
+"например google-analytics.com, googletagmanager.com, facebook.net, "
+"clarity.ms, youtube.com. Запросов к ним быть не должно."
+
+#: templates/admin/guide.php:198
+msgid ""
+"În tab-ul Application (în Firefox, Storage), la Cookies, uită-te la cookie-"
+"urile site-ului. Înainte de acord nu trebuie să fie _ga, _fbp, _clck sau "
+"alte cookie-uri de urmărire."
+msgstr ""
+"На вкладке Application (в Firefox — Storage), в разделе Cookies, посмотрите "
+"cookie сайта. До согласия не должно быть _ga, _fbp, _clck или других cookie "
+"отслеживания."
+
+#: templates/admin/guide.php:199
+msgid ""
+"Apasă „Permite tot” în banner (sau textul pe care l-ai pus tu în Setări). "
+"Acum cererile și cookie-urile serviciilor trebuie să apară. Asta arată că "
+"blocarea ține exact până la acord."
+msgstr ""
+"Нажмите «Разрешить все» в баннере (или текст, который вы задали в "
+"Настройках). Теперь запросы и cookie сервисов должны появиться. Это "
+"показывает, что блокировка действует ровно до согласия."
+
+#: templates/admin/guide.php:201
+msgid ""
+"În modul Advanced e normal să vezi cereri spre Google Analytics și Tag "
+"Manager înainte de acord, dar fără cookie-ul _ga."
+msgstr ""
+"В режиме Advanced нормально видеть запросы к Google Analytics и Tag Manager "
+"до согласия, но без cookie _ga."
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:207
+#, php-format
+msgid ""
+"Pe ecranul %1$sPagini legale%2$s, pluginul generează trei documente din "
+"șabloane: Politica de confidențialitate, Termeni și condiții și Politica de "
+"cookie-uri. Șabloanele sunt scrise pentru Moldova și există în română, rusă "
+"și engleză."
+msgstr ""
+"На экране %1$sЮридические страницы%2$s плагин создаёт из шаблонов три "
+"документа: Политику конфиденциальности, Условия использования и Политику "
+"использования файлов cookie. Шаблоны написаны для Молдовы и есть на "
+"румынском, русском и английском."
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:208
+msgid ""
+"Textele se adaptează la setările tale: modul Pro sau Light, blocarea "
+"scripturilor, modul de măsurare, durata acordului și retenția registrului."
+msgstr ""
+"Тексты подстраиваются под ваши настройки: режим Pro или Light, блокировку "
+"скриптов, режим измерения, срок хранения согласия и срок хранения реестра."
+
+#. translators: %s: the cookie table shortcode
+#: templates/admin/guide.php:209
+#, php-format
+msgid ""
+"Politica de cookie-uri conține tabelul de cookie-uri (shortcode-ul %s). "
+"Tabelul se actualizează singur când se schimbă serviciile. Nu trebuie să "
+"regenerezi pagina pentru el."
+msgstr ""
+"Политика использования файлов cookie содержит таблицу cookie (шорткод %s). "
+"Таблица обновляется сама, когда меняются сервисы. Создавать страницу заново "
+"ради неё не нужно."
+
+#. translators: %s: the cookie table shortcode
+#: templates/admin/guide.php:210
+msgid ""
+"O pagină nouă se salvează ca ciornă. Citește-o, completeaz-o și publică-o "
+"din editor. Linkul „Politica de confidențialitate” din banner apare doar "
+"după ce pagina e publicată."
+msgstr ""
+"Новая страница сохраняется как черновик. Прочитайте её, дополните и "
+"опубликуйте из редактора. Ссылка «Политика конфиденциальности» в баннере "
+"появляется только после публикации страницы."
+
+#. translators: 1, 2: shortcodes
+#: templates/admin/guide.php:211
+#, php-format
+msgid ""
+"Pentru linkuri spre Politica de confidențialitate și spre Termeni și "
+"condiții (de exemplu în footer) folosește shortcode-urile %1$s și %2$s. "
+"Linkul apare doar când pagina e publicată; până atunci se vede doar numele "
+"documentului, fără link."
+msgstr ""
+"Для ссылок на Политику конфиденциальности и на Условия использования "
+"(например, в подвале) используйте шорткоды %1$s и %2$s. Ссылка появляется "
+"только после публикации страницы; до этого видно только название документа, "
+"без ссылки."
+
+#. translators: 1, 2: shortcodes
+#: templates/admin/guide.php:212
+msgid ""
+"Pe paginile legale legate în plugin, bannerul apare fără fundalul întunecat, "
+"ca vizitatorul să le poată citi înainte să decidă."
+msgstr ""
+"На юридических страницах, привязанных в плагине, баннер показывается без "
+"тёмного фона, чтобы посетитель мог прочитать их до того, как решит."
+
+#: templates/admin/guide.php:214
+msgid "Ce completezi tu"
+msgstr "Что заполняете вы"
+
+#: templates/admin/guide.php:215
+msgid ""
+"La „Datele operatorului”: Denumire operator, Email contact, Responsabil date "
+"(DPO), Jurisdicție și Adresa. Ele apar în paginile generate."
+msgstr ""
+"В «Данных оператора»: Наименование оператора, Контактный email, "
+"Ответственный за защиту данных (DPO), Юрисдикция и Адрес. Эти данные "
+"появляются в созданных страницах."
+
+#: templates/admin/guide.php:216
+msgid ""
+"Caseta „Ce face pluginul și ce rămâne la tine” de pe ecran arată ce nu "
+"acoperă pluginul. De exemplu: registrul activităților de prelucrare, "
+"informarea pentru formulare, newsletter sau magazin, notificarea CNPDCP."
+msgstr ""
+"Блок «Что делает плагин и что остаётся за вами» на экране показывает, что "
+"плагин не охватывает. Например: реестр операций по обработке данных, "
+"уведомление для форм, рассылки или магазина, уведомление НЦЗПД."
+
+#: templates/admin/guide.php:218
+msgid "De ce e nevoie de o revizie juridică"
+msgstr "Зачем нужна юридическая проверка"
+
+#: templates/admin/guide.php:219
+msgid ""
+"Șabloanele sunt un punct de plecare, nu consultanță juridică. Pluginul nu "
+"știe ce alte date prelucrezi: formulare, comenzi, newsletter, conturi. Dă "
+"textul unui jurist să-l citească înainte de publicare."
+msgstr ""
+"Шаблоны — это отправная точка, а не юридическая консультация. Плагин не "
+"знает, какие ещё данные вы обрабатываете: формы, заказы, рассылки, учётные "
+"записи. Перед публикацией дайте текст на проверку юристу."
+
+#: templates/admin/guide.php:221
+msgid "Când regenerezi"
+msgstr "Когда создавать заново"
+
+#: templates/admin/guide.php:222
+msgid ""
+"„Regenerează” înlocuiește textul paginii cu șablonul. Ce ai schimbat de mână "
+"în pagină se pierde, deci notează-ți modificările înainte."
+msgstr ""
+"«Создать заново» заменяет текст страницы шаблоном. Всё, что вы изменили на "
+"странице вручную, теряется, поэтому заранее запишите свои изменения."
+
+#: templates/admin/guide.php:224
+msgid ""
+"după ce schimbi „Mod afișare” (Pro sau Light) sau blocarea scripturilor;"
+msgstr ""
+"после изменения «Режима отображения» (Pro или Light) или блокировки скриптов;"
+
+#: templates/admin/guide.php:225
+msgid "după ce schimbi „Mod de măsurare” (Strict sau Advanced);"
+msgstr "после изменения «Режима измерения» (Strict или Advanced);"
+
+#: templates/admin/guide.php:226
+msgid ""
+"după ce schimbi „Memorarea consimțământului (zile)” sau „Retenție log "
+"(luni)”;"
+msgstr ""
+"после изменения «Хранение согласия (дни)» или «Срок хранения реестра (мес.)»;"
+
+#: templates/admin/guide.php:227
+msgid ""
+"când ecranul Pagini legale spune că șabloanele au fost actualizate sau că o "
+"pagină a fost generată pentru alt mod de măsurare."
+msgstr ""
+"когда экран «Юридические страницы» сообщает, что шаблоны обновлены или что "
+"страница создана для другого режима измерения."
+
+#: templates/admin/guide.php:229
+msgid ""
+"Regenerarea actualizează și traducerile paginii create de plugin (WPML sau "
+"Polylang). Traducerile făcute de tine nu sunt atinse."
+msgstr ""
+"При повторном создании обновляются и переводы страницы, созданные плагином "
+"(WPML или Polylang). Переводы, сделанные вами, не затрагиваются."
+
+#: templates/admin/guide.php:235
+msgid ""
+"Pluginul se actualizează din ecranul Plugins, ca orice plugin. După un "
+"update, fă trei verificări:"
+msgstr ""
+"Плагин обновляется на экране «Плагины», как любой другой плагин. После "
+"обновления сделайте три проверки:"
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:237
+#, php-format
+msgid ""
+"Citește notificările Consent Manager Pro din admin. De exemplu, „Am început "
+"să blocăm până la acord: …” apare o singură dată, după actualizarea de la o "
+"versiune 0.4.x, și numește serviciile care până atunci rulau fără acord. "
+"Deschide %1$sServicii%2$s și verifică lista „Găsite pe site”: după un "
+"update, biblioteca poate recunoaște servicii noi fără să te anunțe."
+msgstr ""
+"Прочитайте уведомления Consent Manager Pro в админке. Например, «Теперь "
+"блокируются до согласия: …» появляется один раз, после обновления с версии "
+"0.4.x, и называет сервисы, которые до этого работали без согласия. Откройте "
+"%1$sСервисы%2$s и проверьте список «Найдены на сайте»: после обновления "
+"библиотека может распознавать новые сервисы, не сообщая об этом."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:238
+#, php-format
+msgid "Rulează %1$sVerificare%2$s, ca să vezi că paginile sunt încă verzi."
+msgstr ""
+"Запустите %1$sПроверку%2$s, чтобы убедиться, что страницы по-прежнему "
+"зелёные."
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:239
+#, php-format
+msgid ""
+"Dacă %1$sPagini legale%2$s spune că șabloanele au fost actualizate, "
+"regenerează fiecare document. Mesajul dispare după ce le regenerezi pe toate "
+"trei."
+msgstr ""
+"Если на экране %1$sЮридические страницы%2$s написано, что шаблоны обновлены, "
+"создайте каждый документ заново. Сообщение исчезнет, когда вы заново "
+"создадите все три."
+
+#: templates/admin/guide.php:242
+msgid "Re-consimțământul"
+msgstr "Повторное согласие"
+
+#: templates/admin/guide.php:243
+msgid ""
+"Când pe site apare un serviciu nou, într-o categorie pe care vizitatorul a "
+"acceptat-o deja, pluginul nu îl încarcă pe baza acordului vechi. La "
+"următoarea pagină pe care o deschide, bannerul se arată direct la "
+"preferințe, cu serviciile noi marcate, până când vizitatorul decide. Până "
+"atunci, categoria e tratată ca refuzată."
+msgstr ""
+"Когда на сайте появляется новый сервис в категории, которую посетитель уже "
+"принял, плагин не загружает его на основании старого согласия. На следующей "
+"странице, которую откроет посетитель, баннер сразу показывает настройки с "
+"отмеченными новыми сервисами, пока посетитель не решит. До этого категория "
+"считается отклонённой."
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:244
+#, php-format
+msgid ""
+"Pluginul ține minte toate serviciile găsite vreodată pe site. Dacă ai scos "
+"un serviciu și vrei ca lista să conțină doar ce e acum pe site, apasă "
+"„Resetează lista serviciilor văzute” în %1$sServicii%2$s."
+msgstr ""
+"Плагин запоминает все сервисы, когда-либо найденные на сайте. Если вы убрали "
+"сервис и хотите, чтобы список содержал только то, что есть на сайте сейчас, "
+"нажмите «Сбросить список обнаруженных сервисов» в %1$sСервисах%2$s."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:245
+#, php-format
+msgid ""
+"Vrei să întrebi din nou toți vizitatorii, de exemplu după o schimbare mare "
+"în politică? Mărește „Versiune politică” în %1$sSetări%2$s."
+msgstr ""
+"Хотите снова спросить всех посетителей, например после крупного изменения "
+"политики? Увеличьте «Версию политики» в %1$sНастройках%2$s."
+
+#. translators: %1$s, %2$s: link to the Registru consimțăminte screen
+#: templates/admin/guide.php:251
+#, php-format
+msgid ""
+"%1$sRegistru consimțăminte%2$s păstrează dovada alegerilor făcute de "
+"vizitatori, cerută de Legea 195/2024. Registrul există doar în modul Pro: în "
+"Light nu se cere acord."
+msgstr ""
+"%1$sРеестр согласий%2$s хранит доказательство выбора посетителей, которого "
+"требует Закон 195/2024. Реестр есть только в режиме Pro: в Light согласие не "
+"запрашивается."
+
+#. translators: %1$s, %2$s: link to the Registru consimțăminte screen
+#: templates/admin/guide.php:252
+msgid ""
+"La fiecare alegere se păstrează: data, ID-ul consimțământului, decizia, "
+"categoriile și serviciile, limba, versiunea politicii și adresa paginii. IP-"
+"ul și browserul se păstrează doar ca hash, nu în clar."
+msgstr ""
+"Для каждого выбора сохраняются: дата, ID согласия, решение, категории и "
+"сервисы, язык, версия политики и адрес страницы. IP и браузер сохраняются "
+"только в виде хеша, а не в открытом виде."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:253
+#, php-format
+msgid ""
+"Înregistrările se șterg automat după numărul de luni din „Retenție log "
+"(luni)”, în %1$sSetări%2$s. Implicit: 13 luni."
+msgstr ""
+"Записи удаляются автоматически по истечении числа месяцев из «Срок хранения "
+"реестра (мес.)» в %1$sНастройках%2$s. По умолчанию — 13 месяцев."
+
+#: templates/admin/guide.php:255
+msgid "Căutarea după ID"
+msgstr "Поиск по ID"
+
+#: templates/admin/guide.php:256
+msgid ""
+"Vizitatorul își vede ID-ul în fereastra „Setări cookie”, sub preferințe. "
+"Dacă îți scrie cu o cerere, pune ID-ul în câmpul „ID consimțământ” și apasă "
+"„Filtrează”. Vezi tot istoricul alegerilor lui."
+msgstr ""
+"Посетитель видит свой ID в окне «Настройки cookie», под предпочтениями. Если "
+"он пишет вам с запросом, введите ID в поле «ID согласия» и нажмите "
+"«Фильтровать». Вы увидите всю историю его выборов."
+
+#: templates/admin/guide.php:258
+msgid "Exportul"
+msgstr "Экспорт"
+
+#: templates/admin/guide.php:259
+msgid ""
+"„Export CSV” și „Export JSON” descarcă tot registrul. Păstrează fișierul în "
+"siguranță: e o dovadă legală."
+msgstr ""
+"«Экспорт CSV» и «Экспорт JSON» скачивают весь реестр. Храните файл в "
+"надёжном месте: это юридическое доказательство."
+
+#: templates/admin/guide.php:260
+msgid ""
+"„Golește registrul” șterge definitiv toate înregistrările. Folosește-l doar "
+"dacă știi sigur că nu mai ai nevoie de ele."
+msgstr ""
+"«Очистить реестр» безвозвратно удаляет все записи. Используйте эту кнопку, "
+"только если точно уверены, что записи больше не нужны."
+
+#: templates/admin/guide.php:262
+msgid "Dezinstalarea"
+msgstr "Удаление плагина"
+
+#: templates/admin/guide.php:263
+msgid ""
+"La dezinstalare, pluginul șterge mereu datele lui de lucru: rezultatele "
+"scanărilor, raportul verificării, imaginile video și fonturile localizate."
+msgstr ""
+"При удалении плагин всегда удаляет свои рабочие данные: результаты "
+"сканирования, отчёт проверки, картинки видео и локализованные шрифты."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:264
+#, php-format
+msgid ""
+"Setările, categoriile, serviciile configurate și registrul se șterg doar "
+"dacă ai bifat „Șterge toate datele la dezinstalare”, în %1$sSetări%2$s. "
+"Registrul e dovada legală a alegerilor: păstrează-l (sau un export al lui) "
+"cât cere legea înainte să bifezi."
+msgstr ""
+"Настройки, категории, настроенные сервисы и реестр удаляются, только если вы "
+"отметили «Удалить все данные при удалении плагина» в %1$sНастройках%2$s. "
+"Реестр — юридическое доказательство выбора: прежде чем отмечать этот флажок, "
+"храните его (или его экспорт) столько, сколько требует закон."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:265
+msgid ""
+"Paginile legale generate rămân pe site. Le ștergi tu, din Pagini, dacă nu "
+"mai ai nevoie de ele."
+msgstr ""
+"Созданные юридические страницы остаются на сайте. Если они больше не нужны, "
+"удалите их сами в разделе «Страницы»."
+
+#: templates/admin/guide.php:271
+msgid ""
+"Pluginul are un API JavaScript și o funcție PHP, ca să legi codul tău de "
+"acordul vizitatorului."
+msgstr ""
+"У плагина есть JavaScript API и функция PHP, чтобы вы могли связать свой код "
+"с согласием посетителя."
+
+#. translators: 1: window.CMP, 2: the script handle, 3: DOMContentLoaded
+#: templates/admin/guide.php:272
+#, php-format
+msgid ""
+"În JavaScript, %1$s există după ce se încarcă scriptul bannerului (handle-ul "
+"%2$s, în footer). Încarcă scriptul tău cu el ca dependență sau așteaptă %3$s."
+msgstr ""
+"В JavaScript объект %1$s доступен после загрузки скрипта баннера (handle "
+"%2$s, в подвале). Подключайте свой скрипт с зависимостью от него или ждите "
+"%3$s."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:274
+#, php-format
+msgid "%s: dacă o categorie e permisă acum."
+msgstr "%s: разрешена ли категория сейчас."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:275
+#, php-format
+msgid "%s: decizia salvată, sau null dacă vizitatorul nu a decis."
+msgstr "%s: сохранённое решение или null, если посетитель ещё не решил."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:276
+#, php-format
+msgid "%s: deschide preferințele."
+msgstr "%s: открывает настройки."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:277
+#, php-format
+msgid ""
+"%s: apelează funcția la fiecare decizie, și imediat dacă vizitatorul a decis "
+"deja."
+msgstr ""
+"%s: вызывает функцию при каждом решении и сразу, если посетитель уже решил."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:278
+#, php-format
+msgid "%s: apelează funcția o singură dată, când categoria e permisă."
+msgstr "%s: вызывает функцию один раз, когда категория разрешена."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:279
+#, php-format
+msgid ""
+"%s: adaugă o categorie la acord. Merge doar dintr-un clic real al "
+"vizitatorului, de exemplu pe butonul tău „Încarcă harta”."
+msgstr ""
+"%s: добавляет категорию в согласие. Работает только по настоящему клику "
+"посетителя, например по вашей кнопке «Загрузить карту»."
+
+#. translators: %s: method name
+#: templates/admin/guide.php:280
+#, php-format
+msgid "%s: scoate o categorie din acord."
+msgstr "%s: убирает категорию из согласия."
+
+#. translators: %s: event name
+#: templates/admin/guide.php:281
+#, php-format
+msgid "%s: eveniment pe document, după fiecare decizie pe categorii."
+msgstr "%s: событие на document после каждого решения по категориям."
+
+#. translators: %s: the PHP function
+#: templates/admin/guide.php:284
+#, php-format
+msgid ""
+"În PHP, %s spune dacă vizitatorul a permis o categorie. Nu o folosi pe "
+"pagini puse complet în cache: cookie-ul diferă de la un vizitator la altul."
+msgstr ""
+"В PHP %s сообщает, разрешил ли посетитель категорию. Не используйте её на "
+"страницах с полным кешированием: cookie у каждого посетителя свой."
+
+#. translators: 1-3: category slugs
+#: templates/admin/guide.php:286
+#, php-format
+msgid ""
+"Categoriile se identifică prin slug: %1$s (mereu permisă), %2$s, %3$s și "
+"cele create de tine în Categorii."
+msgstr ""
+"Категории определяются по slug: %1$s (всегда разрешена), %2$s, %3$s и те, "
+"что вы создали в «Категориях»."
+
+#. translators: 1-3: category slugs
+#: templates/admin/guide.php:287
+msgid ""
+"În modul Light nu există decizie: allowCategory și denyCategory nu fac "
+"nimic, iar onConsent și whenAllowed nu apelează funcția pentru categoriile "
+"opționale."
+msgstr ""
+"В режиме Light решения нет: allowCategory и denyCategory ничего не делают, а "
+"onConsent и whenAllowed не вызывают функцию для необязательных категорий."

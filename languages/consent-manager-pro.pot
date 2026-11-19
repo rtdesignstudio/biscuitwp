@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T12:35:28+00:00\n"
+"POT-Creation-Date: 2026-11-19T13:03:34+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: consent-manager-pro\n"
@@ -39,47 +39,54 @@ msgstr ""
 msgid "https://rt.md"
 msgstr ""
 
-#: includes/admin/class-admin.php:55
-#: includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:56
+#: includes/admin/class-admin.php:73
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr ""
 
-#: includes/admin/class-admin.php:57
+#: includes/admin/class-admin.php:58
 msgid "Caută actualizări"
 msgstr ""
 
-#: includes/admin/class-admin.php:64
 #: includes/admin/class-admin.php:65
+#: includes/admin/class-admin.php:66
 msgid "Consent Manager"
 msgstr ""
 
-#: includes/admin/class-admin.php:73
+#: includes/admin/class-admin.php:74
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr ""
 
-#: includes/admin/class-admin.php:74
+#: includes/admin/class-admin.php:75
 #: includes/admin/class-audit-list-table.php:17
+#: includes/admin/class-guide.php:22
 msgid "Servicii"
 msgstr ""
 
-#: includes/admin/class-admin.php:75
+#: includes/admin/class-admin.php:76
 msgid "Verificare"
 msgstr ""
 
-#: includes/admin/class-admin.php:76
+#: includes/admin/class-admin.php:77
 #: includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr ""
 
-#: includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:78
+#: includes/admin/class-guide.php:25
 #: includes/admin/class-settings-page.php:260
 #: includes/admin/class-settings-page.php:386
 msgid "Pagini legale"
 msgstr ""
 
-#: includes/admin/class-admin.php:95
+#: includes/admin/class-admin.php:79
+#: includes/admin/class-guide.php:43
+msgid "Ghid"
+msgstr ""
+
+#: includes/admin/class-admin.php:97
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
@@ -97,31 +104,31 @@ msgstr ""
 msgid "Acțiune neautorizată."
 msgstr ""
 
-#: includes/admin/class-admin.php:121
+#: includes/admin/class-admin.php:123
 msgid "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul)."
 msgstr ""
 
-#: includes/admin/class-admin.php:122
+#: includes/admin/class-admin.php:124
 msgid "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect."
 msgstr ""
 
-#: includes/admin/class-admin.php:123
+#: includes/admin/class-admin.php:125
 #: includes/admin/class-services-page.php:426
 msgid "Consent Manager Pro:"
 msgstr ""
 
-#: includes/admin/class-admin.php:125
+#: includes/admin/class-admin.php:127
 msgid "Detalii în „Servicii”"
 msgstr ""
 
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:138
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr ""
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:142
+#: includes/admin/class-admin.php:144
 #, php-format
 msgid "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" din lista de mai jos."
 msgstr ""
@@ -712,6 +719,34 @@ msgstr ""
 msgid "Raportul nu a putut fi salvat. Încearcă din nou."
 msgstr ""
 
+#: includes/admin/class-guide.php:20
+msgid "Pornire în 5 minute"
+msgstr ""
+
+#: includes/admin/class-guide.php:21
+msgid "Ce mod alegi"
+msgstr ""
+
+#: includes/admin/class-guide.php:23
+msgid "Exemple"
+msgstr ""
+
+#: includes/admin/class-guide.php:24
+msgid "Cum verifici blocarea"
+msgstr ""
+
+#: includes/admin/class-guide.php:26
+msgid "După un update"
+msgstr ""
+
+#: includes/admin/class-guide.php:27
+msgid "Registru și date"
+msgstr ""
+
+#: includes/admin/class-guide.php:28
+msgid "Pentru developeri"
+msgstr ""
+
 #: includes/admin/class-legal-page.php:10
 #: includes/modules/class-legal.php:277
 msgid "Politica de confidențialitate"
@@ -967,6 +1002,7 @@ msgid "Setarea ta: blocat până la acord (se aplică în Strict)."
 msgstr ""
 
 #: includes/admin/class-services-page.php:89
+#: templates/admin/guide.php:90
 msgid "Serviciu personalizat"
 msgstr ""
 
@@ -1454,4 +1490,731 @@ msgstr ""
 
 #: includes/modules/class-updater.php:242
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
+msgstr ""
+
+#: templates/admin/guide.php:32
+msgid "Consent Manager — Ghid"
+msgstr ""
+
+#: templates/admin/guide.php:33
+msgid "Ghidul te duce de la instalare la un site care cere acord corect. Citește-l o dată de la cap la coadă, apoi revino la secțiunea de care ai nevoie."
+msgstr ""
+
+#: templates/admin/guide.php:34
+msgid "Fiecare ecran al pluginului are sus un link „Ghid”. El te aduce direct la secțiunea despre acel ecran."
+msgstr ""
+
+#: templates/admin/guide.php:37
+msgid "Cuprins"
+msgstr ""
+
+#: templates/admin/guide.php:48
+msgid "Cinci pași pentru un site care cere acord corect. Fă-i în ordine."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:50
+#, php-format
+msgid "%1$sSetări%2$s: alege „Mod afișare”. Pentru majoritatea site-urilor, Pro. Lasă bifat „Blochează scripturile de tracking până la consimțământ” și „Mod de măsurare” pe Strict. Apasă „Salvează setările”."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:51
+#, php-format
+msgid "%1$sServicii%2$s: uită-te la lista „Găsite pe site”. Pluginul scanează singur paginile site-ului. Dacă lista e goală, apasă „Rescanează”. Verifică să nu lipsească nimic din ce știi că folosește site-ul."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:52
+#, php-format
+msgid "%1$sPagini legale%2$s: completează „Datele operatorului”, apoi apasă „Generează” la fiecare document (sau „Regenerează”, dacă documentul are deja o pagină: textul ei va fi înlocuit). O pagină nouă se salvează ca ciornă: citește-o și publică-o din editor."
+msgstr ""
+
+#. translators: 1: the shortcode, 2: the menu link URL
+#: templates/admin/guide.php:53
+#, php-format
+msgid "Pune în footer linkul „Setări cookie”: shortcode-ul %1$s sau un link de meniu cu URL-ul %2$s. Prin el vizitatorul își schimbă sau își retrage acordul."
+msgstr ""
+
+#. translators: 1: the shortcode, 2: the menu link URL
+#: templates/admin/guide.php:54
+msgid "În modul Pro, dacă linkul lipsește de pe pagina principală, ecranul Setări arată avertismentul „Lipsește linkul „Setări cookie””. În loc de link poți porni „Buton flotant redeschidere” (doar în Pro), dar linkul din footer e varianta recomandată."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen; %3$s, %4$s: link to the "Cum verifici blocarea" section
+#: templates/admin/guide.php:55
+#, php-format
+msgid "%1$sVerificare%2$s: apasă „Verifică în browser”. Nicio pagină nu trebuie să iasă roșie. Galbenul nu e o blocare ratată, dar merită citit. Dacă o pagină e roșie, citește %3$sCum verifici blocarea%4$s."
+msgstr ""
+
+#: templates/admin/guide.php:57
+msgid "Secțiunile de mai jos explică fiecare pas pe larg."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:63
+#, php-format
+msgid "Modurile se aleg în %1$sSetări%2$s. Sunt două alegeri: Pro sau Light („Mod afișare”), apoi, în Pro, Strict sau Advanced („Mod de măsurare”)."
+msgstr ""
+
+#: templates/admin/guide.php:65
+msgid "Pro sau Light"
+msgstr ""
+
+#: templates/admin/guide.php:66
+msgid "Pro afișează un banner cu butoane de acceptare, de refuz și de alegere pe categorii. Pluginul ține minte alegerea vizitatorului și o scrie în registru. Alege Pro dacă folosești statistici, publicitate, un chat sau video încorporat."
+msgstr ""
+
+#: templates/admin/guide.php:67
+msgid "Dacă browserul vizitatorului trimite semnalul Global Privacy Control (GPC), pluginul înregistrează automat refuzul („Doar cele necesare”) și nu mai arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”."
+msgstr ""
+
+#: templates/admin/guide.php:68
+msgid "Light afișează doar o bară informativă. Nu cere acord și nu pune cookie-uri. De aceea serviciile care cer acord sunt blocate permanent: Google Analytics, Tag Manager, Meta Pixel și celelalte nu rulează deloc, în afară de excepțiile marcate de tine. Video-urile și hărțile se încarcă doar dacă vizitatorul apasă „Încarcă conținutul”."
+msgstr ""
+
+#: templates/admin/guide.php:69
+msgid "Alege Light pentru un site de prezentare fără tracking. Dacă în Light pluginul găsește scripturi de tracking pe site, ecranul Setări te avertizează."
+msgstr ""
+
+#: templates/admin/guide.php:71
+msgid "Strict sau Advanced"
+msgstr ""
+
+#: templates/admin/guide.php:72
+msgid "„Mod de măsurare” contează doar în modul Pro, cu blocarea scripturilor pornită."
+msgstr ""
+
+#: templates/admin/guide.php:73
+msgid "Strict: serviciile blocate nu se încarcă deloc înainte de acord. Google nu primește nimic de la vizitatorii care refuză, deci statisticile arată mai puține vizite. E alegerea recomandată."
+msgstr ""
+
+#: templates/admin/guide.php:74
+msgid "Advanced: Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat”. Fără acord, Google primește ping-uri fără cookie-uri și estimează vizitele celor care refuză. Ce câștigi: statistici mai complete."
+msgstr ""
+
+#: templates/admin/guide.php:75
+msgid "În Advanced, Google Ads (AW-), Floodlight (DC-), vechiul Universal Analytics și celelalte servicii rămân blocate până la acord. Tag Manager poate încărca și alte etichete: verifică în Tag Manager că ele respectă Consent Mode."
+msgstr ""
+
+#: templates/admin/guide.php:76
+msgid "Ce riști: Google primește adresa IP și datele browserului înainte de acord. E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE. De aceea Advanced se activează doar după ce bifezi confirmarea de sub opțiune."
+msgstr ""
+
+#: templates/admin/guide.php:77
+msgid "Ce spune textul legal: în Advanced, dacă pe site s-au găsit Google Analytics sau Tag Manager (sau dacă site-ul nu a fost încă scanat), Politica de cookie-uri descrie măsurarea fără cookie-uri, iar Politica de confidențialitate îi dă temeiul: interesul legitim. După ce schimbi modul, regenerează paginile legale. Ecranul Setări îți amintește printr-un mesaj."
+msgstr ""
+
+#: templates/admin/guide.php:84
+msgid "Biblioteca"
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:85
+#, php-format
+msgid "Pluginul recunoaște singur serviciile din bibliotecă: Google Analytics, Meta Pixel, YouTube, Clarity, Hotjar, Tawk.to, Crisp și altele. Lista completă e la „Toată biblioteca”, pe ecranul %1$sServicii%2$s."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:86
+msgid "„Găsite pe site” arată serviciile din ultima scanare. Pluginul rescanează site-ul o dată pe zi și după fiecare salvare a setărilor sau a serviciilor. „Rescanează” pornește o scanare nouă pe loc."
+msgstr ""
+
+#: templates/admin/guide.php:87
+msgid "La fiecare serviciu poți schimba categoria de acord. Bifa „nu bloca (excepție)” îl lasă să se încarce fără acord. Folosește-o doar pentru unelte care nu pun cookie-uri și nu urmăresc vizitatorul, de exemplu statistici fără cookie-uri."
+msgstr ""
+
+#: templates/admin/guide.php:88
+msgid "Scanarea vede doar ce e în HTML-ul paginii. Ce adaugă ulterior Google Tag Manager sau alt JavaScript trebuie controlat din Tag Manager, cu Consent Mode."
+msgstr ""
+
+#: templates/admin/guide.php:91
+msgid "Dacă un serviciu lipsește din bibliotecă, apasă „+ Adaugă serviciu” la „Servicii personalizate” și completează:"
+msgstr ""
+
+#: templates/admin/guide.php:93
+msgid "Nume: numele serviciului, așa cum îl văd vizitatorii."
+msgstr ""
+
+#: templates/admin/guide.php:94
+msgid "Categorie: categoria de acord de care depinde serviciul."
+msgstr ""
+
+#: templates/admin/guide.php:95
+msgid "Domenii (unul pe rând): pluginul blochează până la acord scripturile și iframe-urile de pe aceste domenii."
+msgstr ""
+
+#: templates/admin/guide.php:96
+msgid "Cookie-uri: numele, durata și scopul fiecărui cookie. Apar în tabelul din Politica de cookie-uri."
+msgstr ""
+
+#: templates/admin/guide.php:97
+msgid "Script (opțional): cod care rulează doar după acord. Câmpul apare doar pentru administratorii care au dreptul de a adăuga cod (unfiltered_html)."
+msgstr ""
+
+#: templates/admin/guide.php:99
+msgid "Apoi apasă „Salvează serviciile”. Domeniul site-ului tău nu poate fi domeniul unui serviciu, pentru că ar bloca site-ul însuși."
+msgstr ""
+
+#: templates/admin/guide.php:101
+msgid "Scripturi proprii: atributul data-cmp-category"
+msgstr ""
+
+#. translators: %s: the data-cmp-category attribute
+#: templates/admin/guide.php:102
+#, php-format
+msgid "Ai un script pus în temă sau într-un plugin, pe care pluginul nu îl recunoaște? Adaugă-i atributul %s, cu slug-ul categoriei:"
+msgstr ""
+
+#: templates/admin/guide.php:104
+msgid "Scriptul nu rulează până când vizitatorul acceptă categoria. Atributul merge la fel pe un iframe."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
+#: templates/admin/guide.php:105
+#, php-format
+msgid "Slug-urile sunt pe ecranul %1$sCategorii%2$s. Implicit: %3$s, %4$s și %5$s. Cu valoarea %3$s scriptul rulează mereu. O valoare pe care pluginul nu o înțelege blochează scriptul, ca să nu scape nimic."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
+#: templates/admin/guide.php:106
+msgid "Atributul contează doar când blocarea e activă: în Pro, cu „Blochează scripturile de tracking până la consimțământ” bifat; în Light, mereu."
+msgstr ""
+
+#: templates/admin/guide.php:108
+msgid "„Încarcă mereu” la embed-uri"
+msgstr ""
+
+#: templates/admin/guide.php:109
+msgid "Până la acord, video-urile YouTube și Vimeo, hărțile Google Maps și iframe-urile serviciilor tale apar ca un bloc cu butonul „Încarcă conținutul”. El încarcă doar acel conținut, pe pagina curentă."
+msgstr ""
+
+#: templates/admin/guide.php:110
+msgid "Butonul „Încarcă mereu” ține minte alegerea pentru acel serviciu, pe tot site-ul, fără să accepte toată categoria. Alegerea se scrie în registru ca „Serviciu permis („Încarcă mereu”)”."
+msgstr ""
+
+#: templates/admin/guide.php:111
+msgid "Vizitatorul retrage alegerea din „Setări cookie”, din lista serviciilor încărcate mereu. „Încarcă mereu” nu există în modul Light, pentru că Light nu pune cookie-uri."
+msgstr ""
+
+#: templates/admin/guide.php:112
+msgid "„Încarcă mereu” apare doar la conținutul unui serviciu din bibliotecă sau al unui serviciu personalizat, nu și la un iframe marcat cu atributul data-cmp-category."
+msgstr ""
+
+#: templates/admin/guide.php:118
+msgid "Cazuri frecvente, fiecare cu pașii de urmat."
+msgstr ""
+
+#: templates/admin/guide.php:120
+msgid "„Am Clarity (sau alt tracker) pus direct în temă”"
+msgstr ""
+
+#: templates/admin/guide.php:121
+msgid "Problema: codul de tracking e lipit în tema site-ului, de exemplu în header.php sau într-un câmp pentru cod din setările temei. Vrei să nu ruleze înainte de acord."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:123
+#, php-format
+msgid "În %1$sSetări%2$s, verifică că modul e Pro și că „Blochează scripturile de tracking până la consimțământ” e bifat."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:124
+#, php-format
+msgid "În %1$sServicii%2$s, apasă „Rescanează”. Clarity e în bibliotecă, deci trebuie să apară la „Găsite pe site”, cu starea „blocat până la acord”."
+msgstr ""
+
+#. translators: %s: the attribute with a category
+#: templates/admin/guide.php:125
+#, php-format
+msgid "Dacă trackerul nu apare (nu e în bibliotecă sau codul lui arată altfel), adaugă în temă, pe tag-ul lui script, atributul %s. Sau adaugă un serviciu personalizat cu domeniul lui."
+msgstr ""
+
+#. translators: %s: the attribute with a category
+#: templates/admin/guide.php:126
+msgid "Dacă trackerul vine din Google Tag Manager, nu din temă, pluginul nu îl vede în pagină. Setează în Tag Manager eticheta să ceară consimțământ (Consent Mode)."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:127
+#, php-format
+msgid "Rulează %1$sVerificare%2$s. Pagina trebuie să fie verde, iar Clarity să apară doar în coloana „După „Acceptă tot””."
+msgstr ""
+
+#: templates/admin/guide.php:130
+msgid "„Am un chat (Tawk.to, Crisp)”"
+msgstr ""
+
+#: templates/admin/guide.php:131
+msgid "Problema: widgetul de chat pune cookie-uri și contactează serverele furnizorului imediat ce se încarcă. Tawk.to și Crisp sunt în bibliotecă, în categoria Marketing."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:133
+#, php-format
+msgid "În %1$sServicii%2$s, apasă „Rescanează” și verifică că chatul apare la „Găsite pe site”, cu starea „blocat până la acord”."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Categorii screen
+#: templates/admin/guide.php:134
+#, php-format
+msgid "Vrei ca chatul să depindă de o categorie separată? Creeaz-o în %1$sCategorii%2$s („+ Adaugă categorie”, apoi „Salvează categoriile”). Alege-o apoi în lista de lângă serviciu și apasă „Salvează serviciile”."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Categorii screen
+#: templates/admin/guide.php:135
+msgid "Fără acord, bula de chat nu apare. Spune-le vizitatorilor asta, de exemplu pe pagina de contact: pentru chat, trebuie acceptată categoria lui din „Setări cookie”."
+msgstr ""
+
+#: templates/admin/guide.php:136
+msgid "Pentru un furnizor de chat care nu e în bibliotecă, adaugă un serviciu personalizat cu domeniile lui."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:137
+#, php-format
+msgid "Rulează %1$sVerificare%2$s. Domeniile chatului nu trebuie să apară în coloana „Înainte de acord”."
+msgstr ""
+
+#: templates/admin/guide.php:140
+msgid "„Am YouTube în articole”"
+msgstr ""
+
+#: templates/admin/guide.php:141
+msgid "Problema: un video YouTube încorporat pune cookie-uri chiar dacă vizitatorul nu apasă play."
+msgstr ""
+
+#: templates/admin/guide.php:143
+msgid "Nu schimbi nimic în articole. Cu blocarea pornită, pluginul înlocuiește singur fiecare video cu un bloc „Încarcă conținutul”. Imaginea video-ului, când există, se servește de pe site-ul tău, deci YouTube nu e contactat înainte de acord."
+msgstr ""
+
+#: templates/admin/guide.php:144
+msgid "Vizitatorul poate încărca un singur video („Încarcă conținutul”) sau toate video-urile YouTube („Încarcă mereu”). Dacă acceptă în banner categoria lui YouTube, video-urile se încarcă direct."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:145
+#, php-format
+msgid "YouTube e în categoria Marketing. Dacă vrei altă categorie, schimb-o la YouTube, în %1$sServicii%2$s."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:146
+#, php-format
+msgid "Deschide un articol cu video într-o fereastră privată și uită-te la bloc. Apoi rulează %1$sVerificare%2$s."
+msgstr ""
+
+#: templates/admin/guide.php:149
+msgid "„Folosesc Google Fonts din temă”"
+msgstr ""
+
+#: templates/admin/guide.php:150
+msgid "Problema: tema încarcă fonturile de la fonts.googleapis.com. La fiecare vizită, Google primește IP-ul vizitatorului. Soluția e să servești fonturile de pe site-ul tău."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:152
+#, php-format
+msgid "Funcția merge doar în modul Pro. În %1$sSetări%2$s, bifează „Localizare Google Fonts” și apasă „Salvează setările”."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
+#: templates/admin/guide.php:153
+#, php-format
+msgid "Apasă „Localizează fonturile”, în secțiunea Google Fonts de jos din %1$sSetări%2$s. Sau apasă „Localizează” în %3$sVerificare%4$s: butonul apare acolo când scanarea găsește Google Fonts și opțiunea „Localizare Google Fonts” e pornită."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
+#: templates/admin/guide.php:154
+msgid "Pluginul descarcă fonturile găsite pe paginile scanate și pe pagina principală. Apoi trimite vizitatorii la copia de pe site, nu la Google."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:155
+#, php-format
+msgid "În %1$sVerificare%2$s, apasă „Rescanează”. Google Fonts nu mai trebuie să apară la „Resurse care trimit IP-ul”."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:156
+msgid "Pluginul înlocuiește doar fonturile încărcate cu un tag link în HTML. Dacă tema le încarcă din CSS (@import) sau din JavaScript, ele rămân la Google. Atunci găzduiește fonturile din temă."
+msgstr ""
+
+#: templates/admin/guide.php:157
+msgid "Dacă schimbi fonturile temei, apasă din nou „Localizează fonturile”. „Șterge fonturile localizate” te întoarce la fonturile de la Google."
+msgstr ""
+
+#: templates/admin/guide.php:165
+msgid "Ecranul Verificare"
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:166
+#, php-format
+msgid "Ecranul %1$sVerificare%2$s face două lucruri:"
+msgstr ""
+
+#: templates/admin/guide.php:168
+msgid "„Scanarea pe server” citește HTML-ul paginilor ca un vizitator fără cookie-uri. Arată, pe fiecare pagină, serviciile găsite, starea lor și de unde vin (temă, plugin, cod în pagină). Arată și resursele care trimit IP-ul vizitatorului: Google Fonts, Adobe Fonts, Font Awesome, CDN-uri, Gravatar, emoji WordPress."
+msgstr ""
+
+#: templates/admin/guide.php:169
+msgid "„Verifică în browser” încarcă pe rând, invizibil, paginile în browserul tău. Notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă tot” simulat."
+msgstr ""
+
+#. translators: %d: max pages
+#: templates/admin/guide.php:171
+#, php-format
+msgid "Se verifică cel mult %d de pagini: pagina principală, paginile legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul. Adaugi sau scoți pagini în „Adaugă pagini (una pe rând)” și „Exclude pagini (una pe rând)”, apoi apeși „Salvează lista”."
+msgstr ""
+
+#. translators: %d: max pages
+#: templates/admin/guide.php:172
+msgid "Ce înseamnă culorile din raport:"
+msgstr ""
+
+#: templates/admin/guide.php:174
+msgid "Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a încărcat înainte de acord. Asta trebuie reparat."
+msgstr ""
+
+#: templates/admin/guide.php:175
+msgid "Galben: pagina folosește resurse care trimit IP-ul vizitatorului la terți, sau cookie-uri pe care pluginul nu le cunoaște. Nu e o blocare ratată, dar merită verificat."
+msgstr ""
+
+#: templates/admin/guide.php:176
+msgid "Verde: nimic din ce cere acord nu s-a încărcat înainte de acord."
+msgstr ""
+
+#: templates/admin/guide.php:177
+msgid "„nu s-a putut verifica”: pagina nu a răspuns, nu permite încărcarea într-un cadru, e pe altă origine decât adminul sau nu are bannerul. Nu înseamnă verde: verific-o manual."
+msgstr ""
+
+#: templates/admin/guide.php:179
+msgid "Excepțiile, serviciile necesare și, în Advanced, Google Analytics și Tag Manager apar separat și nu schimbă culoarea."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:180
+#, php-format
+msgid "Pentru emoji și Gravatar, bifează opțiunile din „Resurse terțe WordPress”, în %1$sSetări%2$s."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:181
+msgid "Limitele verificării, pe scurt:"
+msgstr ""
+
+#: templates/admin/guide.php:183
+msgid "Rulează ca administrator logat. Pluginurile care schimbă pagina pentru utilizatorii logați pot da alt rezultat decât pentru vizitatori."
+msgstr ""
+
+#: templates/admin/guide.php:184
+msgid "Ce apare doar după un clic sau după scroll nu e prins."
+msgstr ""
+
+#: templates/admin/guide.php:185
+msgid "Cookie-urile puse de terți pe domeniile lor nu se pot citi. Se văd doar domeniile contactate."
+msgstr ""
+
+#: templates/admin/guide.php:186
+msgid "După „Acceptă tot”, cookie-urile serviciilor rămân în browserul tău, iar paginile verificate pot apărea ca vizite în statistici."
+msgstr ""
+
+#: templates/admin/guide.php:188
+msgid "Lista completă e pe ecran, la „Limitele verificării”."
+msgstr ""
+
+#: templates/admin/guide.php:190
+msgid "Verificarea manuală cu DevTools"
+msgstr ""
+
+#: templates/admin/guide.php:191
+msgid "DevTools sunt uneltele pentru dezvoltatori din browser. Le deschizi cu tasta F12 sau cu clic dreapta pe pagină, apoi „Inspect” („Inspectează”)."
+msgstr ""
+
+#: templates/admin/guide.php:192
+msgid "Tab-ul Network („Rețea”) din DevTools arată fiecare cerere a paginii: fiecare fișier, script sau imagine, cu domeniul de la care vine."
+msgstr ""
+
+#: templates/admin/guide.php:194
+msgid "Deschide o fereastră privată (incognito) în Chrome sau Firefox. Așa pornești fără cookie-uri și fără un acord salvat. Folosește un browser fără GPC (sau oprește-l): Brave și DuckDuckGo îl trimit, iar atunci pluginul înregistrează automat refuzul și bannerul nu apare."
+msgstr ""
+
+#: templates/admin/guide.php:195
+msgid "Deschide DevTools, mergi la tab-ul Network și bifează „Disable cache”."
+msgstr ""
+
+#: templates/admin/guide.php:196
+msgid "Intră pe site. Nu apăsa nimic în banner."
+msgstr ""
+
+#: templates/admin/guide.php:197
+msgid "În câmpul de filtrare din Network, scrie pe rând domeniile serviciilor tale, de exemplu google-analytics.com, googletagmanager.com, facebook.net, clarity.ms, youtube.com. Nu trebuie să apară nicio cerere spre ele."
+msgstr ""
+
+#: templates/admin/guide.php:198
+msgid "În tab-ul Application (în Firefox, Storage), la Cookies, uită-te la cookie-urile site-ului. Înainte de acord nu trebuie să fie _ga, _fbp, _clck sau alte cookie-uri de urmărire."
+msgstr ""
+
+#: templates/admin/guide.php:199
+msgid "Apasă „Permite tot” în banner (sau textul pe care l-ai pus tu în Setări). Acum cererile și cookie-urile serviciilor trebuie să apară. Asta arată că blocarea ține exact până la acord."
+msgstr ""
+
+#: templates/admin/guide.php:201
+msgid "În modul Advanced e normal să vezi cereri spre Google Analytics și Tag Manager înainte de acord, dar fără cookie-ul _ga."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:207
+#, php-format
+msgid "Pe ecranul %1$sPagini legale%2$s, pluginul generează trei documente din șabloane: Politica de confidențialitate, Termeni și condiții și Politica de cookie-uri. Șabloanele sunt scrise pentru Moldova și există în română, rusă și engleză."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:208
+msgid "Textele se adaptează la setările tale: modul Pro sau Light, blocarea scripturilor, modul de măsurare, durata acordului și retenția registrului."
+msgstr ""
+
+#. translators: %s: the cookie table shortcode
+#: templates/admin/guide.php:209
+#, php-format
+msgid "Politica de cookie-uri conține tabelul de cookie-uri (shortcode-ul %s). Tabelul se actualizează singur când se schimbă serviciile. Nu trebuie să regenerezi pagina pentru el."
+msgstr ""
+
+#. translators: %s: the cookie table shortcode
+#: templates/admin/guide.php:210
+msgid "O pagină nouă se salvează ca ciornă. Citește-o, completeaz-o și publică-o din editor. Linkul „Politica de confidențialitate” din banner apare doar după ce pagina e publicată."
+msgstr ""
+
+#. translators: 1, 2: shortcodes
+#: templates/admin/guide.php:211
+#, php-format
+msgid "Pentru linkuri spre Politica de confidențialitate și spre Termeni și condiții (de exemplu în footer) folosește shortcode-urile %1$s și %2$s. Linkul apare doar când pagina e publicată; până atunci se vede doar numele documentului, fără link."
+msgstr ""
+
+#. translators: 1, 2: shortcodes
+#: templates/admin/guide.php:212
+msgid "Pe paginile legale legate în plugin, bannerul apare fără fundalul întunecat, ca vizitatorul să le poată citi înainte să decidă."
+msgstr ""
+
+#: templates/admin/guide.php:214
+msgid "Ce completezi tu"
+msgstr ""
+
+#: templates/admin/guide.php:215
+msgid "La „Datele operatorului”: Denumire operator, Email contact, Responsabil date (DPO), Jurisdicție și Adresa. Ele apar în paginile generate."
+msgstr ""
+
+#: templates/admin/guide.php:216
+msgid "Caseta „Ce face pluginul și ce rămâne la tine” de pe ecran arată ce nu acoperă pluginul. De exemplu: registrul activităților de prelucrare, informarea pentru formulare, newsletter sau magazin, notificarea CNPDCP."
+msgstr ""
+
+#: templates/admin/guide.php:218
+msgid "De ce e nevoie de o revizie juridică"
+msgstr ""
+
+#: templates/admin/guide.php:219
+msgid "Șabloanele sunt un punct de plecare, nu consultanță juridică. Pluginul nu știe ce alte date prelucrezi: formulare, comenzi, newsletter, conturi. Dă textul unui jurist să-l citească înainte de publicare."
+msgstr ""
+
+#: templates/admin/guide.php:221
+msgid "Când regenerezi"
+msgstr ""
+
+#: templates/admin/guide.php:222
+msgid "„Regenerează” înlocuiește textul paginii cu șablonul. Ce ai schimbat de mână în pagină se pierde, deci notează-ți modificările înainte."
+msgstr ""
+
+#: templates/admin/guide.php:224
+msgid "după ce schimbi „Mod afișare” (Pro sau Light) sau blocarea scripturilor;"
+msgstr ""
+
+#: templates/admin/guide.php:225
+msgid "după ce schimbi „Mod de măsurare” (Strict sau Advanced);"
+msgstr ""
+
+#: templates/admin/guide.php:226
+msgid "după ce schimbi „Memorarea consimțământului (zile)” sau „Retenție log (luni)”;"
+msgstr ""
+
+#: templates/admin/guide.php:227
+msgid "când ecranul Pagini legale spune că șabloanele au fost actualizate sau că o pagină a fost generată pentru alt mod de măsurare."
+msgstr ""
+
+#: templates/admin/guide.php:229
+msgid "Regenerarea actualizează și traducerile paginii create de plugin (WPML sau Polylang). Traducerile făcute de tine nu sunt atinse."
+msgstr ""
+
+#: templates/admin/guide.php:235
+msgid "Pluginul se actualizează din ecranul Plugins, ca orice plugin. După un update, fă trei verificări:"
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:237
+#, php-format
+msgid "Citește notificările Consent Manager Pro din admin. De exemplu, „Am început să blocăm până la acord: …” apare o singură dată, după actualizarea de la o versiune 0.4.x, și numește serviciile care până atunci rulau fără acord. Deschide %1$sServicii%2$s și verifică lista „Găsite pe site”: după un update, biblioteca poate recunoaște servicii noi fără să te anunțe."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:238
+#, php-format
+msgid "Rulează %1$sVerificare%2$s, ca să vezi că paginile sunt încă verzi."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Pagini legale screen
+#: templates/admin/guide.php:239
+#, php-format
+msgid "Dacă %1$sPagini legale%2$s spune că șabloanele au fost actualizate, regenerează fiecare document. Mesajul dispare după ce le regenerezi pe toate trei."
+msgstr ""
+
+#: templates/admin/guide.php:242
+msgid "Re-consimțământul"
+msgstr ""
+
+#: templates/admin/guide.php:243
+msgid "Când pe site apare un serviciu nou, într-o categorie pe care vizitatorul a acceptat-o deja, pluginul nu îl încarcă pe baza acordului vechi. La următoarea pagină pe care o deschide, bannerul se arată direct la preferințe, cu serviciile noi marcate, până când vizitatorul decide. Până atunci, categoria e tratată ca refuzată."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Servicii screen
+#: templates/admin/guide.php:244
+#, php-format
+msgid "Pluginul ține minte toate serviciile găsite vreodată pe site. Dacă ai scos un serviciu și vrei ca lista să conțină doar ce e acum pe site, apasă „Resetează lista serviciilor văzute” în %1$sServicii%2$s."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:245
+#, php-format
+msgid "Vrei să întrebi din nou toți vizitatorii, de exemplu după o schimbare mare în politică? Mărește „Versiune politică” în %1$sSetări%2$s."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Registru consimțăminte screen
+#: templates/admin/guide.php:251
+#, php-format
+msgid "%1$sRegistru consimțăminte%2$s păstrează dovada alegerilor făcute de vizitatori, cerută de Legea 195/2024. Registrul există doar în modul Pro: în Light nu se cere acord."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Registru consimțăminte screen
+#: templates/admin/guide.php:252
+msgid "La fiecare alegere se păstrează: data, ID-ul consimțământului, decizia, categoriile și serviciile, limba, versiunea politicii și adresa paginii. IP-ul și browserul se păstrează doar ca hash, nu în clar."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:253
+#, php-format
+msgid "Înregistrările se șterg automat după numărul de luni din „Retenție log (luni)”, în %1$sSetări%2$s. Implicit: 13 luni."
+msgstr ""
+
+#: templates/admin/guide.php:255
+msgid "Căutarea după ID"
+msgstr ""
+
+#: templates/admin/guide.php:256
+msgid "Vizitatorul își vede ID-ul în fereastra „Setări cookie”, sub preferințe. Dacă îți scrie cu o cerere, pune ID-ul în câmpul „ID consimțământ” și apasă „Filtrează”. Vezi tot istoricul alegerilor lui."
+msgstr ""
+
+#: templates/admin/guide.php:258
+msgid "Exportul"
+msgstr ""
+
+#: templates/admin/guide.php:259
+msgid "„Export CSV” și „Export JSON” descarcă tot registrul. Păstrează fișierul în siguranță: e o dovadă legală."
+msgstr ""
+
+#: templates/admin/guide.php:260
+msgid "„Golește registrul” șterge definitiv toate înregistrările. Folosește-l doar dacă știi sigur că nu mai ai nevoie de ele."
+msgstr ""
+
+#: templates/admin/guide.php:262
+msgid "Dezinstalarea"
+msgstr ""
+
+#: templates/admin/guide.php:263
+msgid "La dezinstalare, pluginul șterge mereu datele lui de lucru: rezultatele scanărilor, raportul verificării, imaginile video și fonturile localizate."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:264
+#, php-format
+msgid "Setările, categoriile, serviciile configurate și registrul se șterg doar dacă ai bifat „Șterge toate datele la dezinstalare”, în %1$sSetări%2$s. Registrul e dovada legală a alegerilor: păstrează-l (sau un export al lui) cât cere legea înainte să bifezi."
+msgstr ""
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:265
+msgid "Paginile legale generate rămân pe site. Le ștergi tu, din Pagini, dacă nu mai ai nevoie de ele."
+msgstr ""
+
+#: templates/admin/guide.php:271
+msgid "Pluginul are un API JavaScript și o funcție PHP, ca să legi codul tău de acordul vizitatorului."
+msgstr ""
+
+#. translators: 1: window.CMP, 2: the script handle, 3: DOMContentLoaded
+#: templates/admin/guide.php:272
+#, php-format
+msgid "În JavaScript, %1$s există după ce se încarcă scriptul bannerului (handle-ul %2$s, în footer). Încarcă scriptul tău cu el ca dependență sau așteaptă %3$s."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:274
+#, php-format
+msgid "%s: dacă o categorie e permisă acum."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:275
+#, php-format
+msgid "%s: decizia salvată, sau null dacă vizitatorul nu a decis."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:276
+#, php-format
+msgid "%s: deschide preferințele."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:277
+#, php-format
+msgid "%s: apelează funcția la fiecare decizie, și imediat dacă vizitatorul a decis deja."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:278
+#, php-format
+msgid "%s: apelează funcția o singură dată, când categoria e permisă."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:279
+#, php-format
+msgid "%s: adaugă o categorie la acord. Merge doar dintr-un clic real al vizitatorului, de exemplu pe butonul tău „Încarcă harta”."
+msgstr ""
+
+#. translators: %s: method name
+#: templates/admin/guide.php:280
+#, php-format
+msgid "%s: scoate o categorie din acord."
+msgstr ""
+
+#. translators: %s: event name
+#: templates/admin/guide.php:281
+#, php-format
+msgid "%s: eveniment pe document, după fiecare decizie pe categorii."
+msgstr ""
+
+#. translators: %s: the PHP function
+#: templates/admin/guide.php:284
+#, php-format
+msgid "În PHP, %s spune dacă vizitatorul a permis o categorie. Nu o folosi pe pagini puse complet în cache: cookie-ul diferă de la un vizitator la altul."
+msgstr ""
+
+#. translators: 1-3: category slugs
+#: templates/admin/guide.php:286
+#, php-format
+msgid "Categoriile se identifică prin slug: %1$s (mereu permisă), %2$s, %3$s și cele create de tine în Categorii."
+msgstr ""
+
+#. translators: 1-3: category slugs
+#: templates/admin/guide.php:287
+msgid "În modul Light nu există decizie: allowCategory și denyCategory nu fac nimic, iar onConsent și whenAllowed nu apelează funcția pentru categoriile opționale."
 msgstr ""

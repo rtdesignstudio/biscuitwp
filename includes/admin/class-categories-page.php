@@ -17,7 +17,7 @@ class CMP_Categories_Page {
 		$cats = CMP_Consent::get_categories();
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'Consent Manager — Categorii', 'consent-manager-pro' ); ?></h1>
+			<h1><?php esc_html_e( 'Consent Manager — Categorii', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Categorii salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>

@@ -15,7 +15,7 @@ The same JavaScript API is available in the WordPress plugin and in the standalo
 
   or listen to the `cmp:consent` event (see below), which needs no `window.CMP` at all.
 
-Categories are identified by slug: `necessary` (always allowed), `statistics`, `marketing`, `preferences`, plus any custom category the site defines.
+Categories are identified by slug: `necessary` (always allowed), `statistics` and `marketing` by default, plus any custom category the site defines.
 
 ## Members
 

@@ -40,7 +40,7 @@ class CMP_Audit_Page {
 		$list->prepare_items();
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'Registru consimțăminte', 'consent-manager-pro' ); ?></h1>
+			<h1><?php esc_html_e( 'Registru consimțăminte', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'register' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<p>
 				<?php
 				printf(

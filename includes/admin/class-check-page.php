@@ -233,7 +233,7 @@ class CMP_Check_Page {
 		$cmp_off  = self::blocking_off();
 		?>
 		<div class="wrap cmp-admin cmp-check">
-			<h1><?php esc_html_e( 'Consent Manager — Verificare', 'consent-manager-pro' ); ?></h1>
+			<h1><?php esc_html_e( 'Consent Manager — Verificare', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'verify' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['cmp_urls'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista de pagini a fost salvată. Scanarea pornește din nou.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>

@@ -35,6 +35,7 @@ class CMP_Admin {
 		add_action( 'admin_post_cmp_purge_log', array( 'CMP_Audit_Page', 'purge' ) );
 
 		require_once CMP_PATH . 'includes/admin/class-legal-page.php';
+		require_once CMP_PATH . 'includes/admin/class-guide.php';
 		add_action( 'admin_post_cmp_legal', array( 'CMP_Legal_Page', 'handle' ) );
 		add_action( 'admin_post_cmp_dismiss_templates_notice', array( 'CMP_Legal_Page', 'dismiss_templates_notice' ) );
 		add_action( 'admin_post_cmp_dismiss_operator_note', array( 'CMP_Legal_Page', 'dismiss_operator_note' ) );
@@ -75,6 +76,7 @@ class CMP_Admin {
 		add_submenu_page( self::SLUG, __( 'Verificare', 'consent-manager-pro' ), __( 'Verificare', 'consent-manager-pro' ), 'manage_options', CMP_Check_Page::SLUG, array( 'CMP_Check_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Registru consimțăminte', 'consent-manager-pro' ), __( 'Registru consimțăminte', 'consent-manager-pro' ), 'manage_options', 'cmp-audit', array( 'CMP_Audit_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Pagini legale', 'consent-manager-pro' ), __( 'Pagini legale', 'consent-manager-pro' ), 'manage_options', 'cmp-legal', array( 'CMP_Legal_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Ghid', 'consent-manager-pro' ), __( 'Ghid', 'consent-manager-pro' ), 'manage_options', CMP_Guide::SLUG, array( 'CMP_Guide', 'render' ) );
 	}
 
 	public function assets( $hook ) {

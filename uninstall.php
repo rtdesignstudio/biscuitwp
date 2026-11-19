@@ -1,6 +1,7 @@
 <?php
 /**
- * Uninstall. Temporary data is always removed; settings, categories and the
+ * Uninstall. Temporary data is always removed; settings, categories, the
+ * configured services and the
  * consent log (legal evidence) only when the admin turned on
  * "Șterge toate datele la dezinstalare". See CMP_Uninstaller.
  */

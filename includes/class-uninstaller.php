@@ -26,8 +26,9 @@ class CMP_Uninstaller {
 	 */
 	public static function cleanup_site( $wpdb, $full ) {
 		$always = array(
-			// B1: services library.
-			'cmp_services', 'cmp_services_found', 'cmp_services_notice', 'cmp_services_seen', 'cmp_services_history', 'cmp_thumb_queue', 'cmp_operator_note_seen', 'cmp_templates_notice', 'cmp_templates_regenerated', 'cmp_db_schema',
+			// B1: services library (the configured services, their history and the
+			// seen flag are kept like the settings: removed only with the flag).
+			'cmp_services_found', 'cmp_services_notice', 'cmp_thumb_queue', 'cmp_operator_note_seen', 'cmp_templates_notice', 'cmp_templates_regenerated', 'cmp_db_schema',
 			// B3: multi-page scan, browser check report, compatibility copy.
 			'cmp_scan_urls', 'cmp_scan_queue', 'cmp_scan_pages', 'cmp_scan_state', 'cmp_scan_aggregate', 'cmp_scan_lock', 'cmp_scan_saved_at', 'cmp_check_report',
 			// Localized Google Fonts map.
@@ -66,7 +67,7 @@ class CMP_Uninstaller {
 			return;
 		}
 
-		foreach ( array( 'cmp_settings', 'cmp_categories', 'cmp_db_version' ) as $option ) {
+		foreach ( array( 'cmp_settings', 'cmp_categories', 'cmp_db_version', 'cmp_services', 'cmp_services_history', 'cmp_services_seen' ) as $option ) {
 			delete_option( $option );
 		}
 		// Any other cmp_* option, plus cmp_* transients. esc_like escapes the "_" wildcard.
