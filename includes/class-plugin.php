@@ -38,6 +38,7 @@ class CMP_Plugin {
 		CMP_Thumbs::register();
 		require_once CMP_PATH . 'includes/modules/class-blocker.php';
 		CMP_Blocker::register();
+		require_once CMP_PATH . 'includes/modules/class-scanner.php';
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
 		CMP_Fonts::register();
 		require_once CMP_PATH . 'includes/modules/class-lang.php';
