@@ -307,6 +307,12 @@ class CMP_Legal {
 		}
 	}
 
+	/** WP: the stored plugin settings, as an array. */
+	private static function stored_settings() {
+		$s = CMP_Consent::get_settings();
+		return is_array( $s ) ? $s : array();
+	}
+
 	/** WP: operator data stored on the "Pagini legale" screen. */
 	private static function stored_meta() {
 		$s = CMP_Consent::get_settings();
@@ -368,6 +374,7 @@ class CMP_Legal {
 			if ( $post && self::refreshable_translation( get_post_meta( $existing_id, '_cmp_legal_type', true ), $type, (string) $post->post_content ) ) {
 				wp_update_post( array( 'ID' => $existing_id, 'post_content' => CMP_Legal_Page::build_content( $type, $meta, $lang ) ) );
 				update_post_meta( $existing_id, '_cmp_legal_type', $type );
+				update_post_meta( $existing_id, '_cmp_legal_mode', CMP_Legal_Page::page_mode( self::stored_settings(), CMP_Legal_Page::services_history() ) );
 			}
 			return (int) $existing_id;
 		}
@@ -381,6 +388,7 @@ class CMP_Legal {
 			return 0;
 		}
 		update_post_meta( $id, '_cmp_legal_type', $type );
+		update_post_meta( $id, '_cmp_legal_mode', CMP_Legal_Page::page_mode( self::stored_settings(), CMP_Legal_Page::services_history() ) );
 		return (int) $id;
 	}
 

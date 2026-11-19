@@ -50,6 +50,68 @@ class CMP_Legal_Page {
 		);
 	}
 
+	/**
+	 * Pure: the {{#advanced}} flag ('1' or ''). Set when the Advanced
+	 * measurement mode is in effect and Google Analytics or Google Tag Manager
+	 * was ever found on the site ($history: the cmp_services_history list).
+	 */
+	public static function measurement_vars( array $settings, $history ) {
+		return array( 'advanced' => self::advanced_text( $settings, $history ) ? '1' : '' );
+	}
+
+	/**
+	 * Pure: do the legal texts get the Advanced variant? Advanced in effect and
+	 * Google Analytics or Google Tag Manager in $history. The one rule behind
+	 * both the {{#advanced}} variable and page_mode().
+	 */
+	private static function advanced_text( array $settings, $history ) {
+		$seen = array();
+		foreach ( is_array( $history ) ? $history : array() as $id ) {
+			if ( is_string( $id ) ) {
+				$seen[] = $id;
+			}
+		}
+		return CMP_Services::measurement_active( $settings ) && (bool) array_intersect( CMP_Services::MEASUREMENT_IDS, $seen );
+	}
+
+	/**
+	 * Pure: the text variant a page is generated in: 'light', 'advanced' (the
+	 * {{#advanced}} variant, same rule as measurement_vars) or 'strict'.
+	 */
+	public static function page_mode( array $settings, $history ) {
+		if ( isset( $settings['mode'] ) && 'light' === $settings['mode'] ) {
+			return 'light';
+		}
+		return self::advanced_text( $settings, $history ) ? 'advanced' : 'strict';
+	}
+
+	/** WP: the cumulative list of services found on the site (cmp_services_history). */
+	public static function services_history() {
+		$h = get_option( 'cmp_services_history', array() );
+		return is_array( $h ) ? $h : array();
+	}
+
+	/**
+	 * Pure: one notice per linked page generated for another mode.
+	 * $pages: list of {type, title, mode} (mode = the stored _cmp_legal_mode, ''
+	 * when the page predates it: no notice then). The terms text does not
+	 * depend on the measurement mode, so terms never gets one.
+	 */
+	public static function mode_notices( array $pages, $current ) {
+		$out = array();
+		foreach ( $pages as $p ) {
+			$mode = isset( $p['mode'] ) ? (string) $p['mode'] : '';
+			if ( isset( $p['type'] ) && 'terms' === $p['type'] ) {
+				continue;
+			}
+			if ( '' !== $mode && $mode !== $current ) {
+				/* translators: %s: page title */
+				$out[] = sprintf( __( '„%s” a fost generată pentru alt mod de măsurare. Regenerează pagina.', 'consent-manager-pro' ), isset( $p['title'] ) ? (string) $p['title'] : '' );
+			}
+		}
+		return $out;
+	}
+
 	/** Page content from the $lang template. $meta is the stored operator data (or settings holding it). */
 	public static function build_content( $type, array $meta, $lang = 'ro' ) {
 		if ( isset( $meta['legal_meta'] ) && is_array( $meta['legal_meta'] ) ) {
@@ -65,7 +127,11 @@ class CMP_Legal_Page {
 			'address'        => isset( $meta['address'] ) ? $meta['address'] : '',
 			'effective_date' => self::date_for( $lang ),
 		);
-		$vars = array_merge( $vars, self::settings_vars( CMP_Consent::get_settings() ) );
+		$vars = array_merge(
+			$vars,
+			self::settings_vars( CMP_Consent::get_settings() ),
+			self::measurement_vars( CMP_Consent::get_settings(), get_option( 'cmp_services_history', array() ) ) // same rule as page_mode()
+		);
 		return CMP_Legal::fill_template( CMP_Legal::load_template( $type, $lang ), $vars );
 	}
 
@@ -85,6 +151,7 @@ class CMP_Legal_Page {
 		}
 		$meta = isset( $settings['legal_meta'] ) && is_array( $settings['legal_meta'] ) ? $settings['legal_meta'] : array();
 		wp_update_post( array( 'ID' => $pid, 'post_content' => self::build_content( 'cookie', $meta, CMP_Legal::primary_lang() ) ) );
+		update_post_meta( $pid, '_cmp_legal_mode', self::page_mode( $settings, self::services_history() ) );
 	}
 
 	/**
@@ -201,6 +268,18 @@ class CMP_Legal_Page {
 		$meta   = self::meta();
 		$docs   = self::documents();
 		$wp_pid = (int) get_option( 'wp_page_for_privacy_policy' );
+		$linked = array();
+		foreach ( $docs as $type => $doc ) {
+			if ( $doc['id'] && ! $doc['suggested'] ) {
+				$linked[] = array(
+					'type'  => $type,
+					'title' => get_the_title( $doc['id'] ),
+					'mode'  => (string) get_post_meta( (int) $doc['id'], '_cmp_legal_mode', true ),
+				);
+			}
+		}
+		$current_settings = CMP_Consent::get_settings();
+		$mode_notices     = self::mode_notices( $linked, self::page_mode( is_array( $current_settings ) ? $current_settings : array(), self::services_history() ) );
 		$badges = array(
 			'published' => array( __( 'Publicată', 'consent-manager-pro' ), '#00a32a' ),
 			'draft'     => array( __( 'Ciornă (nu e vizibilă vizitatorilor)', 'consent-manager-pro' ), '#dba617' ),
@@ -213,6 +292,9 @@ class CMP_Legal_Page {
 				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi.', 'consent-manager-pro' ); ?>
 					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_templates_notice' ), 'cmp_dismiss_templates_notice' ) ); ?>"><?php esc_html_e( 'Închide', 'consent-manager-pro' ); ?></a></p></div>
 			<?php endif; ?>
+			<?php foreach ( $mode_notices as $mode_notice ) : ?>
+				<div class="notice notice-warning"><p><?php echo esc_html( $mode_notice ); ?></p></div>
+			<?php endforeach; ?>
 			<?php if ( isset( $_GET['generated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor.', 'consent-manager-pro' ); ?></p></div>
 			<?php elseif ( isset( $_GET['saved'] ) ) : ?>
@@ -399,6 +481,7 @@ class CMP_Legal_Page {
 		}
 		if ( ! is_wp_error( $post_id ) && $post_id ) {
 			update_post_meta( (int) $post_id, '_cmp_legal_type', $type ); // generated by the plugin
+			update_post_meta( (int) $post_id, '_cmp_legal_mode', self::page_mode( $settings, self::services_history() ) );
 		}
 		if ( is_wp_error( $post_id ) || ! $post_id ) {
 			return is_wp_error( $post_id ) ? $post_id : new WP_Error( 'cmp_legal_failed', 'failed' );

@@ -138,7 +138,7 @@ $t6_expect = array(
 		'rights' => 'Your rights as a data subject', 'remove' => 'Stop loading',
 	),
 );
-$t6_known = array( 'company', 'site_name', 'contact_email', 'dpo', 'jurisdiction', 'address', 'effective_date', 'retention_months', 'cookie_days', 'pro', 'light', 'blocking' );
+$t6_known = array( 'company', 'site_name', 'contact_email', 'dpo', 'jurisdiction', 'address', 'effective_date', 'retention_months', 'cookie_days', 'pro', 'light', 'blocking', 'advanced' );
 $t6_base  = array(
 	'company' => 'Acme SRL', 'site_name' => 'Acme', 'contact_email' => 'a@b.md', 'dpo' => 'Ion DPO',
 	'jurisdiction' => 'Republica Moldova', 'address' => 'str. X 1, Chișinău', 'effective_date' => '18.11.2026',
@@ -317,3 +317,143 @@ if ( method_exists( 'CMP_Legal_Page', 'operator_note_html' ) ) {
 $t7_src = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
 cmp_assert( false !== strpos( $t7_src, "get_option( 'cmp_operator_note_seen' )" ) && false !== strpos( $t7_src, "update_option( 'cmp_operator_note_seen'" ), 'legal screen: note seen option read and set' );
 cmp_assert( false !== strpos( (string) file_get_contents( __DIR__ . '/../uninstall.php' ), "'cmp_operator_note_seen'" ), 'uninstall removes cmp_operator_note_seen' );
+
+// B2 Task 4: legal texts for the Advanced measurement mode, per-page mode notice.
+require_once __DIR__ . '/../includes/class-services.php';
+$b2_adv    = array( 'mode' => 'pro', 'block_scripts' => true, 'measurement' => 'advanced' );
+$b2_strict = array( 'mode' => 'pro', 'block_scripts' => true, 'measurement' => 'strict' );
+$b2_light  = array( 'mode' => 'light', 'block_scripts' => true, 'measurement' => 'advanced' );
+cmp_assert( method_exists( 'CMP_Legal_Page', 'measurement_vars' ), 'CMP_Legal_Page::measurement_vars exists' );
+cmp_assert( method_exists( 'CMP_Legal_Page', 'page_mode' ), 'CMP_Legal_Page::page_mode exists' );
+cmp_assert( method_exists( 'CMP_Legal_Page', 'mode_notices' ), 'CMP_Legal_Page::mode_notices exists' );
+if ( method_exists( 'CMP_Legal_Page', 'measurement_vars' ) && method_exists( 'CMP_Legal_Page', 'page_mode' ) && method_exists( 'CMP_Legal_Page', 'mode_notices' ) ) {
+	$b2_mv = function ( $s, $h ) {
+		return CMP_Legal_Page::measurement_vars( $s, $h );
+	};
+	cmp_assert_eq( $b2_mv( $b2_adv, array( 'youtube', 'google-analytics' ) ), array( 'advanced' => '1' ), 'advanced var: Advanced with GA in history' );
+	cmp_assert_eq( $b2_mv( $b2_adv, array( 'google-tag-manager' ) ), array( 'advanced' => '1' ), 'advanced var: Advanced with GTM in history' );
+	cmp_assert_eq( $b2_mv( $b2_adv, array( 'youtube', 'meta-pixel' ) ), array( 'advanced' => '' ), 'advanced var: Advanced without GA/GTM in history' );
+	cmp_assert_eq( $b2_mv( $b2_adv, false ), array( 'advanced' => '' ), 'advanced var: no history' );
+	cmp_assert_eq( $b2_mv( $b2_strict, array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Strict' );
+	cmp_assert_eq( $b2_mv( array( 'mode' => 'pro', 'block_scripts' => false, 'measurement' => 'advanced' ), array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Advanced without blocking has no effect' );
+	cmp_assert_eq( $b2_mv( $b2_light, array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Light' );
+	cmp_assert_eq( $b2_mv( $b2_adv, array( array( 'google-analytics' ), 7 ) ), array( 'advanced' => '' ), 'advanced var: non-string history entries ignored' );
+
+	$b2_ga = array( 'google-analytics' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_adv, $b2_ga ), 'advanced', 'page_mode: Advanced active with GA in history' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_adv, array( 'google-tag-manager' ) ), 'advanced', 'page_mode: Advanced active with GTM in history' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_adv, array() ), 'strict', 'page_mode (fix 1): Advanced without GA/GTM history -> strict (the variant rendered)' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_adv, array( 'youtube' ) ), 'strict', 'page_mode (fix 1): Advanced with unrelated history -> strict' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_strict, $b2_ga ), 'strict', 'page_mode: Strict' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( $b2_light, $b2_ga ), 'light', 'page_mode: Light (whatever measurement says)' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( array( 'mode' => 'pro', 'measurement' => 'advanced' ), $b2_ga ), 'strict', 'page_mode: Advanced without blocking -> strict' );
+	cmp_assert_eq( CMP_Legal_Page::page_mode( array(), array() ), 'strict', 'page_mode: defaults -> strict' );
+	foreach ( array( array( $b2_adv, $b2_ga ), array( $b2_adv, array() ), array( $b2_strict, $b2_ga ), array( $b2_light, $b2_ga ) ) as $b2_c ) {
+		cmp_assert_eq( 'advanced' === CMP_Legal_Page::page_mode( $b2_c[0], $b2_c[1] ), '1' === CMP_Legal_Page::measurement_vars( $b2_c[0], $b2_c[1] )['advanced'], 'page_mode and the advanced variable agree' );
+	}
+	// Scenario: page generated in Advanced before GA was seen -> stamped strict; GA appears -> notice.
+	$b2_stamp = CMP_Legal_Page::page_mode( $b2_adv, array() );
+	cmp_assert_eq( CMP_Legal_Page::mode_notices( array( array( 'type' => 'cookie', 'title' => 'C', 'mode' => $b2_stamp ) ), CMP_Legal_Page::page_mode( $b2_adv, $b2_ga ) ), array( '„C” a fost generată pentru alt mod de măsurare. Regenerează pagina.' ), 'mode_notices (fix 1): page stamped strict gets the notice once GA is in history' );
+	cmp_assert_eq( CMP_Legal_Page::mode_notices( array( array( 'type' => 'terms', 'title' => 'T', 'mode' => 'strict' ) ), 'advanced' ), array(), 'mode_notices (fix 1, M-1): terms never gets the notice' );
+	cmp_assert_eq( CMP_Legal_Page::mode_notices( array( array( 'type' => 'privacy', 'title' => 'P', 'mode' => 'advanced' ) ), 'strict' ), array( '„P” a fost generată pentru alt mod de măsurare. Regenerează pagina.' ), 'mode_notices: privacy Advanced -> Strict notice' );
+
+	$b2_n = CMP_Legal_Page::mode_notices( array(
+		array( 'title' => 'Politica de cookie-uri', 'mode' => 'strict' ),
+		array( 'title' => 'Politica de confidențialitate', 'mode' => 'advanced' ),
+		array( 'title' => 'Termeni', 'mode' => '' ),
+	), 'advanced' );
+	cmp_assert_eq( $b2_n, array( '„Politica de cookie-uri” a fost generată pentru alt mod de măsurare. Regenerează pagina.' ), 'mode_notices: only pages with a different stored mode; none without meta' );
+	cmp_assert_eq( CMP_Legal_Page::mode_notices( array( array( 'title' => 'X', 'mode' => 'light' ) ), 'light' ), array(), 'mode_notices: same mode -> none' );
+
+	// Rendering: four cases x cookie/privacy x RO/RU/EN.
+	$b2_cases = array(
+		'adv_ga'   => array( $b2_adv, array( 'google-analytics' ) ),
+		'adv_none' => array( $b2_adv, array( 'youtube' ) ),
+		'strict'   => array( $b2_strict, array( 'google-analytics', 'google-tag-manager' ) ),
+		'light'    => array( $b2_light, array( 'google-analytics' ) ),
+	);
+	$b2_pin = array(
+		'ro' => array(
+			'cookie'  => array( 'Ne arată cum este folosit site-ul, ca să îl putem îmbunătăți. Îți cerem acordul pentru ele.', '(de exemplu video sau hărți), nu se încarcă până nu îți dai acordul.', 'Serviciile refuzate nu se mai încarcă de la următoarea pagină.', 'e tratată ca refuzată și rămâne blocată.' ),
+			'privacy' => array( 'Temei: consimțământul tău.', 'Serviciile configurate în instrumentul nostru de cookie-uri nu se încarcă până nu îți dai acordul.' ),
+		),
+		'ru' => array(
+			'cookie'  => array( 'Показывают нам, как используется сайт, чтобы мы могли его улучшить. Мы запрашиваем ваше согласие на их использование.', '(например, видео или карты), не загружаются, пока вы не дадите согласие.', 'Отклонённые сервисы перестают загружаться со следующей страницы.', 'считается отклонённой и остаётся заблокированной.' ),
+			'privacy' => array( 'Основание: ваше согласие.', 'Сервисы, настроенные в нашем инструменте cookie, не загружаются, пока вы не дадите согласие.' ),
+		),
+		'en' => array(
+			'cookie'  => array( 'They show us how the website is used, so we can improve it. We ask for your consent to use them.', '(for example videos or maps), do not load until you give your consent.', 'Rejected services stop loading from the next page.', 'is treated as refused and stays blocked.' ),
+			'privacy' => array( 'Legal basis: your consent.', 'The services configured in our cookie tool do not load until you give your consent.' ),
+		),
+	);
+	$b2_mark = array(
+		'ro' => array( 'cookie' => 'Pe acest site, Google Analytics și Google Tag Manager se încarcă înainte de alegerea ta, fără cookie-uri până îți dai acordul.', 'privacy' => '<strong>Măsurarea fără cookie-uri</strong>' ),
+		'ru' => array( 'cookie' => 'На этом сайте Google Analytics и Google Tag Manager загружаются до того, как вы сделаете выбор, без файлов cookie, пока вы не дадите согласие.', 'privacy' => '<strong>Измерение без файлов cookie</strong>' ),
+		'en' => array( 'cookie' => 'On this website, Google Analytics and Google Tag Manager load before you make your choice, without cookies until you give your consent.', 'privacy' => '<strong>Measurement without cookies</strong>' ),
+	);
+	$b2_gtm = array(
+		'ro' => 'Google Tag Manager poate încărca și alte etichete configurate de site; acestea trebuie să respecte alegerea ta, iar site-ul răspunde de configurarea lor.',
+		'ru' => 'Google Tag Manager может загружать и другие теги, настроенные сайтом; они должны соблюдать ваш выбор, а за их настройку отвечает сайт.',
+		'en' => 'Google Tag Manager can also load other tags that the website configures; those must respect your choice, and the website is responsible for configuring them.',
+	);
+	$b2_exempt = array(
+		'ro' => 'Se pot încărca fără acord serviciile pe care site-ul le-a marcat ca excepție, de exemplu unelte de statistică fără cookie-uri.',
+		'ru' => 'Без согласия могут загружаться сервисы, которые сайт отметил как исключение, например инструменты статистики без файлов cookie.',
+		'en' => 'Services the website has marked as exempt, for example cookieless statistics tools, may load without consent.',
+	);
+	$b2_light_ex = array(
+		'ro' => '(de exemplu, pentru securitatea formularelor sau pentru statistici fără cookie-uri)',
+		'ru' => '(например, для безопасности форм или для статистики без файлов cookie)',
+		'en' => '(for example, for form security or for cookieless statistics)',
+	);
+	$b2_ip = array( 'ro' => 'adresa IP', 'ru' => 'IP-адрес', 'en' => 'IP address' );
+	foreach ( $b2_pin as $l => $by_type ) {
+		foreach ( $by_type as $type => $pins ) {
+			$tpl = CMP_Legal::load_template( $type, $l );
+			$out = array();
+			foreach ( $b2_cases as $case => $c ) {
+				$vars = array_merge( $t6_base, CMP_Legal_Page::settings_vars( $c[0] ), CMP_Legal_Page::measurement_vars( $c[0], $c[1] ) );
+				foreach ( array( 'full' => array(), 'bare' => array( 'address' => '', 'dpo' => '', 'jurisdiction' => '' ) ) as $fill => $over ) {
+					$o = CMP_Legal::fill_template( $tpl, array_merge( $vars, $over ) );
+					cmp_assert( false === strpos( $o, '{{' ) && false === strpos( $o, '}}' ), "b2 $l/$type/$case/$fill: no {{ left" );
+					cmp_assert( ! preg_match( '/<p>\s*<\/p>|<li>\s*<\/li>|<ul>\s*<\/ul>/u', $o ), "b2 $l/$type/$case/$fill: no empty p/li/ul" );
+					cmp_assert( ! preg_match( '/<!-- wp:(paragraph|list|list-item) -->\s*<!-- \/wp:\1 -->/', $o ), "b2 $l/$type/$case/$fill: no empty block" );
+					cmp_assert( ! preg_match( '/<p>[^<]*\s\.<\/p>|\s\.\s|\s,|,,|\.\./u', strip_tags( $o, '<p>' ) ), "b2 $l/$type/$case/$fill: no dangling punctuation" );
+				}
+				$out[ $case ] = CMP_Legal::fill_template( $tpl, $vars );
+			}
+			$mark = $b2_mark[ $l ][ $type ];
+			cmp_assert( false !== strpos( $out['adv_ga'], $mark ), "b2 $l/$type/adv_ga: Advanced paragraph present" );
+			cmp_assert( false !== strpos( $out['adv_ga'], 'Google Analytics' ) && false !== strpos( $out['adv_ga'], 'Google Tag Manager' ), "b2 $l/$type/adv_ga: names GA and GTM" );
+			cmp_assert( false !== strpos( $out['adv_ga'], $b2_ip[ $l ] ), "b2 $l/$type/adv_ga: IP address stated" );
+			cmp_assert( false !== strpos( $out['adv_ga'], $b2_gtm[ $l ] ), "b2 $l/$type/adv_ga (fix 1, M-3): GTM other-tags caveat" );
+			foreach ( array( 'adv_none', 'strict', 'light' ) as $case ) {
+				cmp_assert( false === strpos( $out[ $case ], $b2_gtm[ $l ] ), "b2 $l/$type/$case: no GTM caveat" );
+			}
+			foreach ( array( 'adv_ga', 'strict' ) as $case ) {
+				cmp_assert( false !== strpos( $out[ $case ], $b2_exempt[ $l ] ), "b2 $l/$type/$case (fix 1, I-2): exempt cookieless tools may load without consent" );
+			}
+			cmp_assert( false !== strpos( $out['light'], $b2_light_ex[ $l ] ), "b2 $l/$type/light (fix 1, M-5): same exempt examples in cookie and privacy" );
+			foreach ( array( 'adv_none', 'strict', 'light' ) as $case ) {
+				cmp_assert( false === strpos( $out[ $case ], $mark ), "b2 $l/$type/$case: no Advanced paragraph" );
+			}
+			cmp_assert_eq( $out['adv_none'], $out['strict'], "b2 $l/$type: Advanced without GA/GTM renders as Strict" );
+			foreach ( $pins as $i => $pin ) {
+				cmp_assert( false !== strpos( $out['strict'], $pin ), "b2 $l/$type/strict: sentence $i kept" );
+				cmp_assert( false === strpos( $out['adv_ga'], $pin ), "b2 $l/$type/adv_ga: sentence $i (false in Advanced) absent" );
+			}
+		}
+	}
+}
+$b2_src  = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
+$b2_lsrc = (string) file_get_contents( __DIR__ . '/../includes/modules/class-legal.php' );
+preg_match( '/function build_content\(.*?\n\t}\n/s', $b2_src, $b2_bc );
+cmp_assert( isset( $b2_bc[0] ) && false !== strpos( $b2_bc[0], 'self::measurement_vars(' ) && false !== strpos( $b2_bc[0], "'cmp_services_history'" ), 'build_content merges measurement_vars from the settings and cmp_services_history' );
+preg_match( '/function generate_page\(.*?\n\t}\n/s', $b2_src, $b2_gp );
+cmp_assert( isset( $b2_gp[0] ) && false !== strpos( $b2_gp[0], "'_cmp_legal_mode', self::page_mode(" ), 'generate_page writes _cmp_legal_mode' );
+preg_match( '/function regenerate_cookie_page\(.*?\n\t}\n/s', $b2_src, $b2_rc );
+cmp_assert( isset( $b2_rc[0] ) && false !== strpos( $b2_rc[0], "'_cmp_legal_mode', self::page_mode(" ), 'regenerate_cookie_page writes _cmp_legal_mode' );
+preg_match( '/function sync_translation\(.*?\n\t}\n/s', $b2_lsrc, $b2_st );
+cmp_assert( isset( $b2_st[0] ) && 2 === substr_count( $b2_st[0], "'_cmp_legal_mode', CMP_Legal_Page::page_mode(" ), 'sync_translation writes _cmp_legal_mode on refresh/adoption and on create' );
+cmp_assert( false !== strpos( $b2_src, "get_post_meta( (int) \$doc['id'], '_cmp_legal_mode', true )" ) && false !== strpos( $b2_src, 'self::mode_notices(' ), 'legal screen reads _cmp_legal_mode and shows mode_notices' );
+cmp_assert_eq( preg_match_all( '/page_mode\(\s*[^;]*?,\s*(self|CMP_Legal_Page)::services_history\(\)\s*\)/', $b2_src . $b2_lsrc ), 5, 'fix 1: every page_mode call passes services_history() (generate, cookie refresh, notice, sync refresh + create)' );
