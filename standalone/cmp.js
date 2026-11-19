@@ -410,6 +410,16 @@
 		return (active === last || (!inside && active !== dialog)) ? first : null;
 	}
 	// focusTrap:end
+	// keys:begin
+	// Pure: what Escape does. In the settings panel it goes back to the main
+	// view, like the Back button; anywhere else it does nothing. Not while
+	// re-consent hides Back; without the overlay, only with focus inside the
+	// banner. It never saves a choice, writes the cookie or closes the banner.
+	// Tested in standalone/tests/run.js (source-extracted).
+	function escapeAction(prefsOpen, backHidden, blocking, focusInside) {
+		return prefsOpen && !backHidden && (blocking || focusInside === true) ? 'back' : null;
+	}
+	// keys:end
 
 	// Pure: does an embed of this category load for the accepted categories?
 	function embedLoads(category, accepted) {
@@ -512,6 +522,7 @@
 			var noOverlay = isPolicyPage(cfg.privacyUrl, window.location.href);
 			root.className = 'cmp cmp--' + cfg.preset + ' cmp--pos-' + cfg.position + (noOverlay ? ' cmp--no-overlay' : '');
 			root.setAttribute('data-cmp', '');
+			root.setAttribute('lang', cfg.lang);
 			root.hidden = true;
 
 			var privacyLink = '';
@@ -549,10 +560,10 @@
 			});
 
 			root.innerHTML =
-				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay ? 'false' : 'true') + '" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>' +
+				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay ? 'false' : 'true') + '" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>' +
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
-				'<p class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
+				'<p id="cmp-intro" class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
 				'<div class="cmp__actions">' +
 				'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">' + escapeHtml(cfg.texts.prefs) + '</button>' +
 				'<span class="cmp__spacer" aria-hidden="true"></span>' +
@@ -564,7 +575,7 @@
 				'</div>' +
 				'<div class="cmp__prefs" data-cmp-view="prefs">' +
 				'<div class="cmp__prefs-header">' +
-				'<h2 id="cmp-prefs-title" class="cmp__title" data-cmp-prefs-title data-cmp-reconsent-title="' + escapeHtml(cfg.texts.reconsent_title || '') + '">' + escapeHtml(cfg.texts.prefs_title) + '</h2>' +
+				'<h2 id="cmp-prefs-title" class="cmp__title" tabindex="-1" data-cmp-prefs-title data-cmp-reconsent-title="' + escapeHtml(cfg.texts.reconsent_title || '') + '">' + escapeHtml(cfg.texts.prefs_title) + '</h2>' +
 				'<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="' + escapeHtml(cfg.texts.back) + '">' +
 				'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
 				'</button>' +
@@ -594,6 +605,7 @@
 			var root = document.createElement('div');
 			root.className = 'cmp-light cmp--' + cfg.preset;
 			root.setAttribute('data-cmp-light', '');
+			root.setAttribute('lang', cfg.lang);
 			root.hidden = true;
 			root.setAttribute('role', 'region');
 			root.setAttribute('aria-label', cfg.texts.dialogLabel);
@@ -721,16 +733,22 @@
 		function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
 		function show() {
 			if (!banner) { return; }
+			var wasHidden = banner.hidden;
 			hideReopen();
 			banner.hidden = false;
 			if (blocking()) { document.body.classList.add('cmp-has-banner'); }
-			if (blocking()) { trapFocus(true); }
+			// Escape works on every banner; the Tab trap only where it blocks the page.
+			document.addEventListener('keydown', onKeydown);
+			// Trap (and remember the focus to restore) only when it appears; already on
+			// screen (openPreferences while it shows), just focus the view.
+			if (blocking() && wasHidden) { trapFocus(true); } else if (!wasHidden || prefsOpen()) { focusDialog(); }
 		}
 		function hide() {
 			if (!banner) { return; }
 			banner.hidden = true;
 			document.body.classList.remove('cmp-has-banner');
 			closePrefs();
+			document.removeEventListener('keydown', onKeydown);
 			trapFocus(false);
 			if (readCookie()) { showReopen(); }
 		}
@@ -746,24 +764,39 @@
 				return el.getClientRects().length > 0;
 			});
 		}
+		function prefsOpen() { var m = modal(); return !!m && m.classList.contains('is-prefs-open'); }
 		function onKeydown(e) {
-			if (e.key !== 'Tab') { return; }
+			if (e.key === 'Escape' || e.key === 'Esc') {
+				var back = banner.querySelector('[data-cmp-view="prefs"] [data-cmp-action="back"]');
+				if (escapeAction(prefsOpen(), !!(back && back.hidden), blocking(), banner.contains(document.activeElement)) === 'back') { e.preventDefault(); goBack(); }
+				return;
+			}
+			if (e.key !== 'Tab' || !blocking()) { return; }
 			var target = trapStep(focusable(), document.activeElement, e.shiftKey, modal());
 			if (target) { e.preventDefault(); target.focus(); }
 		}
 		function trapFocus(on) {
 			if (on) {
 				lastFocus = document.activeElement;
-				document.addEventListener('keydown', onKeydown);
 				// Focus the dialog, not its first button: a programmatic focus on a button
 				// shows the :focus-visible ring on open. The ring now appears only once
 				// the visitor tabs into the buttons.
-				var m = modal();
-				if (m) { m.focus(); }
+				focusDialog();
 			} else {
-				document.removeEventListener('keydown', onKeydown);
 				if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
 			}
+		}
+
+		// The dialog on the main view, the settings title when the panel is open.
+		function focusDialog() {
+			var t = prefsOpen() ? banner.querySelector('[data-cmp-prefs-title]') : modal();
+			if (t) { t.focus(); }
+		}
+		// Back to the main view (Back button or Escape), focus on "Settings".
+		function goBack() {
+			closePrefs();
+			var p = banner.querySelector('[data-cmp-view="main"] [data-cmp-action="prefs"]');
+			if (p) { p.focus(); }
 		}
 
 		function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
@@ -792,6 +825,9 @@
 			m.classList.add('is-prefs-open');
 			// The dialog is named by the title on screen.
 			m.setAttribute('aria-labelledby', 'cmp-prefs-title');
+			// Screen readers start on the panel title (no-op while the banner is hidden: show() focuses it).
+			var t = banner.querySelector('[data-cmp-prefs-title]');
+			if (t) { t.focus(); }
 		}
 
 		// --- Re-consent (B4) ---
@@ -838,7 +874,7 @@
 				el.hidden = !ids.length;
 			});
 		}
-		function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); m.setAttribute('aria-labelledby', 'cmp-title'); m.removeAttribute('aria-describedby'); } }
+		function closePrefs() { var m = modal(); if (m) { m.classList.remove('is-prefs-open'); m.setAttribute('aria-labelledby', 'cmp-title'); m.setAttribute('aria-describedby', 'cmp-intro'); } }
 
 		function bind() {
 			if (!banner) { return; }
@@ -851,7 +887,7 @@
 				if (action === 'accept') { save(cfg.categories.map(function (c) { return c.slug; }), 'accepted_all'); }
 				else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); rejectServices(); }
 				else if (action === 'prefs') { openPrefs(); }
-				else if (action === 'back') { closePrefs(); }
+				else if (action === 'back') { goBack(); }
 				else if (action === 'save') {
 					var sel = selectedFromUI();
 					var decision = decisionFor(sel, cfg.categories);

@@ -21,7 +21,7 @@ $cmp_privacy_id  = isset( $settings['privacy_page_id'] ) ? (int) $settings['priv
 // Link only a published page: a draft would be a 404 for visitors.
 $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_privacy_id ) ) ? get_permalink( $cmp_privacy_id ) : '';
 ?>
-<div class="cmp-light cmp--<?php echo esc_attr( $preset ); ?>" data-cmp-light hidden role="region" aria-label="<?php echo esc_attr( CMP_Lang::text( 'title' ) ); ?>">
+<div class="cmp-light cmp--<?php echo esc_attr( $preset ); ?>" lang="<?php echo esc_attr( CMP_Lang::current() ); ?>" data-cmp-light hidden role="region" aria-label="<?php echo esc_attr( CMP_Lang::text( 'title' ) ); ?>">
 	<p class="cmp-light__text">
 		<?php echo esc_html( $cmp_text( 'light_intro', CMP_Lang::text( 'light_intro' ) ) ); ?>
 		<?php if ( $cmp_privacy_url ) : ?>

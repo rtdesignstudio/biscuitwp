@@ -24,13 +24,13 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 ?>
 <?php $cmp_position = isset( $settings['position'] ) ? $settings['position'] : 'modal-center'; ?>
 <?php $cmp_no_overlay = ! empty( $no_overlay ); // Policy pages: readable behind a non-blocking banner. ?>
-<div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?> cmp--pos-<?php echo esc_attr( $cmp_position ); ?><?php echo $cmp_no_overlay ? ' cmp--no-overlay' : ''; ?>" data-cmp hidden>
-	<div class="cmp__modal" role="dialog" aria-modal="<?php echo $cmp_no_overlay ? 'false' : 'true'; ?>" aria-labelledby="cmp-title" tabindex="-1" data-cmp-modal>
+<div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?> cmp--pos-<?php echo esc_attr( $cmp_position ); ?><?php echo $cmp_no_overlay ? ' cmp--no-overlay' : ''; ?>" lang="<?php echo esc_attr( CMP_Lang::current() ); ?>" data-cmp hidden>
+	<div class="cmp__modal" role="dialog" aria-modal="<?php echo $cmp_no_overlay ? 'false' : 'true'; ?>" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>
 
 		<!-- View 1: main message + actions -->
 		<div class="cmp__main" data-cmp-view="main">
 			<h2 id="cmp-title" class="cmp__title"><?php echo esc_html( $cmp_text( 'title', CMP_Lang::text( 'title' ) ) ); ?></h2>
-			<p class="cmp__text">
+			<p id="cmp-intro" class="cmp__text">
 				<?php echo esc_html( $cmp_text( 'intro', CMP_Lang::text( 'intro' ) ) ); ?>
 				<?php if ( $cmp_privacy_url ) : ?>
 					<a class="cmp__link" href="<?php echo esc_url( $cmp_privacy_url ); ?>"><?php echo esc_html( CMP_Lang::text( 'privacy' ) ); ?></a>.
@@ -51,7 +51,7 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 		<div class="cmp__prefs" data-cmp-view="prefs">
 			<div class="cmp__prefs-header">
 				<?php // Re-consent (B4): JS swaps this title for data-cmp-reconsent-title and shows the text below. ?>
-				<h2 id="cmp-prefs-title" class="cmp__title" data-cmp-prefs-title data-cmp-reconsent-title="<?php echo esc_attr( CMP_Lang::text( 'reconsent_title' ) ); ?>"><?php echo esc_html( $cmp_text( 'prefs_title', CMP_Lang::text( 'prefs_title' ) ) ); ?></h2>
+				<h2 id="cmp-prefs-title" class="cmp__title" tabindex="-1" data-cmp-prefs-title data-cmp-reconsent-title="<?php echo esc_attr( CMP_Lang::text( 'reconsent_title' ) ); ?>"><?php echo esc_html( $cmp_text( 'prefs_title', CMP_Lang::text( 'prefs_title' ) ) ); ?></h2>
 				<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="<?php echo esc_attr( CMP_Lang::text( 'back' ) ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>
 				</button>

@@ -292,7 +292,7 @@ ok(!/vals = wpConsentValues\(D\.wpConsent, consentedCategories\(\)\);/.test(bann
 // M1: during a re-consent the back button is hidden; the dialog is named by the visible title.
 ok(/function renderReconsent\(view\) \{[\s\S]*?\[data-cmp-action="back"\][\s\S]*?\.hidden = on;/.test(bannerSrc), 'M1: back button hidden while re-consent is pending');
 ok(/function openPrefs\(\) \{[\s\S]*?setAttribute\('aria-labelledby', 'cmp-prefs-title'\)/.test(bannerSrc), 'M1: open prefs -> aria-labelledby = prefs title');
-ok(/function closePrefs\(\) \{[^\n]*setAttribute\('aria-labelledby', 'cmp-title'\)[^\n]*removeAttribute\('aria-describedby'\)/.test(bannerSrc), 'M1: close prefs -> aria-labelledby = main title, no description');
+ok(/function closePrefs\(\) \{[^\n]*setAttribute\('aria-labelledby', 'cmp-title'\)[^\n]*setAttribute\('aria-describedby', 'cmp-intro'\)/.test(bannerSrc), 'M1 (B5 T3): close prefs -> aria-labelledby = main title, described by the intro again');
 // M2: the focus trap wraps on the visible controls of the active view.
 var ftM = bannerSrc.match(/\/\/ focusTrap:begin\n([\s\S]*?)\/\/ focusTrap:end/);
 ok(!!ftM, 'M2: banner.js exposes the focusTrap block');
@@ -684,6 +684,82 @@ if (bcSrc) {
 	eq(runCheckSim({ api: false }), [], 'B5 sim: no bridge (not check mode) -> nothing');
 	eq(runCheckSim({ top: true }), [], 'B5 sim: not in a frame -> nothing');
 }
+
+// B5 Task 3: Escape, focus, described dialog, lang (banner.js and cmp.js).
+function keysFns(src) {
+	var m = src.match(/\/\/ keys:begin\n([\s\S]*?)\/\/ keys:end/);
+	return { m: m, escapeAction: m ? new Function(m[1] + '\nreturn escapeAction;')() : null };
+}
+function fnBody(src, name) {
+	var i = src.indexOf('function ' + name + '(');
+	if (i === -1) { return ''; }
+	var j = src.indexOf('{', i), depth = 0, k;
+	for (k = j; k < src.length; k++) {
+		if (src[k] === '{') { depth++; } else if (src[k] === '}') { depth--; if (!depth) { break; } }
+	}
+	return src.slice(i, k + 1);
+}
+var kB = keysFns(bannerSrc), kC = keysFns(cmpSrc);
+ok(!!kB.m, 'B5 T3: banner.js exposes the keys block');
+ok(!!kC.m, 'B5 T3: cmp.js exposes the keys block');
+ok(!!kB.m && !!kC.m && kB.m[1].replace(/^\t+/gm, '') === kC.m[1].replace(/^\t+/gm, ''), 'B5 T3: keys blocks identical in banner.js and cmp.js');
+[['banner.js', kB, bannerSrc], ['cmp.js', kC, cmpSrc]].forEach(function (t) {
+	var n = t[0], ea = t[1].escapeAction, src = t[2];
+	if (ea) {
+		// escapeAction(prefsOpen, backHidden, blocking, focusInside)
+		eq(ea(true, false, true, true), 'back', 'B5 T3 ' + n + ': prefs open, blocking -> back');
+		eq(ea(true, false, true, false), 'back', 'B5 T3 ' + n + ': prefs open, blocking, focus outside -> back');
+		eq(ea(false, false, true, true), null, 'B5 T3 ' + n + ': prefs closed -> null');
+		eq(ea(false, false, false, true), null, 'B5 T3 ' + n + ': prefs closed, no overlay -> null');
+		eq(ea(true, true, true, true), null, 'B5 T3 ' + n + ': back hidden (re-consent) -> null');
+		eq(ea(true, false, false, false), null, 'B5 T3 ' + n + ': no overlay, focus outside the banner -> null');
+		eq(ea(true, false, false, true), 'back', 'B5 T3 ' + n + ': no overlay, focus inside the banner -> back');
+		eq(ea(true), null, 'B5 T3 ' + n + ': missing flags -> null (focus not known inside)');
+	} else { ok(false, 'B5 T3 ' + n + ': escapeAction defined'); }
+	var kd = fnBody(src, 'onKeydown'), gb = fnBody(src, 'goBack');
+	ok(/'Escape'/.test(kd) && /escapeAction\(/.test(kd), 'B5 T3 ' + n + ': onKeydown handles Escape through escapeAction');
+	ok(/goBack\(\)/.test(kd), 'B5 T3 ' + n + ': Escape -> goBack()');
+	ok(!!gb && /closePrefs\(\)/.test(gb) && /\[data-cmp-action="prefs"\]/.test(gb) && /\.focus\(\)/.test(gb), 'B5 T3 ' + n + ': goBack closes the settings and focuses the Settings button');
+	var NOSAVE = /\b(saveConsent|writeCookie|decide|save|hide|logConsent|rejectServices)\(/;
+	ok(!!kd && !NOSAVE.test(kd), 'B5 T3 ' + n + ': onKeydown never saves, writes the cookie or closes');
+	ok(!!gb && !NOSAVE.test(gb), 'B5 T3 ' + n + ': goBack never saves, writes the cookie or closes');
+	ok(!NOSAVE.test(t[1].m ? t[1].m[1] : 'save('), 'B5 T3 ' + n + ': keys block never saves');
+	ok(/else if \(action === 'back'\) \{ goBack\(\); \}/.test(src), 'B5 T3 ' + n + ': the Back button also returns focus to Settings');
+	ok(/\[data-cmp-prefs-title\][\s\S]*?\.focus\(\)/.test(fnBody(src, 'openPrefs')), 'B5 T3 ' + n + ': openPrefs focuses the settings title');
+	ok(/setAttribute\('aria-describedby', 'cmp-intro'\)/.test(fnBody(src, 'closePrefs')), 'B5 T3 ' + n + ': closePrefs restores aria-describedby = cmp-intro');
+	ok(/blocking\(\)/.test(kd) && /e\.key !== 'Tab'/.test(kd), 'B5 T3 ' + n + ': Tab trap only while the banner blocks');
+	ok(/addEventListener\('keydown', onKeydown\)/.test(fnBody(src, 'show')) && /removeEventListener\('keydown', onKeydown\)/.test(fnBody(src, 'hide')), 'B5 T3 ' + n + ': keydown listened while the banner shows (also without overlay)');
+	ok(!/keydown/.test(fnBody(src, 'initLight')), 'B5 T3 ' + n + ': Light card has no key handling');
+	ok(/escapeAction\(prefsOpen\(\), !!\(back && back\.hidden\), blocking\(\), banner\.contains\(document\.activeElement\)\)/.test(kd), 'B5 T3 ' + n + ': onKeydown passes the four flags to escapeAction');
+	// M2: show() on an already visible banner (CMP.openPreferences while it shows)
+	// must not re-run trapFocus (lastFocus would be recorded inside the banner).
+	var shSrc = fnBody(src, 'show');
+	var mkShow = function (hidden, block, open) {
+		var log = [], bn = { hidden: hidden };
+		var docStub = { body: { classList: { add: function () {} } }, addEventListener: function () { log.push('listen'); } };
+		var f = new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', shSrc + '\nreturn show;')(
+			bn, function () { return block; }, function () { return open; },
+			function (on) { log.push('trap:' + on); }, function () { log.push('focus'); }, function () {}, docStub, function () {});
+		f();
+		return { log: log.filter(function (x) { return x !== 'listen'; }), hidden: bn.hidden };
+	};
+	if (shSrc) {
+		eq(mkShow(true, true, false).log, ['trap:true'], 'B5 T3 ' + n + ': show() from hidden, blocking -> trapFocus');
+		eq(mkShow(false, true, true).log, ['focus'], 'B5 T3 ' + n + ': show() already visible, blocking -> only focusDialog (no trap)');
+		eq(mkShow(false, false, true).log, ['focus'], 'B5 T3 ' + n + ': show() already visible, no overlay -> focusDialog');
+		eq(mkShow(true, false, true).log, ['focus'], 'B5 T3 ' + n + ': show() from hidden, no overlay, prefs open -> focusDialog');
+		eq(mkShow(true, false, false).log, [], 'B5 T3 ' + n + ': show() from hidden, no overlay, main view -> no focus taken');
+		eq(mkShow(true, true, false).hidden, false, 'B5 T3 ' + n + ': show() unhides');
+	} else { ok(false, 'B5 T3 ' + n + ': show() found'); }
+});
+// Standalone markup: described dialog, focusable title, lang from the chosen language.
+ok(/aria-labelledby="cmp-title" aria-describedby="cmp-intro"/.test(cmpSrc), 'B5 T3 cmp.js: dialog described by the intro');
+ok(/'<p id="cmp-intro" class="cmp__text">'/.test(cmpSrc), 'B5 T3 cmp.js: intro has id="cmp-intro"');
+ok(/<h2 id="cmp-prefs-title" class="cmp__title" tabindex="-1"/.test(cmpSrc), 'B5 T3 cmp.js: settings title tabindex="-1"');
+ok(/function renderPro\(cfg\) \{[\s\S]*?root\.setAttribute\('lang', cfg\.lang\)/.test(cmpSrc), 'B5 T3 cmp.js: .cmp gets lang from the chosen language');
+ok(/function renderLight\(cfg\) \{[\s\S]*?root\.setAttribute\('lang', cfg\.lang\)[\s\S]*?function renderReopen/.test(cmpSrc), 'B5 T3 cmp.js: .cmp-light gets lang from the chosen language');
+eq(cmp.normalizeConfig({ lang: 'ru' }).lang, 'ru', 'B5 T3 cmp.js: chosen language ru');
+eq(cmp.normalizeConfig({ lang: 'xx' }).lang, 'ro', 'B5 T3 cmp.js: unknown language -> ro');
 
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

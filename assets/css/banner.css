@@ -153,6 +153,8 @@ body.cmp-has-banner { overflow: hidden; }
 .cmp__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 /* The dialog receives focus on open (for screen readers); no ring on it. */
 .cmp__modal:focus { outline: none; }
+/* The settings title takes focus when the panel opens (screen readers start there); not a control, no ring. */
+.cmp__title:focus { outline: none; }
 
 .cmp__btn--ghost { color: var(--cmp-dark); border-color: var(--cmp-dark); background: var(--cmp-bg); }
 .cmp__btn--ghost:hover { background: var(--cmp-hover); }
@@ -474,3 +476,6 @@ body.cmp-has-banner { overflow: hidden; }
 .cmp .cmp-embed--thumb .cmp-embed__link, .cmp-embed--thumb .cmp-embed__link,
 .cmp-embed--thumb .cmp-embed__link:hover, .cmp-embed--thumb .cmp-embed__link:focus { color: #fff; }
 .cmp-embed--thumb .cmp-embed__btn:focus-visible, .cmp-embed--thumb .cmp-embed__always:focus-visible, .cmp-embed--thumb .cmp-embed__link:focus-visible { outline-color: #fff; }
+
+/* Reduced motion: no slide or fade for visitors who asked for less motion (pseudo-elements too: the toggle knob). */
+@media (prefers-reduced-motion: reduce) { .cmp *, .cmp *::before, .cmp *::after, .cmp-light *, .cmp-light *::before, .cmp-light *::after, .cmp-reopen { transition: none !important; animation: none !important; } }
