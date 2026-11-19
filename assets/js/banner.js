@@ -26,6 +26,8 @@
 	// same-origin frame with a cmp_check nonce; the server then publishes
 	// CMP_DATA.check and the session check cookies. Pure helpers; tested in
 	// standalone/tests/run.js (source-extracted). Standalone has no check mode.
+	// The measuring runner is assets/js/banner-check.js, enqueued only in check
+	// mode; it reaches this file through the check bridge (below).
 	// The consent / "always load" cookie names from CMP_DATA; session = check mode.
 	function cookieNames(d) {
 		d = d || {};
@@ -38,27 +40,6 @@
 	// The cookie attributes after the value: a session cookie has no max-age.
 	function cookieTail(maxAge, session) {
 		return ';path=/' + (session ? '' : ';max-age=' + maxAge) + ';SameSite=Lax';
-	}
-	// The entries of `after` missing from `before`, in order, without duplicates.
-	function checkDiff(before, after) {
-		var b = Array.isArray(before) ? before : [], out = [];
-		(Array.isArray(after) ? after : []).forEach(function (x) {
-			if (b.indexOf(x) === -1 && out.indexOf(x) === -1) { out.push(x); }
-		});
-		return { added: out };
-	}
-	// The cookie names of a document.cookie string, in order, without duplicates.
-	function cookieList(str) {
-		var out = [];
-		String(str || '').split(';').forEach(function (part) {
-			var i = part.indexOf('='), name = (i === -1 ? part : part.slice(0, i)).replace(/^\s+|\s+$/g, '');
-			if (name && out.indexOf(name) === -1) { out.push(name); }
-		});
-		return out;
-	}
-	// The message posted to the admin screen for one phase.
-	function checkMessage(phase, resources, cookies, hasBanner) {
-		return { type: 'cmp-check', phase: phase, resources: Array.isArray(resources) ? resources : [], cookies: Array.isArray(cookies) ? cookies : [], banner: !!hasBanner };
 	}
 	// The cookies whose name starts with `prefix`, raw values, in order (first wins).
 	function prefixCookies(str, prefix) {
@@ -100,15 +81,6 @@
 		if (q === -1) { return s + hash; }
 		var keep = s.slice(q + 1).split('&').filter(function (p) { return p !== '' && p.split('=')[0] !== 'cmp_check'; });
 		return s.slice(0, q) + (keep.length ? '?' + keep.join('&') : '') + hash;
-	}
-	// Is `win` framed by a page of its own origin (the admin "Verificare" screen)?
-	// A cross-origin parent throws on access: false.
-	function parentSameOrigin(win) {
-		try {
-			return !!win && win.parent !== win && !!win.parent && win.parent.location.origin === win.location.origin;
-		} catch (e) {
-			return false;
-		}
 	}
 	// check:end
 
@@ -168,6 +140,10 @@
 		var wpSnap = prefixCookies(document.cookie, wpPrefix());
 		try { if (window.history && history.replaceState) { history.replaceState(history.state, '', stripCheckParam(location.href)); } } catch (e) {}
 		window.addEventListener('pagehide', endCheck);
+		// The bridge for assets/js/banner-check.js (check mode only). accept: the
+		// same path as the visitor's click (delegated handler -> save()); none in
+		// Light (it stores no consent). hasBanner: the accept button, or the Light card.
+		window.CMP_CHECK_API = { accept: D.mode === 'light' ? null : function () { var a = banner ? banner.querySelector('[data-cmp-action="accept"]') : null; if (a) { a.click(); } }, endCheck: endCheck, hasBanner: function () { return D.mode === 'light' ? !!document.querySelector('[data-cmp-light]') : !!(banner && banner.querySelector('[data-cmp-action="accept"]')); } };
 	}
 	var SVC_ID_RE = /^[a-z0-9-]+$/;
 	// Pure: the allowed service ids, [] unless the cookie is for this policy version.
@@ -779,53 +755,6 @@
 			box.appendChild(b);
 		});
 		row.hidden = !ids.length;
-	}
-
-	// --- Check mode: measure the page before and after "Accept all" ---
-	// Only with CMP_DATA.check (a valid nonce, checked on the server) and inside
-	// a frame; results go to the parent of the same origin only.
-	function checkSnapshot() {
-		var res = [];
-		try {
-			(window.performance && performance.getEntriesByType ? performance.getEntriesByType('resource') : []).forEach(function (e) {
-				if (e && typeof e.name === 'string' && res.indexOf(e.name) === -1) { res.push(e.name); }
-			});
-		} catch (e) {}
-		return { resources: res, cookies: cookieList(document.cookie) };
-	}
-	function postCheck(msg) {
-		try { window.parent.postMessage(msg, location.origin); } catch (e) {}
-	}
-	function runCheck() {
-		setTimeout(function () {
-			var before = checkSnapshot();
-			if (D.mode === 'light') {
-				// Light stores no consent: "before" only.
-				var msgL = checkMessage('before', before.resources, before.cookies, !!document.querySelector('[data-cmp-light]'));
-				msgL.light = true;
-				postCheck(msgL);
-				endCheck();
-				return;
-			}
-			var accept = banner ? banner.querySelector('[data-cmp-action="accept"]') : null;
-			postCheck(checkMessage('before', before.resources, before.cookies, !!accept));
-			if (!accept) { endCheck(); return; }
-			// Never "Acceptă tot" under a frame of another origin.
-			if (!parentSameOrigin(window)) { endCheck(); return; }
-			// The same path as the visitor's click (delegated handler -> save()).
-			accept.click();
-			setTimeout(function () {
-				var after = checkSnapshot();
-				var msg = checkMessage('after', after.resources, after.cookies, true);
-				msg.added = { resources: checkDiff(before.resources, after.resources).added, cookies: checkDiff(before.cookies, after.cookies).added };
-				postCheck(msg);
-				endCheck();
-			}, 2500);
-		}, 1500);
-	}
-	if (D.check && window.parent !== window) {
-		if (document.readyState === 'complete') { runCheck(); }
-		else { window.addEventListener('load', runCheck); }
 	}
 
 	// --- Public API ---

@@ -502,11 +502,18 @@ var rcC = cmpSrc.match(/\/\/ reconsent:begin\n([\s\S]*?)\/\/ reconsent:end/);
 ok(!!rcM && !!rcC && rcM[1].replace(/^\t+/gm, '') === rcC[1].replace(/^\t+/gm, ''), 'reconsent blocks identical in banner.js and cmp.js');
 
 // B3 Task 4: check mode helpers (banner.js only; standalone has no check mode).
+// B5 Task 2: the runner and its helpers moved to assets/js/banner-check.js
+// (loaded only in check mode); the cookie helpers stay in banner.js. Both
+// check blocks are extracted and evaluated together.
 var ckM = bannerSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
 ok(!!ckM, 'banner.js exposes the check block');
+var bcSrc = (function () { try { return require('fs').readFileSync(require('path').join(__dirname, '../../assets/js/banner-check.js'), 'utf8'); } catch (e) { return ''; } })();
+var ckC = bcSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
+ok(!!ckC, 'banner-check.js exposes the check block');
+var ckAll = (ckM && ckC) ? ckM[1] + ckC[1] : null;
 ok(!/check:begin/.test(cmpSrc) && !/cmp-check/.test(cmpSrc), 'standalone cmp.js has no check mode');
-var ck = ckM ? new Function(ckM[1] + '\nreturn { checkDiff: checkDiff, cookieNames: cookieNames, cookieTail: cookieTail, cookieList: cookieList, checkMessage: checkMessage };')() : {};
-if (ckM) {
+var ck = ckAll ? new Function(ckAll + '\nreturn { checkDiff: checkDiff, cookieNames: cookieNames, cookieTail: cookieTail, cookieList: cookieList, checkMessage: checkMessage };')() : {};
+if (ckAll) {
 	eq(ck.checkDiff(['a', 'b'], ['b', 'c', 'a', 'd']), { added: ['c', 'd'] }, 'checkDiff: only new entries, in the order of after');
 	eq(ck.checkDiff(['a'], ['c', 'c', 'a', 'c']), { added: ['c'] }, 'checkDiff: no duplicates');
 	eq(ck.checkDiff([], ['x']), { added: ['x'] }, 'checkDiff: empty before');
@@ -531,11 +538,20 @@ ok(/function writeCookie\(obj, maxAge\) \{[\s\S]*?document\.cookie = D\.cookieNa
 ok(/function writeSvc\(obj\) \{[\s\S]*?document\.cookie = SVC_COOKIE \+ '=' \+ v \+ cookieTail\(maxAge, !!D\.check\);/.test(bannerSrc), 'banner.js: svc cookie is a session cookie in check mode');
 ok(/function logConsent\(payload\) \{\n\t\tif \(!D\.ajaxUrl \|\| D\.check\) \{ return; \}/.test(bannerSrc), 'banner.js: no consent log in check mode');
 ok(/var reload = firstDecision && !!D\.reloadOnDecision && !D\.check;/.test(bannerSrc), 'banner.js: no reload in check mode');
-ok(/parent\.postMessage\([^)]*, location\.origin\)/.test(bannerSrc), 'banner.js: check results posted to the same origin only');
-ok(/D\.check && window\.parent !== window/.test(bannerSrc), 'banner.js: measuring runs only in check mode, inside a frame');
+ok(/parent\.postMessage\([^)]*, location\.origin\)/.test(bcSrc), 'banner-check.js: check results posted to the same origin only');
+ok(/if \(D\.check\) \{[\s\S]*?window\.CMP_CHECK_API = \{/.test(bannerSrc) && (bannerSrc.match(/CMP_CHECK_API/g) || []).length === 1, 'banner.js: the check bridge exists only in check mode');
+ok(/var API = window\.CMP_CHECK_API;\n\tif \(!API \|\| window\.parent === window\) \{ return; \}/.test(bcSrc), 'banner-check.js: measuring runs only in check mode, inside a frame');
+// B5 Task 2: the split.
+ok(!/function runCheck/.test(bannerSrc), 'B5: banner.js no longer contains function runCheck');
+ok(/function runCheck\(\)/.test(bcSrc), 'B5: banner-check.js contains runCheck');
+ok(!/function (checkDiff|cookieList|checkMessage|parentSameOrigin|checkSnapshot|postCheck)\(/.test(bannerSrc) && !/postMessage/.test(bannerSrc), 'B5: the measuring helpers and postMessage left banner.js');
+ok(!/function (cookieNames|cookieTail|prefixCookies|restorePlan|persistTail|stripCheckParam|endCheck|clearCheckCookies)\(/.test(bcSrc), 'B5: the cookie / restore helpers stay in banner.js only');
+ok(!/CMP_DATA/.test(bcSrc) && (bcSrc.match(/CMP_CHECK_API/g) || []).length === 1, 'B5: banner-check.js reads only window.CMP_CHECK_API');
+ok(/window\.CMP_CHECK_API = \{ accept: [^\n]*, endCheck: endCheck, hasBanner: /.test(bannerSrc), 'B5: the bridge is { accept, endCheck, hasBanner }');
+ok(/if \(document\.readyState === 'complete'\) \{ runCheck\(\); \}\n\telse \{ window\.addEventListener\('load', runCheck\); \}/.test(bcSrc), 'B5: runCheck starts on load, or at once when load already fired');
 
 // B3 Task 4 fix round 1: restore the admin's WP Consent API cookies, clean up, strip the token.
-var ck2 = ckM ? new Function(ckM[1] + '\nreturn { prefixCookies: typeof prefixCookies === "function" ? prefixCookies : null, restorePlan: typeof restorePlan === "function" ? restorePlan : null, persistTail: typeof persistTail === "function" ? persistTail : null, stripCheckParam: typeof stripCheckParam === "function" ? stripCheckParam : null };')() : {};
+var ck2 = ckAll ? new Function(ckAll + '\nreturn { prefixCookies: typeof prefixCookies === "function" ? prefixCookies : null, restorePlan: typeof restorePlan === "function" ? restorePlan : null, persistTail: typeof persistTail === "function" ? persistTail : null, stripCheckParam: typeof stripCheckParam === "function" ? stripCheckParam : null };')() : {};
 ok(typeof ck2.prefixCookies === 'function' && typeof ck2.restorePlan === 'function' && typeof ck2.persistTail === 'function' && typeof ck2.stripCheckParam === 'function', 'check block: restore / strip helpers present');
 if (typeof ck2.restorePlan === 'function') {
 	eq(ck2.prefixCookies('cmp_consent=x; wp_consent_statistics=deny; wp_consent_marketing=allow; other=1; wp_consent_statistics=dup', 'wp_consent'), [{ name: 'wp_consent_statistics', value: 'deny' }, { name: 'wp_consent_marketing', value: 'allow' }], 'prefixCookies: names and raw values, first wins');
@@ -559,8 +575,8 @@ ok(/if \(typeof n === 'string' && n\.indexOf\('cmp_check_'\) === 0\)/.test(banne
 ok(/navigator\.globalPrivacyControl === true && !D\.check/.test(bannerSrc), 'M4: GPC bypass only in check mode');
 ok(/if \(D\.check\) \{[\s\S]{0,400}?var wpSnap = prefixCookies\(document\.cookie, wpPrefix\(\)\);/.test(bannerSrc), 'I1: WP Consent API cookies snapshotted at parse, only in check mode');
 ok(/function endCheck\(\) \{[\s\S]*?restorePlan\(wpSnap, document\.cookie, wpPrefix\(\)\)[\s\S]*?clearCheckCookies\(\);/.test(bannerSrc), 'I1/I2: endCheck restores wp_consent_* and clears the check cookies');
-ok(/postCheck\(msg\);\n\t\t\t\tendCheck\(\);/.test(bannerSrc), 'I1/I2: endCheck after the after message');
-ok((bannerSrc.match(/postCheck\(msgL\);\n\t\t\t\tendCheck\(\);/) || []).length === 1 && /if \(!accept\) \{ endCheck\(\); return; \}/.test(bannerSrc), 'I1/I2: endCheck in the early-stop paths');
+ok(/postCheck\(msg\);\n\t\t\t\tAPI\.endCheck\(\);/.test(bcSrc), 'I1/I2: endCheck after the after message');
+ok((bcSrc.match(/postCheck\(msgL\);\n\t\t\t\tAPI\.endCheck\(\);/) || []).length === 1 && /if \(!hasBanner\) \{ API\.endCheck\(\); return; \}/.test(bcSrc), 'I1/I2: endCheck in the early-stop paths');
 ok(/window\.addEventListener\('pagehide', endCheck\)/.test(bannerSrc), 'I1/I2: endCheck on pagehide');
 ok(/history\.replaceState\(history\.state, '', stripCheckParam\(location\.href\)\)/.test(bannerSrc), 'M1: token stripped from the URL in check mode');
 
@@ -609,9 +625,9 @@ if (ckM) {
 ok(/function next\(i\) \{[\s\S]*?var pre = checkCookieNames\(document\.cookie\);[\s\S]*?document\.createElement\('iframe'\)/.test(checkSrc), 'check I2 (final): per-page baseline taken in next() before the frame is created');
 ok(/checkOutcome\(c\.state, c\.pre\)/.test(checkSrc), 'check I2 (final): finish() passes the per-page baseline');
 // M5: auto "Acceptă tot" only under a same-origin parent.
-var ckB = bannerSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
+var ckB = bcSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
 var ck5 = ckB ? new Function(ckB[1] + '\nreturn { po: typeof parentSameOrigin === "function" ? parentSameOrigin : null };')() : {};
-ok(!!ck5.po, 'M5: banner.js check block has parentSameOrigin');
+ok(!!ck5.po, 'M5: banner-check.js check block has parentSameOrigin');
 if (ck5.po) {
 	var wSelf = { location: { origin: 'https://a.md' } }; wSelf.parent = wSelf;
 	eq(ck5.po(wSelf), false, 'M5: top window (no parent) -> false');
@@ -622,7 +638,52 @@ if (ck5.po) {
 	eq(ck5.po(wX), false, 'M5: cross-origin parent (access throws) -> false');
 	eq(ck5.po(null), false, 'M5: no window -> false');
 }
-ok(/if \(!parentSameOrigin\(window\)\) \{ endCheck\(\); return; \}\n\t\t\t\/\/ The same path as the visitor's click \(delegated handler -> save\(\)\)\.\n\t\t\taccept\.click\(\);/.test(bannerSrc), 'M5: runCheck checks the parent origin right before accept.click() and stops via endCheck');
+ok(/if \(!parentSameOrigin\(window\)\) \{ API\.endCheck\(\); return; \}\n\t\t\t\/\/ The same path as the visitor's click \(delegated handler -> save\(\)\)\.\n\t\t\tAPI\.accept\(\);/.test(bcSrc), 'M5: runCheck checks the parent origin right before the accept click and stops via endCheck');
+ok(/accept: D\.mode === 'light' \? null : function \(\) \{ var a = banner \? banner\.querySelector\('\[data-cmp-action="accept"\]'\) : null; if \(a\) \{ a\.click\(\); \} \}/.test(bannerSrc), 'B5: CMP_CHECK_API.accept clicks the banner\'s accept button (same path as the visitor), none in Light');
+
+// B5 Task 2: run banner-check.js against a fake frame (the event order of B3).
+function runCheckSim(opts) {
+	var log = [], timers = [], loadFns = [];
+	var parentWin = { location: { origin: opts.parentOrigin || 'https://a.md' }, postMessage: function (m, o) { log.push(['post', m.phase, o, m]); } };
+	var win = { location: { origin: 'https://a.md' }, parent: opts.top ? null : parentWin, addEventListener: function (ev, fn) { if (ev === 'load') { loadFns.push(fn); } } };
+	if (opts.top) { win.parent = win; }
+	var res = ['https://a.md/x.js'];
+	var cookies = '_pre=1';
+	if (opts.api !== false) {
+		win.CMP_CHECK_API = {
+			accept: opts.light ? null : function () { log.push(['accept']); res.push('https://t.com/ga.js'); cookies += '; _ga=1'; },
+			endCheck: function () { log.push(['end']); },
+			hasBanner: function () { return opts.banner !== false; }
+		};
+	}
+	var doc = { readyState: opts.ready || 'complete' };
+	Object.defineProperty(doc, 'cookie', { get: function () { return cookies; } });
+	var perf = { getEntriesByType: function () { return res.map(function (n) { return { name: n }; }); } };
+	win.performance = perf;
+	new Function('window', 'document', 'performance', 'location', 'setTimeout', bcSrc)(win, doc, perf, win.location, function (fn, ms) { timers.push([fn, ms]); });
+	loadFns.forEach(function (fn) { fn(); });
+	while (timers.length) { var t = timers.shift(); log.push(['wait', t[1]]); t[0](); }
+	return log;
+}
+if (bcSrc) {
+	var simOk = runCheckSim({});
+	eq(simOk.map(function (e) { return e[0] === 'post' ? 'post:' + e[1] + ':' + e[2] : e[0] === 'wait' ? 'wait:' + e[1] : e[0]; }), ['wait:1500', 'post:before:https://a.md', 'accept', 'wait:2500', 'post:after:https://a.md', 'end'], 'B5 sim: before -> accept -> +2500 ms -> after -> endCheck');
+	var aft = simOk.filter(function (e) { return e[1] === 'after'; })[0];
+	eq(aft ? aft[3].added : null, { resources: ['https://t.com/ga.js'], cookies: ['_ga'] }, 'B5 sim: after carries the additions');
+	var bef = simOk.filter(function (e) { return e[1] === 'before'; })[0];
+	eq(bef ? [bef[3].type, bef[3].banner, bef[3].resources, bef[3].cookies] : null, ['cmp-check', true, ['https://a.md/x.js'], ['_pre']], 'B5 sim: before message shape');
+	eq(runCheckSim({ ready: 'interactive' }).filter(function (e) { return e[0] === 'post'; }).length, 2, 'B5 sim: waits for load when it has not fired yet');
+	var simL = runCheckSim({ light: true });
+	eq([simL.filter(function (e) { return e[0] === 'post'; }).length, simL.filter(function (e) { return e[0] === 'post'; })[0][3].light, simL[simL.length - 1][0]], [1, true, 'end'], 'B5 sim: Light -> before only (light: true), then endCheck');
+	var simN = runCheckSim({ banner: false });
+	eq(simN.map(function (e) { return e[0]; }), ['wait', 'post', 'end'], 'B5 sim: no banner -> before (banner: false), endCheck, no accept');
+	eq(simN[1][3].banner, false, 'B5 sim: no banner flag');
+	var simX = runCheckSim({ parentOrigin: 'https://evil.md' });
+	eq(simX.filter(function (e) { return e[0] === 'accept'; }).length, 0, 'B5 sim: other-origin parent -> never accept');
+	eq(simX[simX.length - 1][0], 'end', 'B5 sim: other-origin parent -> endCheck');
+	eq(runCheckSim({ api: false }), [], 'B5 sim: no bridge (not check mode) -> nothing');
+	eq(runCheckSim({ top: true }), [], 'B5 sim: not in a frame -> nothing');
+}
 
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

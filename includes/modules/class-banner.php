@@ -78,6 +78,11 @@ class CMP_Banner {
 		$js    = CMP_Assets::src_or_min( 'assets/js/banner.js', $debug );
 		wp_enqueue_style( 'cmp-banner', CMP_URL . $css, array(), CMP_Plugin::asset_ver( $css ) );
 		wp_enqueue_script( 'cmp-banner', CMP_URL . $js, array(), CMP_Plugin::asset_ver( $js ), true );
+		// The check-mode runner (admin "Verificare"): only on a checked page, after banner.js.
+		if ( CMP_Scanner::check_mode() ) {
+			$cjs = CMP_Assets::src_or_min( 'assets/js/banner-check.js', $debug );
+			wp_enqueue_script( 'cmp-banner-check', CMP_URL . $cjs, array( 'cmp-banner' ), CMP_Plugin::asset_ver( $cjs ), true );
+		}
 
 		// Embed services by id (library embeds and custom services, which can
 		// embed too), for the "always loaded" row in the preferences: static, so

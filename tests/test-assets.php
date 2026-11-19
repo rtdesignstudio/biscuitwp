@@ -7,6 +7,7 @@ $root = dirname( __DIR__ ) . '/';
 $pairs = array(
 	'assets/js/banner.js'  => 'assets/js/banner.min.js',
 	'assets/css/banner.css' => 'assets/css/banner.min.css',
+	'assets/js/banner-check.js' => 'assets/js/banner-check.min.js',
 	'standalone/cmp.js'    => 'standalone/cmp.min.js',
 	'standalone/cmp.css'   => 'standalone/cmp.min.css',
 );
@@ -32,6 +33,11 @@ $css = CMP_Assets::gz_size( $root . 'assets/css/banner.min.css' );
 echo "INFO: banner.min.js gz={$js} banner.min.css gz={$css} sum=" . ( $js + $css ) . " (budget 12288)\n";
 cmp_assert( $js > 0 && $css > 0 && $js + $css <= 12288, 'banner gzip budget <= 12288 bytes' );
 echo 'INFO: standalone cmp.min.js gz=' . CMP_Assets::gz_size( $root . 'standalone/cmp.min.js' ) . ' cmp.min.css gz=' . CMP_Assets::gz_size( $root . 'standalone/cmp.min.css' ) . "\n";
+
+// B5 Task 2: the check-mode runner is a separate file, enqueued only in check
+// mode, after cmp-banner, in the footer (not part of the visitor budget).
+$bn_src = (string) file_get_contents( $root . 'includes/modules/class-banner.php' );
+cmp_assert( 1 === preg_match( '#if \( CMP_Scanner::check_mode\(\) \) \{\s*\$cjs = CMP_Assets::src_or_min\( \'assets/js/banner-check\.js\', \$debug \);\s*wp_enqueue_script\( \'cmp-banner-check\', CMP_URL \. \$cjs, array\( \'cmp-banner\' \), CMP_Plugin::asset_ver\( \$cjs \), true \);#', $bn_src ), 'class-banner: banner-check enqueued only in check mode, after cmp-banner, in the footer' );
 
 // src_or_min.
 cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', false ), 'assets/js/banner.min.js', 'src_or_min js -> .min' );
