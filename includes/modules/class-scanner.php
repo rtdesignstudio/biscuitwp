@@ -624,6 +624,137 @@ class CMP_Scanner {
 		return (int) $now - (int) $taken > self::LOCK_TTL;
 	}
 
+	/**
+	 * Pure: is the check mode on? $param is the raw ?cmp_check token (null when
+	 * absent); $verify gets the token and says whether it is a valid cmp_check
+	 * nonce of a user with manage_options. No token -> false, verify not called.
+	 */
+	public static function check_active( ?string $param, callable $verify ): bool {
+		if ( null === $param || '' === $param ) {
+			return false;
+		}
+		return (bool) $verify( $param );
+	}
+
+	/**
+	 * Pure: the request side of check_mode(). $ctx: init (init has run), parsed
+	 * (parse_request has run), admin, ajax, rest (REST_REQUEST, a JSON request or
+	 * a REST URI). Returns active and final (whether the answer may be
+	 * memoised). Before init: false, not final. Admin, AJAX, REST: false.
+	 * Before parse_request the answer is given but not memoised, so a REST
+	 * request that is only recognised at parse_request never keeps a `true`.
+	 */
+	public static function check_request( array $ctx, ?string $param, callable $verify ): array {
+		if ( empty( $ctx['init'] ) ) {
+			return array( 'active' => false, 'final' => false );
+		}
+		$final = ! empty( $ctx['parsed'] );
+		if ( ! empty( $ctx['admin'] ) || ! empty( $ctx['ajax'] ) || ! empty( $ctx['rest'] ) ) {
+			return array( 'active' => false, 'final' => $final );
+		}
+		return array( 'active' => self::check_active( $param, $verify ), 'final' => $final );
+	}
+
+	/** Pure: is this a REST URI (…/<prefix>/… in the path, or ?rest_route)? */
+	public static function is_rest_uri( $uri, array $get, $prefix ): bool {
+		if ( isset( $get['rest_route'] ) ) {
+			return true;
+		}
+		$path = (string) parse_url( (string) $uri, PHP_URL_PATH );
+		return '' !== (string) $prefix && false !== strpos( rtrim( $path, '/' ) . '/', '/' . trim( (string) $prefix, '/' ) . '/' );
+	}
+
+	/**
+	 * Pure: CMP_DATA for the mode. Inactive -> unchanged. Active -> the check
+	 * flag, the session check cookies and no reload after the decision.
+	 */
+	public static function check_data( array $data, bool $check ): array {
+		if ( ! $check ) {
+			return $data;
+		}
+		$names                    = CMP_Consent::cookie_names( true );
+		$data['cookieName']       = $names['consent'];
+		$data['reloadOnDecision'] = false;
+		$data['check']            = true;
+		$data['svcCookie']        = $names['svc'];
+		return $data;
+	}
+
+	/* ------------------------------------------------------------------
+	 * WordPress side of the check mode (front end, ?cmp_check=<nonce>).
+	 * ------------------------------------------------------------------ */
+
+	/** @var bool|null Check mode of this request, computed once (after init). */
+	private static $check = null;
+
+	/**
+	 * Is this front-end request in check mode? A valid cmp_check nonce of a user
+	 * with manage_options; otherwise the parameter is ignored completely. Before
+	 * `init` (no current user yet) it answers false without remembering it.
+	 */
+	public static function check_mode(): bool {
+		if ( null !== self::$check ) {
+			return self::$check;
+		}
+		if ( ! function_exists( 'did_action' ) || ! did_action( 'init' ) ) {
+			return false;
+		}
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- this IS the nonce, verified below.
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$rest = ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() )
+			|| self::is_rest_uri( $uri, $_GET, function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json' );
+		$raw  = isset( $_GET['cmp_check'] ) && is_string( $_GET['cmp_check'] ) ? sanitize_text_field( wp_unslash( $_GET['cmp_check'] ) ) : null;
+		// phpcs:enable
+		$r = self::check_request(
+			array(
+				'init'   => true,
+				'parsed' => (bool) did_action( 'parse_request' ),
+				'admin'  => is_admin(),
+				'ajax'   => wp_doing_ajax(),
+				'rest'   => $rest,
+			),
+			$raw,
+			function ( $token ) {
+				return false !== wp_verify_nonce( $token, 'cmp_check' ) && current_user_can( 'manage_options' );
+			}
+		);
+		if ( $r['final'] ) {
+			self::$check = $r['active'];
+		}
+		return $r['active'];
+	}
+
+	/** show_admin_bar: hidden on a check page (the measured page must look like a visitor's). */
+	public static function check_admin_bar( $show ) {
+		return self::check_mode() ? false : $show;
+	}
+
+	/**
+	 * template_redirect: a check page is never cached, and every check page
+	 * starts as a new visitor: the check cookies of an earlier page (same
+	 * session) are expired and ignored for this request.
+	 */
+	public static function check_page_setup() {
+		if ( ! self::check_mode() ) {
+			return;
+		}
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		nocache_headers();
+		if ( ! headers_sent() ) {
+			// The token stays on this site (the URL is also cleaned in banner.js).
+			header( 'Referrer-Policy: same-origin' );
+		}
+		foreach ( CMP_Consent::cookie_names( true ) as $name ) {
+			unset( $_COOKIE[ $name ] );
+			if ( ! headers_sent() ) {
+				setcookie( $name, '', time() - YEAR_IN_SECONDS, '/' );
+			}
+		}
+	}
+
 	/* ------------------------------------------------------------------
 	 * WordPress side: cron, queue, fetching. Never runs on a front-end view.
 	 * ------------------------------------------------------------------ */
@@ -632,6 +763,9 @@ class CMP_Scanner {
 		add_action( self::RUN_HOOK, array( __CLASS__, 'run_batch' ) );
 		add_action( self::DAILY_HOOK, array( __CLASS__, 'enqueue_all' ) );
 		add_action( 'admin_init', array( __CLASS__, 'maybe_first_scan' ) );
+		// Check mode (front end only; inert without a valid ?cmp_check nonce).
+		add_filter( 'show_admin_bar', array( __CLASS__, 'check_admin_bar' ), 99 );
+		add_action( 'template_redirect', array( __CLASS__, 'check_page_setup' ), 0 );
 	}
 
 	/** Schedule the daily refresh when missing (activation, upgrade). */

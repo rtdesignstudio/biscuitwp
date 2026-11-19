@@ -7,6 +7,26 @@ class CMP_Consent {
 
 	const COOKIE = 'cmp_consent';
 
+	/** Session cookies of the check mode (B3), used instead of cmp_consent / cmp_svc. */
+	const CHECK_COOKIE     = 'cmp_check_consent';
+	const CHECK_SVC_COOKIE = 'cmp_check_svc';
+
+	/**
+	 * Pure: the consent and "always load" cookie names for the mode. The check
+	 * mode never reads or writes the admin's real cmp_consent / cmp_svc.
+	 */
+	public static function cookie_names( bool $check ): array {
+		return $check
+			? array( 'consent' => self::CHECK_COOKIE, 'svc' => self::CHECK_SVC_COOKIE )
+			: array( 'consent' => self::COOKIE, 'svc' => 'cmp_svc' );
+	}
+
+	/** The consent cookie name for this request (the check cookie in check mode). */
+	public static function cookie_name(): string {
+		$check = class_exists( 'CMP_Scanner' ) && CMP_Scanner::check_mode();
+		return self::cookie_names( $check )['consent'];
+	}
+
 	/**
 	 * Pure evaluation. $cookie is the decoded cookie array or null.
 	 * Returns map slug => bool.
@@ -103,10 +123,11 @@ class CMP_Consent {
 
 
 	private static function read_cookie() {
-		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
+		$name = self::cookie_name();
+		if ( empty( $_COOKIE[ $name ] ) || ! is_string( $_COOKIE[ $name ] ) ) {
 			return null;
 		}
-		$raw     = wp_unslash( $_COOKIE[ self::COOKIE ] );
+		$raw     = wp_unslash( $_COOKIE[ $name ] );
 		$decoded = json_decode( $raw, true );
 		return is_array( $decoded ) ? $decoded : null;
 	}

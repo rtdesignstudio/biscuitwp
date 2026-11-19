@@ -108,6 +108,8 @@ class CMP_Banner {
 			// wp-consent-api.js is enqueued at PHP_INT_MAX - 100, so add the dependency after that.
 			add_action( 'wp_enqueue_scripts', array( $this, 'depend_on_consent_api' ), PHP_INT_MAX - 90 );
 		}
+		// Check mode (B3): session check cookies, no reload; unchanged otherwise.
+		$cmp_data = CMP_Scanner::check_data( $cmp_data, CMP_Scanner::check_mode() );
 		wp_localize_script( 'cmp-banner', 'CMP_DATA', $cmp_data );
 	}
 

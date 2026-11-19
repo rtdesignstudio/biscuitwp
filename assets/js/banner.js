@@ -18,8 +18,90 @@
 		var v = encodeURIComponent(JSON.stringify(obj));
 		var days = (D.cookieDays && D.cookieDays > 0) ? D.cookieDays : 180;
 		if (!(typeof maxAge === 'number' && maxAge > 0)) { maxAge = 60 * 60 * 24 * days; }
-		document.cookie = D.cookieName + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
+		document.cookie = D.cookieName + '=' + v + cookieTail(maxAge, !!D.check);
 	}
+
+	// check:begin
+	// Check mode (B3): the admin's "Verificare" screen loads a page in a hidden
+	// same-origin frame with a cmp_check nonce; the server then publishes
+	// CMP_DATA.check and the session check cookies. Pure helpers; tested in
+	// standalone/tests/run.js (source-extracted). Standalone has no check mode.
+	// The consent / "always load" cookie names from CMP_DATA; session = check mode.
+	function cookieNames(d) {
+		d = d || {};
+		return {
+			consent: (typeof d.cookieName === 'string' && d.cookieName) ? d.cookieName : 'cmp_consent',
+			svc: (typeof d.svcCookie === 'string' && d.svcCookie) ? d.svcCookie : 'cmp_svc',
+			session: !!d.check
+		};
+	}
+	// The cookie attributes after the value: a session cookie has no max-age.
+	function cookieTail(maxAge, session) {
+		return ';path=/' + (session ? '' : ';max-age=' + maxAge) + ';SameSite=Lax';
+	}
+	// The entries of `after` missing from `before`, in order, without duplicates.
+	function checkDiff(before, after) {
+		var b = Array.isArray(before) ? before : [], out = [];
+		(Array.isArray(after) ? after : []).forEach(function (x) {
+			if (b.indexOf(x) === -1 && out.indexOf(x) === -1) { out.push(x); }
+		});
+		return { added: out };
+	}
+	// The cookie names of a document.cookie string, in order, without duplicates.
+	function cookieList(str) {
+		var out = [];
+		String(str || '').split(';').forEach(function (part) {
+			var i = part.indexOf('='), name = (i === -1 ? part : part.slice(0, i)).replace(/^\s+|\s+$/g, '');
+			if (name && out.indexOf(name) === -1) { out.push(name); }
+		});
+		return out;
+	}
+	// The message posted to the admin screen for one phase.
+	function checkMessage(phase, resources, cookies, hasBanner) {
+		return { type: 'cmp-check', phase: phase, resources: Array.isArray(resources) ? resources : [], cookies: Array.isArray(cookies) ? cookies : [], banner: !!hasBanner };
+	}
+	// The cookies whose name starts with `prefix`, raw values, in order (first wins).
+	function prefixCookies(str, prefix) {
+		var out = [], seen = [];
+		String(str || '').split(';').forEach(function (part) {
+			var i = part.indexOf('=');
+			if (i === -1) { return; }
+			var name = part.slice(0, i).replace(/^\s+|\s+$/g, '');
+			if (!name || name.indexOf(prefix) !== 0 || seen.indexOf(name) !== -1) { return; }
+			seen.push(name);
+			out.push({ name: name, value: part.slice(i + 1) });
+		});
+		return out;
+	}
+	// What to write to put the `prefix` cookies back as in `snap` (taken before
+	// the first push): set = the originals that changed or went missing; del =
+	// the ones that did not exist then.
+	function restorePlan(snap, now, prefix) {
+		var cur = prefixCookies(now, prefix), before = Array.isArray(snap) ? snap : [], set = [], del = [];
+		before.forEach(function (c) {
+			var hit = cur.filter(function (x) { return x.name === c.name; })[0];
+			if (!hit || hit.value !== c.value) { set.push({ name: c.name, value: c.value }); }
+		});
+		cur.forEach(function (x) {
+			if (!before.some(function (c) { return c.name === x.name; })) { del.push(x.name); }
+		});
+		return { set: set, del: del };
+	}
+	// Attributes of a restored persistent cookie (WP Consent API: `days` days, 30 by default).
+	function persistTail(days, secure) {
+		var d = Number(days) > 0 ? Number(days) : 30;
+		return ';path=/;max-age=' + Math.round(d * 86400) + ';SameSite=Lax' + (secure ? ';secure' : '');
+	}
+	// The URL without the cmp_check parameter (the nonce must not reach trackers).
+	function stripCheckParam(url) {
+		var s = String(url), h = s.indexOf('#'), hash = h === -1 ? '' : s.slice(h);
+		s = h === -1 ? s : s.slice(0, h);
+		var q = s.indexOf('?');
+		if (q === -1) { return s + hash; }
+		var keep = s.slice(q + 1).split('&').filter(function (p) { return p !== '' && p.split('=')[0] !== 'cmp_check'; });
+		return s.slice(0, q) + (keep.length ? '?' + keep.join('&') : '') + hash;
+	}
+	// check:end
 
 	// Consent ID: a random v4 UUID kept in the consent cookie and in the consent
 	// log, so a visitor's choice can be found and demonstrated (GDPR / Law
@@ -46,7 +128,38 @@
 	// banner nor counts as a refusal of the categories; save() never touches it.
 	// `id` is a UUID made on the first click, used only to log when the consent
 	// cookie has none.
-	var SVC_COOKIE = 'cmp_svc';
+	var SVC_COOKIE = cookieNames(D).svc;
+	// Check mode: every checked page starts as a first visit and leaves nothing
+	// behind. The check cookies are dropped here (the server expired them too)
+	// and again at the end; never the real cookies.
+	function clearCheckCookies() {
+		[D.cookieName, SVC_COOKIE].forEach(function (n) {
+			if (typeof n === 'string' && n.indexOf('cmp_check_') === 0) { document.cookie = n + '=' + cookieTail(0, true) + ';max-age=0'; }
+		});
+	}
+	function wpPrefix() {
+		var api = window.consent_api;
+		return (api && typeof api.cookie_prefix === 'string' && api.cookie_prefix) ? api.cookie_prefix : 'wp_consent';
+	}
+	// End of a checked page (after the measurement, an early stop, or pagehide):
+	// the admin's WP Consent API cookies go back to their values before the first
+	// push (the pushes stay, so consent-aware plugins are measured), and the
+	// check cookies are removed. Idempotent.
+	function endCheck() {
+		if (!D.check || !wpSnap) { return; }
+		var plan = restorePlan(wpSnap, document.cookie, wpPrefix());
+		var api = window.consent_api, days = api ? (api.cookie_expiration || api.cookie_expire) : 0, secure = location.protocol === 'https:';
+		plan.set.forEach(function (c) { document.cookie = c.name + '=' + c.value + persistTail(days, secure); });
+		plan.del.forEach(function (n) { document.cookie = n + '=;path=/;max-age=0'; });
+		clearCheckCookies();
+	}
+	if (D.check) {
+		clearCheckCookies();
+		// Before pushWpInit (DOMContentLoaded): the admin's own values.
+		var wpSnap = prefixCookies(document.cookie, wpPrefix());
+		try { if (window.history && history.replaceState) { history.replaceState(history.state, '', stripCheckParam(location.href)); } } catch (e) {}
+		window.addEventListener('pagehide', endCheck);
+	}
 	var SVC_ID_RE = /^[a-z0-9-]+$/;
 	// Pure: the allowed service ids, [] unless the cookie is for this policy version.
 	function svcAllowed(c, version) {
@@ -94,7 +207,7 @@
 		var v = encodeURIComponent(JSON.stringify(obj));
 		var days = (D.cookieDays && D.cookieDays > 0) ? D.cookieDays : 180;
 		var maxAge = 60 * 60 * 24 * days;
-		document.cookie = SVC_COOKIE + '=' + v + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
+		document.cookie = SVC_COOKIE + '=' + v + cookieTail(maxAge, !!D.check);
 	}
 
 	function requiredSlugs() {
@@ -271,7 +384,7 @@
 	}
 
 	function logConsent(payload) {
-		if (!D.ajaxUrl) { return; }
+		if (!D.ajaxUrl || D.check) { return; }
 		var body = new URLSearchParams();
 		body.set('action', 'cmp_log_consent');
 		body.set('decision', payload.decision);
@@ -288,7 +401,7 @@
 	var firstDecision = false;
 
 	function save(accepted, decision) {
-		var reload = firstDecision && !!D.reloadOnDecision;
+		var reload = firstDecision && !!D.reloadOnDecision && !D.check;
 		firstDecision = false;
 		// B4: the services of the accepted categories at this decision, so a service
 		// added later can be detected. None when the map is unknown (no scan yet).
@@ -492,7 +605,8 @@
 	function initLight() {
 		var bar = document.querySelector('[data-cmp-light]');
 		if (!bar) { return; }
-		try { if (localStorage.getItem('cmp_light_dismissed')) { return; } } catch (e) {}
+		// Check mode: always shown (the measured page is a first visit).
+		if (!D.check) { try { if (localStorage.getItem('cmp_light_dismissed')) { return; } } catch (e) {} }
 		bar.hidden = false;
 		var btn = bar.querySelector('[data-cmp-light-dismiss]');
 		if (btn) {
@@ -658,6 +772,51 @@
 		row.hidden = !ids.length;
 	}
 
+	// --- Check mode: measure the page before and after "Accept all" ---
+	// Only with CMP_DATA.check (a valid nonce, checked on the server) and inside
+	// a frame; results go to the parent of the same origin only.
+	function checkSnapshot() {
+		var res = [];
+		try {
+			(window.performance && performance.getEntriesByType ? performance.getEntriesByType('resource') : []).forEach(function (e) {
+				if (e && typeof e.name === 'string' && res.indexOf(e.name) === -1) { res.push(e.name); }
+			});
+		} catch (e) {}
+		return { resources: res, cookies: cookieList(document.cookie) };
+	}
+	function postCheck(msg) {
+		try { window.parent.postMessage(msg, location.origin); } catch (e) {}
+	}
+	function runCheck() {
+		setTimeout(function () {
+			var before = checkSnapshot();
+			if (D.mode === 'light') {
+				// Light stores no consent: "before" only.
+				var msgL = checkMessage('before', before.resources, before.cookies, !!document.querySelector('[data-cmp-light]'));
+				msgL.light = true;
+				postCheck(msgL);
+				endCheck();
+				return;
+			}
+			var accept = banner ? banner.querySelector('[data-cmp-action="accept"]') : null;
+			postCheck(checkMessage('before', before.resources, before.cookies, !!accept));
+			if (!accept) { endCheck(); return; }
+			// The same path as the visitor's click (delegated handler -> save()).
+			accept.click();
+			setTimeout(function () {
+				var after = checkSnapshot();
+				var msg = checkMessage('after', after.resources, after.cookies, true);
+				msg.added = { resources: checkDiff(before.resources, after.resources).added, cookies: checkDiff(before.cookies, after.cookies).added };
+				postCheck(msg);
+				endCheck();
+			}, 2500);
+		}, 1500);
+	}
+	if (D.check && window.parent !== window) {
+		if (document.readyState === 'complete') { runCheck(); }
+		else { window.addEventListener('load', runCheck); }
+	}
+
 	// --- Public API ---
 	window.CMP = {
 		isAllowed: function (slug) {
@@ -718,7 +877,7 @@
 			showReopen();
 			return;
 		}
-		if (navigator.globalPrivacyControl === true) {
+		if (navigator.globalPrivacyControl === true && !D.check) {
 			// Global Privacy Control: record refusal without prompting. Read in the
 			// browser, not from request headers in PHP: a cached page would otherwise
 			// replay the first visitor's signal to everyone. DNT is ignored.

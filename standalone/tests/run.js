@@ -501,5 +501,68 @@ ok(!/backfillSvc\([^\n]*\n[^\n]*(logConsent|save\(|show\(\))/.test(bannerSrc) &&
 var rcC = cmpSrc.match(/\/\/ reconsent:begin\n([\s\S]*?)\/\/ reconsent:end/);
 ok(!!rcM && !!rcC && rcM[1].replace(/^\t+/gm, '') === rcC[1].replace(/^\t+/gm, ''), 'reconsent blocks identical in banner.js and cmp.js');
 
+// B3 Task 4: check mode helpers (banner.js only; standalone has no check mode).
+var ckM = bannerSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
+ok(!!ckM, 'banner.js exposes the check block');
+ok(!/check:begin/.test(cmpSrc) && !/cmp-check/.test(cmpSrc), 'standalone cmp.js has no check mode');
+var ck = ckM ? new Function(ckM[1] + '\nreturn { checkDiff: checkDiff, cookieNames: cookieNames, cookieTail: cookieTail, cookieList: cookieList, checkMessage: checkMessage };')() : {};
+if (ckM) {
+	eq(ck.checkDiff(['a', 'b'], ['b', 'c', 'a', 'd']), { added: ['c', 'd'] }, 'checkDiff: only new entries, in the order of after');
+	eq(ck.checkDiff(['a'], ['c', 'c', 'a', 'c']), { added: ['c'] }, 'checkDiff: no duplicates');
+	eq(ck.checkDiff([], ['x']), { added: ['x'] }, 'checkDiff: empty before');
+	eq(ck.checkDiff(['x'], []), { added: [] }, 'checkDiff: nothing after');
+	eq(ck.checkDiff(null, undefined), { added: [] }, 'checkDiff: non-arrays are empty');
+	eq(ck.checkDiff('ab', ['a']), { added: ['a'] }, 'checkDiff: a string before is not a list');
+	eq(ck.cookieNames({ cookieName: 'cmp_consent' }), { consent: 'cmp_consent', svc: 'cmp_svc', session: false }, 'cookieNames: normal CMP_DATA -> real cookies');
+	eq(ck.cookieNames({ check: true, cookieName: 'cmp_check_consent', svcCookie: 'cmp_check_svc' }), { consent: 'cmp_check_consent', svc: 'cmp_check_svc', session: true }, 'cookieNames: check CMP_DATA -> check cookies, session');
+	eq(ck.cookieNames(undefined), { consent: 'cmp_consent', svc: 'cmp_svc', session: false }, 'cookieNames: no CMP_DATA -> defaults');
+	eq(ck.cookieNames({ cookieName: '', svcCookie: 5 }), { consent: 'cmp_consent', svc: 'cmp_svc', session: false }, 'cookieNames: invalid names -> defaults');
+	eq(ck.cookieTail(3600, false), ';path=/;max-age=3600;SameSite=Lax', 'cookieTail: persistent cookie keeps max-age');
+	eq(ck.cookieTail(3600, true), ';path=/;SameSite=Lax', 'cookieTail: session cookie has no max-age');
+	eq(ck.cookieList('a=1; cmp_check_consent=%7B%7D; _ga=GA1; a=2'), ['a', 'cmp_check_consent', '_ga'], 'cookieList: names in order, no duplicates');
+	eq(ck.cookieList(''), [], 'cookieList: empty string');
+	eq(ck.cookieList(' x=; =y; z'), ['x', 'z'], 'cookieList: odd entries');
+	eq(ck.checkMessage('before', ['https://a/x.js'], ['_ga'], true), { type: 'cmp-check', phase: 'before', resources: ['https://a/x.js'], cookies: ['_ga'], banner: true }, 'checkMessage: before shape');
+	eq(ck.checkMessage('before', null, null, 0), { type: 'cmp-check', phase: 'before', resources: [], cookies: [], banner: false }, 'checkMessage: lists and flag normalised');
+}
+// Wiring (source checks).
+ok(/var SVC_COOKIE = cookieNames\(D\)\.svc;/.test(bannerSrc), 'banner.js: cmp_svc name follows CMP_DATA');
+ok(/function writeCookie\(obj, maxAge\) \{[\s\S]*?document\.cookie = D\.cookieName \+ '=' \+ v \+ cookieTail\(maxAge, !!D\.check\);/.test(bannerSrc), 'banner.js: consent cookie is a session cookie in check mode');
+ok(/function writeSvc\(obj\) \{[\s\S]*?document\.cookie = SVC_COOKIE \+ '=' \+ v \+ cookieTail\(maxAge, !!D\.check\);/.test(bannerSrc), 'banner.js: svc cookie is a session cookie in check mode');
+ok(/function logConsent\(payload\) \{\n\t\tif \(!D\.ajaxUrl \|\| D\.check\) \{ return; \}/.test(bannerSrc), 'banner.js: no consent log in check mode');
+ok(/var reload = firstDecision && !!D\.reloadOnDecision && !D\.check;/.test(bannerSrc), 'banner.js: no reload in check mode');
+ok(/parent\.postMessage\([^)]*, location\.origin\)/.test(bannerSrc), 'banner.js: check results posted to the same origin only');
+ok(/D\.check && window\.parent !== window/.test(bannerSrc), 'banner.js: measuring runs only in check mode, inside a frame');
+
+// B3 Task 4 fix round 1: restore the admin's WP Consent API cookies, clean up, strip the token.
+var ck2 = ckM ? new Function(ckM[1] + '\nreturn { prefixCookies: typeof prefixCookies === "function" ? prefixCookies : null, restorePlan: typeof restorePlan === "function" ? restorePlan : null, persistTail: typeof persistTail === "function" ? persistTail : null, stripCheckParam: typeof stripCheckParam === "function" ? stripCheckParam : null };')() : {};
+ok(typeof ck2.prefixCookies === 'function' && typeof ck2.restorePlan === 'function' && typeof ck2.persistTail === 'function' && typeof ck2.stripCheckParam === 'function', 'check block: restore / strip helpers present');
+if (typeof ck2.restorePlan === 'function') {
+	eq(ck2.prefixCookies('cmp_consent=x; wp_consent_statistics=deny; wp_consent_marketing=allow; other=1; wp_consent_statistics=dup', 'wp_consent'), [{ name: 'wp_consent_statistics', value: 'deny' }, { name: 'wp_consent_marketing', value: 'allow' }], 'prefixCookies: names and raw values, first wins');
+	eq(ck2.prefixCookies('wp_consentx=1; xwp_consent_a=1', 'wp_consent'), [{ name: 'wp_consentx', value: '1' }], 'prefixCookies: prefix match at the start only');
+	eq(ck2.prefixCookies('', 'wp_consent'), [], 'prefixCookies: none');
+	var snap = [{ name: 'wp_consent_statistics', value: 'deny' }, { name: 'wp_consent_marketing', value: 'deny' }];
+	eq(ck2.restorePlan(snap, 'wp_consent_statistics=allow; wp_consent_marketing=deny; wp_consent_functional=allow; _ga=1', 'wp_consent'),
+		{ set: [{ name: 'wp_consent_statistics', value: 'deny' }], del: ['wp_consent_functional'] }, 'restorePlan: rewrite changed values, delete the ones absent before');
+	eq(ck2.restorePlan(snap, '', 'wp_consent'), { set: snap, del: [] }, 'restorePlan: a deleted original is rewritten');
+	eq(ck2.restorePlan([], 'wp_consent_a=allow', 'wp_consent'), { set: [], del: ['wp_consent_a'] }, 'restorePlan: nothing before -> delete all');
+	eq(ck2.restorePlan(snap, 'wp_consent_statistics=deny; wp_consent_marketing=deny', 'wp_consent'), { set: [], del: [] }, 'restorePlan: unchanged -> nothing to write');
+	eq(ck2.persistTail(30, false), ';path=/;max-age=2592000;SameSite=Lax', 'persistTail: days -> max-age, http');
+	eq(ck2.persistTail(0, true), ';path=/;max-age=2592000;SameSite=Lax;secure', 'persistTail: default 30 days, https -> secure');
+	eq(ck2.stripCheckParam('https://ex.md/p/?cmp_check=abc123'), 'https://ex.md/p/', 'stripCheckParam: only param');
+	eq(ck2.stripCheckParam('https://ex.md/p/?a=1&cmp_check=abc&b=2#x'), 'https://ex.md/p/?a=1&b=2#x', 'stripCheckParam: middle param');
+	eq(ck2.stripCheckParam('https://ex.md/p/?cmp_check=abc&b=2'), 'https://ex.md/p/?b=2', 'stripCheckParam: first param');
+	eq(ck2.stripCheckParam('https://ex.md/p/?a=1&cmp_check=abc#x'), 'https://ex.md/p/?a=1#x', 'stripCheckParam: last param with hash');
+	eq(ck2.stripCheckParam('https://ex.md/p/?xcmp_check=1'), 'https://ex.md/p/?xcmp_check=1', 'stripCheckParam: other names kept');
+}
+ok(/if \(typeof n === 'string' && n\.indexOf\('cmp_check_'\) === 0\)/.test(bannerSrc), 'M4: check-cookie cleanup only touches cmp_check_* names');
+ok(/navigator\.globalPrivacyControl === true && !D\.check/.test(bannerSrc), 'M4: GPC bypass only in check mode');
+ok(/if \(D\.check\) \{[\s\S]{0,400}?var wpSnap = prefixCookies\(document\.cookie, wpPrefix\(\)\);/.test(bannerSrc), 'I1: WP Consent API cookies snapshotted at parse, only in check mode');
+ok(/function endCheck\(\) \{[\s\S]*?restorePlan\(wpSnap, document\.cookie, wpPrefix\(\)\)[\s\S]*?clearCheckCookies\(\);/.test(bannerSrc), 'I1/I2: endCheck restores wp_consent_* and clears the check cookies');
+ok(/postCheck\(msg\);\n\t\t\t\tendCheck\(\);/.test(bannerSrc), 'I1/I2: endCheck after the after message');
+ok((bannerSrc.match(/postCheck\(msgL\);\n\t\t\t\tendCheck\(\);/) || []).length === 1 && /if \(!accept\) \{ endCheck\(\); return; \}/.test(bannerSrc), 'I1/I2: endCheck in the early-stop paths');
+ok(/window\.addEventListener\('pagehide', endCheck\)/.test(bannerSrc), 'I1/I2: endCheck on pagehide');
+ok(/history\.replaceState\(history\.state, '', stripCheckParam\(location\.href\)\)/.test(bannerSrc), 'M1: token stripped from the URL in check mode');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

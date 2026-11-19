@@ -251,3 +251,56 @@ cmp_assert_eq( array_keys( CMP_Scanner::legacy_copy( $t2_nohome ) ), array( 'raw
 
 // M-2: lock.
 cmp_assert( CMP_Scanner::lock_expired( 1000, 1000 + 181 ) && ! CMP_Scanner::lock_expired( 1000, 1100 ), 'lock_expired: a lock older than 3 minutes is taken over' );
+
+// B3 Task 4: nonce-gated check mode. $verify models wp_verify_nonce( $t, 'cmp_check' ) && current_user_can( 'manage_options' ).
+require_once __DIR__ . '/../includes/class-consent.php';
+$t4_calls  = 0;
+$t4_nonce  = function ( $t ) {
+	return 'good-nonce' === $t;
+};
+$t4_verify = function ( $can ) use ( &$t4_calls, $t4_nonce ) {
+	return function ( $t ) use ( &$t4_calls, $t4_nonce, $can ) {
+		$t4_calls++;
+		return $t4_nonce( $t ) && $can;
+	};
+};
+cmp_assert( ! CMP_Scanner::check_active( 'bad-nonce', $t4_verify( true ) ), 'check_active: invalid nonce -> false' );
+$t4_calls = 0;
+cmp_assert( ! CMP_Scanner::check_active( null, $t4_verify( true ) ) && 0 === $t4_calls, 'check_active: no parameter -> false, verify not called' );
+cmp_assert( ! CMP_Scanner::check_active( '', $t4_verify( true ) ) && 0 === $t4_calls, 'check_active: empty parameter -> false, verify not called' );
+cmp_assert( ! CMP_Scanner::check_active( 'good-nonce', $t4_verify( false ) ), 'check_active: valid nonce without manage_options -> false' );
+cmp_assert( CMP_Scanner::check_active( 'good-nonce', $t4_verify( true ) ), 'check_active: valid nonce with manage_options -> true' );
+cmp_assert( true === CMP_Scanner::check_active( 'good-nonce', function () { return 1; } ), 'check_active: a truthy verify (wp_verify_nonce returns 1|2) gives a real bool' );
+
+// Server cookie names follow the mode.
+cmp_assert_eq( CMP_Consent::cookie_names( false ), array( 'consent' => 'cmp_consent', 'svc' => 'cmp_svc' ), 'cookie_names: normal mode uses the real cookies' );
+cmp_assert_eq( CMP_Consent::cookie_names( true ), array( 'consent' => 'cmp_check_consent', 'svc' => 'cmp_check_svc' ), 'cookie_names: check mode uses the session check cookies' );
+cmp_assert_eq( CMP_Consent::COOKIE, 'cmp_consent', 'cookie_names: COOKIE constant unchanged' );
+
+// CMP_DATA overlay.
+$t4_data = array( 'version' => '3', 'cookieName' => 'cmp_consent', 'reloadOnDecision' => true, 'cookieDays' => 180 );
+cmp_assert_eq( CMP_Scanner::check_data( $t4_data, false ), $t4_data, 'check_data: inactive -> CMP_DATA unchanged' );
+cmp_assert_eq(
+	CMP_Scanner::check_data( $t4_data, true ),
+	array( 'version' => '3', 'cookieName' => 'cmp_check_consent', 'reloadOnDecision' => false, 'cookieDays' => 180, 'check' => true, 'svcCookie' => 'cmp_check_svc' ),
+	'check_data: active -> check flag, check cookies, no reload'
+);
+
+// B3 Task 4 fix round 1 (M2/M4): the request side of check_mode(), pure.
+$t4_ok   = function () { return true; };
+$t4_ctx  = array( 'init' => true, 'parsed' => true, 'admin' => false, 'ajax' => false, 'rest' => false );
+cmp_assert_eq( CMP_Scanner::check_request( $t4_ctx, 'good-nonce', $t4_ok ), array( 'active' => true, 'final' => true ), 'check_request: front end after parse_request -> active, memoised' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'init' => false ) ), 'good-nonce', $t4_ok ), array( 'active' => false, 'final' => false ), 'check_request: before init -> false, not memoised' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'parsed' => false ) ), 'good-nonce', $t4_ok ), array( 'active' => true, 'final' => false ), 'check_request: between init and parse_request -> answered, not memoised' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'admin' => true ) ), 'good-nonce', $t4_ok ), array( 'active' => false, 'final' => true ), 'check_request: admin -> false' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'ajax' => true ) ), 'good-nonce', $t4_ok ), array( 'active' => false, 'final' => true ), 'check_request: AJAX -> false' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'rest' => true ) ), 'good-nonce', $t4_ok ), array( 'active' => false, 'final' => true ), 'check_request: REST/JSON -> false' );
+cmp_assert_eq( CMP_Scanner::check_request( array_merge( $t4_ctx, array( 'rest' => true, 'parsed' => false ) ), 'good-nonce', $t4_ok ), array( 'active' => false, 'final' => false ), 'check_request: REST URI before parse_request -> false, not memoised' );
+cmp_assert_eq( CMP_Scanner::check_request( $t4_ctx, null, $t4_ok ), array( 'active' => false, 'final' => true ), 'check_request: no token -> false' );
+cmp_assert( CMP_Scanner::is_rest_uri( '/wp-json/wp/v2/posts?cmp_check=x', array(), 'wp-json' ), 'is_rest_uri: /wp-json/ path' );
+cmp_assert( CMP_Scanner::is_rest_uri( '/sub/wp-json/x', array(), 'wp-json' ), 'is_rest_uri: subdirectory install' );
+cmp_assert( CMP_Scanner::is_rest_uri( '/?cmp_check=x', array( 'rest_route' => '/wp/v2' ), 'wp-json' ), 'is_rest_uri: ?rest_route' );
+cmp_assert( ! CMP_Scanner::is_rest_uri( '/blog/post/?cmp_check=x', array(), 'wp-json' ), 'is_rest_uri: normal page' );
+cmp_assert( ! CMP_Scanner::is_rest_uri( '/?q=wp-json/', array(), 'wp-json' ), 'is_rest_uri: prefix in the query only is not REST' );
+$t4_src = file_get_contents( __DIR__ . '/../includes/modules/class-scanner.php' );
+cmp_assert( false !== strpos( $t4_src, "header( 'Referrer-Policy: same-origin' )" ), 'check_page_setup: Referrer-Policy same-origin (M1)' );
