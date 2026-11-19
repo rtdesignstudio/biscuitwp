@@ -718,8 +718,12 @@ class CMP_Scanner {
 		return 1 === preg_match( $re, (string) $name );
 	}
 
-	/** Pure: how a service loaded before consent counts: red, or why it is shown apart. */
-	private static function service_level( array $s, $mode ) {
+	/**
+	 * Pure: how a service loaded before consent counts: red, or why it is shown
+	 * apart (necessary | exempt | advanced). Shared by classify() (browser
+	 * verdict) and service_state() (server report label).
+	 */
+	public static function service_level( array $s, $mode ) {
 		if ( isset( $s['category'] ) && 'necessary' === $s['category'] ) {
 			return 'necessary';
 		}
@@ -728,6 +732,29 @@ class CMP_Scanner {
 			return 'advanced';
 		}
 		return CMP_Services::consent_exempt( $s ) ? 'exempt' : 'red';
+	}
+
+	/**
+	 * Pure: the state of one service found on a page by the server scan, for the
+	 * report label. $page_services: the page's services (raw, blocked, found);
+	 * $svc: the active service with this id, or null; $mode: pro | advanced | light.
+	 * Returns blocked | blocked_light (marked data-cmp-service by the blocker),
+	 * necessary | exempt | advanced (never blocked, see service_level), or
+	 * unblocked | unblocked_off (loads without consent; _off: script blocking is off).
+	 */
+	public static function service_state( $id, array $page_services, $svc, $mode, $blocking_off ) {
+		$id      = (string) $id;
+		$blocked = isset( $page_services['blocked'] ) ? (array) $page_services['blocked'] : array();
+		if ( in_array( $id, $blocked, true ) ) {
+			return 'light' === $mode ? 'blocked_light' : 'blocked';
+		}
+		$off = $blocking_off ? 'unblocked_off' : 'unblocked';
+		$raw = isset( $page_services['raw'] ) ? (array) $page_services['raw'] : array();
+		if ( in_array( $id, $raw, true ) || ! is_array( $svc ) ) {
+			return $off;
+		}
+		$level = self::service_level( $svc, $mode );
+		return 'red' === $level ? $off : $level;
 	}
 
 	/** Pure: the service whose host pattern matches the URL; the longest (most specific) pattern wins. */
@@ -917,7 +944,9 @@ class CMP_Scanner {
 	/**
 	 * Pure: one page of the browser check, from the raw data check.js sends:
 	 * url, result (ok | timeout | nobanner | origin), before { resources, cookies },
-	 * added { resources, cookies } (after "Acceptă tot"), light. Returns null for
+	 * added { resources, cookies } (after "Acceptă tot"), light, pre (cookie names
+	 * already in the browser just before this page's frame: set by an earlier
+	 * page's "Acceptă tot"; united with the run's $baseline). Returns null for
 	 * a page off the site. status none (with reason) when it could not be checked.
 	 */
 	public static function check_page( array $raw, array $services, $home, $mode, array $baseline = array() ) {
@@ -934,7 +963,8 @@ class CMP_Scanner {
 		$b    = isset( $raw['before'] ) && is_array( $raw['before'] ) ? $raw['before'] : array();
 		$res  = self::str_list( isset( $b['resources'] ) ? $b['resources'] : array(), self::CHECK_MAX_RESOURCES, self::CHECK_MAX_URL );
 		$cks  = self::str_list( isset( $b['cookies'] ) ? $b['cookies'] : array(), self::CHECK_MAX_COOKIES, 200 );
-		$base = self::str_list( $baseline, self::CHECK_MAX_COOKIES, 200 );
+		$pre  = self::str_list( isset( $raw['pre'] ) && is_array( $raw['pre'] ) ? $raw['pre'] : array(), self::CHECK_MAX_COOKIES, 200 );
+		$base = self::str_list( array_merge( self::str_list( $baseline, self::CHECK_MAX_COOKIES, 200 ), $pre ), self::CHECK_MAX_COOKIES * 2, 200 );
 		$c    = self::classify( $res, $cks, $services, (string) $home, (string) $mode, $base );
 		$out['status'] = $c['status'];
 		$out['reason'] = 'none' === $c['status'] ? 'nodata' : '';
@@ -1019,6 +1049,8 @@ class CMP_Scanner {
 		if ( ! headers_sent() ) {
 			// The token stays on this site (the URL is also cleaned in banner.js).
 			header( 'Referrer-Policy: same-origin' );
+			// Only the admin screen (same origin) may frame a check page.
+			header( 'X-Frame-Options: SAMEORIGIN' );
 		}
 		foreach ( CMP_Consent::cookie_names( true ) as $name ) {
 			unset( $_COOKIE[ $name ] );

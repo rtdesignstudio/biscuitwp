@@ -101,6 +101,15 @@
 		var keep = s.slice(q + 1).split('&').filter(function (p) { return p !== '' && p.split('=')[0] !== 'cmp_check'; });
 		return s.slice(0, q) + (keep.length ? '?' + keep.join('&') : '') + hash;
 	}
+	// Is `win` framed by a page of its own origin (the admin "Verificare" screen)?
+	// A cross-origin parent throws on access: false.
+	function parentSameOrigin(win) {
+		try {
+			return !!win && win.parent !== win && !!win.parent && win.parent.location.origin === win.location.origin;
+		} catch (e) {
+			return false;
+		}
+	}
 	// check:end
 
 	// Consent ID: a random v4 UUID kept in the consent cookie and in the consent
@@ -801,6 +810,8 @@
 			var accept = banner ? banner.querySelector('[data-cmp-action="accept"]') : null;
 			postCheck(checkMessage('before', before.resources, before.cookies, !!accept));
 			if (!accept) { endCheck(); return; }
+			// Never "Acceptă tot" under a frame of another origin.
+			if (!parentSameOrigin(window)) { endCheck(); return; }
 			// The same path as the visitor's click (delegated handler -> save()).
 			accept.click();
 			setTimeout(function () {

@@ -27,8 +27,10 @@
 		}
 		return out;
 	}
-	// The raw result of one page: timeout (no message), nobanner, or ok.
-	function checkOutcome(st) {
+	// The raw result of one page: timeout (no message), nobanner, or ok. `pre`: the
+	// cookie names in this browser just before the page's frame was created (an
+	// earlier page's "Acceptă tot" may have set some): not a verdict on this page.
+	function checkOutcome(st, pre) {
 		var b = st && st.before;
 		if (!b) { return { result: 'timeout' }; }
 		if (!b.banner) { return { result: 'nobanner' }; }
@@ -36,7 +38,8 @@
 			result: 'ok',
 			light: !!b.light,
 			before: { resources: checkClean(b.resources, 300, 500), cookies: checkClean(b.cookies, 100, 200) },
-			added: null
+			added: null,
+			pre: checkClean(pre, 100, 200)
 		};
 		var a = st.after && st.after.added;
 		if (!out.light && a) {
@@ -94,7 +97,7 @@
 		cur = null;
 		clearTimeout(c.timer);
 		if (c.frame.parentNode) { c.frame.parentNode.removeChild(c.frame); }
-		var o = checkOutcome(c.state);
+		var o = checkOutcome(c.state, c.pre);
 		o.url = c.url;
 		results.push(o);
 		next(c.index + 1);
@@ -109,13 +112,15 @@
 			next(i + 1);
 			return;
 		}
+		// Per-page baseline: the cookies left by the pages before this one.
+		var pre = checkCookieNames(document.cookie);
 		var f = document.createElement('iframe');
 		f.setAttribute('aria-hidden', 'true');
 		f.setAttribute('tabindex', '-1');
 		f.title = 'cmp-check';
 		// Off-screen but rendered at a desktop size, so the page behaves as for a visitor.
 		f.style.cssText = 'position:absolute;left:-10000px;top:0;width:1280px;height:900px;border:0;';
-		cur = { index: i, url: C.pages[i], frame: f, state: { before: null, after: null } };
+		cur = { index: i, url: C.pages[i], frame: f, pre: pre, state: { before: null, after: null } };
 		cur.timer = setTimeout(finish, (+C.timeout) || 20000);
 		f.src = checkUrl(C.pages[i], C.checkNonce);
 		document.body.appendChild(f);

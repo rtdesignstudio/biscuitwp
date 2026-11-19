@@ -199,7 +199,7 @@ class CMP_Settings_Page {
 						<td>
 							<label><input type="checkbox" name="cmp[localize_fonts]" value="1" <?php checked( ! empty( $s['localize_fonts'] ) ); ?>> <?php esc_html_e( 'Servește Google Fonts local (fără request la Google)', 'consent-manager-pro' ); ?></label>
 							<p class="description">
-								<?php esc_html_e( 'După activare (și Salvează), apasă „Localizează fonturile" de mai jos ca să descarci fonturile de pe homepage. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?>
+								<?php esc_html_e( 'După activare (și Salvează), apasă „Localizează fonturile" de mai jos ca să descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?>
 								<?php
 								$cmp_fmap = get_option( CMP_Fonts::MAP_KEY, array() );
 								if ( is_array( $cmp_fmap ) && $cmp_fmap ) {
@@ -284,7 +284,7 @@ class CMP_Settings_Page {
 			<?php if ( isset( $_GET['cmp_fonts_cleared'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Fonturi localizate șterse.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
-			<p class="description"><?php esc_html_e( 'Descarcă fonturile Google folosite pe homepage și servește-le local. Activează întâi opțiunea „Localizare Google Fonts" de mai sus și salvează.', 'consent-manager-pro' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Descarcă fonturile Google folosite pe paginile scanate ale site-ului și servește-le local. Activează întâi opțiunea „Localizare Google Fonts" de mai sus și salvează.', 'consent-manager-pro' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
 				<input type="hidden" name="action" value="cmp_localize_fonts">
 				<?php wp_nonce_field( 'cmp_localize_fonts' ); ?>

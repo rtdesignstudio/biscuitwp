@@ -416,3 +416,47 @@ cmp_assert( 'none' === $t5p['status'] && 'origin' === $t5p['reason'], 'check_pag
 // M2: a path is resolved against the home path (subdirectory install).
 $t5m = CMP_Scanner::clean_manual_urls( "/contact/\n/blog/despre/", '', 'https://ex.md/blog/' );
 cmp_assert_eq( $t5m['add'], array( 'https://ex.md/blog/contact/', 'https://ex.md/blog/despre/' ), 'manual urls M2: /path resolved under the home path' );
+
+// B3 final review fix wave.
+$fw_find = function ( array $svcs, $id ) {
+	foreach ( $svcs as $s ) {
+		if ( isset( $s['id'] ) && $id === $s['id'] ) {
+			return $s;
+		}
+	}
+	return null;
+};
+$fw_ref = new ReflectionMethod( 'CMP_Scanner', 'service_level' );
+cmp_assert( $fw_ref->isPublic(), 'I1: CMP_Scanner::service_level is public (one rule for the label and the verdict)' );
+cmp_assert( method_exists( 'CMP_Scanner', 'service_state' ), 'I1: CMP_Scanner::service_state exists' );
+if ( method_exists( 'CMP_Scanner', 'service_state' ) ) {
+	$fw_pl = $fw_find( $t5_svc, 'plausible' );
+	$fw_pl['exempt'] = true;
+	cmp_assert_eq( CMP_Scanner::service_state( 'plausible', array( 'raw' => array(), 'blocked' => array(), 'found' => array( 'plausible' ) ), $fw_pl, 'pro', false ), 'exempt', 'I1 label: Plausible marked exempt -> exempt, not "blocat"' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'recaptcha', array( 'raw' => array(), 'blocked' => array(), 'found' => array( 'recaptcha' ) ), $fw_find( $t5_svc, 'recaptcha' ), 'pro', false ), 'necessary', 'I1 label: reCAPTCHA (necessary) -> necessary' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'google-analytics', array( 'raw' => array(), 'blocked' => array(), 'found' => array( 'google-analytics' ) ), $fw_find( $t5_svc, 'google-analytics' ), 'advanced', false ), 'advanced', 'I1 label: GA4 in Advanced -> advanced (Consent Mode)' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'youtube', array( 'raw' => array(), 'blocked' => array(), 'found' => array( 'youtube' ) ), $fw_find( $t5_svc, 'youtube' ), 'pro', true ), 'unblocked_off', 'I1 label: YouTube iframe with blocking off -> unblocked, blocking off' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'google-analytics', array( 'raw' => array(), 'blocked' => array( 'google-analytics' ), 'found' => array( 'google-analytics' ) ), $fw_find( $t5_svc, 'google-analytics' ), 'pro', false ), 'blocked', 'I1 label: GA with a data-cmp-service marker -> blocked until consent' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'google-analytics', array( 'raw' => array(), 'blocked' => array( 'google-analytics' ), 'found' => array( 'google-analytics' ) ), $fw_find( $t5_svc, 'google-analytics' ), 'light', false ), 'blocked_light', 'I1 label: Light, blocked -> blocked permanently' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'google-analytics', array( 'raw' => array( 'google-analytics' ), 'blocked' => array(), 'found' => array( 'google-analytics' ) ), $fw_find( $t5_svc, 'google-analytics' ), 'pro', true ), 'unblocked_off', 'I1 label: raw GA, blocking off -> unblocked, blocking off' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'youtube', array( 'raw' => array(), 'blocked' => array(), 'found' => array( 'youtube' ) ), $fw_find( $t5_svc, 'youtube' ), 'pro', false ), 'unblocked', 'I1 label: live YouTube iframe, blocking on -> unblocked (never "blocat" by default)' );
+	cmp_assert_eq( CMP_Scanner::service_state( 'gone', array( 'found' => array( 'gone' ) ), null, 'pro', false ), 'unblocked', 'I1 label: a service no longer active -> unblocked' );
+}
+// I2: cookies already in the browser just before this page's frame (set by "Acceptă tot" on an earlier page).
+$fw_p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/b/', 'result' => 'ok', 'pre' => array( '_ga', '_ga_ABC' ), 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array( '_ga', '_ga_ABC' ) ) ), $t5_svc, $t5_h, 'pro', array() );
+cmp_assert( 'green' === $fw_p['status'] && 'preexisting' === $t5_lvl( $fw_p, '_ga' ) && 'preexisting' === $t5_lvl( $fw_p, '_ga_ABC' ), 'check_page I2 (final): a cookie in the per-page baseline is preexisting, not red' );
+$fw_p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/b/', 'result' => 'ok', 'pre' => array( 'other' ), 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array( '_ga', 'k' ) ) ), $t5_svc, $t5_h, 'pro', array( 'k' ) );
+cmp_assert( 'red' === $fw_p['status'] && 'preexisting' === $t5_lvl( $fw_p, 'k' ), 'check_page I2 (final): run baseline and page baseline are united; a new _ga stays red' );
+$fw_p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/b/', 'result' => 'ok', 'pre' => array( 5, array( '_ga' ), str_repeat( 'x', 300 ) ), 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array( '_ga' ) ) ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $fw_p['status'], 'check_page I2 (final): non-string or oversized per-page baseline entries are dropped' );
+$fw_p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/b/', 'result' => 'ok', 'pre' => 'not-a-list-_ga', 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array( '_ga' ) ) ), $t5_svc, $t5_h, 'advanced' );
+cmp_assert( 'consentmode' === $t5_lvl( $fw_p, '_ga' ), 'check_page I2 (final): a string per-page baseline is not a list of _ga' );
+// M5: a check page can never be framed by another origin.
+cmp_assert( false !== strpos( $t4_src, "header( 'X-Frame-Options: SAMEORIGIN' )" ), 'check_page_setup M5: X-Frame-Options SAMEORIGIN' );
+// M1 / M2: texts.
+$fw_set = file_get_contents( __DIR__ . '/../includes/admin/class-settings-page.php' );
+cmp_assert( false === strpos( $fw_set, 'fonturile de pe homepage' ) && false === strpos( $fw_set, 'folosite pe homepage' ), 'M1: font texts no longer say "homepage"' );
+cmp_assert( 2 === substr_count( $fw_set, 'paginile scanate ale site-ului' ), 'M1: both font texts say "paginile scanate ale site-ului"' );
+$fw_chk = file_get_contents( __DIR__ . '/../includes/admin/class-check-page.php' );
+cmp_assert( 1 === preg_match( "/_n\\(\\s*'Am respins o adresă/u", $fw_chk ) && false === strpos( $fw_chk, "__( 'Am respins %d adrese" ), 'M2: rejected-addresses notice uses _n()' );
+cmp_assert( false !== strpos( $fw_chk, 'CMP_Scanner::service_state(' ) && false === strpos( $fw_chk, "in_array( \$cmp_id, \$cmp_raw, true ) ? __( 'neblocat'" ), 'I1: the server report label comes from CMP_Scanner::service_state' );

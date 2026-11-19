@@ -595,5 +595,34 @@ if (ckM) {
 	eq(ck.payload(['_ga'], [{ url: 'u', result: 'timeout' }]), { baseline: ['_ga'], pages: [{ url: 'u', result: 'timeout' }] }, 'check I2: payload carries the baseline and the pages');
 }
 
+// B3 final review fix wave.
+// I2: per-page cookie baseline (cookies already in the browser just before each frame).
+var ckF = ckM ? new Function(ckM[1] + '\nreturn { outcome: checkOutcome, payload: checkPayload };')() : {};
+if (ckM) {
+	var ocP = ckF.outcome({ before: { banner: true, resources: [], cookies: ['_ga'] }, after: null }, ['_ga', '_ga', 5, 'cmp_consent']);
+	eq(ocP.pre, ['_ga', 'cmp_consent'], 'check I2 (final): an ok page carries its own baseline, cleaned');
+	eq(ckF.outcome({ before: { banner: true, resources: [], cookies: [] } }).pre, [], 'check I2 (final): no per-page baseline -> empty list');
+	var bigPre = []; for (var bp = 0; bp < 150; bp++) { bigPre.push('c' + bp); }
+	eq(ckF.outcome({ before: { banner: true, resources: [], cookies: [] } }, bigPre).pre.length, 100, 'check I2 (final): per-page baseline capped at 100');
+	eq(ckF.payload([], [ocP]).pages[0].pre, ['_ga', 'cmp_consent'], 'check I2 (final): payload pages carry pre');
+}
+ok(/function next\(i\) \{[\s\S]*?var pre = checkCookieNames\(document\.cookie\);[\s\S]*?document\.createElement\('iframe'\)/.test(checkSrc), 'check I2 (final): per-page baseline taken in next() before the frame is created');
+ok(/checkOutcome\(c\.state, c\.pre\)/.test(checkSrc), 'check I2 (final): finish() passes the per-page baseline');
+// M5: auto "Acceptă tot" only under a same-origin parent.
+var ckB = bannerSrc.match(/\/\/ check:begin\n([\s\S]*?)\/\/ check:end/);
+var ck5 = ckB ? new Function(ckB[1] + '\nreturn { po: typeof parentSameOrigin === "function" ? parentSameOrigin : null };')() : {};
+ok(!!ck5.po, 'M5: banner.js check block has parentSameOrigin');
+if (ck5.po) {
+	var wSelf = { location: { origin: 'https://a.md' } }; wSelf.parent = wSelf;
+	eq(ck5.po(wSelf), false, 'M5: top window (no parent) -> false');
+	eq(ck5.po({ location: { origin: 'https://a.md' }, parent: { location: { origin: 'https://a.md' } } }), true, 'M5: same-origin parent -> true');
+	eq(ck5.po({ location: { origin: 'https://a.md' }, parent: { location: { origin: 'https://evil.md' } } }), false, 'M5: other-origin parent -> false');
+	var wX = { location: { origin: 'https://a.md' }, parent: {} };
+	Object.defineProperty(wX.parent, 'location', { get: function () { throw new Error('SecurityError'); } });
+	eq(ck5.po(wX), false, 'M5: cross-origin parent (access throws) -> false');
+	eq(ck5.po(null), false, 'M5: no window -> false');
+}
+ok(/if \(!parentSameOrigin\(window\)\) \{ endCheck\(\); return; \}\n\t\t\t\/\/ The same path as the visitor's click \(delegated handler -> save\(\)\)\.\n\t\t\taccept\.click\(\);/.test(bannerSrc), 'M5: runCheck checks the parent origin right before accept.click() and stops via endCheck');
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

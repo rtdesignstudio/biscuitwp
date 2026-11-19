@@ -32,6 +32,26 @@ class CMP_Check_Page {
 		return 'light' !== self::mode() && empty( $s['block_scripts'] );
 	}
 
+	/** The report label of a service state (CMP_Scanner::service_state). */
+	private static function state_label( $state ) {
+		switch ( $state ) {
+			case 'blocked':
+				return __( 'blocat până la acord', 'consent-manager-pro' );
+			case 'blocked_light':
+				return __( 'blocat permanent (modul Light)', 'consent-manager-pro' );
+			case 'necessary':
+				return __( 'neblocat (necesar)', 'consent-manager-pro' );
+			case 'exempt':
+				return __( 'excepție, se încarcă fără acord', 'consent-manager-pro' );
+			case 'advanced':
+				return __( 'Advanced: se încarcă cu Consent Mode „refuzat”', 'consent-manager-pro' );
+			case 'unblocked_off':
+				return __( 'neblocat (blocarea scripturilor e oprită)', 'consent-manager-pro' );
+			default:
+				return __( 'neblocat', 'consent-manager-pro' );
+		}
+	}
+
 	/** Readable source of a script or resource (array( kind, slug ) from CMP_Scanner::source_for). */
 	private static function source_label( $src ) {
 		static $plugins = null;
@@ -204,6 +224,13 @@ class CMP_Check_Page {
 		}
 		$post_url = admin_url( 'admin-post.php' );
 		$cmp_ipl  = self::ip_labels();
+		$cmp_svc  = array();
+		foreach ( CMP_Services::active() as $cmp_s ) {
+			if ( is_array( $cmp_s ) && isset( $cmp_s['id'] ) ) {
+				$cmp_svc[ (string) $cmp_s['id'] ] = $cmp_s;
+			}
+		}
+		$cmp_off  = self::blocking_off();
 		?>
 		<div class="wrap cmp-admin cmp-check">
 			<h1><?php esc_html_e( 'Consent Manager — Verificare', 'consent-manager-pro' ); ?></h1>
@@ -211,7 +238,7 @@ class CMP_Check_Page {
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista de pagini a fost salvată. Scanarea pornește din nou.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( ! empty( $_GET['cmp_rejected'] ) ) : ?>
-				<div class="notice notice-warning is-dismissible"><p><?php echo esc_html( sprintf( /* translators: %d: number of addresses */ __( 'Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate.', 'consent-manager-pro' ), (int) $_GET['cmp_rejected'] ) ); ?></p></div>
+				<div class="notice notice-warning is-dismissible"><p><?php $cmp_nr = (int) $_GET['cmp_rejected']; echo esc_html( sprintf( /* translators: %d: number of addresses */ _n( 'Am respins o adresă: doar paginile de pe domeniul site-ului pot fi verificate.', 'Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate.', $cmp_nr, 'consent-manager-pro' ), $cmp_nr ) ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_fonts'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( /* translators: %d — count */ __( 'Localizate %d fonturi.', 'consent-manager-pro' ), (int) $_GET['cmp_fonts'] ) ); ?></p></div>
@@ -281,14 +308,14 @@ class CMP_Check_Page {
 							<td>
 								<?php
 								$cmp_found = isset( $p['services']['found'] ) ? (array) $p['services']['found'] : array();
-								$cmp_raw   = isset( $p['services']['raw'] ) ? (array) $p['services']['raw'] : array();
+								$cmp_ps    = isset( $p['services'] ) && is_array( $p['services'] ) ? $p['services'] : array();
 								if ( ! $cmp_found ) {
 									echo '<span class="description">' . esc_html__( 'niciun serviciu', 'consent-manager-pro' ) . '</span>';
 								}
 								echo '<ul>';
 								foreach ( $cmp_found as $cmp_id ) {
 									$cmp_id  = (string) $cmp_id;
-									$cmp_st  = in_array( $cmp_id, $cmp_raw, true ) ? __( 'neblocat', 'consent-manager-pro' ) : __( 'blocat până la acord', 'consent-manager-pro' );
+									$cmp_st  = self::state_label( CMP_Scanner::service_state( $cmp_id, $cmp_ps, isset( $cmp_svc[ $cmp_id ] ) ? $cmp_svc[ $cmp_id ] : null, $mode, $cmp_off ) );
 									$cmp_srs = isset( $p['sources'][ $cmp_id ] ) ? self::sources_text( $p['sources'][ $cmp_id ] ) : '';
 									echo '<li><strong>' . esc_html( isset( $names[ $cmp_id ] ) ? $names[ $cmp_id ] : $cmp_id ) . '</strong> — ' . esc_html( $cmp_st )
 										. ( '' !== $cmp_srs ? '<br><span class="description">' . esc_html( $cmp_srs ) . '</span>' : '' ) . '</li>';
