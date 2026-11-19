@@ -681,6 +681,279 @@ class CMP_Scanner {
 	}
 
 	/* ------------------------------------------------------------------
+	 * Browser check (Verificare): classification and the saved report (pure).
+	 * ------------------------------------------------------------------ */
+
+	const CHECK_OPTION        = 'cmp_check_report';
+	const CHECK_MAX_RESOURCES = 300;
+	const CHECK_MAX_COOKIES   = 100;
+	const CHECK_MAX_URL       = 500;
+	const MANUAL_MAX_URL      = 2000;
+
+	/** Display names of the IP-leaking resource types. */
+	const IP_LABELS = array(
+		'google_fonts' => 'Google Fonts',
+		'adobe_fonts'  => 'Adobe Fonts',
+		'font_awesome' => 'Font Awesome',
+		'cdn'          => 'CDN',
+		'gravatar'     => 'Gravatar',
+		'emoji'        => 'emoji WordPress',
+	);
+
+	/** Pure: a cookie set by WordPress or by this plugin (cmp_*, wp_consent_*): not part of the verdict. */
+	private static function ignored_cookie( $name ) {
+		return 1 === preg_match( '/^(?:cmp_|wp_consent_|wordpress_|wp-settings-|wp_lang$)/', (string) $name );
+	}
+
+	/** Pure: does a cookie name match a library pattern ('_ga', '_ga_*')? */
+	private static function cookie_matches( $name, $pattern ) {
+		$pattern = (string) $pattern;
+		if ( '' === $pattern ) {
+			return false;
+		}
+		if ( false === strpos( $pattern, '*' ) ) {
+			return (string) $name === $pattern;
+		}
+		$re = '/^' . str_replace( '\*', '.*', preg_quote( $pattern, '/' ) ) . '$/';
+		return 1 === preg_match( $re, (string) $name );
+	}
+
+	/** Pure: how a service loaded before consent counts: red, or why it is shown apart. */
+	private static function service_level( array $s, $mode ) {
+		if ( isset( $s['category'] ) && 'necessary' === $s['category'] ) {
+			return 'necessary';
+		}
+		$id = isset( $s['id'] ) ? (string) $s['id'] : '';
+		if ( ( 'advanced' === $mode || ! empty( $s['mode_exempt'] ) ) && in_array( $id, CMP_Services::MEASUREMENT_IDS, true ) && ! CMP_Services::consent_exempt( $s ) ) {
+			return 'advanced';
+		}
+		return CMP_Services::consent_exempt( $s ) ? 'exempt' : 'red';
+	}
+
+	/** Pure: the service whose host pattern matches the URL; the longest (most specific) pattern wins. */
+	private static function host_service( $url, array $services ) {
+		$best = null;
+		$len  = -1;
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) ) {
+				continue;
+			}
+			$path = isset( $s['type'] ) && 'embed' === $s['type'] && isset( $s['path'] ) ? (string) $s['path'] : '';
+			foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
+				$p = (string) $h . $path;
+				if ( strlen( $p ) > $len && CMP_Services::host_matches( $url, $p ) ) {
+					$best = $s;
+					$len  = strlen( $p );
+				}
+			}
+		}
+		return $best;
+	}
+
+	/** Pure: the service that lists this cookie name. */
+	private static function cookie_service( $name, array $services ) {
+		foreach ( $services as $s ) {
+			if ( ! is_array( $s ) || empty( $s['id'] ) ) {
+				continue;
+			}
+			foreach ( (array) ( isset( $s['cookies'] ) ? $s['cookies'] : array() ) as $ck ) {
+				$pat = is_array( $ck ) && isset( $ck['name'] ) ? $ck['name'] : $ck;
+				if ( is_string( $pat ) && self::cookie_matches( $name, $pat ) ) {
+					return $s;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Pure: the verdict of one page before consent. $before_hosts: resource URLs
+	 * (or bare hosts) contacted; $before_cookies: first-party cookie names.
+	 * $mode: 'pro' | 'advanced' (GA4/GTM load with Consent Mode denied) | 'light'.
+	 * Returns array( 'status' => red|yellow|green|none, 'items' => [ [level, label, host|cookie, source] ] ).
+	 * level: red | yellow change the status; exempt | necessary | advanced |
+	 * consentmode (Advanced: a GA/GTM cookie before consent) | preexisting (a
+	 * cookie already in the admin's browser before the run, $baseline) never do.
+	 * source: the service id, the resource type, or '' when unknown.
+	 * One host can carry several services (path patterns): items are deduped
+	 * per host and service / resource type / unknown, not per host.
+	 */
+	public static function classify( array $before_hosts, array $before_cookies, array $services, string $home, string $mode, array $baseline = array() ): array {
+		$items = array();
+		$seen  = array();
+		$data  = false;
+		foreach ( $before_hosts as $u ) {
+			$u = trim( (string) $u );
+			if ( '' === $u ) {
+				continue;
+			}
+			if ( 1 === preg_match( '#^//#', $u ) ) {
+				$u = 'https:' . $u;
+			} elseif ( 1 !== preg_match( '#^[a-z][a-z0-9+.-]*:#i', $u ) ) {
+				$u = 'https://' . $u; // a bare host
+			}
+			if ( 1 !== preg_match( '#^https?://#i', $u ) ) {
+				continue; // data:, blob:, extensions
+			}
+			$host = parse_url( $u, PHP_URL_HOST );
+			if ( ! is_string( $host ) || '' === $host ) {
+				continue;
+			}
+			$data = true;
+			$host = strtolower( $host );
+			if ( self::is_own_host( $u, $home ) ) {
+				continue;
+			}
+			$svc  = self::host_service( $u, $services );
+			$type = null === $svc ? self::ip_type( $host ) : '';
+			if ( null !== $svc ) {
+				$item = array( self::service_level( $svc, $mode ), isset( $svc['name'] ) ? (string) $svc['name'] : (string) $svc['id'], $host, (string) $svc['id'] );
+			} elseif ( '' !== $type ) {
+				$item = array( 'yellow', self::IP_LABELS[ $type ], $host, $type );
+			} else {
+				$item = array( 'red', '', $host, '' );
+			}
+			$key = 'h|' . $host . '|' . ( '' !== $item[3] ? $item[3] : 'unknown' );
+			if ( isset( $seen[ $key ] ) ) {
+				continue;
+			}
+			$seen[ $key ] = true;
+			$items[]      = $item;
+		}
+		foreach ( $before_cookies as $c ) {
+			$c = trim( (string) $c );
+			if ( '' === $c ) {
+				continue;
+			}
+			$data = true;
+			if ( self::ignored_cookie( $c ) || isset( $seen[ 'c|' . $c ] ) ) {
+				continue;
+			}
+			$seen[ 'c|' . $c ] = true;
+			$svc   = self::cookie_service( $c, $services );
+			$label = null !== $svc ? ( isset( $svc['name'] ) ? (string) $svc['name'] : (string) $svc['id'] ) : '';
+			$id    = null !== $svc ? (string) $svc['id'] : '';
+			if ( in_array( $c, $baseline, true ) ) {
+				// Already in the admin's browser before the run (an earlier real accept, an earlier check): no verdict.
+				$items[] = array( 'preexisting', $label, $c, $id );
+				continue;
+			}
+			$level = null !== $svc ? self::service_level( $svc, $mode ) : 'yellow';
+			if ( 'advanced' === $level ) {
+				$level = 'consentmode'; // with Consent Mode denied this cookie should not exist
+			}
+			$items[] = array( $level, $label, $c, $id );
+		}
+		$status = $data ? 'green' : 'none';
+		foreach ( $items as $it ) {
+			if ( 'red' === $it[0] ) {
+				$status = 'red';
+				break;
+			}
+			if ( 'yellow' === $it[0] ) {
+				$status = 'yellow';
+			}
+		}
+		return array( 'status' => $status, 'items' => $items );
+	}
+
+	/** Pure: a list of strings from untrusted input (array, or a string with one entry per line), capped. */
+	private static function str_list( $in, $max, $max_len ) {
+		$list = is_array( $in ) ? $in : preg_split( '/[\r\n]+/', (string) $in );
+		$out  = array();
+		foreach ( (array) $list as $v ) {
+			if ( ! is_string( $v ) ) {
+				continue;
+			}
+			$v = trim( $v );
+			if ( '' === $v || strlen( $v ) > $max_len || in_array( $v, $out, true ) ) {
+				continue;
+			}
+			$out[] = $v;
+			if ( count( $out ) >= $max ) {
+				break;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure: the manual additions and exclusions to save in cmp_scan_urls. Only
+	 * http(s) addresses on the site's domain are kept ('/path' is resolved under
+	 * the home URL, subdirectory included); the others are returned in 'rejected'. At most MAX_PAGES each.
+	 */
+	public static function clean_manual_urls( $add, $exclude, $home ) {
+		$base  = '';
+		$hpath = '';
+		if ( 1 === preg_match( '~^(https?://[^/?#]+)(/[^?#]*)?~i', (string) $home, $m ) ) {
+			$base  = $m[1];
+			$hpath = isset( $m[2] ) ? rtrim( $m[2], '/' ) : ''; // subdirectory install: /blog
+		}
+		$res = array( 'add' => array(), 'exclude' => array(), 'rejected' => array() );
+		foreach ( array( 'add' => $add, 'exclude' => $exclude ) as $key => $in ) {
+			$keys = array();
+			foreach ( self::str_list( $in, self::MAX_PAGES * 5, self::MANUAL_MAX_URL ) as $u ) {
+				if ( '' !== $base && 1 === preg_match( '#^/(?!/)#', $u ) ) {
+					// A path is relative to the home path, unless it already starts with it.
+					$u = $base . ( '' !== $hpath && 0 !== strpos( $u . '/', $hpath . '/' ) ? $hpath : '' ) . $u;
+				}
+				if ( 1 !== preg_match( '#^https?://[^\s<>"\']+$#i', $u ) || ! self::is_own_host( $u, $home ) ) {
+					if ( count( $res['rejected'] ) < self::MAX_PAGES ) {
+						$res['rejected'][] = $u;
+					}
+					continue;
+				}
+				$k = self::url_key( $u );
+				if ( isset( $keys[ $k ] ) || count( $res[ $key ] ) >= self::MAX_PAGES ) {
+					continue;
+				}
+				$keys[ $k ]    = true;
+				$res[ $key ][] = (string) preg_replace( '/#.*$/s', '', $u );
+			}
+		}
+		return $res;
+	}
+
+	/**
+	 * Pure: one page of the browser check, from the raw data check.js sends:
+	 * url, result (ok | timeout | nobanner | origin), before { resources, cookies },
+	 * added { resources, cookies } (after "Acceptă tot"), light. Returns null for
+	 * a page off the site. status none (with reason) when it could not be checked.
+	 */
+	public static function check_page( array $raw, array $services, $home, $mode, array $baseline = array() ) {
+		$url = isset( $raw['url'] ) && is_string( $raw['url'] ) ? trim( $raw['url'] ) : '';
+		if ( '' === $url || strlen( $url ) > self::MANUAL_MAX_URL || 1 !== preg_match( '#^https?://#i', $url ) || ! self::is_own_host( $url, $home ) ) {
+			return null;
+		}
+		$result = isset( $raw['result'] ) && in_array( $raw['result'], array( 'ok', 'timeout', 'nobanner', 'origin' ), true ) ? $raw['result'] : 'timeout';
+		$light  = ! empty( $raw['light'] ) || 'light' === $mode;
+		$out    = array( 'url' => $url, 'status' => 'none', 'reason' => $result, 'items' => array(), 'after' => null, 'light' => $light );
+		if ( 'ok' !== $result ) {
+			return $out;
+		}
+		$b    = isset( $raw['before'] ) && is_array( $raw['before'] ) ? $raw['before'] : array();
+		$res  = self::str_list( isset( $b['resources'] ) ? $b['resources'] : array(), self::CHECK_MAX_RESOURCES, self::CHECK_MAX_URL );
+		$cks  = self::str_list( isset( $b['cookies'] ) ? $b['cookies'] : array(), self::CHECK_MAX_COOKIES, 200 );
+		$base = self::str_list( $baseline, self::CHECK_MAX_COOKIES, 200 );
+		$c    = self::classify( $res, $cks, $services, (string) $home, (string) $mode, $base );
+		$out['status'] = $c['status'];
+		$out['reason'] = 'none' === $c['status'] ? 'nodata' : '';
+		$out['items']  = $c['items'];
+		if ( ! $light && isset( $raw['added'] ) && is_array( $raw['added'] ) ) {
+			$a = $raw['added'];
+			$after = self::classify(
+				self::str_list( isset( $a['resources'] ) ? $a['resources'] : array(), self::CHECK_MAX_RESOURCES, self::CHECK_MAX_URL ),
+				self::str_list( isset( $a['cookies'] ) ? $a['cookies'] : array(), self::CHECK_MAX_COOKIES, 200 ),
+				$services,
+				(string) $home,
+				(string) $mode
+			);
+			$out['after'] = $after['items'];
+		}
+		return $out;
+	}
+
+	/* ------------------------------------------------------------------
 	 * WordPress side of the check mode (front end, ?cmp_check=<nonce>).
 	 * ------------------------------------------------------------------ */
 
@@ -982,6 +1255,12 @@ class CMP_Scanner {
 	/** The page list; the sitemap is read only when $with_sitemap (cron). */
 	private static function build_list( $with_sitemap ) {
 		return self::page_list( home_url( '/' ), self::legal_urls(), self::latest_urls(), $with_sitemap ? self::sitemap_urls() : array(), self::manual_urls() );
+	}
+
+	/** The pages of the last (or current) scan run; before any run, the list without the sitemap. */
+	public static function current_list() {
+		$s = self::state();
+		return ! empty( $s['urls'] ) && is_array( $s['urls'] ) ? array_values( $s['urls'] ) : self::build_list( false );
 	}
 
 	/**

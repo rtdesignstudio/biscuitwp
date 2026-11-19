@@ -564,5 +564,36 @@ ok((bannerSrc.match(/postCheck\(msgL\);\n\t\t\t\tendCheck\(\);/) || []).length =
 ok(/window\.addEventListener\('pagehide', endCheck\)/.test(bannerSrc), 'I1/I2: endCheck on pagehide');
 ok(/history\.replaceState\(history\.state, '', stripCheckParam\(location\.href\)\)/.test(bannerSrc), 'M1: token stripped from the URL in check mode');
 
+// B3 Task 5: the pure helpers of assets/js/check.js (admin "Verificare" screen).
+var checkSrc = (function () { try { return require('fs').readFileSync(require('path').join(__dirname, '../../assets/js/check.js'), 'utf8'); } catch (e) { return ''; } })();
+var ckM = checkSrc.match(/\/\/ checkPure:begin\n([\s\S]*?)\/\/ checkPure:end/);
+ok(!!ckM, 'check.js exposes the checkPure block');
+var ck = ckM ? new Function(ckM[1] + '\nreturn { accept: checkAccept, url: checkUrl, clean: checkClean, outcome: checkOutcome, origin: checkOriginOf, names: checkCookieNames, payload: checkPayload };')() : {};
+if (ckM) {
+	var fw = {}, other = {};
+	eq(ck.accept({ origin: 'https://a.md', source: fw, data: { type: 'cmp-check', phase: 'before' } }, fw, 'https://a.md'), true, 'check: same origin, our frame, our type -> accepted');
+	eq(ck.accept({ origin: 'https://evil.md', source: fw, data: { type: 'cmp-check' } }, fw, 'https://a.md'), false, 'check: other origin -> rejected');
+	eq(ck.accept({ origin: 'https://a.md', source: other, data: { type: 'cmp-check' } }, fw, 'https://a.md'), false, 'check: another window -> rejected');
+	eq(ck.accept({ origin: 'https://a.md', source: fw, data: { type: 'x' } }, fw, 'https://a.md'), false, 'check: other message type -> rejected');
+	eq(ck.accept({ origin: 'https://a.md', source: fw, data: null }, fw, 'https://a.md'), false, 'check: no data -> rejected');
+	eq(ck.url('https://a.md/p/', 'N1'), 'https://a.md/p/?cmp_check=N1', 'check: token added');
+	eq(ck.url('https://a.md/p/?x=1#top', 'N 1'), 'https://a.md/p/?x=1&cmp_check=N%201', 'check: token appended to a query, hash dropped');
+	eq(ck.clean(['https://g.com/a?id=1', 'https://g.com/a?id=2', 'https://g.com/b#x', 5, ''], 10, 500), ['https://g.com/a', 'https://g.com/b'], 'check: query/hash stripped, deduped, non-strings dropped');
+	eq(ck.clean(['a', 'b', 'c'], 2, 500).length, 2, 'check: capped');
+	eq(ck.outcome({ before: null }).result, 'timeout', 'check: no message -> timeout (never green)');
+	eq(ck.outcome({ before: { banner: false, resources: [], cookies: [] } }).result, 'nobanner', 'check: banner missing -> nobanner');
+	eq(ck.outcome({ before: { banner: true, light: true, resources: ['x'], cookies: [] } }).light, true, 'check: Light -> before only');
+	var oc = ck.outcome({ before: { banner: true, resources: ['https://g.com/a'], cookies: ['k'] }, after: { added: { resources: ['https://h.com/x?y'], cookies: ['_ga'] } } });
+	eq([oc.result, oc.added.resources, oc.added.cookies], ['ok', ['https://h.com/x'], ['_ga']], 'check: before + after -> ok with additions');
+	eq(ck.outcome({ before: { banner: true, resources: [], cookies: [] }, after: null }).added, null, 'check: after missing -> no additions');
+
+	// Fix round 1: origin of a page (M1), the admin's cookie baseline (I2).
+	eq(ck.origin('HTTPS://Shop.Example.md/a?x'), 'https://shop.example.md', 'check M1: origin of a page, lowercased');
+	eq(ck.origin('https://example.md:8443/'), 'https://example.md:8443', 'check M1: port kept');
+	eq(ck.origin('/relative'), '', 'check M1: no origin for a relative URL');
+	eq(ck.names(' _ga=GA1.1; cmp_consent=x ;_ga=dup; empty; =v'), ['_ga', 'cmp_consent', 'empty'], 'check I2: cookie names of document.cookie, deduped');
+	eq(ck.payload(['_ga'], [{ url: 'u', result: 'timeout' }]), { baseline: ['_ga'], pages: [{ url: 'u', result: 'timeout' }] }, 'check I2: payload carries the baseline and the pages');
+}
+
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

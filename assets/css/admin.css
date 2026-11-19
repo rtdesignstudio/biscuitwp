@@ -21,3 +21,20 @@
 .cmp-admin .cmp-operator-note summary { cursor: pointer; font-weight: 600; }
 .cmp-admin .cmp-operator-note h3 { margin: 14px 0 6px; font-size: 13px; }
 .cmp-admin .cmp-operator-note ul { margin: 0 0 0 18px; list-style: disc; }
+
+.cmp-admin .cmp-check-list { margin: 8px 0 12px 24px; }
+.cmp-admin .cmp-check-table { margin: 8px 0 16px; }
+.cmp-admin .cmp-check-table td { vertical-align: top; }
+.cmp-admin .cmp-check-table ul { margin: 0; }
+.cmp-admin .cmp-check-url { word-break: break-all; width: 26%; }
+.cmp-admin .cmp-check-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-weight: 600; background: #f0f0f1; color: #50575e; }
+.cmp-admin .cmp-check-badge--red { background: #fcf0f1; color: #b32d2e; }
+.cmp-admin .cmp-check-badge--yellow { background: #fcf9e8; color: #8a6d00; }
+.cmp-admin .cmp-check-badge--green { background: #edfaef; color: #00753a; }
+.cmp-admin .cmp-check-item--red { color: #b32d2e; }
+.cmp-admin .cmp-check-item--yellow { color: #8a6d00; }
+.cmp-admin .cmp-check-item--exempt, .cmp-admin .cmp-check-item--necessary, .cmp-admin .cmp-check-item--advanced, .cmp-admin .cmp-check-item--consentmode, .cmp-admin .cmp-check-item--preexisting, .cmp-admin .cmp-check-item--stale { color: #50575e; }
+.cmp-admin .cmp-check-limits { max-width: 1100px; margin: 12px 0; padding: 10px 16px; background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #dba617; border-radius: 4px; }
+.cmp-admin .cmp-check-limits ul { margin: 6px 0 0 18px; list-style: disc; }
+.cmp-admin .cmp-check-fonts { margin: 8px 0; }
+.cmp-admin .cmp-check-status { margin-left: 8px; }

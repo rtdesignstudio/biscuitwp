@@ -364,7 +364,9 @@ class CMP_Services_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 		CMP_Blocker::scan_homepage( true ); // queues every page; the screen shows "Scanare în curs (X/Y)"
-		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG ), admin_url( 'admin.php' ) ) );
+		// The "Verificare" screen posts here too and gets back to itself.
+		$back = isset( $_POST['cmp_back'] ) && 'cmp-check' === $_POST['cmp_back'] ? 'cmp-check' : self::SLUG;
+		wp_safe_redirect( add_query_arg( array( 'page' => $back ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 

@@ -304,3 +304,115 @@ cmp_assert( ! CMP_Scanner::is_rest_uri( '/blog/post/?cmp_check=x', array(), 'wp-
 cmp_assert( ! CMP_Scanner::is_rest_uri( '/?q=wp-json/', array(), 'wp-json' ), 'is_rest_uri: prefix in the query only is not REST' );
 $t4_src = file_get_contents( __DIR__ . '/../includes/modules/class-scanner.php' );
 cmp_assert( false !== strpos( $t4_src, "header( 'Referrer-Policy: same-origin' )" ), 'check_page_setup: Referrer-Policy same-origin (M1)' );
+
+// B3 Task 5: classify (before consent) and the manual addresses.
+$t5_lib = json_decode( file_get_contents( __DIR__ . '/../data/services.json' ), true );
+$t5_svc = CMP_Services::all( $t5_lib['services'], array(), array() );
+$t5_h   = 'https://example.md/';
+$t5_lvl = function ( $r, $value ) {
+	foreach ( $r['items'] as $it ) {
+		if ( $it[2] === $value ) {
+			return $it[0];
+		}
+	}
+	return null;
+};
+$t5 = CMP_Scanner::classify( array( 'https://www.google-analytics.com/g/collect' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 'red' === $t5_lvl( $t5, 'www.google-analytics.com' ), 'classify: GA host before consent -> red' );
+cmp_assert_eq( $t5['items'][0][1], 'Google Analytics', 'classify: the item carries the library name' );
+cmp_assert_eq( $t5['items'][0][3], 'google-analytics', 'classify: the item source is the service id' );
+$t5 = CMP_Scanner::classify( array(), array( '_ga' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 'red' === $t5_lvl( $t5, '_ga' ), 'classify: a _ga cookie without its host -> red' );
+$t5 = CMP_Scanner::classify( array(), array( '_ga_ABC123' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'], 'classify: wildcard library cookie (_ga_*) -> red' );
+$t5 = CMP_Scanner::classify( array( 'https://plausible.io/js/script.js', 'https://example.md/wp-content/themes/t/style.css' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'green' === $t5['status'] && 'exempt' === $t5_lvl( $t5, 'plausible.io' ), 'classify: Plausible (exempt) -> shown separately, green' );
+$t5 = CMP_Scanner::classify( array( 'https://fonts.googleapis.com/css2?family=Inter' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'yellow' === $t5['status'] && 'yellow' === $t5_lvl( $t5, 'fonts.googleapis.com' ), 'classify: fonts.googleapis.com -> yellow' );
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( 'mystery_id' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'yellow' === $t5['status'] && 'yellow' === $t5_lvl( $t5, 'mystery_id' ), 'classify: an unknown cookie -> yellow' );
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( 'wordpress_logged_in_abc', 'wordpress_test_cookie', 'wp-settings-1', 'wp-settings-time-1', 'wp_lang', 'cmp_check_consent', 'wp_consent_marketing' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'green' === $t5['status'] && array() === $t5['items'], 'classify: WordPress, cmp_* and wp_consent_* cookies are ignored' );
+$t5 = CMP_Scanner::classify( array( 'https://www.googletagmanager.com/gtm.js?id=GTM-X' ), array(), $t5_svc, $t5_h, 'advanced' );
+cmp_assert( 'green' === $t5['status'] && 'advanced' === $t5_lvl( $t5, 'www.googletagmanager.com' ), 'classify: Advanced, googletagmanager.com -> shown separately' );
+$t5 = CMP_Scanner::classify( array( 'https://www.googletagmanager.com/gtm.js?id=GTM-X' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'], 'classify: Strict, googletagmanager.com -> red' );
+$t5 = CMP_Scanner::classify( array(), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'none' === $t5['status'] && array() === $t5['items'], 'classify: no data -> none' );
+$t5 = CMP_Scanner::classify( array( 'https://www.google.com/recaptcha/api.js' ), array( '_GRECAPTCHA' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'green' === $t5['status'] && 'necessary' === $t5_lvl( $t5, 'www.google.com' ), 'classify: reCAPTCHA (necessary) by its path, not Google Maps -> separate' );
+$t5 = CMP_Scanner::classify( array( 'https://tracker.unknown-cdn.net/a.js', 'https://cdn.example.md/x.js', 'https://www.example.md/y.css' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 'red' === $t5_lvl( $t5, 'tracker.unknown-cdn.net' ) && 1 === count( $t5['items'] ), 'classify: unknown third-party host -> red; own host and subdomains ignored' );
+$t5 = CMP_Scanner::classify( array( 'https://www.google-analytics.com/a', 'https://www.google-analytics.com/b' ), array( '_ga' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert_eq( count( $t5['items'] ), 2, 'classify: one item per host, plus the cookie' );
+
+// Manual addresses (cmp_scan_urls).
+$t5m = CMP_Scanner::clean_manual_urls( "https://example.md/contact/\nhttps://evil.com/x\n/despre/\njavascript:alert(1)", array( 'https://www.example.md/old/', 'https://other.org/' ), $t5_h );
+cmp_assert_eq( $t5m['add'], array( 'https://example.md/contact/', 'https://example.md/despre/' ), 'manual urls: own addresses kept, a path is resolved on the home host' );
+cmp_assert( in_array( 'https://evil.com/x', $t5m['rejected'], true ) && in_array( 'https://other.org/', $t5m['rejected'], true ), 'manual urls: an external address is rejected' );
+cmp_assert_eq( $t5m['exclude'], array( 'https://www.example.md/old/' ), 'manual urls: external exclusion rejected too' );
+$t5many = array();
+for ( $i = 0; $i < 40; $i++ ) {
+	$t5many[] = "https://example.md/p{$i}/";
+}
+$t5m = CMP_Scanner::clean_manual_urls( $t5many, array( 'https://example.md/p1/', 'https://example.md/p1' ), $t5_h );
+cmp_assert( 20 === count( $t5m['add'] ) && 1 === count( $t5m['exclude'] ), 'manual urls: capped at 20, duplicates dropped' );
+
+// One page of the browser check, from the raw data of check.js.
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/a/', 'result' => 'timeout' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'none' === $t5p['status'] && 'timeout' === $t5p['reason'], 'check_page: no message -> none (could not check), never green' );
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/a/', 'result' => 'nobanner', 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array() ) ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'none' === $t5p['status'] && 'nobanner' === $t5p['reason'], 'check_page: banner missing -> none' );
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://evil.com/', 'result' => 'ok', 'before' => array( 'resources' => array( 'https://example.md/x.js' ) ) ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( null === $t5p, 'check_page: a page off the site is dropped' );
+$t5p = CMP_Scanner::check_page(
+	array(
+		'url'    => 'https://example.md/a/',
+		'result' => 'ok',
+		'before' => array( 'resources' => array( 'https://example.md/x.js', 'https://fonts.gstatic.com/s/a.woff2' ), 'cookies' => array() ),
+		'added'  => array( 'resources' => array( 'https://www.google-analytics.com/g/collect' ), 'cookies' => array( '_ga' ) ),
+	),
+	$t5_svc,
+	$t5_h,
+	'pro'
+);
+cmp_assert( 'yellow' === $t5p['status'] && is_array( $t5p['after'] ) && 2 === count( $t5p['after'] ), 'check_page: before classified, after-consent additions listed' );
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/a/', 'result' => 'ok', 'light' => true, 'before' => array( 'resources' => array( 'https://example.md/x.js' ) ), 'added' => array( 'resources' => array( 'https://www.google-analytics.com/' ) ) ), $t5_svc, $t5_h, 'light' );
+cmp_assert( true === $t5p['light'] && null === $t5p['after'], 'check_page: Light keeps only "before"' );
+
+// B3 Task 5, fix round 1.
+// I1: one host can carry several services (path patterns): no host-only dedupe.
+$t5 = CMP_Scanner::classify( array( 'https://www.google.com/recaptcha/api.js', 'https://www.google.com/maps/embed?pb=x' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 2 === count( $t5['items'] ), 'classify I1: reCAPTCHA (necessary) + Google Maps on www.google.com -> red, both listed' );
+$t5_ga_ex = $t5_svc;
+foreach ( $t5_ga_ex as $i => $s ) {
+	if ( 'google-analytics' === $s['id'] ) {
+		$t5_ga_ex[ $i ]['exempt'] = true;
+	}
+}
+$t5 = CMP_Scanner::classify( array( 'https://www.googletagmanager.com/gtag/js?id=G-1', 'https://www.googletagmanager.com/gtm.js?id=GTM-1' ), array(), $t5_ga_ex, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 2 === count( $t5['items'] ), 'classify I1: exempt GA (gtag/js) does not hide a non-exempt GTM on the same host' );
+$t5 = CMP_Scanner::classify( array( 'https://www.googletagmanager.com/gtag/js?id=G-1', 'https://www.googletagmanager.com/gtm.js?id=GTM-1' ), array(), $t5_ga_ex, $t5_h, 'advanced' );
+cmp_assert( 'green' === $t5['status'] && 2 === count( $t5['items'] ), 'classify I1: Advanced, exempt GA + GTM -> both separate, green' );
+$t5 = CMP_Scanner::classify( array( 'https://www.gstatic.com/recaptcha/r.js', 'https://www.gstatic.com/other/x.js' ), array(), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'red' === $t5['status'] && 'unknown' === ( $t5['items'][1][0] === 'red' && '' === $t5['items'][1][3] ? 'unknown' : '' ), 'classify I1: reCAPTCHA on www.gstatic.com does not hide another gstatic resource' );
+// I2: cookies already in the admin's browser before the run.
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( '_ga' ), $t5_svc, $t5_h, 'pro', array( '_ga', 'other' ) );
+cmp_assert( 'green' === $t5['status'] && 'preexisting' === $t5_lvl( $t5, '_ga' ), 'classify I2: _ga already in the browser (baseline) -> separate, not red' );
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( '_ga' ), $t5_svc, $t5_h, 'pro', array( 'other' ) );
+cmp_assert( 'red' === $t5['status'], 'classify I2: _ga not in the baseline -> red' );
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( 'foo' ), $t5_svc, $t5_h, 'pro', array( 'foo' ) );
+cmp_assert( 'green' === $t5['status'] && 'preexisting' === $t5_lvl( $t5, 'foo' ), 'classify I2: unknown cookie in the baseline -> separate, not yellow' );
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://example.md/a/', 'result' => 'ok', 'before' => array( 'resources' => array( 'https://example.md/x.js' ), 'cookies' => array( '_ga' ) ) ), $t5_svc, $t5_h, 'pro', array( '_ga' ) );
+cmp_assert( 'green' === $t5p['status'], 'check_page I2: the baseline reaches classify' );
+// M3: Advanced, GA cookie before consent (not in the baseline) -> Consent Mode note, separate.
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( '_ga' ), $t5_svc, $t5_h, 'advanced' );
+cmp_assert( 'green' === $t5['status'] && 'consentmode' === $t5_lvl( $t5, '_ga' ), 'classify M3: Advanced, _ga before consent -> consentmode note, separate' );
+$t5 = CMP_Scanner::classify( array( 'https://example.md/x.js' ), array( '_ga' ), $t5_svc, $t5_h, 'advanced', array( '_ga' ) );
+cmp_assert( 'preexisting' === $t5_lvl( $t5, '_ga' ), 'classify M3: Advanced, _ga in the baseline -> preexisting' );
+// M1: another origin than the admin.
+$t5p = CMP_Scanner::check_page( array( 'url' => 'https://shop.example.md/', 'result' => 'origin' ), $t5_svc, $t5_h, 'pro' );
+cmp_assert( 'none' === $t5p['status'] && 'origin' === $t5p['reason'], 'check_page M1: other origin -> none with reason origin' );
+// M2: a path is resolved against the home path (subdirectory install).
+$t5m = CMP_Scanner::clean_manual_urls( "/contact/\n/blog/despre/", '', 'https://ex.md/blog/' );
+cmp_assert_eq( $t5m['add'], array( 'https://ex.md/blog/contact/', 'https://ex.md/blog/despre/' ), 'manual urls M2: /path resolved under the home path' );

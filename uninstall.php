@@ -17,8 +17,8 @@ foreach ( array( 'cmp_services', 'cmp_services_found', 'cmp_services_notice', 'c
 }
 delete_transient( 'cmp_db_schema_retry' );
 
-// B3: the multi-page scan (queue, per-page results, aggregate, state) and its compatibility copy.
-foreach ( array( 'cmp_scan_urls', 'cmp_scan_queue', 'cmp_scan_pages', 'cmp_scan_state', 'cmp_scan_aggregate', 'cmp_scan_lock', 'cmp_scan_saved_at' ) as $cmp_option ) {
+// B3: the multi-page scan (queue, per-page results, aggregate, state), the browser check report and the compatibility copy.
+foreach ( array( 'cmp_scan_urls', 'cmp_scan_queue', 'cmp_scan_pages', 'cmp_scan_state', 'cmp_scan_aggregate', 'cmp_scan_lock', 'cmp_scan_saved_at', 'cmp_check_report' ) as $cmp_option ) {
 	delete_option( $cmp_option );
 }
 delete_transient( 'cmp_tracker_scan' );

@@ -174,7 +174,9 @@ class CMP_Fonts {
 		}
 
 		update_option( self::MAP_KEY, array_merge( self::map(), $map ) );
-		wp_safe_redirect( add_query_arg( array( 'page' => CMP_Admin::SLUG, 'cmp_fonts' => (int) $count ), admin_url( 'admin.php' ) ) );
+		// The "Verificare" screen posts here too and gets back to itself.
+		$back = isset( $_POST['cmp_back'] ) && 'cmp-check' === $_POST['cmp_back'] ? 'cmp-check' : CMP_Admin::SLUG; // phpcs:ignore WordPress.Security.NonceVerification -- checked above
+		wp_safe_redirect( add_query_arg( array( 'page' => $back, 'cmp_fonts' => (int) $count ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 

@@ -26,6 +26,10 @@ class CMP_Admin {
 		add_action( 'admin_notices', array( 'CMP_Services_Page', 'update_notice' ) );
 		add_action( 'admin_notices', array( $this, 'library_notice' ) );
 
+		require_once CMP_PATH . 'includes/admin/class-check-page.php';
+		add_action( 'admin_post_cmp_scan_urls', array( 'CMP_Check_Page', 'save_urls' ) );
+		add_action( 'wp_ajax_cmp_check_save', array( 'CMP_Check_Page', 'ajax_save' ) );
+
 		require_once CMP_PATH . 'includes/admin/class-audit-page.php';
 		add_action( 'admin_post_cmp_export_log', array( 'CMP_Audit_Page', 'export' ) );
 		add_action( 'admin_post_cmp_purge_log', array( 'CMP_Audit_Page', 'purge' ) );
@@ -68,6 +72,7 @@ class CMP_Admin {
 		add_submenu_page( self::SLUG, __( 'Setări', 'consent-manager-pro' ), __( 'Setări', 'consent-manager-pro' ), 'manage_options', self::SLUG, array( 'CMP_Settings_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Categorii', 'consent-manager-pro' ), __( 'Categorii', 'consent-manager-pro' ), 'manage_options', 'cmp-categories', array( 'CMP_Categories_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Servicii', 'consent-manager-pro' ), __( 'Servicii', 'consent-manager-pro' ), 'manage_options', 'cmp-services', array( 'CMP_Services_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Verificare', 'consent-manager-pro' ), __( 'Verificare', 'consent-manager-pro' ), 'manage_options', CMP_Check_Page::SLUG, array( 'CMP_Check_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Registru consimțăminte', 'consent-manager-pro' ), __( 'Registru consimțăminte', 'consent-manager-pro' ), 'manage_options', 'cmp-audit', array( 'CMP_Audit_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Pagini legale', 'consent-manager-pro' ), __( 'Pagini legale', 'consent-manager-pro' ), 'manage_options', 'cmp-legal', array( 'CMP_Legal_Page', 'render' ) );
 	}
@@ -78,6 +83,10 @@ class CMP_Admin {
 		}
 		wp_enqueue_style( 'cmp-admin', CMP_URL . 'assets/css/admin.css', array(), CMP_Plugin::asset_ver( 'assets/css/admin.css' ) );
 		wp_enqueue_script( 'cmp-admin', CMP_URL . 'assets/js/admin.js', array(), CMP_Plugin::asset_ver( 'assets/js/admin.js' ), true );
+		if ( false !== strpos( (string) $hook, CMP_Check_Page::SLUG ) && current_user_can( 'manage_options' ) ) {
+			wp_enqueue_script( 'cmp-check', CMP_URL . 'assets/js/check.js', array(), CMP_Plugin::asset_ver( 'assets/js/check.js' ), true );
+			wp_localize_script( 'cmp-check', 'CMP_CHECK', CMP_Check_Page::script_data() );
+		}
 	}
 
 	/** Manual update check: clear caches, re-check, report via notice on the Plugins screen. */
