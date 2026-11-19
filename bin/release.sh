@@ -23,10 +23,17 @@ if ! grep -q "define( 'CMP_VERSION', '$VERSION' )" "$SLUG.php"; then
 	echo "ERROR: CMP_VERSION constant does not match '$VERSION'."; exit 1
 fi
 
+# 2b. Tests must pass (includes the minified-asset freshness check and size budget).
+if ! php tests/run.php >/tmp/cmp-release-tests.log 2>&1; then
+	tail -20 /tmp/cmp-release-tests.log
+	echo "ERROR: tests failed (run bash bin/build-assets.sh if assets are stale)."; exit 1
+fi
+echo "Tests passed."
+
 # 3. Build a clean zip (runtime files only).
 rm -rf dist && mkdir -p "dist/$SLUG"
 rsync -a --exclude 'docs' --exclude 'tests' --exclude 'bin' --exclude 'dist' \
-	--exclude 'proxy' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
+	--exclude 'proxy' --exclude 'package.json' --exclude 'node_modules' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
 	./ "dist/$SLUG/"
 ( cd dist && zip -qr "$SLUG.zip" "$SLUG" )
 echo "Built dist/$SLUG.zip"

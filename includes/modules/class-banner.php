@@ -72,8 +72,12 @@ class CMP_Banner {
 	public function enqueue() {
 		$cmp_settings = CMP_Consent::get_settings();
 
-		wp_enqueue_style( 'cmp-banner', CMP_URL . 'assets/css/banner.css', array(), CMP_Plugin::asset_ver( 'assets/css/banner.css' ) );
-		wp_enqueue_script( 'cmp-banner', CMP_URL . 'assets/js/banner.js', array(), CMP_Plugin::asset_ver( 'assets/js/banner.js' ), true );
+		// Minified build unless SCRIPT_DEBUG (see bin/build-assets.sh).
+		$debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+		$css   = CMP_Assets::src_or_min( 'assets/css/banner.css', $debug );
+		$js    = CMP_Assets::src_or_min( 'assets/js/banner.js', $debug );
+		wp_enqueue_style( 'cmp-banner', CMP_URL . $css, array(), CMP_Plugin::asset_ver( $css ) );
+		wp_enqueue_script( 'cmp-banner', CMP_URL . $js, array(), CMP_Plugin::asset_ver( $js ), true );
 
 		// Embed services by id (library embeds and custom services, which can
 		// embed too), for the "always loaded" row in the preferences: static, so

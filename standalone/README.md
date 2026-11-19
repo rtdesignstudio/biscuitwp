@@ -293,7 +293,7 @@ cmp_consent={"v":"1","categories":["necessary","statistics"],"decision":"partial
 ### Performance
 - The `defer` attribute on `<script src="cmp.js">` ensures the bundle loads after DOM parsing.
 - Marked tracker scripts (`type="text/plain"`) are not executed by the browser; CMP injects them on consent.
-- The bundle ships unminified (readable source); minification/CDN packaging is deferred to a later phase.
+- Minified builds ship next to the readable source: `cmp.min.js` and `cmp.min.css` (each starts with a `/*! cmp-src-sha256:… */` header). Use them in production. CDN packaging is deferred to a later phase.
 
 ### Browser Support
 Modern browsers (Chrome, Firefox, Safari, Edge) with ES6 support. Requires `localStorage` and `fetch` for full functionality.
@@ -315,6 +315,7 @@ The `cmp.css` file is kept in sync with the WordPress plugin's banner styles via
 ```
 
 This ensures the standalone bundle always matches the plugin's visual design.
+To regenerate the minified files (`cmp.min.js`, `cmp.min.css`, and the plugin's `.min` assets) run `bash bin/build-assets.sh` from the repo root; it calls `build.sh` first.
 It also produces, from `data/services.json`:
 
 - `services.json`, an identical copy of the library;
