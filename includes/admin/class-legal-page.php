@@ -53,7 +53,8 @@ class CMP_Legal_Page {
 	/**
 	 * Pure: the {{#advanced}} flag ('1' or ''). Set when the Advanced
 	 * measurement mode is in effect and Google Analytics or Google Tag Manager
-	 * was ever found on the site ($history: the cmp_services_history list).
+	 * was ever found on the site ($history: the cmp_services_history list), or
+	 * the site was never scanned ($history not an array).
 	 */
 	public static function measurement_vars( array $settings, $history ) {
 		return array( 'advanced' => self::advanced_text( $settings, $history ) ? '1' : '' );
@@ -61,12 +62,18 @@ class CMP_Legal_Page {
 
 	/**
 	 * Pure: do the legal texts get the Advanced variant? Advanced in effect and
-	 * Google Analytics or Google Tag Manager in $history. The one rule behind
-	 * both the {{#advanced}} variable and page_mode().
+	 * Google Analytics or Google Tag Manager in $history. A missing history (not
+	 * an array: never scanned, or the loopback scan keeps failing) is no evidence
+	 * that GA/GTM are absent, so it counts as present (over-disclosure); only an
+	 * explicit list without them means "no GA/GTM". The one rule behind both the
+	 * {{#advanced}} variable and page_mode().
 	 */
 	private static function advanced_text( array $settings, $history ) {
+		if ( ! is_array( $history ) ) {
+			return CMP_Services::measurement_active( $settings );
+		}
 		$seen = array();
-		foreach ( is_array( $history ) ? $history : array() as $id ) {
+		foreach ( $history as $id ) {
 			if ( is_string( $id ) ) {
 				$seen[] = $id;
 			}
@@ -85,10 +92,14 @@ class CMP_Legal_Page {
 		return self::advanced_text( $settings, $history ) ? 'advanced' : 'strict';
 	}
 
-	/** WP: the cumulative list of services found on the site (cmp_services_history). */
+	/**
+	 * WP: the cumulative list of services found on the site (cmp_services_history),
+	 * or false when there is none (never scanned): page_mode() then counts GA/GTM
+	 * as present in Advanced.
+	 */
 	public static function services_history() {
-		$h = get_option( 'cmp_services_history', array() );
-		return is_array( $h ) ? $h : array();
+		$h = get_option( 'cmp_services_history', false );
+		return is_array( $h ) ? $h : false;
 	}
 
 	/**
@@ -130,7 +141,7 @@ class CMP_Legal_Page {
 		$vars = array_merge(
 			$vars,
 			self::settings_vars( CMP_Consent::get_settings() ),
-			self::measurement_vars( CMP_Consent::get_settings(), get_option( 'cmp_services_history', array() ) ) // same rule as page_mode()
+			self::measurement_vars( CMP_Consent::get_settings(), get_option( 'cmp_services_history', false ) ) // same rule as page_mode()
 		);
 		return CMP_Legal::fill_template( CMP_Legal::load_template( $type, $lang ), $vars );
 	}

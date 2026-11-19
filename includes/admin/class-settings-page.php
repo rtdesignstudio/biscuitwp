@@ -154,8 +154,8 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Mod de măsurare', 'consent-manager-pro' ); ?></th>
 						<td data-cmp-measurement data-cmp-measurement-stored="<?php echo esc_attr( $cmp_meas ); ?>">
 							<fieldset>
-								<label><input type="radio" name="cmp[measurement]" value="strict" <?php checked( $cmp_meas, 'strict' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Strict', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'nimic nu se încarcă înainte de acord. Recomandat.', 'consent-manager-pro' ); ?></label><br>
-								<label><input type="radio" name="cmp[measurement]" value="advanced" <?php checked( $cmp_meas, 'advanced' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Advanced', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'Google Analytics și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat” până la acord. Google estimează vizitele celor care refuză.', 'consent-manager-pro' ); ?></label>
+								<label><input type="radio" name="cmp[measurement]" value="strict" <?php checked( $cmp_meas, 'strict' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Strict', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'serviciile blocate nu se încarcă înainte de acord (excepțiile marcate, de ex. unelte de statistică fără cookie-uri, da). Recomandat.', 'consent-manager-pro' ); ?></label><br>
+								<label><input type="radio" name="cmp[measurement]" value="advanced" <?php checked( $cmp_meas, 'advanced' ); ?> <?php disabled( ! $cmp_meas_avail ); ?>> <strong><?php esc_html_e( 'Advanced', 'consent-manager-pro' ); ?></strong> — <?php esc_html_e( 'Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat” până la acord. Google estimează vizitele celor care refuză. Google Ads (AW-), Floodlight (DC-) și Universal Analytics vechi (analytics.js) rămân blocate până la acord.', 'consent-manager-pro' ); ?></label>
 								<p data-cmp-measurement-ack style="margin:6px 0 0 24px">
 									<label><input type="checkbox" name="cmp[measurement_ack]" value="1"> <?php esc_html_e( 'Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE.', 'consent-manager-pro' ); ?></label>
 								</p>
@@ -288,9 +288,9 @@ class CMP_Settings_Page {
 		$meas  = CMP_Sanitizer::measurement( $raw, $old );
 		$clean['measurement'] = $meas['value'];
 		update_option( 'cmp_settings', $clean );
-		$prev = CMP_Sanitizer::measurement( array(), $old );
-		if ( $prev['value'] !== $meas['value'] ) {
-			set_transient( self::MSG_KEY . get_current_user_id(), $meas['value'], 60 );
+		$change = self::measurement_change( $old, $clean, CMP_Legal_Page::services_history() );
+		if ( null !== $change ) {
+			set_transient( self::MSG_KEY . get_current_user_id(), $change, 60 );
 		}
 		delete_transient( 'cmp_tracker_scan' ); // like a Services save: the next scan follows the new settings
 		$args = array( 'page' => CMP_Admin::SLUG, 'updated' => 1 );
@@ -304,6 +304,27 @@ class CMP_Settings_Page {
 	/** Transient prefix (+ user id) for the one-time message after a measurement mode change. */
 	const MSG_KEY = 'cmp_measurement_msg_';
 
+	/**
+	 * Pure: the message to show after a save, from the EFFECTIVE measurement
+	 * mode (measurement_active) before and after, not the stored value: turning
+	 * blocking or Pro back on can re-activate a stored Advanced. Null = no
+	 * change. 'regen' = the legal text variant (page_mode) changed too, so
+	 * regenerating the legal pages actually changes something.
+	 *
+	 * @return array{to: string, regen: bool}|null
+	 */
+	public static function measurement_change( array $old, array $new, $history ) {
+		$before = CMP_Services::measurement_active( $old );
+		$after  = CMP_Services::measurement_active( $new );
+		if ( $before === $after ) {
+			return null;
+		}
+		return array(
+			'to'    => $after ? 'advanced' : 'strict',
+			'regen' => CMP_Legal_Page::page_mode( $old, $history ) !== CMP_Legal_Page::page_mode( $new, $history ),
+		);
+	}
+
 	/** Show, once, what changed after switching between Strict and Advanced. */
 	private static function render_measurement_message() {
 		$key = self::MSG_KEY . get_current_user_id();
@@ -312,16 +333,22 @@ class CMP_Settings_Page {
 			return;
 		}
 		delete_transient( $key );
+		// Array from measurement_change(); a bare string from before the fix means "regenerate".
+		$regen = is_array( $to ) ? ! empty( $to['regen'] ) : true;
+		$to    = is_array( $to ) ? ( isset( $to['to'] ) ? $to['to'] : '' ) : $to;
 		if ( 'advanced' === $to ) {
-			$msg = __( 'Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag Manager ca etichetele să respecte Consent Mode. Regenerează paginile legale.', 'consent-manager-pro' );
+			$msg = __( 'Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag Manager ca etichetele să respecte Consent Mode.', 'consent-manager-pro' );
 		} elseif ( 'strict' === $to ) {
-			$msg = __( 'Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care refuză, deci statisticile vor arăta mai puține vizite. Regenerează paginile legale.', 'consent-manager-pro' );
+			$msg = __( 'Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care refuză, deci statisticile vor arăta mai puține vizite.', 'consent-manager-pro' );
 			if ( CMP_Services::admin_exempt_measurement( CMP_Services::active() ) ) {
 				$msg .= ' ' . __( 'Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii».', 'consent-manager-pro' );
 			}
 		} else {
 			return;
 		}
-		echo '<div class="notice notice-warning"><p>' . esc_html( $msg ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=cmp-legal' ) ) . '">' . esc_html__( 'Pagini legale', 'consent-manager-pro' ) . '</a></p></div>';
+		if ( $regen ) {
+			$msg .= ' ' . __( 'Regenerează paginile legale.', 'consent-manager-pro' );
+		}
+		echo '<div class="notice notice-warning"><p>' . esc_html( $msg ) . ( $regen ? ' <a href="' . esc_url( admin_url( 'admin.php?page=cmp-legal' ) ) . '">' . esc_html__( 'Pagini legale', 'consent-manager-pro' ) . '</a>' : '' ) . '</p></div>';
 	}
 }

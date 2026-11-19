@@ -38,20 +38,35 @@ class CMP_Banner {
 		return $advanced ? CMP_Consent::advanced_defaults( $signals ) : $signals;
 	}
 
-	/** Emit gtag consent default BEFORE any tag manager fires. */
+	/**
+	 * Pure: the Consent Mode default <script>. $advanced adds the data-cmp-default
+	 * marker, by which the blocker's output buffer moves this stub to right after
+	 * <head> (CMP_Blocker::place_consent_default). Strict markup is unmarked.
+	 */
+	public static function consent_default_script( array $signals, $advanced ) {
+		$json = function_exists( 'wp_json_encode' ) ? wp_json_encode( $signals ) : json_encode( $signals );
+		return '<script data-cmp-keep' . ( $advanced ? ' data-cmp-default' : '' ) . ">\n"
+			. "window.dataLayer = window.dataLayer || [];\n"
+			. "function gtag(){dataLayer.push(arguments);}\n"
+			. 'gtag("consent","default",' . $json . ");\n"
+			. "</script>\n";
+	}
+
+	/**
+	 * Emit gtag consent default BEFORE any tag manager fires. In Advanced the
+	 * output buffer then moves it to right after <head> (tags hardcoded before
+	 * wp_head stay live there); this print is the fallback when it cannot.
+	 */
 	public function print_consent_default() {
-		$signals = self::consent_default_payload(
+		$advanced = CMP_Services::advanced_now();
+		$signals  = self::consent_default_payload(
 			CMP_Consent::build_default_signals( CMP_Consent::get_categories() ),
-			CMP_Services::advanced_now()
+			$advanced
 		);
 		if ( null === $signals ) {
 			return;
 		}
-		echo "<script data-cmp-keep>\n";
-		echo "window.dataLayer = window.dataLayer || [];\n";
-		echo "function gtag(){dataLayer.push(arguments);}\n";
-		echo 'gtag("consent","default",' . wp_json_encode( $signals ) . ");\n";
-		echo "</script>\n";
+		echo self::consent_default_script( $signals, $advanced ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed markup plus JSON-encoded signals.
 	}
 
 	public function enqueue() {

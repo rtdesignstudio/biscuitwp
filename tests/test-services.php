@@ -154,7 +154,7 @@ foreach ( $cmp_cl_ids as $cmp_cl ) {
 	cmp_assert( ! empty( $cmp_cl_by[ $cmp_cl ]['hosts'] ) && ! empty( $cmp_cl_by[ $cmp_cl ]['inline'] ), "{$cmp_cl}: hosts and markers" );
 }
 cmp_assert( isset( $cmp_cl_by['matomo'] ) && empty( $cmp_cl_by['matomo']['exempt_default'] ), 'matomo: in library, NOT exempt by default' );
-cmp_assert_eq( array_column( $cmp_cl_by['matomo']['cookies'], 'name' ), array( '_pk_id', '_pk_ses' ), 'matomo: standard cookies listed' );
+cmp_assert_eq( array_column( $cmp_cl_by['matomo']['cookies'], 'name' ), array( '_pk_id', '_pk_ses', '_pk_ref' ), 'matomo: standard cookies listed (_pk_ref added after vendor check, final fix T1)' );
 cmp_assert_eq( $cmp_cl_by['matomo']['hosts'], array( 'matomo.cloud' ), 'matomo: hosts' );
 cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'library with cookieless tools validates' );
 $cmp_cl_all = array_column( CMP_Services::all( $lib, array(), array() ), null, 'id' );

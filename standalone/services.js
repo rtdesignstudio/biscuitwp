@@ -73,6 +73,11 @@ window.CMP_SERVICES = {
       "inline": [],
       "gtm": true,
       "cookies": [],
+      "nocookie_purpose": {
+        "ro": "fără cookie-uri proprii; încarcă etichetele configurate de site",
+        "ru": "без собственных файлов cookie; загружает теги, настроенные сайтом",
+        "en": "no cookies of its own; loads the tags the website configures"
+      },
       "transfer": "US",
       "privacy_url": "https://policies.google.com/privacy"
     },
@@ -755,10 +760,12 @@ window.CMP_SERVICES = {
       "type": "script",
       "category": "statistics",
       "hosts": [
-        "cdn.usefathom.com"
+        "cdn.usefathom.com",
+        "cdn-eu.usefathom.com"
       ],
       "inline": [
-        "cdn.usefathom.com"
+        "cdn.usefathom.com",
+        "cdn-eu.usefathom.com"
       ],
       "gtm": false,
       "exempt_default": true,
@@ -805,9 +812,22 @@ window.CMP_SERVICES = {
             "ru": "Сохраняет состояние текущей сессии.",
             "en": "Keeps the current session state."
           }
+        },
+        {
+          "name": "_pk_ref",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Reține site-ul de pe care a venit vizitatorul.",
+            "ru": "Запоминает сайт, с которого пришёл посетитель.",
+            "en": "Stores the website the visitor came from."
+          }
         }
       ],
-      "transfer": "EU",
+      "transfer": "EU, NZ",
       "privacy_url": "https://matomo.org/matomo-cloud-privacy-policy/"
     }
   ]

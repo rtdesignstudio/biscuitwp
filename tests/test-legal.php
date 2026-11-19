@@ -62,7 +62,7 @@ $t7_lib   = array( $t7_cust, $t7_ga, $t7_rc, $t7_nock, $t7_cust2 );
 $ids = function ( $list ) { return array_map( function ( $s ) { return $s['id']; }, $list ); };
 cmp_assert_eq( $ids( CMP_Legal::table_services( array( 'recaptcha', 'ga' ), $t7_lib ) ), array( 'recaptcha', 'ga', 'custom_1', 'custom_2' ), 'table_services: found in found order, then unfound custom' );
 cmp_assert_eq( $ids( CMP_Legal::table_services( array( 'ga', 'ga', 'custom_2' ), $t7_lib ) ), array( 'ga', 'custom_2', 'custom_1' ), 'table_services: dedupe, found custom not repeated' );
-cmp_assert_eq( $ids( CMP_Legal::table_services( array( 'nock', 'zzz_unknown' ), $t7_lib ) ), array( 'custom_1', 'custom_2' ), 'table_services: no-cookie and unknown ids skipped' );
+cmp_assert_eq( $ids( CMP_Legal::table_services( array( 'nock', 'zzz_unknown' ), $t7_lib ) ), array( 'nock', 'custom_1', 'custom_2' ), 'table_services: unknown ids skipped, found no-cookie service listed (final fix I3)' );
 cmp_assert_eq( $ids( CMP_Legal::table_services( array( 'recaptcha' ), $t7_lib ) )[0], 'recaptcha', 'table_services: necessary service included when found' );
 
 $h = CMP_Legal::cookie_table_html( $t7_cats, array( $t7_ga ), 'ro' );
@@ -333,7 +333,7 @@ if ( method_exists( 'CMP_Legal_Page', 'measurement_vars' ) && method_exists( 'CM
 	cmp_assert_eq( $b2_mv( $b2_adv, array( 'youtube', 'google-analytics' ) ), array( 'advanced' => '1' ), 'advanced var: Advanced with GA in history' );
 	cmp_assert_eq( $b2_mv( $b2_adv, array( 'google-tag-manager' ) ), array( 'advanced' => '1' ), 'advanced var: Advanced with GTM in history' );
 	cmp_assert_eq( $b2_mv( $b2_adv, array( 'youtube', 'meta-pixel' ) ), array( 'advanced' => '' ), 'advanced var: Advanced without GA/GTM in history' );
-	cmp_assert_eq( $b2_mv( $b2_adv, false ), array( 'advanced' => '' ), 'advanced var: no history' );
+	cmp_assert_eq( $b2_mv( $b2_adv, false ), array( 'advanced' => '1' ), 'advanced var: no history counts as GA/GTM present (final fix I4)' );
 	cmp_assert_eq( $b2_mv( $b2_strict, array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Strict' );
 	cmp_assert_eq( $b2_mv( array( 'mode' => 'pro', 'block_scripts' => false, 'measurement' => 'advanced' ), array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Advanced without blocking has no effect' );
 	cmp_assert_eq( $b2_mv( $b2_light, array( 'google-analytics' ) ), array( 'advanced' => '' ), 'advanced var: Light' );

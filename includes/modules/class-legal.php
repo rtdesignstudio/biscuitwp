@@ -109,7 +109,9 @@ class CMP_Legal {
 	/**
 	 * Pure: the services to list in the cookie table: the ones found on the site
 	 * (in found order, any category), then the custom services not found. Each
-	 * once; services without cookies and unknown ids are skipped.
+	 * once; unknown ids are skipped. Services without cookies are listed too:
+	 * cookie_table_html() gives them one row, so a cookieless tool that loads
+	 * without consent (and its transfer country) is still disclosed.
 	 */
 	public static function table_services( array $found_ids, array $services ) {
 		$by_id = array();
@@ -121,7 +123,7 @@ class CMP_Legal {
 		$out  = array();
 		$seen = array();
 		$add  = function ( $s ) use ( &$out, &$seen ) {
-			if ( isset( $seen[ $s['id'] ] ) || empty( $s['cookies'] ) || ! is_array( $s['cookies'] ) ) {
+			if ( isset( $seen[ $s['id'] ] ) || ( isset( $s['cookies'] ) && ! is_array( $s['cookies'] ) ) ) {
 				return;
 			}
 			$seen[ $s['id'] ] = true;
@@ -196,7 +198,24 @@ class CMP_Legal {
 			$slug  = isset( $svc['category'] ) ? $svc['category'] : '';
 			$label = isset( $labels[ $slug ] ) ? $labels[ $slug ] : $slug;
 			$tr    = isset( $svc['transfer'] ) && '' !== (string) $svc['transfer'] ? $svc['transfer'] : $none;
-			foreach ( (array) ( isset( $svc['cookies'] ) ? $svc['cookies'] : array() ) as $ck ) {
+			if ( empty( $svc['cookies'] ) ) {
+				// Cookieless service: one row naming the service itself.
+				if ( isset( $svc['nocookie_purpose'] ) && '' !== self::loc( $svc['nocookie_purpose'], $lang ) ) {
+					$purpose = self::loc( $svc['nocookie_purpose'], $lang );
+				} else {
+					$purpose = CMP_Lang::text( 'statistics' === $slug ? 'tbl_nocookie_stats' : 'tbl_nocookie', $lang );
+				}
+				$rows .= '<tr>'
+					. '<td>' . self::esc( isset( $svc['name'] ) && '' !== (string) $svc['name'] ? $svc['name'] : ( isset( $svc['id'] ) ? $svc['id'] : '' ) ) . '</td>'
+					. '<td>' . self::esc( isset( $svc['provider'] ) ? $svc['provider'] : '' ) . '</td>'
+					. '<td>' . self::esc( $none ) . '</td>'
+					. '<td>' . self::esc( $purpose ) . '</td>'
+					. '<td>' . self::esc( $label ) . '</td>'
+					. '<td>' . self::esc( $tr ) . '</td>'
+					. '</tr>';
+				continue;
+			}
+			foreach ( (array) $svc['cookies'] as $ck ) {
 				$rows .= '<tr>'
 					. '<td>' . self::esc( isset( $ck['name'] ) ? $ck['name'] : '' ) . '</td>'
 					. '<td>' . self::esc( isset( $svc['provider'] ) ? $svc['provider'] : '' ) . '</td>'

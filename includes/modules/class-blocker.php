@@ -268,12 +268,44 @@ class CMP_Blocker {
 		if ( self::blocks_trackers( $s ) ) {
 			$thumb = class_exists( 'CMP_Thumbs' ) ? array( 'CMP_Thumbs', 'url' ) : null;
 			$html  = self::rewrite( $html, self::embed_labels(), null, $thumb ); // services: active() when available, else the library
+			// Advanced leaves GA4/GTM live wherever the theme put them (often before
+			// wp_head), so the Consent Mode default must come first in <head>.
+			if ( CMP_Services::measurement_active( $s ) && class_exists( 'CMP_Banner' ) ) {
+				$signals = CMP_Banner::consent_default_payload( CMP_Consent::build_default_signals( CMP_Consent::get_categories() ), true );
+				$html    = self::place_consent_default( $html, CMP_Banner::consent_default_script( $signals, true ) );
+			}
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$html = CMP_Fonts::rewrite_links( $html, CMP_Fonts::map() );
 			$html = self::strip_hint_links( $html, self::FONT_HOSTS );
 		}
 		return $html;
+	}
+
+	/**
+	 * Pure: $snippet inserted right after the first opening <head …> tag (not
+	 * <header>). Without one, $html comes back unchanged.
+	 */
+	public static function inject_after_head( string $html, string $snippet ): string {
+		if ( ! preg_match( '/<head(?=[\s>\/])[^>]*>/i', $html, $m, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+		$at = $m[0][1] + strlen( $m[0][0] );
+		return substr( $html, 0, $at ) . $snippet . substr( $html, $at );
+	}
+
+	/**
+	 * Pure (Advanced): put the Consent Mode stub first in <head>. The copy
+	 * printed at wp_head (marked data-cmp-default) is removed and $snippet is
+	 * injected right after <head>, so the page has it exactly once. Without a
+	 * <head> tag nothing changes and the wp_head copy stays as the fallback.
+	 */
+	public static function place_consent_default( string $html, string $snippet ): string {
+		if ( ! preg_match( '/<head(?=[\s>\/])[^>]*>/i', $html ) ) {
+			return $html;
+		}
+		$html = (string) preg_replace( '/<script\b[^>]*\sdata-cmp-default(?=[\s=>\/])[^>]*>.*?<\/script>\n?/is', '', $html );
+		return self::inject_after_head( $html, $snippet );
 	}
 
 	/** The services to act on when the caller gives none: the site's active ones (Task 4), else the library. */
@@ -324,18 +356,101 @@ class CMP_Blocker {
 	public static function rewrite( $html, array $labels = array(), ?array $services = null, $thumb = null ) {
 		$thumb    = is_callable( $thumb ) ? $thumb : null;
 		$html     = (string) $html;
-		$services = self::rewritable( null === $services ? self::default_services() : $services );
-		$html     = preg_replace_callback(
+		$all      = null === $services ? self::default_services() : $services;
+		$services = self::rewritable( $all );
+		// Script tags: also the services only the Advanced mode exempts, decided per tag.
+		$scripts = self::blockable( $all );
+		$html    = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
-			function ( $m ) use ( $services ) {
-				return self::rewrite_tag( $m, $services );
+			function ( $m ) use ( $scripts ) {
+				return self::rewrite_tag( $m, $scripts );
 			},
 			$html
 		);
-		$html  = self::rewrite_embeds( (string) $html, $labels, $services, $thumb );
-		$hosts = self::tracker_hosts( $services );
-		$html  = self::strip_tracker_noscript( (string) $html, $hosts );
-		return self::strip_hint_links( (string) $html, $hosts );
+		$html = self::rewrite_embeds( (string) $html, $labels, $services, $thumb );
+		// <noscript> never gets Consent Mode and no-JS visitors cannot consent, so
+		// the GTM noscript iframe is stripped in Advanced too.
+		$html = self::strip_tracker_noscript( (string) $html, self::tracker_hosts( $scripts ) );
+		return self::strip_hint_links( (string) $html, self::tracker_hosts( $services ) );
+	}
+
+	/**
+	 * Pure: the rewritable services plus those exempt only by the Advanced mode
+	 * (mode_exempt, not the admin's own "nu bloca"). For the latter, rewrite_tag()
+	 * decides per tag (measurement_tag_exempt). Same as rewritable() in Strict.
+	 */
+	private static function blockable( array $services ) {
+		return array_values(
+			array_filter(
+				$services,
+				function ( $s ) {
+					if ( ! is_array( $s ) || ( isset( $s['category'] ) && 'necessary' === $s['category'] ) ) {
+						return false;
+					}
+					return empty( $s['exempt'] ) || ( ! empty( $s['mode_exempt'] ) && empty( $s['own_exempt'] ) );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Pure: does Advanced leave this tag live? Only GA4 and the GTM container:
+	 * a gtag.js loader for a G- id, inline gtag whose config calls are all
+	 * literal G- ids, the gtm.js loader for a GTM- id, or the inline GTM
+	 * container snippet. Google Ads / Floodlight (AW-, DC-), mixed configs and
+	 * legacy analytics.js / ga('create') stay blocked as in Strict.
+	 */
+	public static function measurement_tag_exempt( $service_id, $src, $body ) {
+		$src  = trim( html_entity_decode( (string) $src, ENT_QUOTES ) );
+		$body = (string) $body;
+		if ( '' !== $src ) {
+			$host = strtolower( (string) parse_url( $src, PHP_URL_HOST ) );
+			$path = (string) parse_url( $src, PHP_URL_PATH );
+			parse_str( (string) parse_url( $src, PHP_URL_QUERY ), $q );
+			$id = isset( $q['id'] ) && is_string( $q['id'] ) ? $q['id'] : '';
+			if ( ! in_array( $service_id, CMP_Services::MEASUREMENT_IDS, true ) || ( 'googletagmanager.com' !== $host && '.googletagmanager.com' !== substr( $host, -21 ) ) ) {
+				return false;
+			}
+			// Either id: with GA set to "nu bloca" by the admin, gtag.js matches the GTM host rule.
+			return ( 0 === strpos( $path, '/gtag/js' ) && self::is_ga4_id( $id ) )
+				|| ( '/gtm.js' === $path && 1 === preg_match( '/^GTM-[A-Z0-9]+$/i', $id ) );
+		}
+		if ( ! in_array( $service_id, CMP_Services::MEASUREMENT_IDS, true ) || self::foreign_google_tag( $body ) ) {
+			return false;
+		}
+		return (bool) preg_match( '/gtag\s*\(\s*[\'"]config[\'"]\s*,\s*[\'"]G-|gtag\/js\?id=G-|GTM-[A-Z0-9]/i', $body );
+	}
+
+	/** Pure: a GA4 measurement id (G-XXXX). */
+	private static function is_ga4_id( $id ) {
+		return 1 === preg_match( '/^G-[A-Z0-9]+$/i', (string) $id );
+	}
+
+	/**
+	 * Pure: does an inline script carry a Google tag other than GA4/GTM? Legacy
+	 * Universal Analytics (ga('create'), analytics.js), a gtag config call whose
+	 * id is not a literal G- id (AW-, DC-, a variable), or a gtag.js loader URL
+	 * for a non-G- id. Fails closed.
+	 */
+	private static function foreign_google_tag( $body ) {
+		if ( preg_match( '/\bga\s*\(\s*[\'"]create[\'"]|analytics\.js|\/ga\.js/i', $body ) ) {
+			return true;
+		}
+		if ( preg_match_all( '/gtag\s*\(\s*[\'"]config[\'"]\s*,\s*([^,)]*)/i', $body, $m ) ) {
+			foreach ( $m[1] as $arg ) {
+				if ( ! preg_match( '/^\s*([\'"])G-[A-Z0-9]+\1\s*$/i', $arg ) ) {
+					return true;
+				}
+			}
+		}
+		if ( preg_match_all( '/gtag\/js\?id=([^&\'"\s]*)/i', $body, $m ) ) {
+			foreach ( $m[1] as $id ) {
+				if ( ! self::is_ga4_id( $id ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** Placeholder copy in the current page language. */
@@ -697,6 +812,24 @@ class CMP_Blocker {
 		if ( null === $svc ) {
 			// An invalid data-cmp-category fails closed: blocked as marketing.
 			return '' === $cat ? self::blocked_script( 'marketing', null, $src, $body, $attrs ) : $m[0];
+		}
+		// Advanced: only GA4 / the GTM container stay live, decided per tag.
+		if ( ! empty( $svc['mode_exempt'] ) && empty( $svc['own_exempt'] ) && self::measurement_tag_exempt( $svc['id'], $src, $body ) ) {
+			// A non-Google tracker in the same tag (GA4 config + fbq, GTM + Clarity)
+			// keeps it blocked, under that other service (N1).
+			$others = array_values(
+				array_filter(
+					$services,
+					function ( $s ) {
+						return ! isset( $s['id'] ) || ! in_array( (string) $s['id'], CMP_Services::MEASUREMENT_IDS, true );
+					}
+				)
+			);
+			$other = self::script_for( $src, $body, $others );
+			if ( null === $other ) {
+				return $m[0];
+			}
+			return self::blocked_script( $other['category'], $other['id'], $src, $body, $attrs );
 		}
 		return self::blocked_script( $svc['category'], $svc['id'], $src, $body, $attrs );
 	}
