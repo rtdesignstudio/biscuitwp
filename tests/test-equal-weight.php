@@ -27,3 +27,7 @@ foreach ( $cmp_sources as $cmp_name => $cmp_src ) {
 
 $cmp_css = (string) file_get_contents( __DIR__ . '/../assets/css/banner.css' );
 cmp_assert( (bool) preg_match( '/\.cmp__choices\s*\{[^}]*grid-template-columns:\s*1fr 1fr/', $cmp_css ), 'CSS: decision group has two equal columns' );
+// B5 Task 5 (phone band): no rule styles one decision apart from the other, and
+// on phones both buttons share one rule (two equal columns, 44 px high).
+cmp_assert( 0 === preg_match( '/data-cmp-action="?(reject|accept|save)/', $cmp_css ), 'CSS: no rule targets reject / accept / save alone' );
+cmp_assert( (bool) preg_match( '/@media \(max-width: 575px\)\s*\{[^@]*\.cmp__choices \.cmp__btn\s*\{[^}]*flex:\s*1 1 0;[^}]*min-height:\s*44px/', $cmp_css ), 'CSS: on phones both decisions share one rule (flex: 1 1 0, min-height: 44px)' );

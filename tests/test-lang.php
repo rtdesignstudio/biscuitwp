@@ -9,7 +9,7 @@ cmp_assert_eq( CMP_Lang::normalize( 'zz' ), 'ro', 'unknown -> ro' );
 cmp_assert_eq( CMP_Lang::normalize( '' ), 'ro', 'empty -> ro' );
 
 // packs completeness: every text key + category present in all langs
-$keys = array( 'title','intro','prefs','reject','accept','prefs_title','save','badge','locked','back','reopen','light_intro','privacy','embed_text','embed_load','consent_id' );
+$keys = array( 'title','intro','prefs','reject','accept','prefs_title','save','badge','locked','back','reopen','light_intro','privacy','embed_text','embed_load','consent_id','details' );
 $slugs = array( 'necessary','statistics','marketing' );
 foreach ( array( 'ro','ru','en' ) as $l ) {
 	foreach ( $keys as $k ) {

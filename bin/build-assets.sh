@@ -30,6 +30,9 @@ min_js() { # src dest
 min_css() { # src dest
 	local tmp; tmp="$(mktemp)"
 	$CSSO --input "$1" --output "$tmp"
+	# csso turns CSS escapes (e.g. "\203A") into raw UTF-8: escape them back, so
+	# the file is pure ASCII whatever charset it is served with.
+	perl -CSD -pi -e 's/([^\x00-\x7F])/sprintf("\\%X ", ord($1))/ge' "$tmp"
 	{ printf '/*! cmp-src-sha256:%s */\n' "$(sha "$1")"; cat "$tmp"; } > "$2"
 	rm -f "$tmp"
 	echo "Built $2"

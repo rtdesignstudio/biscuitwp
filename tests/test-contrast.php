@@ -106,7 +106,7 @@ foreach ( array( '.cmp .cmp__link', '.cmp-light .cmp-light__link', '.cmp-embed__
 cmp_assert( 0 === preg_match( '/:hover[^{]*\{[^}]*text-decoration:\s*none/', $ct_css ), 'links: no :hover rule removes the underline' );
 
 // Focus: a visible :focus-visible ring on every interactive element.
-$ct_focus = array( '.cmp__btn', '.cmp__link', '.cmp__collapse', '.cmp__toggle input', '.cmp-reopen', '.cmp-light__btn', '.cmp-light__link', '.cmp-embed__btn', '.cmp-embed__always', '.cmp-embed__link', '.cmp__always-item' );
+$ct_focus = array( '.cmp__btn', '.cmp__link', '.cmp__collapse', '.cmp__toggle input', '.cmp-reopen', '.cmp-light__btn', '.cmp-light__link', '.cmp-embed__btn', '.cmp-embed__always', '.cmp-embed__link', '.cmp__always-item', '.cmp__more' );
 foreach ( $ct_focus as $ct_sel ) {
 	$ok = (bool) preg_match( '/' . preg_quote( $ct_sel, '/' ) . '(?: \+ [.a-z_-]+)?:focus-visible[^{]*\{[^}]*outline:\s*[23]px solid/', $ct_css )
 		|| (bool) preg_match( '/' . preg_quote( $ct_sel, '/' ) . ':focus-visible(?: \+ [.a-z_-]+)?[^{]*\{[^}]*outline:\s*[23]px solid/', $ct_css );
@@ -134,7 +134,7 @@ function cmp_ct_pad( $d, $axis ) {
 	$h = isset( $p[1] ) ? cmp_ct_px( $p[1] ) : $v;
 	return 'y' === $axis ? 2 * $v : 2 * $h;
 }
-$ct_targets = array( '.cmp__btn', '.cmp__collapse', '.cmp__toggle', '.cmp-reopen', '.cmp-light__btn', '.cmp-embed__btn', '.cmp-embed__always', '.cmp-embed__link', '.cmp__always-item' );
+$ct_targets = array( '.cmp__btn', '.cmp__collapse', '.cmp__toggle', '.cmp-reopen', '.cmp-light__btn', '.cmp-embed__btn', '.cmp-embed__always', '.cmp-embed__link', '.cmp__always-item', '.cmp__more' );
 foreach ( $ct_targets as $ct_sel ) {
 	$d      = cmp_ct_decls( $ct_css, $ct_sel );
 	$border = ( isset( $d['border'] ) && preg_match( '/^1px/', $d['border'] ) ) ? 2.0 : 0.0;

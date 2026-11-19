@@ -736,12 +736,17 @@ ok(!!kB.m && !!kC.m && kB.m[1].replace(/^\t+/gm, '') === kC.m[1].replace(/^\t+/g
 	var shSrc = fnBody(src, 'show');
 	var mkShow = function (hidden, block, open) {
 		var log = [], bn = { hidden: hidden };
-		var docStub = { body: { classList: { add: function () {} } }, addEventListener: function () { log.push('listen'); } };
-		var f = new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', shSrc + '\nreturn show;')(
+		// B5 T5: the scroll lock measures the scrollbar first (--cmp-sbw), the band pads the page scroll.
+		var docStub = { body: { classList: { add: function (c) { log.push('class:' + c); } } }, addEventListener: function () { log.push('listen'); },
+			documentElement: { clientWidth: 985, style: { setProperty: function (k, v) { log.push('set:' + k + '=' + v); } } } };
+		var winStub = { innerWidth: 1000, addEventListener: function (ev) { log.push('win:' + ev); } };
+		var f = new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', shSrc + '\nreturn show;')(
 			bn, function () { return block; }, function () { return open; },
-			function (on) { log.push('trap:' + on); }, function () { log.push('focus'); }, function () {}, docStub, function () {});
+			function (on) { log.push('trap:' + on); }, function () { log.push('focus'); }, function () {}, docStub, function () {}, winStub, function () { log.push('pad'); },
+			function () { return { overflowY: 'visible', scrollbarGutter: 'auto', paddingRight: '0px' }; }, function () { return '15px'; });
 		f();
-		return { log: log.filter(function (x) { return x !== 'listen'; }), hidden: bn.hidden };
+		var BAND = /^(class:|set:|win:|pad$)/;
+		return { log: log.filter(function (x) { return x !== 'listen' && !BAND.test(x); }), band: log.filter(function (x) { return BAND.test(x); }), hidden: bn.hidden };
 	};
 	if (shSrc) {
 		eq(mkShow(true, true, false).log, ['trap:true'], 'B5 T3 ' + n + ': show() from hidden, blocking -> trapFocus');
@@ -760,6 +765,123 @@ ok(/function renderPro\(cfg\) \{[\s\S]*?root\.setAttribute\('lang', cfg\.lang\)/
 ok(/function renderLight\(cfg\) \{[\s\S]*?root\.setAttribute\('lang', cfg\.lang\)[\s\S]*?function renderReopen/.test(cmpSrc), 'B5 T3 cmp.js: .cmp-light gets lang from the chosen language');
 eq(cmp.normalizeConfig({ lang: 'ru' }).lang, 'ru', 'B5 T3 cmp.js: chosen language ru');
 eq(cmp.normalizeConfig({ lang: 'xx' }).lang, 'ro', 'B5 T3 cmp.js: unknown language -> ro');
+
+// B5 Task 5: the two-row band on phones (banner.js and cmp.js).
+function bandFns(src) {
+	var m = src.match(/\/\/ band:begin\n([\s\S]*?)\/\/ band:end/);
+	return { m: m, toggleDetails: m ? new Function(m[1] + '\nreturn toggleDetails;')() : null };
+}
+function bandFn(m, name) {
+	try { return m ? new Function(m[1] + '\nreturn ' + name + ';')() : null; } catch (e) { return null; }
+}
+function stubEl() {
+	var cls = [], attrs = {};
+	return {
+		classList: { add: function (c) { if (cls.indexOf(c) === -1) { cls.push(c); } }, remove: function (c) { cls = cls.filter(function (x) { return x !== c; }); }, contains: function (c) { return cls.indexOf(c) !== -1; } },
+		setAttribute: function (k, v) { attrs[k] = String(v); }, getAttribute: function (k) { return Object.prototype.hasOwnProperty.call(attrs, k) ? attrs[k] : null; }
+	};
+}
+var bB = bandFns(bannerSrc), bC = bandFns(cmpSrc);
+ok(!!bB.m, 'B5 T5: banner.js has the band block');
+ok(!!bC.m, 'B5 T5: cmp.js has the band block');
+ok(!!bB.m && !!bC.m && bB.m[1].replace(/^\t+/gm, '') === bC.m[1].replace(/^\t+/gm, ''), 'B5 T5: band blocks identical in banner.js and cmp.js');
+[['banner.js', bB, bannerSrc], ['cmp.js', bC, cmpSrc]].forEach(function (t) {
+	var n = t[0], td = t[1].toggleDetails, src = t[2];
+	if (td) {
+		var main = stubEl(), btn = stubEl();
+		btn.setAttribute('aria-expanded', 'false');
+		eq(td(main, btn), true, 'B5 T5 ' + n + ': toggleDetails flips collapsed -> expanded');
+		eq([main.classList.contains('is-expanded'), btn.getAttribute('aria-expanded')], [true, 'true'], 'B5 T5 ' + n + ': expanded -> .is-expanded + aria-expanded="true"');
+		eq(td(main, btn), false, 'B5 T5 ' + n + ': a second press collapses');
+		eq([main.classList.contains('is-expanded'), btn.getAttribute('aria-expanded')], [false, 'false'], 'B5 T5 ' + n + ': collapsed -> no .is-expanded, aria-expanded="false"');
+		eq(td(main, btn, true), true, 'B5 T5 ' + n + ': toggleDetails(true) expands');
+		eq(td(main, btn, true), true, 'B5 T5 ' + n + ': toggleDetails(true) twice stays expanded');
+		eq([td(main, btn, false), main.classList.contains('is-expanded'), btn.getAttribute('aria-expanded')], [false, false, 'false'], 'B5 T5 ' + n + ': toggleDetails(false) collapses');
+		eq(td(main, null, true), true, 'B5 T5 ' + n + ': no button -> still toggles the band');
+	} else { ok(false, 'B5 T5 ' + n + ': toggleDetails defined'); }
+	ok(/else if \(action === 'details'\) \{ details\(\); scrollPad\(\); \}/.test(src), 'B5 T5 ' + n + ': the Details button toggles the band and re-pads the page');
+	ok(/toggleDetails\(main, main\.querySelector\('\[data-cmp-action="details"\]'\), on\)/.test(fnBody(src, 'details')), 'B5 T5 ' + n + ': details() drives toggleDetails on the main view');
+	var hd = fnBody(src, 'hide');
+	ok(/details\(false\)/.test(hd), 'B5 T5 ' + n + ': hide() collapses the band');
+	ok(/document\.documentElement\.style\.removeProperty\('--cmp-sbw'\)/.test(hd), 'B5 T5 ' + n + ': hide() drops --cmp-sbw');
+	ok(/window\.removeEventListener\('resize', scrollPad\)/.test(hd) && /scrollPad\(\)/.test(hd), 'B5 T5 ' + n + ': hide() stops the resize listener and clears the scroll padding');
+	// show(): scrollbar width measured before the lock, only when it appears.
+	var shSrc = fnBody(src, 'show');
+	var run = function (hidden, block, bodyPad) {
+		var log = [], bn = { hidden: hidden };
+		var docStub = { body: { classList: { add: function (c) { log.push('class:' + c); } } }, addEventListener: function () {},
+			documentElement: { clientWidth: 985, style: { setProperty: function (k, v) { log.push('set:' + k + '=' + v); } } } };
+		var winStub = { innerWidth: 1000, addEventListener: function (ev, fn) { log.push('win:' + ev + ':' + (fn === padFn)); } };
+		var padFn = function () { log.push('pad'); };
+		var lp = bandFn(t[1].m, 'lockPad') || function () { return '?'; };
+		new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', shSrc + '\nreturn show;')(
+			bn, function () { return block; }, function () { return false; }, function () {}, function () {}, function () {}, docStub, function () {}, winStub, padFn,
+			function (el) { return el === docStub.body ? { paddingRight: bodyPad || '0px' } : { overflowY: 'visible', scrollbarGutter: 'auto' }; }, lp)();
+		return log;
+	};
+	if (shSrc) {
+		eq(run(true, true), ['set:--cmp-sbw=15px', 'class:cmp-has-banner', 'win:resize:true', 'pad'], 'B5 T5 ' + n + ': show() blocking -> --cmp-sbw (innerWidth - clientWidth) before the lock, then resize + scroll padding');
+		eq(run(false, true), ['class:cmp-has-banner', 'win:resize:true', 'pad'], 'B5 T5 ' + n + ': show() already visible -> no re-measure (the scrollbar is already gone)');
+		eq(run(true, false), ['win:resize:true', 'pad'], 'B5 T5 ' + n + ': show() without overlay -> no lock, no --cmp-sbw');
+		eq(run(true, true, '20px')[0], 'set:--cmp-sbw=35px', 'B5 T5 fix ' + n + ': show() keeps the theme\'s body padding-right and adds the scrollbar width');
+	} else { ok(false, 'B5 T5 ' + n + ': show() found'); }
+	// scrollPad(): only without overlay; bottom band -> padding-bottom, top band -> padding-top.
+	// Fix round 1: only the side it set is touched, and the theme's own value comes back.
+	var spSrc = fnBody(src, 'scrollPad');
+	var mkPad = function (theme) {
+		var st = { hidden: false, block: false, rect: { top: 600.4, bottom: 800 } };
+		var style = { scrollPaddingTop: theme.top || '', scrollPaddingBottom: theme.bottom || '' };
+		var f = new Function('banner', 'blocking', 'modal', 'document', 'window', 'var padSide = \'\', padPrev = \'\';\n' + spSrc + '\nreturn scrollPad;')(
+			st, function () { return st.block; }, function () { return { getBoundingClientRect: function () { return st.rect; } }; },
+			{ documentElement: { style: style } }, { innerHeight: 800 });
+		return { st: st, run: function () { f(); return [style.scrollPaddingTop, style.scrollPaddingBottom]; } };
+	};
+	if (spSrc) {
+		var P = mkPad({ top: '80px' });
+		eq(P.run(), ['80px', '200px'], 'B5 T5 ' + n + ': no overlay, bottom band -> scroll-padding-bottom = its height; theme top kept');
+		P.st.rect = { top: 500, bottom: 800 };
+		eq(P.run(), ['80px', '300px'], 'B5 T5 fix ' + n + ': resize / Details -> re-measured');
+		P.st.hidden = true;
+		eq(P.run(), ['80px', ''], 'B5 T5 fix ' + n + ': hidden -> only the side it set is cleared, theme top survives');
+		var P2 = mkPad({ bottom: '10px' });
+		eq(P2.run(), ['', '200px'], 'B5 T5 fix ' + n + ': theme bottom overridden while the band shows');
+		eq(P2.run(), ['', '200px'], 'B5 T5 fix ' + n + ': repeated calls do not stack');
+		P2.st.hidden = true;
+		eq(P2.run(), ['', '10px'], 'B5 T5 fix ' + n + ': hidden -> the theme\'s own bottom value comes back');
+		var P3 = mkPad({ top: '80px', bottom: '5px' });
+		P3.st.block = true;
+		eq([P3.run(), P3.run()], [['80px', '5px'], ['80px', '5px']], 'B5 T5 fix ' + n + ': blocking banner never touches scroll-padding');
+		var P4 = mkPad({});
+		P4.st.rect = { top: 0, bottom: 150.2 };
+		eq(P4.run(), ['151px', ''], 'B5 T5 ' + n + ': no overlay, top band -> scroll-padding-top');
+	} else { ok(false, 'B5 T5 ' + n + ': scrollPad() found'); }
+	ok(/scrollPad\(\);?\s*\}$/.test(fnBody(src, 'openPrefs')) && /scrollPad\(\);?\s*\}$/.test(fnBody(src, 'goBack')), 'B5 T5 fix ' + n + ': Settings and Back re-measure the scroll padding');
+	// lockPad (band block): the body's padding under the lock.
+	var lpF = bandFn(t[1].m, 'lockPad');
+	if (lpF) {
+		eq(lpF(1000, 985, 'visible', 'auto', '0px'), '15px', 'B5 T5 fix ' + n + ': classic scrollbar -> its width');
+		eq(lpF(1000, 985, 'auto', '', '12.5px'), '27.5px', 'B5 T5 fix ' + n + ': theme padding-right kept, scrollbar added');
+		eq(lpF(1000, 1000, 'visible', 'auto', '0px'), '0px', 'B5 T5 fix ' + n + ': overlay scrollbars -> no shift');
+		eq(lpF(1000, 985, 'scroll', 'auto', '4px'), '4px', 'B5 T5 fix ' + n + ': html overflow-y: scroll keeps the bar -> only the theme padding');
+		eq(lpF(1000, 985, 'visible', 'stable', '0px'), '0px', 'B5 T5 fix ' + n + ': scrollbar-gutter: stable -> no shift');
+		eq(lpF(1000, 985, 'visible', undefined, 'x'), '15px', 'B5 T5 fix ' + n + ': unknown gutter / padding -> safe');
+	} else { ok(false, 'B5 T5 fix ' + n + ': lockPad defined'); }
+	// focusable(): a visibility:hidden control (the clamped policy link) is not in the trap.
+	var fcSrc = fnBody(src, 'focusable');
+	if (fcSrc) {
+		var mkEl = function (name, vis) { return { name: name, vis: vis, getClientRects: function () { return [1]; } }; };
+		var els = [mkEl('link', 'hidden'), mkEl('details', 'visible'), mkEl('accept', 'visible')];
+		var scope = { querySelectorAll: function () { return els; } };
+		var fc = new Function('banner', 'modal', 'getComputedStyle', fcSrc + '\nreturn focusable;')(
+			{ querySelector: function () { return scope; } }, function () { return { classList: { contains: function () { return false; } } }; },
+			function (el) { return { visibility: el.vis }; });
+		eq(fc().map(function (e) { return e.name; }), ['details', 'accept'], 'B5 T5 fix ' + n + ': focusable() skips visibility:hidden controls (Tab wrap stays inside)');
+	} else { ok(false, 'B5 T5 fix ' + n + ': focusable() found'); }
+});
+// Standalone texts and markup.
+eq(['ro', 'ru', 'en'].map(function (l) { return cmp.CMP_DEFAULTS.i18n[l].texts.details; }), ['Detalii', 'Подробнее', 'Details'], 'B5 T5 cmp.js: details text in ro / ru / en');
+eq(cmp.normalizeConfig({ lang: 'ru' }).texts.details, 'Подробнее', 'B5 T5 cmp.js: normalizeConfig carries the details text');
+ok(/'<p id="cmp-intro" class="cmp__text">' \+ escapeHtml\(cfg\.texts\.intro\) \+ privacyLink \+ '<\/p>' \+\n\t*'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' \+ escapeHtml\(cfg\.texts\.details\) \+ '<\/button>' \+/.test(cmpSrc), 'B5 T5 cmp.js: Details button right after the intro');
 
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

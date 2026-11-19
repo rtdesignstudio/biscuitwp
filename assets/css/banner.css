@@ -77,7 +77,9 @@
 }
 
 /* Scroll lock while the banner is open (class added by JS). */
-body.cmp-has-banner { overflow: hidden; }
+/* --cmp-sbw = the body's own padding-right plus the scrollbar width (when the
+   lock removes one), set by JS when the lock starts: nothing shifts (CLS). */
+body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 
 .cmp__modal {
 	background: var(--cmp-bg);
@@ -194,6 +196,25 @@ body.cmp-has-banner { overflow: hidden; }
 .cmp__collapse:hover { background: var(--cmp-hover); }
 .cmp__collapse:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 .cmp__collapse svg { width: 18px; height: 18px; }
+
+/* "Details" (phones only, shown in the media query below): expands the intro. */
+.cmp__more {
+	display: none;
+	align-items: center;
+	min-height: 24px;
+	min-width: 24px;
+	margin: 0 0 14px;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	font-weight: 600;
+	color: var(--cmp-primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	cursor: pointer;
+}
+.cmp__more:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; border-radius: 2px; }
 
 /* ---- Design presets (override custom properties; neutral = base above) ---- */
 .cmp--egov {
@@ -318,12 +339,25 @@ body.cmp-has-banner { overflow: hidden; }
 	   specificity (0,2,0) as the corner rules but later in source, so it wins. */
 	.cmp .cmp__modal { margin-inline: auto; }
 	.cmp__title { font-size: 19px; }
-	.cmp__actions { flex-direction: column; align-items: stretch; }
-	.cmp__actions .cmp__btn { width: 100%; text-align: center; }
+	/* Two-row band: [intro, 2 lines] Details / [Reject] [Accept]  Settings ›.
+	   The title stays the dialog's name (aria-labelledby), hidden visually. */
+	.cmp__main .cmp__title { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+	.cmp__main .cmp__text { margin: 0 0 4px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; -webkit-hyphens: auto; hyphens: auto; }
+	/* Collapsed, the policy link is cut off: out of the tab order until Details. */
+	.cmp__main:not(.is-expanded) .cmp__link { visibility: hidden; }
+	.cmp__main.is-expanded .cmp__text { display: block; -webkit-line-clamp: none; line-clamp: none; max-height: 50vh; overflow-y: auto; }
+	.cmp__more { display: inline-flex; }
+	/* Reject / Accept first, together and equal; Settings as text on the right,
+	   onto its own row when it does not fit (long RU texts, zoom). */
+	.cmp__actions { flex-wrap: wrap; gap: 8px 12px; }
 	.cmp__spacer { display: none; }
+	.cmp__actions .cmp__choices { order: -1; flex: 1 1 auto; }
+	.cmp__choices { display: flex; gap: 8px; }
+	.cmp__choices .cmp__btn { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 10px 12px; -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
+	.cmp__actions [data-cmp-action="prefs"] { margin-left: auto; min-height: 24px; padding: 2px 4px; border-color: transparent; background: none; text-decoration: underline; text-underline-offset: 2px; }
+	.cmp__actions [data-cmp-action="prefs"]::after { content: " \203A"; content: " \203A" / ""; }
 	.cmp__prefs-actions { flex-direction: column; }
-	.cmp__prefs-actions .cmp__btn { width: 100%; }
-	.cmp__choices { width: 100%; }
+	.cmp__prefs-actions .cmp__choices { width: 100%; }
 }
 
 /* ---- Light mode: small floating card, bottom-left corner (non-blocking) ---- */

@@ -417,14 +417,37 @@
 	// On the policy pages the banner has no overlay (.cmp--no-overlay): no scroll
 	// lock and no focus trap, so the visitor can read the policy before deciding.
 	function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
+	// The Details button on the main view (phones).
+	function details(on) { var main = banner.querySelector('[data-cmp-view="main"]'); return main ? toggleDetails(main, main.querySelector('[data-cmp-action="details"]'), on) : false; }
+	// No overlay (policy pages): the page's own scrolling (anchors, focus) stops
+	// short of the band: scroll-padding on <html> = the part of the screen it
+	// covers, at the bottom (or the top). Restored when hidden; never when blocking.
+	var padSide = '', padPrev = '';
+	function scrollPad() {
+		var s = document.documentElement.style, m = modal(), r;
+		// Only the side it set, back to the page's own value; the rest is never touched.
+		if (padSide) { s[padSide] = padPrev; padSide = ''; }
+		if (!m || banner.hidden || blocking()) { return; }
+		r = m.getBoundingClientRect();
+		padSide = r.top + r.bottom < window.innerHeight ? 'scrollPaddingTop' : 'scrollPaddingBottom';
+		padPrev = s[padSide];
+		s[padSide] = Math.ceil(padSide === 'scrollPaddingTop' ? r.bottom : window.innerHeight - r.top) + 'px';
+	}
 	function show() {
 		if (!banner) { return; }
 		var wasHidden = banner.hidden;
 		banner.hidden = false;
-		if (blocking()) { document.body.classList.add('cmp-has-banner'); }
+		if (blocking()) {
+			// The scrollbar goes away under the lock: the body takes its width as extra
+			// padding, so the page does not shift (CLS). Measured only when it appears.
+			if (wasHidden) { var de = document.documentElement, cs = getComputedStyle(de); de.style.setProperty('--cmp-sbw', lockPad(window.innerWidth, de.clientWidth, cs.overflowY, cs.scrollbarGutter, getComputedStyle(document.body).paddingRight)); }
+			document.body.classList.add('cmp-has-banner');
+		}
 		hideReopen();
 		// Escape works on every banner; the Tab trap only where it blocks the page.
 		document.addEventListener('keydown', onKeydown);
+		window.addEventListener('resize', scrollPad);
+		scrollPad();
 		// Trap (and remember the focus to restore) only when it appears; already on
 		// screen (openPreferences while it shows), just focus the view.
 		if (blocking() && wasHidden) { trapFocus(true); } else if (!wasHidden || prefsOpen()) { focusDialog(); }
@@ -433,7 +456,11 @@
 		if (!banner) { return; }
 		banner.hidden = true;
 		document.body.classList.remove('cmp-has-banner');
+		document.documentElement.style.removeProperty('--cmp-sbw');
+		window.removeEventListener('resize', scrollPad);
+		details(false);
 		closePrefs();
+		scrollPad();
 		document.removeEventListener('keydown', onKeydown);
 		trapFocus(false);
 		if (readCookie()) { showReopen(); }
@@ -447,7 +474,8 @@
 		var m = modal();
 		var scope = banner.querySelector(m && m.classList.contains('is-prefs-open') ? '[data-cmp-view="prefs"]' : '[data-cmp-view="main"]') || banner;
 		return Array.prototype.filter.call(scope.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])'), function (el) {
-			return el.getClientRects().length > 0;
+			// Not a control hidden by visibility (the policy link in the clamped phone band).
+			return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 		});
 	}
 	// focusTrap:begin
@@ -472,6 +500,25 @@
 		return prefsOpen && !backHidden && (blocking || focusInside === true) ? 'back' : null;
 	}
 	// keys:end
+	// band:begin
+	// Pure DOM helper: "Details" on phones expands / collapses the intro in the
+	// band (.is-expanded on the main view, aria-expanded on the button). No
+	// `expanded` = flip. Returns the new state. Tested in standalone/tests/run.js
+	// (source-extracted, identical in both files).
+	function toggleDetails(main, btn, expanded) {
+		var on = typeof expanded === 'boolean' ? expanded : !main.classList.contains('is-expanded');
+		if (on) { main.classList.add('is-expanded'); } else { main.classList.remove('is-expanded'); }
+		if (btn) { btn.setAttribute('aria-expanded', on ? 'true' : 'false'); }
+		return on;
+	}
+	// Pure: the body's padding-right under the scroll lock = its own, plus the
+	// scrollbar width when the lock removes a classic scrollbar (no shift, CLS).
+	// None with overlay scrollbars, html overflow-y: scroll or a stable gutter.
+	function lockPad(innerW, clientW, overflowY, gutter, padRight) {
+		var gap = overflowY === 'scroll' || /stable/.test(gutter || '') ? 0 : Math.max(innerW - clientW, 0);
+		return ((parseFloat(padRight) || 0) + gap) + 'px';
+	}
+	// band:end
 	function prefsOpen() { var m = modal(); return !!m && m.classList.contains('is-prefs-open'); }
 	function onKeydown(e) {
 		if (e.key === 'Escape' || e.key === 'Esc') {
@@ -505,6 +552,8 @@
 		closePrefs();
 		var p = banner.querySelector('[data-cmp-view="main"] [data-cmp-action="prefs"]');
 		if (p) { p.focus(); }
+		// Its height changed: the policy page's scroll padding follows.
+		scrollPad();
 	}
 
 	function modal() { return banner ? banner.querySelector('[data-cmp-modal]') : null; }
@@ -538,6 +587,8 @@
 		// Screen readers start on the panel title (no-op while the banner is hidden: show() focuses it).
 		var t = banner.querySelector('[data-cmp-prefs-title]');
 		if (t) { t.focus(); }
+		// Its height changed: the policy page's scroll padding follows.
+		scrollPad();
 	}
 
 	// --- Re-consent (B4) ---
@@ -611,6 +662,7 @@
 			else if (action === 'reject') { save(requiredSlugs(), 'rejected_all'); rejectServices(); }
 			else if (action === 'prefs') { openPrefs(); }
 			else if (action === 'back') { goBack(); }
+			else if (action === 'details') { details(); scrollPad(); }
 			else if (action === 'save') {
 				var sel = selectedFromUI();
 				var all = D.categories.length;

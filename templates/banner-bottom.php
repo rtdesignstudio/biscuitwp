@@ -36,6 +36,8 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 					<a class="cmp__link" href="<?php echo esc_url( $cmp_privacy_url ); ?>"><?php echo esc_html( CMP_Lang::text( 'privacy' ) ); ?></a>.
 				<?php endif; ?>
 			</p>
+			<?php // Phones (<= 575 px): the intro is clamped to 2 lines; "Details" shows it all, in the band. ?>
+			<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><?php echo esc_html( CMP_Lang::text( 'details' ) ); ?></button>
 			<div class="cmp__actions">
 				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?></button>
 				<span class="cmp__spacer" aria-hidden="true"></span>
