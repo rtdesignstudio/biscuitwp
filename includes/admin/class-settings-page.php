@@ -92,13 +92,13 @@ class CMP_Settings_Page {
 		}
 		$s = CMP_Consent::get_settings();
 		$positions = array(
-			'top-left'      => 'Stânga sus',
-			'top-center'    => 'Sus centru',
-			'top-right'     => 'Dreapta sus',
-			'middle-center' => 'Mijloc centru',
-			'bottom-left'   => 'Stânga jos',
-			'bottom-center' => 'Jos centru',
-			'bottom-right'  => 'Dreapta jos',
+			'top-left'      => __( 'Stânga sus', 'consent-manager-pro' ),
+			'top-center'    => __( 'Sus centru', 'consent-manager-pro' ),
+			'top-right'     => __( 'Dreapta sus', 'consent-manager-pro' ),
+			'middle-center' => __( 'Mijloc centru', 'consent-manager-pro' ),
+			'bottom-left'   => __( 'Stânga jos', 'consent-manager-pro' ),
+			'bottom-center' => __( 'Jos centru', 'consent-manager-pro' ),
+			'bottom-right'  => __( 'Dreapta jos', 'consent-manager-pro' ),
 		);
 		// Map legacy stored values onto the new set for the selected() display.
 		$cmp_pos = isset( $s['position'] ) ? $s['position'] : 'middle-center';

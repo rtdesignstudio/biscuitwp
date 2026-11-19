@@ -1,0 +1,1457 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Consent Manager Pro\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
+"pro\n"
+"POT-Creation-Date: 2026-11-19T12:25:48+00:00\n"
+"PO-Revision-Date: 2026-11-19 12:25+0000\n"
+"Last-Translator: Consent Manager Pro\n"
+"Language-Team: en_US\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: consent-manager-pro\n"
+
+#. Plugin Name of the plugin
+#: consent-manager-pro.php
+msgid "Consent Manager Pro"
+msgstr "Consent Manager Pro"
+
+#. Plugin URI of the plugin
+#: consent-manager-pro.php
+msgid "https://github.com/rtgit003/consent-manager-pro"
+msgstr "https://github.com/rtgit003/consent-manager-pro"
+
+#. Description of the plugin
+#: consent-manager-pro.php
+msgid "Displays a GDPR-compliant cookie consent banner, generates the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent audit log. Quick to configure, multilingual-ready."
+msgstr "Displays a GDPR-compliant cookie consent banner, generates the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent audit log. Quick to configure, multilingual-ready."
+
+#. Author of the plugin
+#: consent-manager-pro.php
+msgid "RT.md"
+msgstr "RT.md"
+
+#. Author URI of the plugin
+#: consent-manager-pro.php
+msgid "https://rt.md"
+msgstr "https://rt.md"
+
+#: includes/admin/class-admin.php:55
+#: includes/admin/class-admin.php:72
+#: includes/admin/class-check-page.php:363
+msgid "Setări"
+msgstr "Settings"
+
+#: includes/admin/class-admin.php:57
+msgid "Caută actualizări"
+msgstr "Check for updates"
+
+#: includes/admin/class-admin.php:64
+#: includes/admin/class-admin.php:65
+msgid "Consent Manager"
+msgstr "Consent Manager"
+
+#: includes/admin/class-admin.php:73
+#: includes/admin/class-audit-list-table.php:16
+msgid "Categorii"
+msgstr "Categories"
+
+#: includes/admin/class-admin.php:74
+#: includes/admin/class-audit-list-table.php:17
+msgid "Servicii"
+msgstr "Services"
+
+#: includes/admin/class-admin.php:75
+msgid "Verificare"
+msgstr "Check"
+
+#: includes/admin/class-admin.php:76
+#: includes/admin/class-audit-page.php:43
+msgid "Registru consimțăminte"
+msgstr "Consent register"
+
+#: includes/admin/class-admin.php:77
+#: includes/admin/class-settings-page.php:260
+#: includes/admin/class-settings-page.php:386
+msgid "Pagini legale"
+msgstr "Legal pages"
+
+#: includes/admin/class-admin.php:95
+#: includes/admin/class-audit-page.php:106
+#: includes/admin/class-audit-page.php:127
+#: includes/admin/class-categories-page.php:112
+#: includes/admin/class-check-page.php:486
+#: includes/admin/class-legal-page.php:406
+#: includes/admin/class-legal-page.php:459
+#: includes/admin/class-legal-page.php:469
+#: includes/admin/class-services-page.php:284
+#: includes/admin/class-services-page.php:364
+#: includes/admin/class-services-page.php:375
+#: includes/admin/class-services-page.php:395
+#: includes/admin/class-settings-page.php:314
+#: includes/modules/class-fonts.php:127
+#: includes/modules/class-fonts.php:186
+msgid "Acțiune neautorizată."
+msgstr "Unauthorized action."
+
+#: includes/admin/class-admin.php:121
+msgid "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul)."
+msgstr "The services library (data/services.json) is missing or corrupted. Only Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo and Google Maps are blocked until you fix it (reinstall the plugin)."
+
+#: includes/admin/class-admin.php:122
+msgid "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect."
+msgstr "The services library (data/services.json) has errors. Some services may not be blocked correctly."
+
+#: includes/admin/class-admin.php:123
+#: includes/admin/class-services-page.php:426
+msgid "Consent Manager Pro:"
+msgstr "Consent Manager Pro:"
+
+#: includes/admin/class-admin.php:125
+msgid "Detalii în „Servicii”"
+msgstr "Details in “Services”"
+
+#. translators: %s — current plugin version
+#: includes/admin/class-admin.php:136
+#, php-format
+msgid "Consent Manager Pro: ai ultima versiune (%s)."
+msgstr "Consent Manager Pro: you have the latest version (%s)."
+
+#. translators: %s — new version number
+#: includes/admin/class-admin.php:142
+#, php-format
+msgid "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" din lista de mai jos."
+msgstr "Consent Manager Pro: version %s is available — use “Update now” in the list below."
+
+#: includes/admin/class-audit-list-table.php:13
+msgid "Dată"
+msgstr "Date"
+
+#: includes/admin/class-audit-list-table.php:14
+#: includes/admin/class-audit-page.php:81
+msgid "ID consimțământ"
+msgstr "Consent ID"
+
+#: includes/admin/class-audit-list-table.php:15
+msgid "Decizie"
+msgstr "Decision"
+
+#: includes/admin/class-audit-list-table.php:18
+msgid "Limbă"
+msgstr "Language"
+
+#: includes/admin/class-audit-list-table.php:19
+msgid "Versiune"
+msgstr "Version"
+
+#: includes/admin/class-audit-list-table.php:20
+msgid "URL"
+msgstr "URL"
+
+#: includes/admin/class-audit-page.php:16
+msgid "Acceptat tot"
+msgstr "Accepted all"
+
+#: includes/admin/class-audit-page.php:17
+msgid "Doar necesare"
+msgstr "Necessary only"
+
+#: includes/admin/class-audit-page.php:18
+msgid "Parțial"
+msgstr "Partial"
+
+#: includes/admin/class-audit-page.php:19
+msgid "Retras"
+msgstr "Withdrawn"
+
+#: includes/admin/class-audit-page.php:20
+msgid "Serviciu permis („Încarcă mereu”)"
+msgstr "Service allowed (“Always load”)"
+
+#: includes/admin/class-audit-page.php:21
+msgid "Serviciu retras"
+msgstr "Service withdrawn"
+
+#: includes/admin/class-audit-page.php:22
+msgid "Prin butonul site-ului"
+msgstr "Via the site’s button"
+
+#. translators: 1: accepted, 2: rejected, 3: partial
+#: includes/admin/class-audit-page.php:48
+#, php-format
+msgid "Acceptat tot: %1$d · Doar necesare: %2$d · Parțial: %3$d"
+msgstr "Accepted all: %1$d · Necessary only: %2$d · Partial: %3$d"
+
+#. translators: %d — retention in months
+#: includes/admin/class-audit-page.php:63
+#, php-format
+msgid "Retenție: %d luni (înregistrările mai vechi sunt șterse automat)."
+msgstr "Retention: %d months (older records are deleted automatically)."
+
+#: includes/admin/class-audit-page.php:72
+msgid "Toate deciziile"
+msgstr "All decisions"
+
+#: includes/admin/class-audit-page.php:82
+msgid "Filtrează"
+msgstr "Filter"
+
+#: includes/admin/class-audit-page.php:83
+msgid "Vizitatorul își vede ID-ul în „Setări cookie”, sub preferințe. Caută după el ca să găsești istoricul alegerilor lui."
+msgstr "Visitors see their ID in “Cookie settings”, below the preferences. Search by it to find the history of their choices."
+
+#: includes/admin/class-audit-page.php:92
+msgid "Export CSV"
+msgstr "Export CSV"
+
+#: includes/admin/class-audit-page.php:93
+msgid "Export JSON"
+msgstr "Export JSON"
+
+#: includes/admin/class-audit-page.php:95
+msgid "Ștergi definitiv tot registrul?"
+msgstr "Permanently delete the entire register?"
+
+#: includes/admin/class-audit-page.php:98
+msgid "Golește registrul"
+msgstr "Clear the register"
+
+#: includes/admin/class-categories-page.php:20
+msgid "Consent Manager — Categorii"
+msgstr "Consent Manager — Categories"
+
+#: includes/admin/class-categories-page.php:22
+msgid "Categorii salvate."
+msgstr "Categories saved."
+
+#: includes/admin/class-categories-page.php:32
+msgid "+ Adaugă categorie"
+msgstr "+ Add category"
+
+#: includes/admin/class-categories-page.php:33
+msgid "Salvează categoriile"
+msgstr "Save categories"
+
+#: includes/admin/class-categories-page.php:53
+#: includes/admin/class-services-page.php:98
+msgid "Categorie"
+msgstr "Category"
+
+#: includes/admin/class-categories-page.php:54
+#: includes/admin/class-services-page.php:90
+msgid "Șterge"
+msgstr "Delete"
+
+#: includes/admin/class-categories-page.php:57
+msgid "Etichetă"
+msgstr "Label"
+
+#: includes/admin/class-categories-page.php:59
+msgid "Slug"
+msgstr "Slug"
+
+#: includes/admin/class-categories-page.php:63
+msgid "Descriere"
+msgstr "Description"
+
+#: includes/admin/class-categories-page.php:67
+msgid "Obligatorie (mereu activă)"
+msgstr "Required (always on)"
+
+#: includes/admin/class-categories-page.php:70
+msgid "Google Consent Mode signals"
+msgstr "Google Consent Mode signals"
+
+#: includes/admin/class-categories-page.php:76
+msgid "Cookies"
+msgstr "Cookies"
+
+#: includes/admin/class-categories-page.php:79
+#: includes/admin/class-services-page.php:96
+#: includes/admin/class-services-page.php:114
+msgid "Nume"
+msgstr "Name"
+
+#: includes/admin/class-categories-page.php:80
+msgid "Furnizor"
+msgstr "Provider"
+
+#: includes/admin/class-categories-page.php:81
+#: includes/admin/class-services-page.php:115
+msgid "Durată"
+msgstr "Duration"
+
+#: includes/admin/class-categories-page.php:82
+#: includes/admin/class-services-page.php:116
+msgid "Scop"
+msgstr "Purpose"
+
+#: includes/admin/class-categories-page.php:91
+#: includes/admin/class-services-page.php:130
+msgid "+ Adaugă cookie"
+msgstr "+ Add cookie"
+
+#: includes/admin/class-check-page.php:39
+#: includes/admin/class-services-page.php:32
+msgid "blocat până la acord"
+msgstr "blocked until consent"
+
+#: includes/admin/class-check-page.php:41
+msgid "blocat permanent (modul Light)"
+msgstr "permanently blocked (Light mode)"
+
+#: includes/admin/class-check-page.php:43
+#: includes/admin/class-services-page.php:27
+msgid "neblocat (necesar)"
+msgstr "not blocked (necessary)"
+
+#: includes/admin/class-check-page.php:45
+#: includes/admin/class-check-page.php:174
+msgid "excepție, se încarcă fără acord"
+msgstr "exception, loads without consent"
+
+#: includes/admin/class-check-page.php:47
+#: includes/admin/class-check-page.php:176
+msgid "Advanced: se încarcă cu Consent Mode „refuzat”"
+msgstr "Advanced: loads with Consent Mode set to “denied”"
+
+#: includes/admin/class-check-page.php:49
+msgid "neblocat (blocarea scripturilor e oprită)"
+msgstr "not blocked (script blocking is off)"
+
+#: includes/admin/class-check-page.php:51
+msgid "neblocat"
+msgstr "not blocked"
+
+#. translators: %s: plugin name
+#: includes/admin/class-check-page.php:75
+#, php-format
+msgid "plugin: %s"
+msgstr "plugin: %s"
+
+#. translators: %s: theme name
+#: includes/admin/class-check-page.php:79
+#, php-format
+msgid "temă: %s"
+msgstr "theme: %s"
+
+#: includes/admin/class-check-page.php:81
+msgid "WordPress"
+msgstr "WordPress"
+
+#: includes/admin/class-check-page.php:83
+msgid "fișier de pe site (mu-plugins, uploads sau alt folder din afara pluginurilor și temelor)"
+msgstr "file on the site (mu-plugins, uploads or another folder outside plugins and themes)"
+
+#. translators: %s: host
+#: includes/admin/class-check-page.php:86
+#, php-format
+msgid "extern: %s"
+msgstr "external: %s"
+
+#: includes/admin/class-check-page.php:88
+msgid "cod în pagină (temă, plugin sau conținut)"
+msgstr "inline code (theme, plugin or content)"
+
+#: includes/admin/class-check-page.php:119
+#: includes/admin/class-settings-page.php:290
+msgid "Google Fonts"
+msgstr "Google Fonts"
+
+#: includes/admin/class-check-page.php:120
+msgid "Adobe Fonts"
+msgstr "Adobe Fonts"
+
+#: includes/admin/class-check-page.php:121
+msgid "Font Awesome"
+msgstr "Font Awesome"
+
+#: includes/admin/class-check-page.php:122
+msgid "CDN"
+msgstr "CDN"
+
+#: includes/admin/class-check-page.php:123
+msgid "Gravatar"
+msgstr "Gravatar"
+
+#: includes/admin/class-check-page.php:124
+msgid "emoji WordPress"
+msgstr "WordPress emoji"
+
+#: includes/admin/class-check-page.php:130
+msgid "roșu"
+msgstr "red"
+
+#: includes/admin/class-check-page.php:131
+msgid "galben"
+msgstr "yellow"
+
+#: includes/admin/class-check-page.php:132
+msgid "verde"
+msgstr "green"
+
+#: includes/admin/class-check-page.php:134
+msgid "nu s-a putut verifica"
+msgstr "could not be checked"
+
+#: includes/admin/class-check-page.php:139
+msgid "nu s-a putut verifica (bannerul lipsește pe pagină)"
+msgstr "could not be checked (the banner is missing on the page)"
+
+#: includes/admin/class-check-page.php:142
+msgid "nu s-a putut verifica (altă origine decât adminul: subdomeniu, www sau http/https)"
+msgstr "could not be checked (different origin than the admin: subdomain, www or http/https)"
+
+#: includes/admin/class-check-page.php:145
+msgid "nu s-a putut verifica (pagina nu a trimis date)"
+msgstr "could not be checked (the page sent no data)"
+
+#: includes/admin/class-check-page.php:147
+msgid "nu s-a putut verifica (pagina nu a răspuns în 20 s sau nu permite încărcarea într-un cadru)"
+msgstr "could not be checked (the page did not respond within 20 s or does not allow loading in a frame)"
+
+#. translators: %s: cookie name
+#: includes/admin/class-check-page.php:160
+#, php-format
+msgid "cookie: %s"
+msgstr "cookie: %s"
+
+#. translators: %s: host
+#: includes/admin/class-check-page.php:164
+#, php-format
+msgid "domeniu terț necunoscut: %s"
+msgstr "unknown third-party domain: %s"
+
+#. translators: %s: cookie name
+#: includes/admin/class-check-page.php:166
+#, php-format
+msgid "cookie necunoscut, verifică sursa: %s"
+msgstr "unknown cookie, check its source: %s"
+
+#: includes/admin/class-check-page.php:172
+msgid "încărcat înainte de acord"
+msgstr "loaded before consent"
+
+#: includes/admin/class-check-page.php:173
+msgid "trimite IP-ul vizitatorului"
+msgstr "sends the visitor’s IP address"
+
+#: includes/admin/class-check-page.php:175
+msgid "necesar"
+msgstr "necessary"
+
+#: includes/admin/class-check-page.php:177
+msgid "cookie pus înainte de acord: verifică Consent Mode"
+msgstr "cookie set before consent: check Consent Mode"
+
+#: includes/admin/class-check-page.php:178
+msgid "era deja în browserul tău înainte de verificare"
+msgstr "was already in your browser before the check"
+
+#. translators: %s: where the script comes from
+#: includes/admin/class-check-page.php:188
+#, php-format
+msgid "sursa: %s"
+msgstr "source: %s"
+
+#: includes/admin/class-check-page.php:236
+msgid "Consent Manager — Verificare"
+msgstr "Consent Manager — Check"
+
+#: includes/admin/class-check-page.php:238
+msgid "Lista de pagini a fost salvată. Scanarea pornește din nou."
+msgstr "The page list was saved. Scanning starts again."
+
+#. translators: %d: number of addresses
+#: includes/admin/class-check-page.php:241
+msgid "Am respins o adresă: doar paginile de pe domeniul site-ului pot fi verificate."
+msgid_plural "Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate."
+msgstr[0] "One address was rejected: only pages on the site’s domain can be checked."
+msgstr[1] "%d addresses were rejected: only pages on the site’s domain can be checked."
+
+#. translators: %d — count
+#: includes/admin/class-check-page.php:244
+#: includes/admin/class-settings-page.php:292
+#, php-format
+msgid "Localizate %d fonturi."
+msgstr "Localized %d fonts."
+
+#: includes/admin/class-check-page.php:247
+msgid "Verificarea în browser s-a încheiat. Raportul e mai jos."
+msgstr "The browser check is complete. The report is below."
+
+#: includes/admin/class-check-page.php:250
+msgid "Pagini verificate"
+msgstr "Checked pages"
+
+#. translators: %d: max pages
+#: includes/admin/class-check-page.php:251
+#, php-format
+msgid "Cel mult %d pagini de pe domeniul site-ului: pagina principală, paginile legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul."
+msgstr "Up to %d pages on the site’s domain: the homepage, the legal pages, the latest published page of each type, your addresses and the sitemap."
+
+#: includes/admin/class-check-page.php:263
+msgid "Adaugă pagini (una pe rând)"
+msgstr "Add pages (one per line)"
+
+#: includes/admin/class-check-page.php:265
+msgid "Exclude pagini (una pe rând)"
+msgstr "Exclude pages (one per line)"
+
+#: includes/admin/class-check-page.php:268
+msgid "Doar adrese de pe domeniul site-ului (cu sau fără www, plus subdomeniile). Poți scrie și doar calea, de exemplu /contact/."
+msgstr "Only addresses on the site’s domain (with or without www, plus subdomains). You can also enter just the path, for example /contact/."
+
+#: includes/admin/class-check-page.php:269
+msgid "Salvează lista"
+msgstr "Save list"
+
+#: includes/admin/class-check-page.php:273
+msgid "Scanarea pe server"
+msgstr "Server scan"
+
+#. translators: 1: number of pages, 2: time span like "12 minute"
+#: includes/admin/class-check-page.php:278
+#: includes/admin/class-services-page.php:212
+#, php-format
+msgid "%1$d pagină, acum %2$s"
+msgid_plural "%1$d pagini, acum %2$s"
+msgstr[0] "%1$d page, %2$s ago"
+msgstr[1] "%1$d pages, %2$s ago"
+
+#: includes/admin/class-check-page.php:280
+#: includes/admin/class-services-page.php:217
+msgid "Rescanează"
+msgstr "Rescan"
+
+#: includes/admin/class-check-page.php:287
+msgid "Serverul citește HTML-ul paginilor, ca un vizitator fără cookie-uri. Vede ce e în pagină, nu ce adaugă JavaScript-ul ulterior."
+msgstr "The server reads the pages’ HTML, like a visitor without cookies. It sees what is in the page, not what JavaScript adds later."
+
+#: includes/admin/class-check-page.php:289
+#: includes/admin/class-services-page.php:220
+msgid "Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu."
+msgstr "Scanning the site’s pages in the background. Reload this page later."
+
+#: includes/admin/class-check-page.php:289
+msgid "Nicio pagină scanată încă. Apasă „Rescanează”."
+msgstr "No pages scanned yet. Click “Rescan”."
+
+#: includes/admin/class-check-page.php:293
+#: includes/admin/class-check-page.php:409
+#: includes/admin/class-legal-page.php:345
+msgid "Pagina"
+msgstr "Page"
+
+#: includes/admin/class-check-page.php:294
+msgid "Servicii și sursa lor"
+msgstr "Services and their source"
+
+#: includes/admin/class-check-page.php:295
+msgid "Resurse care trimit IP-ul"
+msgstr "Resources that send the IP address"
+
+#. translators: %s: HTTP code or "error"
+#: includes/admin/class-check-page.php:303
+#, php-format
+msgid "nu s-a putut citi (%s)"
+msgstr "could not be read (%s)"
+
+#: includes/admin/class-check-page.php:305
+msgid "ultima citire a eșuat; se arată rezultatul anterior"
+msgstr "the last read failed; showing the previous result"
+
+#: includes/admin/class-check-page.php:313
+msgid "niciun serviciu"
+msgstr "no services"
+
+#: includes/admin/class-check-page.php:330
+msgid "niciuna"
+msgstr "none"
+
+#: includes/admin/class-check-page.php:353
+msgid "Google Fonts trimite IP-ul vizitatorului la Google. Fonturile se pot servi de pe site, adunate din toate paginile scanate."
+msgstr "Google Fonts sends the visitor’s IP address to Google. The fonts can be served from your site, collected from all scanned pages."
+
+#: includes/admin/class-check-page.php:359
+msgid "Localizează"
+msgstr "Localize"
+
+#: includes/admin/class-check-page.php:362
+msgid "Pornește întâi „Localizare Google Fonts” în Setări (doar în modul Pro), apoi revino aici."
+msgstr "First turn on “Localize Google Fonts” in Settings (Pro mode only), then come back here."
+
+#: includes/admin/class-check-page.php:367
+msgid "Adobe Fonts, Font Awesome și CDN-urile (jsDelivr, unpkg, cdnjs) trimit și ele IP-ul vizitatorului la un terț. Le poți găzdui pe site ca să nu mai fie nevoie de ele."
+msgstr "Adobe Fonts, Font Awesome and CDNs (jsDelivr, unpkg, cdnjs) also send the visitor’s IP address to a third party. You can host these files on your site so they are no longer needed."
+
+#: includes/admin/class-check-page.php:369
+msgid "Verificare în browser"
+msgstr "Browser check"
+
+#: includes/admin/class-check-page.php:371
+msgid "Modul Light nu cere acord: verificarea măsoară doar ce se încarcă înainte de acord."
+msgstr "Light mode does not ask for consent: the check only measures what loads before consent."
+
+#: includes/admin/class-check-page.php:373
+msgid "Blocarea scripturilor e oprită: serviciile se încarcă fără acord"
+msgstr "Script blocking is off: services load without consent"
+
+#: includes/admin/class-check-page.php:375
+msgid "Încarcă pe rând, invizibil, paginile de mai sus și notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă tot” simulat."
+msgstr "Loads the pages above one at a time, invisibly, and records what loads before consent and what is added after a simulated “Accept all”."
+
+#: includes/admin/class-check-page.php:377
+msgid "Limitele verificării"
+msgstr "Limits of the check"
+
+#: includes/admin/class-check-page.php:379
+msgid "Rulează în browserul tău, ca administrator logat. Pluginurile care schimbă pagina pentru utilizatorii logați pot da alt rezultat decât pentru vizitatori."
+msgstr "It runs in your browser, as a logged-in administrator. Plugins that change the page for logged-in users may give a different result than for visitors."
+
+#: includes/admin/class-check-page.php:380
+msgid "Paginile care nu permit încărcarea într-un cadru (X-Frame-Options sau CSP frame-ancestors) nu pot fi verificate: rândul lor apare „nu s-a putut verifica”, nu verde."
+msgstr "Pages that do not allow loading in a frame (X-Frame-Options or CSP frame-ancestors) cannot be checked: their row shows “could not be checked”, not green."
+
+#: includes/admin/class-check-page.php:381
+msgid "Cookie-urile puse de terți pe domeniile lor nu pot fi citite; se văd doar domeniile contactate."
+msgstr "Cookies set by third parties on their own domains cannot be read; only the contacted domains are visible."
+
+#: includes/admin/class-check-page.php:382
+msgid "Cookie-urile care erau deja în browserul tău înainte de verificare (de la un acord real sau de la o verificare anterioară) sunt arătate separat și nu schimbă rezultatul: pentru ele contează domeniile contactate. Pentru o verificare completă a cookie-urilor, folosește o fereastră privată în care te autentifici."
+msgstr "Cookies that were already in your browser before the check (from a real consent or an earlier check) are shown separately and do not change the result: for them, the contacted domains are what counts. For a full cookie check, use a private window and log in there."
+
+#: includes/admin/class-check-page.php:383
+msgid "Se pot verifica doar paginile cu aceeași origine ca adminul (același www și http/https). Paginile de pe subdomenii apar „nu s-a putut verifica”."
+msgstr "Only pages with the same origin as the admin (same www and http/https) can be checked. Pages on subdomains show “could not be checked”."
+
+#: includes/admin/class-check-page.php:384
+msgid "Ce apare doar după interacțiune (clic, scroll) nu e prins."
+msgstr "Anything that appears only after interaction (click, scroll) is not caught."
+
+#: includes/admin/class-check-page.php:386
+msgid "„Acceptă tot” se apasă în browserul tău. Acordul tău real nu se schimbă, dar cookie-urile puse de servicii (de exemplu _ga) rămân în browser după verificare, chiar dacă alegerea ta e „refuz”."
+msgstr "“Accept all” is clicked in your browser. Your real consent does not change, but cookies set by services (for example _ga) stay in your browser after the check, even if your choice is “reject”."
+
+#: includes/admin/class-check-page.php:387
+msgid "După acord, fiecare pagină verificată poate apărea ca o vizită în statisticile tale (Google Analytics și altele)."
+msgstr "After consent, each checked page may show up as a visit in your analytics (Google Analytics and others)."
+
+#: includes/admin/class-check-page.php:392
+msgid "Verifică în browser"
+msgstr "Check in browser"
+
+#: includes/admin/class-check-page.php:398
+msgid "Raport"
+msgstr "Report"
+
+#. translators: %s: time span
+#: includes/admin/class-check-page.php:400
+#, php-format
+msgid "acum %s"
+msgstr "%s ago"
+
+#: includes/admin/class-check-page.php:405
+msgid "Raportul e făcut într-un alt mod decât cel de acum, așa că rezultatele nu mai sunt valabile. Verifică din nou."
+msgstr "The report was made in a different mode than the current one, so the results are no longer valid. Check again."
+
+#: includes/admin/class-check-page.php:410
+msgid "Rezultat"
+msgstr "Result"
+
+#: includes/admin/class-check-page.php:411
+msgid "Înainte de acord"
+msgstr "Before consent"
+
+#: includes/admin/class-check-page.php:412
+msgid "După „Acceptă tot”"
+msgstr "After “Accept all”"
+
+#: includes/admin/class-check-page.php:419
+msgid "verifică din nou"
+msgstr "check again"
+
+#: includes/admin/class-check-page.php:424
+msgid "nimic de la terți, niciun cookie de urmărire"
+msgstr "nothing from third parties, no tracking cookies"
+
+#: includes/admin/class-check-page.php:437
+msgid "modul Light: nu există acord"
+msgstr "Light mode: there is no consent"
+
+#: includes/admin/class-check-page.php:441
+msgid "nu s-a primit rezultatul după acord"
+msgstr "no result received after consent"
+
+#: includes/admin/class-check-page.php:443
+msgid "nimic în plus"
+msgstr "nothing more"
+
+#: includes/admin/class-check-page.php:458
+msgid "Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a încărcat înainte de acord. Galben: resurse care trimit IP-ul vizitatorului sau cookie-uri necunoscute. Excepțiile, serviciile necesare și, în Advanced, Google Analytics / Tag Manager apar separat și nu schimbă rezultatul. După acord, serviciile acceptate se încarcă normal: coloana e doar informativă."
+msgstr "Red: a service that requires consent or an unknown third-party domain loaded before consent. Yellow: resources that send the visitor’s IP address, or unknown cookies. Exceptions, necessary services and, in Advanced, Google Analytics / Tag Manager are listed separately and do not change the result. After consent, accepted services load normally: that column is for information only."
+
+#. translators: 1: page number, 2: total pages
+#: includes/admin/class-check-page.php:475
+#, php-format
+msgid "Verific pagina %1$d din %2$d…"
+msgstr "Checking page %1$d of %2$d…"
+
+#: includes/admin/class-check-page.php:476
+msgid "Salvez raportul…"
+msgstr "Saving the report…"
+
+#: includes/admin/class-check-page.php:477
+msgid "Gata."
+msgstr "Done."
+
+#: includes/admin/class-check-page.php:478
+msgid "Raportul nu a putut fi salvat. Încearcă din nou."
+msgstr "The report could not be saved. Try again."
+
+#: includes/admin/class-legal-page.php:10
+#: includes/modules/class-legal.php:277
+msgid "Politica de confidențialitate"
+msgstr "Privacy Policy"
+
+#: includes/admin/class-legal-page.php:11
+#: includes/modules/class-legal.php:281
+msgid "Termeni și condiții"
+msgstr "Terms and Conditions"
+
+#: includes/admin/class-legal-page.php:12
+msgid "Politica de cookie-uri"
+msgstr "Cookie Policy"
+
+#. translators: %s: page title
+#: includes/admin/class-legal-page.php:120
+#, php-format
+msgid "„%s” a fost generată pentru alt mod de măsurare. Regenerează pagina."
+msgstr "“%s” was generated for a different measurement mode. Regenerate the page."
+
+#: includes/admin/class-legal-page.php:243
+msgid "bannerul de cookie-uri"
+msgstr "the cookie banner"
+
+#: includes/admin/class-legal-page.php:244
+msgid "blocarea serviciilor până la acord"
+msgstr "blocking services until consent"
+
+#: includes/admin/class-legal-page.php:245
+msgid "registrul de consimțăminte"
+msgstr "the consent register"
+
+#: includes/admin/class-legal-page.php:246
+msgid "șabloanele paginilor legale"
+msgstr "the legal page templates"
+
+#: includes/admin/class-legal-page.php:247
+msgid "tabelul de cookie-uri"
+msgstr "the cookie table"
+
+#: includes/admin/class-legal-page.php:248
+msgid "re-consimțământul la servicii noi"
+msgstr "asking for consent again when new services appear"
+
+#: includes/admin/class-legal-page.php:251
+msgid "registrul activităților de prelucrare"
+msgstr "the record of processing activities"
+
+#: includes/admin/class-legal-page.php:252
+msgid "numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu"
+msgstr "appointing a data protection officer (DPO), if required"
+
+#: includes/admin/class-legal-page.php:253
+msgid "temeiul legal pentru transferurile de date în afara țării"
+msgstr "the legal basis for data transfers outside the country"
+
+#: includes/admin/class-legal-page.php:254
+msgid "informarea pentru alte prelucrări (formulare, newsletter, magazin)"
+msgstr "the notices for other processing (forms, newsletter, shop)"
+
+#: includes/admin/class-legal-page.php:255
+msgid "verificarea textelor de către un jurist"
+msgstr "a legal review of the texts"
+
+#: includes/admin/class-legal-page.php:256
+msgid "notificarea CNPDCP, unde e cazul"
+msgstr "notifying the NCPDP, where applicable"
+
+#: includes/admin/class-legal-page.php:257
+msgid "serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)"
+msgstr "services the plugin does not recognize (add them in “Services”)"
+
+#: includes/admin/class-legal-page.php:268
+msgid "Ce face pluginul și ce rămâne la tine"
+msgstr "What the plugin does and what is up to you"
+
+#: includes/admin/class-legal-page.php:269
+msgid "Ce face pluginul"
+msgstr "What the plugin does"
+
+#: includes/admin/class-legal-page.php:270
+msgid "Ce rămâne la tine"
+msgstr "What is up to you"
+
+#: includes/admin/class-legal-page.php:271
+msgid "Am înțeles, restrânge"
+msgstr "Got it, collapse"
+
+#: includes/admin/class-legal-page.php:296
+msgid "Publicată"
+msgstr "Published"
+
+#: includes/admin/class-legal-page.php:297
+msgid "Ciornă (nu e vizibilă vizitatorilor)"
+msgstr "Draft (not visible to visitors)"
+
+#: includes/admin/class-legal-page.php:298
+msgid "Lipsește"
+msgstr "Missing"
+
+#: includes/admin/class-legal-page.php:302
+msgid "Consent Manager — Pagini legale"
+msgstr "Consent Manager — Legal pages"
+
+#: includes/admin/class-legal-page.php:304
+msgid "Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi."
+msgstr "The templates were updated (new texts for Moldova, in RO/RU/EN). Regenerate each document to apply them; the translations the plugin created are updated along with it. This message disappears once you regenerate all three documents or close it."
+
+#: includes/admin/class-legal-page.php:305
+#: includes/admin/class-services-page.php:433
+msgid "Închide"
+msgstr "Close"
+
+#: includes/admin/class-legal-page.php:311
+msgid "Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor."
+msgstr "The page was generated. If it is new, it is saved as a draft: review it and publish it from the editor."
+
+#: includes/admin/class-legal-page.php:313
+msgid "Salvat."
+msgstr "Saved."
+
+#: includes/admin/class-legal-page.php:316
+msgid "Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare."
+msgstr "The templates are an informational starting point, NOT legal advice. Have the text reviewed by a specialist before publishing."
+
+#: includes/admin/class-legal-page.php:317
+msgid "Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale."
+msgstr "The texts depend on the mode chosen in Settings (Pro or Light) and on script blocking. After you change the mode or blocking, regenerate the legal pages."
+
+#: includes/admin/class-legal-page.php:317
+msgid "După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale."
+msgstr "After you change the consent or register duration in Settings, regenerate the legal pages."
+
+#: includes/admin/class-legal-page.php:325
+msgid "Datele operatorului"
+msgstr "Controller details"
+
+#: includes/admin/class-legal-page.php:326
+msgid "Apar în paginile generate. Se salvează, nu trebuie completate din nou."
+msgstr "They appear in the generated pages. They are saved, so you don’t have to fill them in again."
+
+#: includes/admin/class-legal-page.php:328
+msgid "Denumire operator"
+msgstr "Controller name"
+
+#: includes/admin/class-legal-page.php:330
+msgid "Email contact"
+msgstr "Contact email"
+
+#: includes/admin/class-legal-page.php:332
+msgid "Responsabil date (DPO)"
+msgstr "Data protection officer (DPO)"
+
+#: includes/admin/class-legal-page.php:334
+msgid "Jurisdicție"
+msgstr "Jurisdiction"
+
+#: includes/admin/class-legal-page.php:336
+msgid "Adresa (opțional, recomandat pentru firme)"
+msgstr "Address (optional, recommended for companies)"
+
+#: includes/admin/class-legal-page.php:340
+msgid "Documente"
+msgstr "Documents"
+
+#: includes/admin/class-legal-page.php:341
+msgid "Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. Linkul „Politica de confidențialitate” din banner apare doar când pagina e publicată."
+msgstr "Choose an existing page (drafts included) or generate one from the template. The “Privacy Policy” link in the banner appears only once the page is published."
+
+#: includes/admin/class-legal-page.php:344
+msgid "Document"
+msgstr "Document"
+
+#: includes/admin/class-legal-page.php:346
+msgid "Stare"
+msgstr "Status"
+
+#: includes/admin/class-legal-page.php:347
+msgid "Șablon"
+msgstr "Template"
+
+#: includes/admin/class-legal-page.php:361
+msgid "— niciuna —"
+msgstr "— none —"
+
+#: includes/admin/class-legal-page.php:367
+msgid "Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești."
+msgstr "Suggested: the WordPress privacy page. Save to use it."
+
+#: includes/admin/class-legal-page.php:370
+msgid "Folosește și ca pagina de confidențialitate a WordPress"
+msgstr "Also use as the WordPress privacy page"
+
+#: includes/admin/class-legal-page.php:376
+msgid "Editează"
+msgstr "Edit"
+
+#: includes/admin/class-legal-page.php:377
+msgid "Vezi"
+msgstr "View"
+
+#: includes/admin/class-legal-page.php:382
+msgid "Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în pagină se pierd. Continui?"
+msgstr "The page text will be replaced with the template. Manual edits to the page will be lost. Continue?"
+
+#: includes/admin/class-legal-page.php:382
+msgid "Regenerează"
+msgstr "Regenerate"
+
+#: includes/admin/class-legal-page.php:384
+msgid "Generează"
+msgstr "Generate"
+
+#: includes/admin/class-legal-page.php:392
+msgid "Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: cele marcate de plugin și cele care încep cu rândul „Document generat automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte traduceri nu sunt atinse."
+msgstr "Regenerating also overwrites the linked translations the plugin created: those marked by the plugin and those starting with the line “Document generat automat de Consent Manager Pro” (copies made by versions 0.4.x). Other translations are left untouched."
+
+#: includes/admin/class-legal-page.php:393
+msgid "Salvează"
+msgstr "Save"
+
+#: includes/admin/class-legal-page.php:443
+msgid "Nu am putut crea pagina."
+msgstr "Could not create the page."
+
+#: includes/admin/class-services-page.php:20
+msgid "Necesare"
+msgstr "Necessary"
+
+#: includes/admin/class-services-page.php:30
+msgid "excepție"
+msgstr "exception"
+
+#: includes/admin/class-services-page.php:48
+msgid "Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat ca să nu se strice formularele. Îl poți bloca dintr-un click."
+msgstr "EU authorities consider that reCAPTCHA requires consent. It is left unblocked so forms don’t break. You can block it with one click."
+
+#: includes/admin/class-services-page.php:62
+#: includes/admin/class-services-page.php:66
+msgid "nu bloca (excepție)"
+msgstr "don’t block (exception)"
+
+#: includes/admin/class-services-page.php:63
+msgid "În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat»."
+msgstr "In Advanced mode, Google Analytics and Tag Manager always load, with Consent Mode set to “denied”."
+
+#: includes/admin/class-services-page.php:64
+msgid "Setarea ta: nu bloca (se aplică și în Strict)."
+msgstr "Your setting: don’t block (also applies in Strict)."
+
+#: includes/admin/class-services-page.php:64
+msgid "Setarea ta: blocat până la acord (se aplică în Strict)."
+msgstr "Your setting: blocked until consent (applies in Strict)."
+
+#: includes/admin/class-services-page.php:89
+msgid "Serviciu personalizat"
+msgstr "Custom service"
+
+#: includes/admin/class-services-page.php:106
+msgid "Domenii (unul pe rând)"
+msgstr "Domains (one per line)"
+
+#: includes/admin/class-services-page.php:108
+msgid "Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe aceste domenii."
+msgstr "Scripts and iframes (videos, forms, calendars) from these domains are blocked."
+
+#: includes/admin/class-services-page.php:111
+msgid "Cookie-uri"
+msgstr "Cookies"
+
+#: includes/admin/class-services-page.php:134
+msgid "Script (opțional, rulează doar după acord)"
+msgstr "Script (optional, runs only after consent)"
+
+#: includes/admin/class-services-page.php:138
+msgid "Are script (doar un administrator cu drept de cod îl poate modifica)"
+msgstr "Has a script (only an administrator allowed to add code can change it)"
+
+#: includes/admin/class-services-page.php:179
+msgid "Consent Manager — Servicii"
+msgstr "Consent Manager — Services"
+
+#: includes/admin/class-services-page.php:181
+msgid "Servicii salvate."
+msgstr "Services saved."
+
+#: includes/admin/class-services-page.php:184
+msgid "Lista a fost resetată."
+msgstr "The list was reset."
+
+#: includes/admin/class-services-page.php:187
+msgid "Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate."
+msgstr "The script was not saved: your account is not allowed to add code (unfiltered_html). The other changes were saved."
+
+#: includes/admin/class-services-page.php:190
+msgid "Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar bloca scripturile site-ului). L-am scos din listă."
+msgstr "Your site’s domain cannot be a custom service domain (it would block the site’s own scripts). It was removed from the list."
+
+#. translators: %s: error text
+#: includes/admin/class-services-page.php:193
+#, php-format
+msgid "Biblioteca de servicii: %s"
+msgstr "Services library: %s"
+
+#: includes/admin/class-services-page.php:197
+msgid "WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului."
+msgstr "WooCommerce is active, but the WP Consent API plugin is missing: WooCommerce extensions don’t know the visitor’s choice."
+
+#: includes/admin/class-services-page.php:199
+msgid "Instalează WP Consent API"
+msgstr "Install WP Consent API"
+
+#: includes/admin/class-services-page.php:209
+msgid "Găsite pe site"
+msgstr "Found on the site"
+
+#: includes/admin/class-services-page.php:222
+msgid "Paginile site-ului nu au putut fi citite. Încearcă „Rescanează”."
+msgstr "The site’s pages could not be read. Try “Rescan”."
+
+#: includes/admin/class-services-page.php:224
+msgid "Apasă „Rescanează” ca să afli ce servicii încarcă site-ul."
+msgstr "Click “Rescan” to find out which services the site loads."
+
+#: includes/admin/class-services-page.php:226
+msgid "Nu am găsit pe site servicii care să aștepte acordul."
+msgstr "No services that wait for consent were found on the site."
+
+#: includes/admin/class-services-page.php:231
+msgid "configurat mai jos"
+msgstr "configured below"
+
+#. translators: %d: number of services
+#: includes/admin/class-services-page.php:240
+#, php-format
+msgid "Toată biblioteca (%d)"
+msgstr "Entire library (%d)"
+
+#: includes/admin/class-services-page.php:244
+msgid "găsit pe site, se setează mai sus"
+msgstr "found on the site, configured above"
+
+#: includes/admin/class-services-page.php:252
+msgid "Servicii personalizate"
+msgstr "Custom services"
+
+#: includes/admin/class-services-page.php:258
+msgid "+ Adaugă serviciu"
+msgstr "+ Add service"
+
+#: includes/admin/class-services-page.php:260
+msgid "Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt JavaScript ulterior trebuie controlat din GTM (Consent Mode)."
+msgstr "We block what appears in the page’s HTML. Whatever Google Tag Manager or other JavaScript adds later must be controlled from GTM (Consent Mode)."
+
+#: includes/admin/class-services-page.php:262
+msgid "Salvează serviciile"
+msgstr "Save services"
+
+#: includes/admin/class-services-page.php:270
+msgid "Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?"
+msgstr "The list of seen services will contain only what the last scan found. Continue?"
+
+#: includes/admin/class-services-page.php:273
+msgid "Resetează lista serviciilor văzute"
+msgstr "Reset the list of seen services"
+
+#: includes/admin/class-services-page.php:274
+msgid "Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) până o resetezi."
+msgstr "Services ever found on the site stay in the list (for re-consent) until you reset it."
+
+#. translators: %s: service names
+#: includes/admin/class-services-page.php:428
+#, php-format
+msgid "Am început să blocăm până la acord: %s —"
+msgstr "We started blocking until consent: %s —"
+
+#: includes/admin/class-services-page.php:430
+msgid "Unele servicii de pe site așteaptă acum acordul vizitatorului —"
+msgstr "Some services on the site now wait for the visitor’s consent —"
+
+#: includes/admin/class-services-page.php:432
+msgid "verifică în „Servicii”"
+msgstr "review them in “Services”"
+
+#. translators: 1: pages scanned, 2: pages in the list
+#: includes/admin/class-settings-page.php:19
+#, php-format
+msgid "Rescanăm site-ul după modificări (%1$d/%2$d)"
+msgstr "Rescanning the site after your changes (%1$d/%2$d)"
+
+#: includes/admin/class-settings-page.php:20
+msgid "Rescanăm site-ul după modificări."
+msgstr "Rescanning the site after your changes."
+
+#: includes/admin/class-settings-page.php:61
+msgid "Modul Light nu poate cere acord."
+msgstr "Light mode cannot ask for consent."
+
+#. translators: %s: tracker names
+#: includes/admin/class-settings-page.php:63
+#, php-format
+msgid "Pe site am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro."
+msgstr "Found on the site: %s. These scripts are permanently blocked in Light and don’t run. If you need them, switch to Pro mode."
+
+#. translators: %s: tracker names
+#: includes/admin/class-settings-page.php:68
+#, php-format
+msgid "Atenție: %s pare încărcat de un script pe care pluginul nu îl poate bloca (injectat ulterior din JavaScript). Verifică sursa lui."
+msgstr "Warning: %s seems to be loaded by a script the plugin cannot block (injected later from JavaScript). Check its source."
+
+#: includes/admin/class-settings-page.php:74
+msgid "Lipsește linkul „Setări cookie”."
+msgstr "The “Cookie settings” link is missing."
+
+#: includes/admin/class-settings-page.php:75
+msgid "Pe pagina principală nu am găsit niciun link care redeschide preferințele. Vizitatorii trebuie să-și poată retrage acordul la fel de ușor cum l-au dat (Legea 195/2024 și GDPR, art. 7). Pune în footer shortcode-ul [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
+msgstr "No link that reopens the preferences was found on the homepage. Visitors must be able to withdraw consent as easily as they gave it (Law 195/2024 and GDPR, Art. 7). Add the [cmp_cookie_settings_link] shortcode to the footer, or a menu link with the URL #cmp-settings."
+
+#. translators: %s: tracker names
+#: includes/admin/class-settings-page.php:81
+#, php-format
+msgid "%s se încarcă pe site înainte de acord. Bifează „Blochează scripturile de tracking până la consimțământ” mai jos."
+msgstr "%s loads on the site before consent. Check “Block tracking scripts until consent” below."
+
+#. translators: %s: tracker names
+#: includes/admin/class-settings-page.php:83
+#, php-format
+msgid "%s se încarcă pe site înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui."
+msgstr "%s loads on the site before consent even though blocking is on: it is probably injected later from JavaScript. Check its source."
+
+#: includes/admin/class-settings-page.php:84
+msgid "Tracking fără acord."
+msgstr "Tracking without consent."
+
+#: includes/admin/class-settings-page.php:95
+msgid "Stânga sus"
+msgstr "Top left"
+
+#: includes/admin/class-settings-page.php:96
+msgid "Sus centru"
+msgstr "Top center"
+
+#: includes/admin/class-settings-page.php:97
+msgid "Dreapta sus"
+msgstr "Top right"
+
+#: includes/admin/class-settings-page.php:98
+msgid "Mijloc centru"
+msgstr "Middle center"
+
+#: includes/admin/class-settings-page.php:99
+msgid "Stânga jos"
+msgstr "Bottom left"
+
+#: includes/admin/class-settings-page.php:100
+msgid "Jos centru"
+msgstr "Bottom center"
+
+#: includes/admin/class-settings-page.php:101
+msgid "Dreapta jos"
+msgstr "Bottom right"
+
+#: includes/admin/class-settings-page.php:112
+msgid "Consent Manager — Setări"
+msgstr "Consent Manager — Settings"
+
+#: includes/admin/class-settings-page.php:114
+msgid "Celelalte setări au fost salvate, dar modul Advanced nu a fost activat: bifează confirmarea de sub opțiune. Măsurarea a rămas pe Strict."
+msgstr "The other settings were saved, but Advanced mode was not turned on: check the confirmation below the option. Measurement stayed on Strict."
+
+#: includes/admin/class-settings-page.php:116
+msgid "Setări salvate."
+msgstr "Settings saved."
+
+#: includes/admin/class-settings-page.php:125
+msgid "Mod afișare"
+msgstr "Display mode"
+
+#: includes/admin/class-settings-page.php:129
+msgid "Pro — banner cu consimțământ granular"
+msgstr "Pro — banner with granular consent"
+
+#: includes/admin/class-settings-page.php:130
+msgid "Light — bară informativă, fără cookie-uri"
+msgstr "Light — information bar, no cookies"
+
+#: includes/admin/class-settings-page.php:132
+msgid "Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, Tag Manager și Meta Pixel sunt blocate permanent; dacă ai nevoie de ele, folosește Pro."
+msgstr "Light: the site is usable right away, only a notice is shown and no cookie is stored. Light cannot ask for consent, so Google Analytics, Tag Manager and Meta Pixel are permanently blocked; if you need them, use Pro."
+
+#: includes/admin/class-settings-page.php:136
+msgid "Poziție banner"
+msgstr "Banner position"
+
+#: includes/admin/class-settings-page.php:144
+msgid "Memorarea consimțământului (zile)"
+msgstr "Remember consent for (days)"
+
+#: includes/admin/class-settings-page.php:147
+msgid "Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de retenția registrului de consimțăminte."
+msgstr "How many days the browser remembers the visitor’s choice before the banner shows again (default 180, maximum 396 = 13 months, in line with EU practice). Not the same as the consent register retention."
+
+#: includes/admin/class-settings-page.php:151
+msgid "Preset design"
+msgstr "Design preset"
+
+#: includes/admin/class-settings-page.php:159
+msgid "Blocare scripturi tracking"
+msgstr "Tracking script blocking"
+
+#: includes/admin/class-settings-page.php:161
+msgid "Blochează scripturile de tracking până la consimțământ"
+msgstr "Block tracking scripts until consent"
+
+#: includes/admin/class-settings-page.php:162
+msgid "Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode „basic”). Video-urile YouTube și Vimeo și hărțile Google Maps apar ca un bloc cu butonul „Încarcă conținutul” până la acord. Recomandat: pornit. În modul Light, blocarea e mereu activă."
+msgstr "Google Analytics, Tag Manager and Meta Pixel don’t load at all before the visitor accepts: Google and Meta receive nothing, not even the IP address (Consent Mode “basic”). YouTube and Vimeo videos and Google Maps show as a block with a “Load content” button until consent. Recommended: on. In Light mode, blocking is always on."
+
+#: includes/admin/class-settings-page.php:170
+msgid "Mod de măsurare"
+msgstr "Measurement mode"
+
+#: includes/admin/class-settings-page.php:173
+msgid "Strict"
+msgstr "Strict"
+
+#: includes/admin/class-settings-page.php:173
+msgid "serviciile blocate nu se încarcă înainte de acord (excepțiile marcate, de ex. unelte de statistică fără cookie-uri, da). Recomandat."
+msgstr "blocked services don’t load before consent (marked exceptions, e.g. cookieless analytics tools, do). Recommended."
+
+#: includes/admin/class-settings-page.php:174
+msgid "Advanced"
+msgstr "Advanced"
+
+#: includes/admin/class-settings-page.php:174
+msgid "Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode pe „refuzat” până la acord. Google estimează vizitele celor care refuză. Google Ads (AW-), Floodlight (DC-) și Universal Analytics vechi (analytics.js) rămân blocate până la acord."
+msgstr "Google Analytics 4 and Tag Manager load from the start, with Consent Mode set to “denied” until consent. Google estimates visits from those who decline. Google Ads (AW-), Floodlight (DC-) and the old Universal Analytics (analytics.js) stay blocked until consent."
+
+#: includes/admin/class-settings-page.php:176
+msgid "Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova (Legea 72/2025, art. 116) și în UE."
+msgstr "I understand that Google receives data before consent. This is a grey area in Moldova (Law 72/2025, Art. 116) and in the EU."
+
+#: includes/admin/class-settings-page.php:179
+msgid "Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu are niciun efect, iar alegerea salvată se păstrează."
+msgstr "Advanced requires Pro mode with script blocking on. Otherwise the option has no effect, and the saved choice is kept."
+
+#: includes/admin/class-settings-page.php:183
+msgid "Buton flotant redeschidere"
+msgstr "Floating reopen button"
+
+#: includes/admin/class-settings-page.php:185
+msgid "Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri"
+msgstr "Show a round button (bottom left) to reopen the cookie preferences"
+
+#: includes/admin/class-settings-page.php:186
+msgid "Recomandat: oprit, cu un link „Setări cookie-uri” în footer — shortcode [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings."
+msgstr "Recommended: off, with a “Cookie settings” link in the footer — the [cmp_cookie_settings_link] shortcode or a menu link with the URL #cmp-settings."
+
+#: includes/admin/class-settings-page.php:187
+msgid "Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în modul Pro."
+msgstr "Appears after the visitor makes a consent choice. Applies only in Pro mode."
+
+#: includes/admin/class-settings-page.php:191
+msgid "Reîncărcare după alegere"
+msgstr "Reload after choice"
+
+#: includes/admin/class-settings-page.php:193
+msgid "Reîncarcă pagina după alegerea din banner"
+msgstr "Reload the page after the banner choice"
+
+#: includes/admin/class-settings-page.php:194
+msgid "Pentru site-uri cu animații la încărcare, ascunse de overlay: după reîncărcare se văd de la început. Se aplică doar la prima alegere, din bannerul apărut la încărcare — nu și la schimbările făcute ulterior din linkul „Setări cookie-uri”."
+msgstr "For sites with load animations hidden by the overlay: after the reload they play from the start. Applies only to the first choice, from the banner shown on load — not to later changes made from the “Cookie settings” link."
+
+#: includes/admin/class-settings-page.php:198
+msgid "Localizare Google Fonts"
+msgstr "Localize Google Fonts"
+
+#: includes/admin/class-settings-page.php:200
+msgid "Servește Google Fonts local (fără request la Google)"
+msgstr "Serve Google Fonts locally (no request to Google)"
+
+#: includes/admin/class-settings-page.php:202
+msgid "După activare (și Salvează), apasă „Localizează fonturile\" de mai jos ca să descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în modul Pro."
+msgstr "After turning it on (and saving), click “Localize fonts” below to download the fonts from the site’s scanned pages. Applies only in Pro mode."
+
+#. translators: %d — count
+#: includes/admin/class-settings-page.php:206
+#, php-format
+msgid "(%d fonturi localizate)"
+msgstr "(%d fonts localized)"
+
+#: includes/admin/class-settings-page.php:213
+msgid "Resurse terțe WordPress"
+msgstr "WordPress third-party resources"
+
+#: includes/admin/class-settings-page.php:215
+msgid "Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către s.w.org)"
+msgstr "Disable WordPress emoji (they no longer send visitors’ IP addresses to s.w.org)"
+
+#: includes/admin/class-settings-page.php:216
+msgid "Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash al emailului)"
+msgstr "Replace Gravatar with a local avatar (Gravatar sends the IP address and a hash of the email)"
+
+#: includes/admin/class-settings-page.php:220
+msgid "Versiune politică"
+msgstr "Policy version"
+
+#: includes/admin/class-settings-page.php:223
+msgid "Incrementează pentru a re-afișa banner-ul tuturor vizitatorilor."
+msgstr "Increase the number to show the banner again to all visitors."
+
+#: includes/admin/class-settings-page.php:227
+msgid "Retenție log (luni)"
+msgstr "Consent register retention (months)"
+
+#: includes/admin/class-settings-page.php:236
+msgid "Titlu banner"
+msgstr "Banner title"
+
+#: includes/admin/class-settings-page.php:237
+msgid "Text introductiv"
+msgstr "Intro text"
+
+#: includes/admin/class-settings-page.php:238
+msgid "Text notice (Light)"
+msgstr "Notice text (Light)"
+
+#: includes/admin/class-settings-page.php:239
+msgid "Buton „Accept\""
+msgstr "“Accept” button"
+
+#: includes/admin/class-settings-page.php:240
+msgid "Buton „Doar necesare\""
+msgstr "“Necessary only” button"
+
+#: includes/admin/class-settings-page.php:241
+msgid "Buton „Gestionează\""
+msgstr "“Manage” button"
+
+#: includes/admin/class-settings-page.php:242
+msgid "Buton „Confirmă selecția\""
+msgstr "“Confirm selection” button"
+
+#: includes/admin/class-settings-page.php:243
+msgid "Titlu preferințe"
+msgstr "Preferences title"
+
+#: includes/admin/class-settings-page.php:252
+#: includes/admin/class-settings-page.php:254
+msgid "(implicit)"
+msgstr "(default)"
+
+#. translators: 1: published count, 2: total, 3: drafts
+#: includes/admin/class-settings-page.php:267
+#, php-format
+msgid "Publicate: %1$d din %2$d · ciorne: %3$d"
+msgstr "Published: %1$d of %2$d · drafts: %3$d"
+
+#: includes/admin/class-settings-page.php:273
+msgid "Gestionează paginile legale"
+msgstr "Manage legal pages"
+
+#: includes/admin/class-settings-page.php:277
+msgid "Dezinstalare"
+msgstr "Uninstall"
+
+#: includes/admin/class-settings-page.php:280
+msgid "Date"
+msgstr "Data"
+
+#: includes/admin/class-settings-page.php:282
+msgid "Șterge toate datele la dezinstalare"
+msgstr "Delete all data on uninstall"
+
+#: includes/admin/class-settings-page.php:283
+msgid "Include registrul de consimțăminte, care e dovada legală a alegerilor vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să ștergi pluginul cu această bifă pornită."
+msgstr "This includes the consent register, which is the legal proof of visitors’ choices. Keep it as long as the law requires (for example 13 months) before deleting the plugin with this option on."
+
+#: includes/admin/class-settings-page.php:287
+msgid "Salvează setările"
+msgstr "Save settings"
+
+#: includes/admin/class-settings-page.php:295
+msgid "Fonturi localizate șterse."
+msgstr "Localized fonts deleted."
+
+#: includes/admin/class-settings-page.php:297
+msgid "Descarcă fonturile Google folosite pe paginile scanate ale site-ului și servește-le local. Activează întâi opțiunea „Localizare Google Fonts\" de mai sus și salvează."
+msgstr "Downloads the Google fonts used on the site’s scanned pages and serves them locally. First turn on the “Localize Google Fonts” option above and save."
+
+#: includes/admin/class-settings-page.php:301
+msgid "Localizează fonturile"
+msgstr "Localize fonts"
+
+#: includes/admin/class-settings-page.php:306
+msgid "Șterge fonturile localizate"
+msgstr "Delete localized fonts"
+
+#: includes/admin/class-settings-page.php:374
+msgid "Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag Manager ca etichetele să respecte Consent Mode."
+msgstr "You switched to Advanced. From now on Google receives cookieless pings from all visitors and estimates visits from those who decline. Check in Tag Manager that your tags respect Consent Mode."
+
+#: includes/admin/class-settings-page.php:376
+msgid "Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care refuză, deci statisticile vor arăta mai puține vizite."
+msgstr "You switched to Strict. From now on you no longer receive data from visitors who decline, so your analytics will show fewer visits."
+
+#: includes/admin/class-settings-page.php:378
+msgid "Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii»."
+msgstr "Google Analytics / Tag Manager stay unblocked through the setting in “Services”."
+
+#: includes/admin/class-settings-page.php:384
+msgid "Regenerează paginile legale."
+msgstr "Regenerate the legal pages."
+
+#: includes/modules/class-legal.php:302
+msgid "Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:"
+msgstr "This site uses cookies managed through Consent Manager Pro. Cookies used:"
+
+#. translators: 1: pages scanned, 2: pages in the list
+#: includes/modules/class-scanner.php:1177
+#, php-format
+msgid "Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui ecran"
+msgstr "Scan in progress (%1$d/%2$d) — it continues each time you open this screen"
+
+#. translators: 1: pages scanned, 2: pages in the list
+#: includes/modules/class-scanner.php:1179
+#, php-format
+msgid "Scanare în curs (%1$d/%2$d)"
+msgstr "Scan in progress (%1$d/%2$d)"
+
+#: includes/modules/class-updater.php:213
+#: includes/modules/class-updater.php:238
+msgid "Nu am putut descărca pachetul de update."
+msgstr "Could not download the update package."
+
+#: includes/modules/class-updater.php:218
+msgid "Pachetul de update nu are o semnătură validă și nu a fost instalat."
+msgstr "The update package does not have a valid signature and was not installed."
+
+#: includes/modules/class-updater.php:242
+msgid "Pachetul de update depășește dimensiunea maximă permisă."
+msgstr "The update package exceeds the maximum allowed size."

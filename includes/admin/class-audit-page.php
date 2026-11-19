@@ -10,6 +10,19 @@ class CMP_Audit_Page {
 		return $wpdb->prefix . 'cmp_consent_log';
 	}
 
+	/** Filter labels for every decision in CMP_Audit::DECISIONS (stored values stay the keys). */
+	public static function decision_labels() {
+		return array(
+			'accepted_all'     => __( 'Acceptat tot', 'consent-manager-pro' ),
+			'rejected_all'     => __( 'Doar necesare', 'consent-manager-pro' ),
+			'partial'          => __( 'Parțial', 'consent-manager-pro' ),
+			'withdrawn'        => __( 'Retras', 'consent-manager-pro' ),
+			'service_allow'    => __( 'Serviciu permis („Încarcă mereu”)', 'consent-manager-pro' ),
+			'service_withdraw' => __( 'Serviciu retras', 'consent-manager-pro' ),
+			'custom'           => __( 'Prin butonul site-ului', 'consent-manager-pro' ),
+		);
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -58,7 +71,7 @@ class CMP_Audit_Page {
 				<select name="decision">
 					<option value=""><?php esc_html_e( 'Toate deciziile', 'consent-manager-pro' ); ?></option>
 					<?php
-					$opts = array( 'accepted_all' => 'Acceptat tot', 'rejected_all' => 'Doar necesare', 'partial' => 'Parțial', 'withdrawn' => 'Retras', 'custom' => 'Prin butonul site-ului' );
+					$opts = self::decision_labels();
 					$cur  = isset( $_GET['decision'] ) ? sanitize_text_field( wp_unslash( $_GET['decision'] ) ) : '';
 					foreach ( $opts as $k => $lbl ) :
 						?>

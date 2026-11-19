@@ -25,6 +25,13 @@ class CMP_Audit_List_Table extends WP_List_Table {
 		return isset( $item[ $column_name ] ) ? esc_html( $item[ $column_name ] ) : '';
 	}
 
+	/** The decision as its translated label; unknown values are shown as stored. */
+	public function column_decision( $item ) {
+		$d      = isset( $item['decision'] ) ? (string) $item['decision'] : '';
+		$labels = CMP_Audit_Page::decision_labels();
+		return esc_html( isset( $labels[ $d ] ) ? $labels[ $d ] : $d );
+	}
+
 	public function prepare_items() {
 		global $wpdb;
 		$table    = $wpdb->prefix . 'cmp_consent_log';

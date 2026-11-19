@@ -26,7 +26,9 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
 		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
-		load_plugin_textdomain( 'consent-manager-pro', false, dirname( plugin_basename( CMP_PATH ) ) . '/languages' );
+		// <plugin folder>/languages, relative to WP_PLUGIN_DIR. plugin_basename() of the main
+		// file maps a symlinked plugin folder back to its name under WP_PLUGIN_DIR.
+		load_plugin_textdomain( 'consent-manager-pro', false, dirname( plugin_basename( CMP_PATH . 'consent-manager-pro.php' ) ) . '/languages' );
 
 		new CMP_Banner();
 		CMP_Audit::register();
