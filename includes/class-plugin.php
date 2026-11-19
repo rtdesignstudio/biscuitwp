@@ -42,6 +42,8 @@ class CMP_Plugin {
 		CMP_Scanner::register();
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
 		CMP_Fonts::register();
+		require_once CMP_PATH . 'includes/modules/class-privacy-tweaks.php';
+		CMP_Privacy_Tweaks::register();
 		require_once CMP_PATH . 'includes/modules/class-lang.php';
 		require_once CMP_PATH . 'includes/modules/class-consent-api.php';
 		CMP_Consent_API::register();

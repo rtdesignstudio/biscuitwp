@@ -210,6 +210,13 @@ class CMP_Settings_Page {
 						</td>
 					</tr>
 					<tr>
+						<th scope="row"><?php esc_html_e( 'Resurse terțe WordPress', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[disable_emoji]" value="1" <?php checked( ! empty( $s['disable_emoji'] ) ); ?>> <?php esc_html_e( 'Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către s.w.org)', 'consent-manager-pro' ); ?></label><br>
+							<label><input type="checkbox" name="cmp[disable_gravatar]" value="1" <?php checked( ! empty( $s['disable_gravatar'] ) ); ?>> <?php esc_html_e( 'Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash al emailului)', 'consent-manager-pro' ); ?></label>
+						</td>
+					</tr>
+					<tr>
 						<th scope="row"><?php esc_html_e( 'Versiune politică', 'consent-manager-pro' ); ?></th>
 						<td>
 							<input type="text" name="cmp[policy_version]" value="<?php echo esc_attr( $s['policy_version'] ); ?>" class="small-text">

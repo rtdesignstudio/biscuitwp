@@ -60,6 +60,8 @@ class CMP_Installer {
 			'terms_page_id'    => 0,
 			'cookie_page_id'   => 0,
 			'block_scripts'    => true,
+			'disable_emoji'    => false,
+			'disable_gravatar' => false,
 			'measurement'      => 'strict',
 		);
 	}

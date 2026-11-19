@@ -52,6 +52,8 @@ class CMP_Sanitizer {
 			'cookie_page_id'   => self::pos_int( $input, 'cookie_page_id' ),
 			'block_scripts'    => ! empty( $input['block_scripts'] ),
 			'localize_fonts'   => ! empty( $input['localize_fonts'] ),
+			'disable_emoji'    => ! empty( $input['disable_emoji'] ),
+			'disable_gravatar' => ! empty( $input['disable_gravatar'] ),
 			'reopen_button'    => ! empty( $input['reopen_button'] ),
 			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
 			'texts'            => $texts,
