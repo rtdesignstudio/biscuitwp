@@ -238,6 +238,8 @@ used in the preferences panel) on the `.cmp-embed` wrapper, plus a button with
 
 ## Public API
 
+Full reference for developers: [docs/api.md](../docs/api.md). In short, `window.CMP` (defined after `DOMContentLoaded`) has `version`, `isAllowed`, `getConsent`, `openPreferences`, `onConsent`, `whenAllowed`, `allowCategory` (visitor gesture only) and `denyCategory`, plus the `cmp:consent` event.
+
 ### Check consent for a category
 ```javascript
 if (window.CMP.isAllowed('statistics')) {

@@ -540,10 +540,107 @@
 		return v;
 	}
 
+	// api:begin
+	// Public API (B7.4), identical in banner.js and standalone/cmp.js; tested in
+	// standalone/tests/run.js (source-extracted). Pure: each build passes its hooks.
+	// A real visitor gesture: the User Activation API where the browser has it,
+	// else the trusted event being handled (window.event). Consent comes from the
+	// visitor (GDPR art. 7), never from a site script running on its own.
+	// Without that API only a trusted activation event counts (a click or a key),
+	// never load, scroll, message or other events a script can wait for.
+	var API_ACTIVATION = { click: 1, keydown: 1, keyup: 1, mousedown: 1, mouseup: 1, pointerdown: 1, pointerup: 1, touchend: 1 };
+	function gestureOk(nav, ev) {
+		if (nav && nav.userActivation) { return !!nav.userActivation.isActive; }
+		return !!(ev && ev.isTrusted && API_ACTIVATION.hasOwnProperty(ev.type));
+	}
+	function apiUniq(list) {
+		var out = [];
+		list.forEach(function (s) { if (out.indexOf(s) === -1) { out.push(s); } });
+		return out;
+	}
+	// A callback's error is reported, never thrown into the caller.
+	function apiErr(e) { if (typeof console !== 'undefined' && console.error) { console.error(e); } }
+	// The decision plus `slug` (and the required ones); no decision = required + slug.
+	function mergeAllow(current, slug, required) {
+		return apiUniq((Array.isArray(current) ? current : []).concat(Array.isArray(required) ? required : [], [slug]));
+	}
+	// The decision without `slug`; a required category is never removed.
+	function mergeDeny(current, slug, required) {
+		var req = Array.isArray(required) ? required : [];
+		return (Array.isArray(current) ? current : []).filter(function (s) { return s !== slug || req.indexOf(s) !== -1; });
+	}
+	// The onConsent listeners. add() returns its own unsubscribe; a throwing
+	// callback is reported and does not stop the others.
+	function subscribers() {
+		var list = [];
+		return {
+			add: function (fn) {
+				var item = { fn: fn };
+				list.push(item);
+				return function () { var i = list.indexOf(item); if (i !== -1) { list.splice(i, 1); } };
+			},
+			emit: function (consent) {
+				list.slice().forEach(function (item) {
+					try { item.fn(consent); } catch (e) { apiErr(e); }
+				});
+			}
+		};
+	}
+	// The new members of window.CMP. h: light(), cat(slug), required(),
+	// isAllowed(slug) (effective, B4), decided() (a stored decision for this policy
+	// version), current() (its effective categories), consent() (getConsent),
+	// gesture(), save(categories, decision) (the panel's save path).
+	function apiMembers(h, subs) {
+		function none() {}
+		function optional(slug) { var c = h.cat(slug); return !h.light() && !!c && !c.required; }
+		return {
+			onConsent: function (fn) {
+				if (typeof fn !== 'function' || h.light()) { return none; }
+				var off = subs.add(fn);
+				if (h.decided()) { try { fn(h.consent()); } catch (e) { apiErr(e); } }
+				return off;
+			},
+			whenAllowed: function (slug, fn) {
+				var done = false, off = none, c = h.cat(slug);
+				if (typeof fn !== 'function') { return none; }
+				function run() {
+					if (done) { return; }
+					done = true;
+					off();
+					try { fn(); } catch (e) { apiErr(e); }
+				}
+				if (c && c.required) { run(); return none; }
+				if (h.light()) { return none; }
+				if (h.isAllowed(slug)) { run(); return none; }
+				off = subs.add(function () { if (h.isAllowed(slug)) { run(); } });
+				return function () { done = true; off(); };
+			},
+			allowCategory: function (slug) {
+				if (!optional(slug)) { return false; }
+				if (!h.gesture()) {
+					if (typeof console !== 'undefined' && console.warn) { console.warn('CMP.allowCategory: ignored, call it from a visitor click'); }
+					return false;
+				}
+				if (h.isAllowed(slug)) { return false; }
+				h.save(mergeAllow(h.decided() ? h.current() : null, slug, h.required()), 'custom');
+				return true;
+			},
+			denyCategory: function (slug) {
+				if (!optional(slug) || !h.isAllowed(slug)) { return false; }
+				h.save(mergeDeny(h.current(), slug, h.required()), 'custom');
+				return true;
+			}
+		};
+	}
+	// api:end
+
 	if (typeof document !== 'undefined') {
 
 		var COOKIE_NAME = 'cmp_consent';
 		var VERSION = '1';
+		// The package version, for CMP.version (VERSION is the policy version of the
+		// cookie). Kept equal to the plugin's CMP_VERSION (checked in tests/run.js).
+		var PKG_VERSION = '0.4.2';
 
 		function renderPro(cfg) {
 			var root = document.createElement('div');
@@ -721,6 +818,13 @@
 		// True while the banner shown on page load is still waiting for the first
 		// decision; only that decision may trigger reloadOnDecision.
 		var firstDecision = false;
+		// The onConsent / whenAllowed listeners (B7.4), told by notify().
+		var apiSubs = subscribers();
+		// A stored decision for the current policy version.
+		function decided() { return !!storedCategories(readCookie(), VERSION); }
+		// The one place the API listeners hear of a change: every save (banner, panel,
+		// GPC, the API itself) and the "Always load" choices, once there is a decision.
+		function notify() { if (decided()) { apiSubs.emit(window.CMP.getConsent()); } }
 
 		function save(accepted, decision) {
 			var reload = firstDecision && cfg.reloadOnDecision;
@@ -737,6 +841,8 @@
 			unblockEmbeds(accepted);
 			document.dispatchEvent(new CustomEvent('cmp:consent', { detail: { categories: accepted, decision: decision } }));
 			logConsent({ categories: accepted, decision: decision });
+			// After the log, so a save made by a listener is logged after this one.
+			notify();
 			hide();
 			// Load-time animations ran behind the overlay; reload so they play visibly.
 			if (reload) { window.location.reload(); }
@@ -1066,6 +1172,7 @@
 			writeSvc(next);
 			logConsent(svcLogPayload('service_allow', id, [], next.id));
 			renderAlways();
+			notify();
 		}
 		// Withdrawing is as easy as granting. Embeds already loaded on this page stay
 		// until the next load.
@@ -1079,6 +1186,7 @@
 			writeSvc(next);
 			logConsent(svcLogPayload('service_withdraw', id, [], next.id));
 			renderAlways();
+			notify();
 			if (!banner) { return; }
 			// The focused button was removed: keep the keyboard user inside the dialog.
 			var left = banner.querySelectorAll('[data-cmp-svc-remove]');
@@ -1159,6 +1267,7 @@
 			}
 
 			window.CMP = {
+				version: PKG_VERSION,
 				isAllowed: function (slug) {
 					var c = readCookie();
 					var cat = (cfg.categories || []).filter(function (x) { return x.slug === slug; })[0];
@@ -1181,6 +1290,17 @@
 					show();
 				}
 			};
+			(function (m) { for (var k in m) { if (Object.prototype.hasOwnProperty.call(m, k)) { window.CMP[k] = m[k]; } } })(apiMembers({
+				light: function () { return cfg.mode === 'light'; },
+				cat: function (slug) { return (cfg.categories || []).filter(function (x) { return x.slug === slug; })[0]; },
+				required: requiredSlugs,
+				isAllowed: function (slug) { return window.CMP.isAllowed(slug); },
+				decided: decided,
+				current: consentedCategories,
+				consent: function () { return window.CMP.getConsent(); },
+				gesture: function () { return gestureOk(window.navigator, window.event); },
+				save: save
+			}, apiSubs));
 
 			// Any "cookie settings" control reopens the preferences: page-provided
 			// [data-cmp-settings] / .cmp-settings-link / .cmp-reopen, a link to

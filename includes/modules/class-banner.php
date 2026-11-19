@@ -93,6 +93,8 @@ class CMP_Banner {
 		$cmp_data = array(
 			'categories' => CMP_Consent::get_categories(),
 			'version'    => CMP_Consent::current_version(),
+			// The plugin's own version, for window.CMP.version (`version` is the policy version).
+			'pluginVersion' => CMP_VERSION,
 			'mode'       => isset( $cmp_settings['mode'] ) ? $cmp_settings['mode'] : 'pro',
 			'cookieName' => CMP_Consent::COOKIE,
 			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),

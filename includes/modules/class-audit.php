@@ -10,7 +10,7 @@ class CMP_Audit {
 	const CRON_HOOK = 'cmp_prune_consent_log';
 
 	/** Logged decisions; service_* are the per-embed "always load" choices. */
-	const DECISIONS = array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn', 'service_allow', 'service_withdraw' );
+	const DECISIONS = array( 'accepted_all', 'rejected_all', 'partial', 'withdrawn', 'service_allow', 'service_withdraw', 'custom' );
 
 	public static function register() {
 		add_action( 'wp_ajax_cmp_log_consent', array( __CLASS__, 'ajax_log' ) );

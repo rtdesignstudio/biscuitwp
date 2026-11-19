@@ -58,7 +58,7 @@ class CMP_Audit_Page {
 				<select name="decision">
 					<option value=""><?php esc_html_e( 'Toate deciziile', 'consent-manager-pro' ); ?></option>
 					<?php
-					$opts = array( 'accepted_all' => 'Acceptat tot', 'rejected_all' => 'Doar necesare', 'partial' => 'Parțial', 'withdrawn' => 'Retras' );
+					$opts = array( 'accepted_all' => 'Acceptat tot', 'rejected_all' => 'Doar necesare', 'partial' => 'Parțial', 'withdrawn' => 'Retras', 'custom' => 'Prin butonul site-ului' );
 					$cur  = isset( $_GET['decision'] ) ? sanitize_text_field( wp_unslash( $_GET['decision'] ) ) : '';
 					foreach ( $opts as $k => $lbl ) :
 						?>

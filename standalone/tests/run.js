@@ -1010,5 +1010,365 @@ eq(Object.keys(cmpMin).sort(), Object.keys(cmp).sort(), 'B5 M8: cmp.min.js expor
 	});
 })();
 
+
+// B7.4 Task 1: public JS API (version, onConsent, whenAllowed, allowCategory,
+// denyCategory). The pure part lives in the `api` block, identical in both files.
+var API_MSG = 'CMP.allowCategory: ignored, call it from a visitor click';
+function apiFns(src) {
+	var m = src.match(/\/\/ api:begin\n([\s\S]*?)\/\/ api:end/);
+	var f = null;
+	try { f = m ? new Function(m[1] + '\nreturn { gestureOk: gestureOk, mergeAllow: mergeAllow, mergeDeny: mergeDeny, subscribers: subscribers, apiMembers: apiMembers };')() : null; } catch (e) { f = null; }
+	return { m: m, f: f };
+}
+var apiB = apiFns(bannerSrc), apiC = apiFns(cmpSrc);
+ok(!!apiB.f, 'B7.4: banner.js exposes the api block');
+ok(!!apiC.f, 'B7.4: cmp.js exposes the api block');
+ok(!!apiB.m && !!apiC.m && apiB.m[1].replace(/^\t+/gm, '') === apiC.m[1].replace(/^\t+/gm, ''), 'B7.4: api blocks identical in banner.js and cmp.js');
+// The other shared blocks stay identical too (focusTrap had no identity check).
+ok(!!ftM && !!ftC && ftM[1].replace(/^\t+/gm, '') === ftC[1].replace(/^\t+/gm, ''), 'B7.4: focusTrap blocks identical in banner.js and cmp.js');
+[['banner.js', apiB.f], ['cmp.js', apiC.f]].forEach(function (t) {
+	var n = 'B7.4 ' + t[0] + ': ', a = t[1];
+	if (!a) { return; }
+	// gestureOk truth table: userActivation wins when present; else window.event.isTrusted.
+	eq(a.gestureOk({ userActivation: { isActive: true } }, null), true, n + 'gesture: activation active -> ok');
+	eq(a.gestureOk({ userActivation: { isActive: false } }, { isTrusted: true }), false, n + 'gesture: activation present but inactive -> no (trusted event ignored)');
+	eq(a.gestureOk({ userActivation: { isActive: true } }, { isTrusted: false }), true, n + 'gesture: activation active, untrusted event -> ok');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'click' }), true, n + 'gesture: no activation API, trusted click -> ok');
+	eq(a.gestureOk({}, { isTrusted: false, type: 'click' }), false, n + 'gesture: no activation API, untrusted click -> no');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'keydown' }), true, n + 'gesture: no activation API, trusted keydown -> ok');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'load' }), false, n + 'gesture: no activation API, trusted load -> no');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'DOMContentLoaded' }), false, n + 'gesture: no activation API, trusted DOMContentLoaded -> no');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'scroll' }), false, n + 'gesture: no activation API, trusted scroll -> no');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'message' }), false, n + 'gesture: no activation API, trusted message -> no');
+	eq(a.gestureOk({}, { isTrusted: true }), false, n + 'gesture: no activation API, trusted event without a type -> no');
+	eq(a.gestureOk({}, { isTrusted: true, type: 'hasOwnProperty' }), false, n + 'gesture: inherited property name is not an activation type');
+	eq(a.gestureOk({}, { isTrusted: false }), false, n + 'gesture: no activation API, synthetic event -> no');
+	eq(a.gestureOk({}, undefined), false, n + 'gesture: no activation API, no event -> no');
+	eq(a.gestureOk(null, { isTrusted: true, type: 'click' }), true, n + 'gesture: no navigator, trusted click -> ok');
+	eq(a.gestureOk(null, { isTrusted: true, type: 'load' }), false, n + 'gesture: no navigator, trusted load -> no');
+	eq(a.gestureOk(undefined, null), false, n + 'gesture: nothing -> no');
+	// mergeAllow / mergeDeny
+	eq(a.mergeAllow(null, 'marketing', ['necessary']), ['necessary', 'marketing'], n + 'mergeAllow: no decision -> required + slug');
+	eq(a.mergeAllow(['necessary', 'statistics'], 'marketing', ['necessary']), ['necessary', 'statistics', 'marketing'], n + 'mergeAllow: added to the decision');
+	eq(a.mergeAllow(['necessary', 'marketing'], 'marketing', ['necessary']), ['necessary', 'marketing'], n + 'mergeAllow: no duplicate');
+	eq(a.mergeAllow(['statistics'], 'marketing', ['necessary']), ['statistics', 'necessary', 'marketing'], n + 'mergeAllow: required always included');
+	var cur = ['necessary', 'statistics'];
+	a.mergeAllow(cur, 'marketing', ['necessary']);
+	eq(cur, ['necessary', 'statistics'], n + 'mergeAllow: input not mutated');
+	eq(a.mergeDeny(['necessary', 'statistics', 'marketing'], 'marketing', ['necessary']), ['necessary', 'statistics'], n + 'mergeDeny: slug removed');
+	eq(a.mergeDeny(['necessary', 'statistics'], 'necessary', ['necessary']), ['necessary', 'statistics'], n + 'mergeDeny: required slug kept');
+	eq(a.mergeDeny(['necessary'], 'marketing', ['necessary']), ['necessary'], n + 'mergeDeny: absent slug -> unchanged');
+	// subscribers
+	var s = a.subscribers(), got = [];
+	var off1 = s.add(function (c) { got.push('a:' + c); });
+	s.add(function () { throw new Error('boom'); });
+	s.add(function (c) { got.push('c:' + c); });
+	var cerr = console.error; console.error = function () {};
+	s.emit(1);
+	off1();
+	s.emit(2);
+	off1();
+	s.emit(3);
+	console.error = cerr;
+	eq(got, ['a:1', 'c:1', 'c:2', 'c:3'], n + 'subscribers: a throwing callback does not stop the next; unsubscribe works and is idempotent');
+	var s2 = a.subscribers(), cnt = 0, f2 = function () { cnt++; };
+	var offA = s2.add(f2); s2.add(f2); offA(); s2.emit({});
+	eq(cnt, 1, n + 'subscribers: the same function added twice is unsubscribed once per handle');
+	// apiMembers with fake hooks: the shared behaviour, independent of the DOM.
+	function fakeApi(o) {
+		var st = { light: !!o.light, decided: !!o.decided, cats: (o.cats || ['necessary']).slice(), gesture: !!o.gesture, saves: [], warns: [] };
+		var CATS = [{ slug: 'necessary', required: true }, { slug: 'statistics' }, { slug: 'marketing' }];
+		var subs = a.subscribers();
+		var cw = console.warn; console.warn = function (m) { st.warns.push(m); };
+		var api = a.apiMembers({
+			light: function () { return st.light; },
+			cat: function (slug) { return CATS.filter(function (x) { return x.slug === slug; })[0]; },
+			required: function () { return ['necessary']; },
+			isAllowed: function (slug) { return slug === 'necessary' || (st.decided && st.cats.indexOf(slug) !== -1); },
+			decided: function () { return st.decided; },
+			current: function () { return st.decided ? st.cats.slice() : []; },
+			consent: function () { return st.decided ? { categories: st.cats.slice() } : null; },
+			gesture: function () { return st.gesture; },
+			save: function (cats, decision) { st.saves.push([cats, decision]); st.save(cats, decision); }
+		}, subs);
+		// A visitor decision (banner / panel): stored, then the subscribers are told.
+		st.save = function (cats, decision) { st.decided = true; st.cats = cats; subs.emit({ categories: cats.slice(), decision: decision }); };
+		st.restore = function () { console.warn = cw; };
+		st.api = api; st.subs = subs;
+		return st;
+	}
+	var st = fakeApi({});
+	eq(Object.keys(st.api).sort(), ['allowCategory', 'denyCategory', 'onConsent', 'whenAllowed'], n + 'apiMembers: the four new members');
+	// Focus 1: no gesture -> nothing changes, warning.
+	eq(st.api.allowCategory('marketing'), false, n + 'F1: allowCategory without a gesture -> false');
+	eq([st.saves.length, st.warns], [0, [API_MSG]], n + 'F1: nothing saved, exact console warning');
+	st.gesture = true;
+	eq(st.api.allowCategory('marketing'), true, n + 'allowCategory with a gesture -> true');
+	eq(st.saves[0], [['necessary', 'marketing'], 'custom'], n + 'allowCategory: required + slug, decision custom');
+	eq(st.api.allowCategory('marketing'), false, n + 'allowCategory on an already allowed category -> false, no save');
+	eq(st.saves.length, 1, n + 'allowCategory: already allowed -> no second save');
+	eq([st.api.allowCategory('necessary'), st.api.allowCategory('bogus'), st.api.denyCategory('necessary'), st.api.denyCategory('bogus')], [false, false, false, false], n + 'required / unknown slug -> false');
+	eq(st.api.denyCategory('marketing'), true, n + 'denyCategory on an allowed category -> true');
+	eq(st.saves[1], [['necessary'], 'custom'], n + 'denyCategory: slug removed, decision custom');
+	// Focus 5: deny on an already refused category -> false, nothing written.
+	eq(st.api.denyCategory('marketing'), false, n + 'F5: denyCategory on a refused category -> false');
+	eq(st.saves.length, 2, n + 'F5: no save');
+	st.restore();
+	// denyCategory needs no gesture.
+	var stD = fakeApi({ decided: true, cats: ['necessary', 'statistics'] });
+	eq(stD.api.denyCategory('statistics'), true, n + 'denyCategory works without a gesture');
+	stD.restore();
+	// Focus 2: onConsent before the decision, then refuse all.
+	var st2 = fakeApi({}), seen = [];
+	var off = st2.api.onConsent(function (c) { seen.push(c); });
+	eq(seen.length, 0, n + 'F2: onConsent not called before a decision');
+	st2.save(['necessary'], 'rejected_all');
+	eq(seen, [{ categories: ['necessary'], decision: 'rejected_all' }], n + 'F2: refuse all -> callback gets only the required categories');
+	ok(typeof off === 'function', n + 'onConsent returns unsubscribe');
+	off();
+	st2.save(['necessary', 'marketing'], 'custom');
+	eq(seen.length, 1, n + 'onConsent: unsubscribed -> not called again');
+	var st2b = fakeApi({ decided: true, cats: ['necessary', 'statistics'] }), seen2 = [];
+	st2b.api.onConsent(function (c) { seen2.push(c); });
+	eq(seen2, [{ categories: ['necessary', 'statistics'] }], n + 'onConsent: already decided -> called immediately');
+	st2.restore(); st2b.restore();
+	// Focus 3: whenAllowed('marketing'), then consent for statistics only.
+	var st3 = fakeApi({}), runs = 0;
+	st3.api.whenAllowed('marketing', function () { runs++; });
+	st3.save(['necessary', 'statistics'], 'partial');
+	eq(runs, 0, n + 'F3: statistics only -> marketing callback not run');
+	st3.save(['necessary', 'statistics', 'marketing'], 'accepted_all');
+	eq(runs, 1, n + 'F3: marketing allowed -> run');
+	st3.save(['necessary'], 'rejected_all');
+	st3.save(['necessary', 'marketing'], 'custom');
+	eq(runs, 1, n + 'F3: runs only once');
+	var runs2 = 0, offW = st3.api.whenAllowed('statistics', function () { runs2++; });
+	eq(runs2, 0, n + 'whenAllowed: not allowed now -> waits');
+	offW();
+	st3.save(['necessary', 'statistics'], 'custom');
+	eq(runs2, 0, n + 'whenAllowed: unsubscribed -> never runs');
+	var runs3 = 0;
+	st3.api.whenAllowed('statistics', function () { runs3++; });
+	eq(runs3, 1, n + 'whenAllowed: already allowed -> runs immediately');
+	var runs4 = 0;
+	st3.api.whenAllowed('necessary', function () { runs4++; });
+	eq(runs4, 1, n + 'whenAllowed: required category -> runs immediately');
+	st3.restore();
+	// Light: allow / deny false; onConsent / whenAllowed never fire, required still runs.
+	var stL = fakeApi({ light: true, decided: true, cats: ['necessary', 'marketing'], gesture: true }), lc = 0, lw = 0, lr = 0;
+	eq([stL.api.allowCategory('statistics'), stL.api.denyCategory('marketing')], [false, false], n + 'Light: allow / deny -> false');
+	eq(stL.saves.length, 0, n + 'Light: nothing saved');
+	stL.api.onConsent(function () { lc++; });
+	stL.api.whenAllowed('marketing', function () { lw++; });
+	stL.api.whenAllowed('necessary', function () { lr++; });
+	stL.subs.emit({});
+	eq([lc, lw, lr], [0, 0, 1], n + 'Light: onConsent / whenAllowed never fire; a required category runs');
+	stL.restore();
+	// Bad arguments do not throw.
+	var stB = fakeApi({});
+	ok(typeof stB.api.onConsent(null) === 'function' && typeof stB.api.whenAllowed('marketing', 'x') === 'function', n + 'non-function callbacks -> a no-op unsubscribe');
+	stB.restore();
+});
+
+// DOM-stub boot: the real files, run in a sandbox, through their save path.
+function bootCmp(file, opts) {
+	var vm = require('vm');
+	var src = require('fs').readFileSync(require('path').join(__dirname, file), 'utf8');
+	var jar = {}, writes = [], listeners = {}, bListeners = {}, events = [], posts = [], warns = [], st = { reloads: 0 };
+	var noop = function () {};
+	function on(map) { return function (t, fn) { (map[t] = map[t] || []).push(fn); }; }
+	function classes() {
+		var s = [];
+		return { contains: function (c) { return s.indexOf(c) !== -1; }, add: function (c) { if (s.indexOf(c) === -1) { s.push(c); } }, remove: function (c) { var i = s.indexOf(c); if (i !== -1) { s.splice(i, 1); } } };
+	}
+	function el() {
+		return { hidden: true, style: { setProperty: noop, removeProperty: noop }, classList: classes(), setAttribute: noop, getAttribute: function () { return null; }, removeAttribute: noop, hasAttribute: function () { return false; }, appendChild: noop, addEventListener: noop, querySelector: function () { return null; }, querySelectorAll: function () { return []; }, contains: function () { return false; }, getClientRects: function () { return []; } };
+	}
+	var banner = el();
+	banner.addEventListener = on(bListeners);
+	var doc = {
+		body: el(), documentElement: el(), activeElement: null, createElement: el,
+		querySelector: function (sel) { return sel === '[data-cmp]' ? banner : null; },
+		querySelectorAll: function () { return []; },
+		addEventListener: on(listeners), removeEventListener: noop,
+		dispatchEvent: function (e) { events.push(e); return true; }
+	};
+	Object.defineProperty(doc, 'cookie', {
+		get: function () { return Object.keys(jar).map(function (k) { return k + '=' + jar[k]; }).join('; '); },
+		set: function (v) {
+			var nv = v.split(';')[0], i = nv.indexOf('='), name = nv.slice(0, i);
+			writes.push(name);
+			if (/max-age=0(;|$)/.test(v)) { delete jar[name]; } else { jar[name] = nv.slice(i + 1); }
+		}
+	});
+	Object.keys(opts.cookies || {}).forEach(function (k) { jar[k] = encodeURIComponent(JSON.stringify(opts.cookies[k])); });
+	var ctx = {
+		document: doc,
+		navigator: opts.nav || { userActivation: { isActive: false } },
+		location: { href: 'https://lp.md/', protocol: 'https:', reload: function () { st.reloads++; } },
+		history: {},
+		console: { warn: function (m) { warns.push(m); }, error: noop, log: noop },
+		fetch: function (u, o) { posts.push(o.body); return { catch: noop }; },
+		URLSearchParams: URLSearchParams, URL: URL,
+		CustomEvent: function (t, i) { this.type = t; this.detail = i && i.detail; },
+		getComputedStyle: function () { return {}; },
+		localStorage: { getItem: function () { return null; }, setItem: noop },
+		innerWidth: 1000, innerHeight: 800, addEventListener: noop, removeEventListener: noop
+	};
+	ctx.window = ctx;
+	if (opts.data) { ctx.CMP_DATA = opts.data; }
+	if (opts.config) { ctx.CMP_CONFIG = opts.config; }
+	vm.createContext(ctx);
+	vm.runInContext(src, ctx);
+	if (opts.before) { opts.before(ctx); }
+	(listeners.DOMContentLoaded || []).forEach(function (f) { f(); });
+	return {
+		ctx: ctx, jar: jar, writes: writes, events: events, posts: posts, warns: warns, st: st,
+		cookie: function (n) { return jar[n] ? JSON.parse(decodeURIComponent(jar[n])) : null; },
+		gesture: function (onOff) { ctx.navigator.userActivation.isActive = onOff; },
+		click: function (action) {
+			var btn = { getAttribute: function () { return action; } };
+			(bListeners.click || []).forEach(function (f) { f({ target: { closest: function (s) { return s === '[data-cmp-action]' ? btn : null; } } }); });
+		},
+		always: function (id) {
+			var box = { getAttribute: function (a) { return a === 'data-cmp-service' ? id : null; } };
+			var btn = { closest: function (s) { return s === '[data-cmp-embed]' ? box : null; } };
+			(listeners.click || []).forEach(function (f) { f({ preventDefault: noop, target: { closest: function (s) { return s === '[data-cmp-embed-always]' ? btn : null; } } }); });
+		}
+	};
+}
+var NOW = Math.floor(Date.now() / 1000), CID = '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d5e6f';
+var BUILDS = [
+	{ n: 'banner.js', file: '../../assets/js/banner.js', ck: 'cmp_consent', v: '3', logs: true,
+		opts: function (o) {
+			var d = { categories: [{ slug: 'necessary', required: true }, { slug: 'statistics' }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/wp-admin/admin-ajax.php', pluginVersion: '0.4.2', cookieDays: 180 };
+			Object.keys(o.data || {}).forEach(function (k) { d[k] = o.data[k]; });
+			if (o.svcByCat) { d.svcByCat = o.svcByCat; }
+			if (o.light) { d.mode = 'light'; }
+			if (o.reload) { d.reloadOnDecision = true; }
+			return { data: d, cookies: o.cookies, nav: o.nav, before: o.before };
+		} },
+	{ n: 'cmp.js', file: '../cmp.js', ck: 'cmp_consent', v: '1', logs: false,
+		opts: function (o) {
+			var c = { categories: ['necessary', 'statistics', 'marketing'] };
+			if (o.svcByCat) { c.services = o.svcByCat; }
+			if (o.light) { c.mode = 'light'; }
+			if (o.reload) { c.reloadOnDecision = true; }
+			return { config: c, cookies: o.cookies, nav: o.nav, before: o.before };
+		} }
+];
+BUILDS.forEach(function (B) {
+	var n = 'B7.4 stub ' + B.n + ': ';
+	function boot(o) { return bootCmp(B.file, B.opts(o || {})); }
+	function decided(cats, extra) {
+		var c = { v: B.v, id: CID, categories: cats, decision: 'custom', ts: NOW - 60 };
+		Object.keys(extra || {}).forEach(function (k) { c[k] = extra[k]; });
+		var o = {}; o[B.ck] = c; return o;
+	}
+	var x = boot();
+	ok(!!x.ctx.CMP && typeof x.ctx.CMP.allowCategory === 'function' && typeof x.ctx.CMP.denyCategory === 'function' && typeof x.ctx.CMP.onConsent === 'function' && typeof x.ctx.CMP.whenAllowed === 'function', n + 'the new members are on window.CMP');
+	eq(x.ctx.CMP.version, '0.4.2', n + 'CMP.version is the package / plugin version');
+	ok(typeof x.ctx.CMP.isAllowed === 'function' && typeof x.ctx.CMP.getConsent === 'function' && typeof x.ctx.CMP.openPreferences === 'function', n + 'the existing members are kept');
+	// Focus 1: called on load, no click.
+	var seen = [];
+	x.ctx.CMP.onConsent(function (c) { seen.push(c); });
+	eq(x.ctx.CMP.allowCategory('marketing'), false, n + 'F1: allowCategory without a gesture -> false');
+	eq([x.cookie(B.ck), x.writes.indexOf(B.ck), x.posts.length, x.events.length, seen.length], [null, -1, 0, 0, 0], n + 'F1: no cookie, no log, no event, no callback');
+	eq(x.warns, [API_MSG], n + 'F1: exact console warning');
+	// With a gesture: written, logged as custom, one cmp:consent, subscribers told.
+	x.gesture(true);
+	eq(x.ctx.CMP.allowCategory('marketing'), true, n + 'allowCategory with a gesture -> true');
+	eq(x.cookie(B.ck).categories, ['necessary', 'marketing'], n + 'cookie: required + marketing');
+	eq(x.cookie(B.ck).decision, 'custom', n + 'cookie decision custom');
+	eq(x.events.map(function (e) { return [e.type, e.detail.decision]; }), [['cmp:consent', 'custom']], n + 'one cmp:consent event (not duplicated)');
+	eq(seen.length === 1 && seen[0].categories, ['necessary', 'marketing'], n + 'onConsent gets the new consent');
+	eq(x.ctx.CMP.isAllowed('marketing'), true, n + 'isAllowed follows');
+	if (B.logs) {
+		eq(x.posts.length === 1 && [x.posts[0].get('decision'), x.posts[0].get('categories')], ['custom', '["necessary","marketing"]'], n + 'logged once as custom');
+	}
+	// Focus 5 on the real file: deny an already refused category.
+	var w0 = x.writes.length, p0 = x.posts.length;
+	eq(x.ctx.CMP.denyCategory('statistics'), false, n + 'F5: deny a refused category -> false');
+	eq([x.writes.length, x.posts.length, x.events.length], [w0, p0, 1], n + 'F5: no write, no log, no event');
+	// Withdrawal through the same path, no gesture needed.
+	x.gesture(false);
+	eq(x.ctx.CMP.denyCategory('marketing'), true, n + 'denyCategory -> true without a gesture');
+	eq(x.cookie(B.ck).categories, ['necessary'], n + 'deny: cookie keeps only required');
+	eq(seen.length, 2, n + 'deny: onConsent told');
+	eq([x.ctx.CMP.allowCategory('necessary'), x.ctx.CMP.denyCategory('necessary'), x.ctx.CMP.allowCategory('bogus')], [false, false, false], n + 'required / unknown -> false');
+	// Fallback without the User Activation API: a trusted window.event.
+	var y = boot({ nav: {} });
+	eq(y.ctx.CMP.allowCategory('statistics'), false, n + 'no activation API, no event -> false');
+	y.ctx.event = { isTrusted: true, type: 'load' };
+	eq(y.ctx.CMP.allowCategory('statistics'), false, n + 'no activation API, trusted load event -> false');
+	y.ctx.event = { isTrusted: true, type: 'click' };
+	eq(y.ctx.CMP.allowCategory('statistics'), true, n + 'no activation API, trusted click -> applied');
+	// Re-entrant save: a listener that withdraws on the allow is logged after it.
+	if (B.logs) {
+		var re = boot(), reDone = false;
+		re.ctx.CMP.onConsent(function (c) { if (!reDone && c.categories.indexOf('marketing') !== -1) { reDone = true; re.ctx.CMP.denyCategory('marketing'); } });
+		re.gesture(true);
+		re.ctx.CMP.allowCategory('marketing');
+		eq(re.posts.map(function (b) { return b.get('categories'); }), ['["necessary","marketing"]', '["necessary"]'], n + 'a save made by a listener is logged after the save that told it');
+		eq(re.cookie(B.ck).categories, ['necessary'], n + 're-entrant save: the last decision wins in the cookie');
+	}
+	// Focus 2: subscribed before the decision, then "reject" clicked.
+	var z = boot(), zs = [];
+	z.ctx.CMP.onConsent(function (c) { zs.push(c); });
+	z.click('reject');
+	eq(zs.length === 1 && [zs[0].categories, zs[0].decision], [['necessary'], 'rejected_all'], n + 'F2: refuse all -> only the required categories');
+	// Focus 3 on the real file.
+	var w = boot(), wr = 0;
+	w.ctx.CMP.whenAllowed('marketing', function () { wr++; });
+	w.gesture(true);
+	w.ctx.CMP.allowCategory('statistics');
+	eq(wr, 0, n + 'F3: statistics only -> not run');
+	w.ctx.CMP.allowCategory('marketing');
+	w.ctx.CMP.denyCategory('marketing');
+	w.ctx.CMP.allowCategory('marketing');
+	eq(wr, 1, n + 'F3: run once, at the marketing consent');
+	// Focus 4: re-consent pending for marketing (it gained a service).
+	var rc = boot({ svcByCat: { marketing: ['meta-pixel', 'tiktok-pixel'] }, cookies: decided(['necessary', 'marketing'], { svc: { marketing: ['meta-pixel'] } }) }), rr = 0, rcs = [];
+	rc.ctx.CMP.whenAllowed('marketing', function () { rr++; });
+	rc.ctx.CMP.onConsent(function (c) { rcs.push(c); });
+	eq(rr, 0, n + 'F4: affected category -> whenAllowed waits');
+	eq(rcs.length === 1 && rcs[0].categories, ['necessary'], n + 'F4: onConsent called at once with the effective categories');
+	rc.gesture(true);
+	eq(rc.ctx.CMP.allowCategory('marketing'), true, n + 'F4: allowCategory confirms the affected category');
+	eq(rr, 1, n + 'F4: whenAllowed runs after the new decision');
+	eq(rc.cookie(B.ck).svc, { marketing: ['meta-pixel', 'tiktok-pixel'] }, n + 'F4: the new snapshot is stored');
+	// "Always load" tells the subscribers too (the visitor decided before).
+	var al = boot({ cookies: decided(['necessary', 'statistics']) }), als = [];
+	al.ctx.CMP.onConsent(function (c) { als.push(c); });
+	al.always('youtube');
+	eq(als.length, 2, n + '"Always load" -> onConsent called again');
+	// Light: nothing applies, nothing fires (even with an old cookie).
+	var li = boot({ light: true, cookies: decided(['necessary', 'marketing']) }), lc = 0, lr = 0;
+	li.gesture(true);
+	eq([li.ctx.CMP.allowCategory('statistics'), li.ctx.CMP.denyCategory('marketing')], [false, false], n + 'Light: allow / deny -> false');
+	li.ctx.CMP.onConsent(function () { lc++; });
+	li.ctx.CMP.whenAllowed('marketing', function () { lc++; });
+	li.ctx.CMP.whenAllowed('necessary', function () { lr++; });
+	eq([lc, lr, li.writes.indexOf(B.ck)], [0, 1, -1], n + 'Light: no callback, no write; a required category runs');
+	// reloadOnDecision: like a panel save on the first decision.
+	var rl = boot({ reload: true });
+	rl.gesture(true);
+	rl.ctx.CMP.allowCategory('marketing');
+	eq(rl.st.reloads, 1, n + 'reloadOnDecision honoured on the first decision');
+	rl.ctx.CMP.allowCategory('statistics');
+	eq(rl.st.reloads, 1, n + 'no reload on a later change');
+});
+// Check mode (B3, WordPress only): check cookie, nothing logged.
+(function () {
+	var ch = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_check_consent', svcCookie: 'cmp_check_svc', ajaxUrl: '/wp-admin/admin-ajax.php', check: true, pluginVersion: '0.4.2' } });
+	ch.gesture(true);
+	eq(ch.ctx.CMP.allowCategory('marketing'), true, 'B7.4 check mode: allowCategory applies');
+	eq([ch.cookie('cmp_check_consent').categories, ch.cookie('cmp_consent'), ch.posts.length], [['necessary', 'marketing'], null, 0], 'B7.4 check mode: check cookie written, real cookie untouched, nothing logged');
+})();
+// CMP.version sources: WordPress reads CMP_DATA.pluginVersion (CMP_DATA.version
+// is the policy version); the standalone constant follows the plugin version.
+ok(/version: String\(D\.pluginVersion \|\| ''\)/.test(bannerSrc), 'B7.4: banner.js CMP.version from CMP_DATA.pluginVersion');
+var pkgM = cmpSrc.match(/var PKG_VERSION = '([^']+)';/), plugM = require('fs').readFileSync(require('path').join(__dirname, '../../consent-manager-pro.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/);
+ok(!!pkgM && !!plugM && pkgM[1] === plugM[1], 'B7.4: cmp.js PKG_VERSION equals CMP_VERSION (got ' + (pkgM && pkgM[1]) + ' vs ' + (plugM && plugM[1]) + ')');
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);
