@@ -39,19 +39,21 @@ class CMP_Uninstaller {
 		delete_transient( 'cmp_db_schema_retry' );
 		delete_transient( 'cmp_tracker_scan' );
 		delete_transient( 'cmp_tracker_scan_fail' );
+		delete_transient( 'cmp_latest_release' );
 
-		// Thumbnail transients (cmp_thumb_fail_<id>, cmp_thumb_lock_<id>).
+		// All plugin transients (thumbnail locks, rate limits, release check, admin messages).
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-				$wpdb->esc_like( '_transient_cmp_thumb_' ) . '%',
-				$wpdb->esc_like( '_transient_timeout_cmp_thumb_' ) . '%'
+				$wpdb->esc_like( '_transient_cmp_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_cmp_' ) . '%'
 			)
 		);
 
 		wp_clear_scheduled_hook( 'cmp_fetch_thumbs' );
 		wp_clear_scheduled_hook( 'cmp_scan_run' );
 		wp_clear_scheduled_hook( 'cmp_scan_daily' );
+		wp_clear_scheduled_hook( 'cmp_prune_consent_log' );
 
 		// uploads/cmp-thumbs (YouTube thumbnails) and uploads/cmp-fonts (localized fonts): flat folders.
 		$up = wp_upload_dir( null, false );
@@ -76,6 +78,10 @@ class CMP_Uninstaller {
 				$wpdb->esc_like( '_transient_timeout_cmp_' ) . '%'
 			)
 		);
+		// The SQL sweep bypasses the object cache: drop stale cached copies.
+		if ( function_exists( 'wp_cache_flush' ) ) {
+			wp_cache_flush();
+		}
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}cmp_consent_log" );
 		delete_post_meta_by_key( '_cmp_legal_type' );
 		delete_post_meta_by_key( '_cmp_legal_mode' );

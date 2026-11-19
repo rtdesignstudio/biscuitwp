@@ -169,3 +169,118 @@ $d = CMP_Installer::default_settings();
 cmp_assert_eq( $d['delete_data_on_uninstall'], false, 'installer default delete_data_on_uninstall false' );
 cmp_assert_eq( CMP_Sanitizer::settings( array() )['delete_data_on_uninstall'], false, 'sanitizer missing -> false' );
 cmp_assert_eq( CMP_Sanitizer::settings( array( 'delete_data_on_uninstall' => '1' ) )['delete_data_on_uninstall'], true, "sanitizer '1' -> true" );
+
+// --- Flag off: the remaining "always" options and every cmp transient go.
+cmp_un_reset( false );
+$GLOBALS['cmp_un']['options'] += array(
+	'cmp_operator_note_seen'     => 1,
+	'cmp_templates_notice'       => 1,
+	'cmp_templates_regenerated'  => 1,
+	'_transient_cmp_rl_abc'      => 1,
+	'_transient_timeout_cmp_rl_abc' => 1,
+	'_transient_cmp_latest_release' => 1,
+	'_transient_cmp_measurement_msg_5' => 1,
+);
+CMP_Uninstaller::cleanup_site( new CMP_Un_Wpdb(), false );
+$o = $GLOBALS['cmp_un']['options'];
+cmp_assert( ! isset( $o['cmp_operator_note_seen'] ) && ! isset( $o['cmp_templates_notice'] ) && ! isset( $o['cmp_templates_regenerated'] ), 'off: operator note and templates options deleted' );
+cmp_assert( ! isset( $o['_transient_cmp_rl_abc'] ) && ! isset( $o['_transient_timeout_cmp_rl_abc'] ) && ! isset( $o['_transient_cmp_latest_release'] ) && ! isset( $o['_transient_cmp_measurement_msg_5'] ), 'off: rate-limit, release and message transients deleted' );
+cmp_assert( isset( $o['_transient_cmpx_other'] ), 'off: foreign transient kept' );
+cmp_assert_eq( in_array( 'cmp_prune_consent_log', $GLOBALS['cmp_un']['cron'], true ), true, 'off: prune cron cleared' );
+
+// --- Multisite run(): two sites, different flags.
+if ( ! function_exists( 'is_multisite' ) ) {
+	function is_multisite() { return ! empty( $GLOBALS['cmp_ms']['on'] ); }
+}
+if ( ! function_exists( 'get_sites' ) ) {
+	function get_sites( $a = array() ) { return array_keys( $GLOBALS['cmp_ms']['sites'] ); }
+}
+if ( ! function_exists( 'switch_to_blog' ) ) {
+	function switch_to_blog( $id ) {
+		$GLOBALS['cmp_ms']['stack'][] = $GLOBALS['cmp_ms']['cur'];
+		$GLOBALS['cmp_ms']['cur']     = $id;
+		$GLOBALS['cmp_ms']['log'][]   = 'switch:' . $id;
+		$GLOBALS['cmp_un']['options'] = &$GLOBALS['cmp_ms']['sites'][ $id ];
+		$GLOBALS['wpdb']->prefix      = 'wp_' . $id . '_';
+		$GLOBALS['wpdb']->options     = 'wp_' . $id . '_options';
+		return true;
+	}
+}
+if ( ! function_exists( 'restore_current_blog' ) ) {
+	function restore_current_blog() {
+		$prev = array_pop( $GLOBALS['cmp_ms']['stack'] );
+		$GLOBALS['cmp_ms']['cur'] = $prev;
+		$GLOBALS['cmp_ms']['log'][] = 'restore';
+		$GLOBALS['wpdb']->prefix  = 'wp_';
+		$GLOBALS['wpdb']->options = 'wp_options';
+		return true;
+	}
+}
+$tmp = cmp_un_reset( false );
+$GLOBALS['wpdb'] = new CMP_Un_Wpdb();
+$GLOBALS['cmp_ms'] = array(
+	'on'    => true,
+	'cur'   => 0,
+	'stack' => array(),
+	'log'   => array(),
+	'sites' => array(
+		1 => array( 'cmp_settings' => array( 'delete_data_on_uninstall' => true ), 'cmp_future_option' => 'x' ),
+		2 => array( 'cmp_settings' => array( 'delete_data_on_uninstall' => false ), 'cmp_future_option' => 'y' ),
+	),
+);
+CMP_Uninstaller::run();
+$drops = array_values( array_filter( $GLOBALS['wpdb']->queries, function ( $q ) { return false !== strpos( $q, 'DROP TABLE' ); } ) );
+cmp_assert_eq( $drops, array( 'DROP TABLE IF EXISTS wp_1_cmp_consent_log' ), 'multisite: only the flagged site drops its log table' );
+cmp_assert( ! isset( $GLOBALS['cmp_ms']['sites'][1]['cmp_settings'] ) && ! isset( $GLOBALS['cmp_ms']['sites'][1]['cmp_future_option'] ), 'multisite: site 1 fully removed' );
+cmp_assert( isset( $GLOBALS['cmp_ms']['sites'][2]['cmp_settings'] ) && isset( $GLOBALS['cmp_ms']['sites'][2]['cmp_future_option'] ), 'multisite: site 2 data kept' );
+cmp_assert_eq( $GLOBALS['cmp_ms']['log'], array( 'switch:1', 'restore', 'switch:2', 'restore' ), 'multisite: switch and restore balanced' );
+unset( $GLOBALS['cmp_un']['options'] );
+$GLOBALS['cmp_ms']['on'] = false;
+@rmdir( $tmp . '/cmp-thumbs' ); @rmdir( $tmp . '/cmp-fonts' ); @rmdir( $tmp );
+
+// --- CMP_Plugin multisite hooks (install_site stubbed by a subclass).
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'CMP_PATH' ) ) {
+	define( 'CMP_PATH', dirname( __DIR__ ) . '/' );
+}
+if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+	function is_plugin_active_for_network( $p ) { return ! empty( $GLOBALS['cmp_ms']['net_active'] ); }
+}
+if ( ! function_exists( 'plugin_basename' ) ) {
+	function plugin_basename( $f ) { return basename( dirname( $f ) ) . '/' . basename( $f ); }
+}
+class CMP_Wpdb_Blog extends CMP_Un_Wpdb {
+	public function get_blog_prefix( $id ) { return 'wp_' . $id . '_'; }
+}
+require_once __DIR__ . '/../includes/class-plugin.php';
+class CMP_Test_Plugin extends CMP_Plugin {
+	public static $installed = array();
+	public static $stopped   = array();
+	public static function install_site() { self::$installed[] = $GLOBALS['cmp_ms']['cur']; }
+	public static function deactivate_site() { self::$stopped[] = $GLOBALS['cmp_ms']['cur']; }
+}
+$GLOBALS['cmp_ms'] = array( 'on' => true, 'cur' => 0, 'stack' => array(), 'log' => array(), 'net_active' => true,
+	'sites' => array( 1 => array(), 2 => array(), 3 => array() ) );
+$GLOBALS['wpdb'] = new CMP_Wpdb_Blog();
+$GLOBALS['cmp_un'] = array( 'options' => array() );
+CMP_Test_Plugin::activate( true );
+cmp_assert_eq( CMP_Test_Plugin::$installed, array( 1, 2, 3 ), 'activate(network): install_site once per site' );
+cmp_assert_eq( $GLOBALS['cmp_ms']['log'], array( 'switch:1', 'restore', 'switch:2', 'restore', 'switch:3', 'restore' ), 'activate(network): switch/restore balanced' );
+CMP_Test_Plugin::$installed = array();
+CMP_Test_Plugin::activate( false );
+cmp_assert_eq( CMP_Test_Plugin::$installed, array( 0 ), 'activate(single site): install_site once, no switching' );
+CMP_Test_Plugin::deactivate( true );
+cmp_assert_eq( CMP_Test_Plugin::$stopped, array( 1, 2, 3 ), 'deactivate(network): every site' );
+CMP_Test_Plugin::$installed = array();
+CMP_Test_Plugin::on_new_site( (object) array( 'blog_id' => 7 ) );
+cmp_assert_eq( CMP_Test_Plugin::$installed, array( 7 ), 'new site: installed when network-active' );
+$GLOBALS['cmp_ms']['net_active'] = false;
+CMP_Test_Plugin::$installed = array();
+CMP_Test_Plugin::on_new_site( (object) array( 'blog_id' => 8 ) );
+cmp_assert_eq( CMP_Test_Plugin::$installed, array(), 'new site: nothing installed when not network-active' );
+cmp_assert_eq( CMP_Plugin::drop_tables( array( 'wp_9_posts' ), 9 ), array( 'wp_9_posts', 'wp_9_cmp_consent_log' ), 'wpmu_drop_tables adds the site log table' );
+$src = file_get_contents( __DIR__ . '/../includes/class-plugin.php' );
+cmp_assert( false !== strpos( $src, "'wp_initialize_site', array( __CLASS__, 'on_new_site' ), 20" ) && false !== strpos( $src, "'wpmu_drop_tables'" ), 'hooks registered in boot' );
+$GLOBALS['cmp_ms']['on'] = false;

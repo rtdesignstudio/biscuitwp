@@ -53,6 +53,10 @@ class CMP_Plugin {
 			new CMP_Admin();
 		}
 
+		// Multisite: new sites get installed, deleted sites lose the consent log table.
+		add_action( 'wp_initialize_site', array( __CLASS__, 'on_new_site' ), 20, 1 );
+		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'drop_tables' ), 10, 2 );
+
 		// Per-request caches of the services list follow their options.
 		foreach ( array( 'cmp_services', 'cmp_categories', 'cmp_settings' ) as $opt ) { // cmp_settings: the measurement mode
 			add_action( 'add_option_' . $opt, array( 'CMP_Services', 'flush' ) );
@@ -158,7 +162,21 @@ class CMP_Plugin {
 		return $mtime ? (string) $mtime : CMP_VERSION;
 	}
 
-	public static function activate() {
+	/** Activation. Network-wide on multisite: install on every existing site. */
+	public static function activate( $network_wide = false ) {
+		if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
+			foreach ( (array) get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $id ) {
+				switch_to_blog( (int) $id );
+				static::install_site();
+				restore_current_blog();
+			}
+			return;
+		}
+		static::install_site();
+	}
+
+	/** Per-site install: schema, daily scan, version stamp. */
+	public static function install_site() {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		CMP_Installer::upgrade_schema();
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
@@ -166,12 +184,47 @@ class CMP_Plugin {
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 
-	/** Deactivation: stop the cron jobs only (settings and data stay). */
-	public static function deactivate() {
+	/** Deactivation: stop the cron jobs only (settings and data stay). Every site when network-wide. */
+	public static function deactivate( $network_wide = false ) {
+		if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
+			foreach ( (array) get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $id ) {
+				switch_to_blog( (int) $id );
+				static::deactivate_site();
+				restore_current_blog();
+			}
+			return;
+		}
+		static::deactivate_site();
+	}
+
+	/** Stop this site's cron jobs. */
+	public static function deactivate_site() {
 		if ( function_exists( 'wp_clear_scheduled_hook' ) ) {
 			wp_clear_scheduled_hook( 'cmp_fetch_thumbs' );
+			wp_clear_scheduled_hook( 'cmp_prune_consent_log' );
 		}
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
 		CMP_Scanner::unschedule();
+	}
+
+	/** A site created while the plugin is network-active gets installed right away. */
+	public static function on_new_site( $new_site ) {
+		if ( ! function_exists( 'is_plugin_active_for_network' ) && defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		if ( ! function_exists( 'is_plugin_active_for_network' ) || ! is_plugin_active_for_network( plugin_basename( CMP_PATH . 'consent-manager-pro.php' ) ) ) {
+			return;
+		}
+		switch_to_blog( (int) $new_site->blog_id );
+		static::install_site();
+		restore_current_blog();
+	}
+
+	/** Deleting a site also drops its consent log table. */
+	public static function drop_tables( $tables, $site_id = 0 ) {
+		global $wpdb;
+		$tables   = (array) $tables;
+		$tables[] = $wpdb->get_blog_prefix( (int) $site_id ) . 'cmp_consent_log';
+		return $tables;
 	}
 }
