@@ -47,3 +47,36 @@ cmp_assert_eq( CMP_Consent::is_policy_page( 14, $cmp_ps, 0 ), true, 'cookie page
 cmp_assert_eq( CMP_Consent::is_policy_page( 3, $cmp_ps, 3 ), true, "WordPress' own privacy policy page counts" );
 cmp_assert_eq( CMP_Consent::is_policy_page( 7, $cmp_ps, 3 ), false, 'any other page is not' );
 cmp_assert_eq( CMP_Consent::is_policy_page( 0, $cmp_ps, 0 ), false, 'no page (archive, 404) is not, even with unset ids' );
+
+
+// B2 task 3: Advanced forces the four ad/analytics signals to denied.
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+require_once __DIR__ . '/../includes/modules/class-banner.php';
+$adv = CMP_Consent::advanced_defaults( array( 'analytics_storage' => 'granted', 'functionality_storage' => 'granted' ) );
+cmp_assert_eq( $adv['analytics_storage'], 'denied', 'advanced_defaults: required analytics forced denied' );
+cmp_assert_eq( $adv['functionality_storage'], 'granted', 'advanced_defaults: other signals unchanged' );
+$adv = CMP_Consent::advanced_defaults( array() );
+foreach ( array( 'analytics_storage', 'ad_storage', 'ad_user_data', 'ad_personalization' ) as $cmp_sig ) {
+	cmp_assert_eq( $adv[ $cmp_sig ], 'denied', "advanced_defaults: empty set gets {$cmp_sig} denied" );
+}
+cmp_assert_eq( CMP_Banner::consent_default_payload( array(), false ), null, 'payload: Strict with no signals prints nothing' );
+$pl = CMP_Banner::consent_default_payload( array(), true );
+cmp_assert_eq( $pl['ad_user_data'], 'denied', 'payload: Advanced with no signals still prints, ad_user_data denied' );
+cmp_assert_eq( $pl['security_storage'], 'granted', 'payload: Advanced security_storage granted' );
+cmp_assert_eq( $pl['wait_for_update'], 500, 'payload: Advanced keeps wait_for_update' );
+$req = CMP_Consent::build_default_signals( array( array( 'slug' => 'statistics', 'required' => true, 'gtag_signals' => array( 'analytics_storage' ) ) ) );
+cmp_assert_eq( CMP_Banner::consent_default_payload( $req, false )['analytics_storage'], 'granted', 'payload: Strict keeps required analytics granted' );
+cmp_assert_eq( CMP_Banner::consent_default_payload( $req, true )['analytics_storage'], 'denied', 'payload: Advanced forces required analytics denied' );
+$strict = CMP_Banner::consent_default_payload( CMP_Consent::build_default_signals( $cats2 ), false );
+cmp_assert_eq( $strict, array(
+	'analytics_storage'       => 'denied',
+	'ad_storage'              => 'denied',
+	'ad_user_data'            => 'denied',
+	'ad_personalization'      => 'denied',
+	'functionality_storage'   => 'denied',
+	'personalization_storage' => 'denied',
+	'security_storage'        => 'granted',
+	'wait_for_update'         => 500,
+), 'payload: Strict equals the previous merge' );

@@ -70,6 +70,14 @@ class CMP_Consent {
 		);
 	}
 
+	/** Advanced: the page loads before consent, so these four always start denied (pure). */
+	public static function advanced_defaults( array $signals ) {
+		foreach ( array( 'analytics_storage', 'ad_storage', 'ad_user_data', 'ad_personalization' ) as $sig ) {
+			$signals[ $sig ] = 'denied';
+		}
+		return $signals;
+	}
+
 	public static function build_update_signals( array $categories, array $accepted ) {
 		return self::map_signals(
 			$categories,

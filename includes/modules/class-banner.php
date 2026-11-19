@@ -19,11 +19,10 @@ class CMP_Banner {
 		echo CMP_Blocker::custom_script_html( CMP_Services::active(), $mode ); // phpcs:ignore WordPress.Security.EscapeOutput -- admin-authored script markup, built and escaped in the blocker.
 	}
 
-	/** Emit gtag consent default BEFORE any tag manager fires. */
-	public function print_consent_default() {
-		$signals = CMP_Consent::build_default_signals( CMP_Consent::get_categories() );
-		if ( empty( $signals ) ) {
-			return;
+	/** Pure: the gtag consent default payload, or null when nothing is printed (Strict with no signals). */
+	public static function consent_default_payload( array $signals, $advanced ) {
+		if ( empty( $signals ) && ! $advanced ) {
+			return null;
 		}
 		$defaults = array(
 			'analytics_storage'       => 'denied',
@@ -36,6 +35,18 @@ class CMP_Banner {
 			'wait_for_update'         => 500,
 		);
 		$signals = array_merge( $defaults, $signals );
+		return $advanced ? CMP_Consent::advanced_defaults( $signals ) : $signals;
+	}
+
+	/** Emit gtag consent default BEFORE any tag manager fires. */
+	public function print_consent_default() {
+		$signals = self::consent_default_payload(
+			CMP_Consent::build_default_signals( CMP_Consent::get_categories() ),
+			CMP_Services::advanced_now()
+		);
+		if ( null === $signals ) {
+			return;
+		}
 		echo "<script data-cmp-keep>\n";
 		echo "window.dataLayer = window.dataLayer || [];\n";
 		echo "function gtag(){dataLayer.push(arguments);}\n";
