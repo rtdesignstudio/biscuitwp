@@ -7,7 +7,23 @@ class CMP_Settings_Page {
 
 	/** Warn when the homepage loads trackers without consent, or runs Light mode with trackers. */
 	private static function render_tracker_warnings( $s ) {
-		$scan = CMP_Blocker::scan_homepage( isset( $_GET['updated'] ) );
+		CMP_Scanner::maybe_run_inline(); // no working cron: this screen moves the scan on
+		$scan     = CMP_Blocker::scan_homepage( false );
+		$progress = CMP_Scanner::current_progress();
+		// After a save, results from before it would be judged against the new
+		// settings (e.g. "blocking is on, yet GA loads"): show none until a newer scan.
+		if ( CMP_Scanner::outdated_now( $scan ) ) {
+			echo '<div class="notice notice-info"><p>' . esc_html(
+				null !== $progress
+					/* translators: 1: pages scanned, 2: pages in the list */
+					? sprintf( __( 'Rescanăm site-ul după modificări (%1$d/%2$d)', 'consent-manager-pro' ), $progress[0], $progress[1] )
+					: __( 'Rescanăm site-ul după modificări.', 'consent-manager-pro' )
+			) . '</p></div>';
+			return;
+		}
+		if ( null !== $progress ) {
+			echo '<div class="notice notice-info"><p>' . esc_html( CMP_Scanner::progress_text( $progress ) ) . '</p></div>';
+		}
 		if ( null === $scan ) {
 			return;
 		}
@@ -44,7 +60,7 @@ class CMP_Settings_Page {
 		if ( 'light' === $mode && ( $scan['raw'] || $scan['blocked'] ) ) {
 			echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Modul Light nu poate cere acord.', 'consent-manager-pro' ) . '</strong> '
 				/* translators: %s: tracker names */
-				. esc_html( sprintf( __( 'Pe pagina principală am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro.', 'consent-manager-pro' ), $label_all() ) )
+				. esc_html( sprintf( __( 'Pe site am găsit: %s. Aceste scripturi sunt blocate permanent în Light și nu rulează. Dacă ai nevoie de ele, treci pe modul Pro.', 'consent-manager-pro' ), $label_all() ) )
 				. '</p></div>';
 			if ( $scan['raw'] ) {
 				echo '<div class="notice notice-error"><p>'
@@ -62,9 +78,9 @@ class CMP_Settings_Page {
 		if ( 'pro' === $mode && $scan['raw'] ) {
 			$msg = empty( $s['block_scripts'] )
 				/* translators: %s: tracker names */
-				? __( '%s se încarcă pe pagina principală înainte de acord. Bifează „Blochează scripturile de tracking până la consimțământ” mai jos.', 'consent-manager-pro' )
+				? __( '%s se încarcă pe site înainte de acord. Bifează „Blochează scripturile de tracking până la consimțământ” mai jos.', 'consent-manager-pro' )
 				/* translators: %s: tracker names */
-				: __( '%s se încarcă pe pagina principală înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui.', 'consent-manager-pro' );
+				: __( '%s se încarcă pe site înainte de acord, deși blocarea e activă: probabil e injectat ulterior din JavaScript. Verifică sursa lui.', 'consent-manager-pro' );
 			echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Tracking fără acord.', 'consent-manager-pro' ) . '</strong> '
 				. esc_html( sprintf( $msg, $label_raw() ) ) . '</p></div>';
 		}
@@ -292,7 +308,8 @@ class CMP_Settings_Page {
 		if ( null !== $change ) {
 			set_transient( self::MSG_KEY . get_current_user_id(), $change, 60 );
 		}
-		delete_transient( 'cmp_tracker_scan' ); // like a Services save: the next scan follows the new settings
+		CMP_Scanner::mark_saved(); // warnings from older results stay hidden until the new scan
+		CMP_Scanner::enqueue_all(); // like a Services save: a fresh scan follows the new settings
 		$args = array( 'page' => CMP_Admin::SLUG, 'updated' => 1 );
 		if ( 'ack' === $meas['error'] ) {
 			$args['cmp_measurement'] = 'ack';

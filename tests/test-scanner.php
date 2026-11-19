@@ -151,3 +151,103 @@ cmp_assert( $has( '<script src=https://cdn.jsdelivr.net/npm/x.js></script>', 'cd
 cmp_assert( ! $has( '<link href="https://fonts.googleapis.com.evil.com/css">', 'google_fonts' ), 'ip_resources: lookalike google host rejected' );
 cmp_assert( ! $has( '<img src="https://notgravatar.com/a.png">', 'gravatar' ), 'ip_resources: lookalike gravatar rejected' );
 cmp_assert_eq( CMP_Scanner::script_sources( '<script src=https://www.google-analytics.com/analytics.js></script>', $svcs, $h )['google-analytics'][0]['kind'], 'external', 'script_sources: unquoted src' );
+
+// ---- Task 2: multi-page aggregate and queue (pure) ----
+$t2_home = CMP_Scanner::page_result( 'https://example.md/', 'ok', '<a href="#cmp-settings">Setări cookie</a>' . CMP_Blocker::rewrite( '<script src="https://www.googletagmanager.com/gtag/js?id=G-ABC123"></script>', array(), $svcs ) . '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=A">', $svcs, $h, 100 );
+$t2_post = CMP_Scanner::page_result( 'https://example.md/news/', 'ok', '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe><script src="https://www.google-analytics.com/analytics.js"></script><img src="https://secure.gravatar.com/avatar/1"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=B">', $svcs, $h, 101 );
+$t2_err  = CMP_Scanner::page_result( 'https://example.md/broken/', '500', '<script src="https://connect.facebook.net/en_US/fbevents.js"></script>', $svcs, $h, 102 );
+cmp_assert_eq( $t2_err, array( 'url' => 'https://example.md/broken/', 'time' => 102, 'status' => '500' ), 'page_result: an error page keeps only url, time and status' );
+cmp_assert( true === $t2_home['home'] && false === $t2_post['home'], 'page_result: the home page is marked' );
+cmp_assert( true === $t2_home['settings_link'] && false === $t2_post['settings_link'], 'page_result: settings_link per page' );
+cmp_assert_eq( $t2_post['fonts'], array( 'https://fonts.googleapis.com/css?family=B' ), 'page_result: Google Fonts links kept per page' );
+
+$t2_agg = CMP_Scanner::aggregate( array( $t2_home, $t2_post, $t2_err ) );
+foreach ( array( 'raw', 'blocked', 'settings_link', 'services', 'time', 'sources', 'resources' ) as $k ) {
+	cmp_assert( array_key_exists( $k, $t2_agg ), "aggregate: has key $k (consumers)" );
+}
+foreach ( array( 'raw', 'blocked', 'found' ) as $k ) {
+	cmp_assert( isset( $t2_agg['services'][ $k ] ) && is_array( $t2_agg['services'][ $k ] ), "aggregate: services.$k is a list" );
+}
+cmp_assert( in_array( 'youtube', $t2_agg['services']['found'], true ), 'aggregate: a service found only on an inner page ends up in found' );
+cmp_assert( in_array( 'google-analytics', $t2_agg['services']['found'], true ), 'aggregate: home page services in found' );
+cmp_assert( ! in_array( 'meta-pixel', $t2_agg['services']['found'], true ) && ! in_array( 'meta-pixel', $t2_agg['services']['raw'], true ), 'aggregate: an error page is ignored' );
+cmp_assert( in_array( 'statistics', $t2_agg['raw'], true ), 'aggregate: raw categories are a union over pages' );
+cmp_assert( in_array( 'google-analytics', $t2_agg['services']['raw'], true ) && in_array( 'google-analytics', $t2_agg['services']['blocked'], true ), 'aggregate: services raw and blocked are unions' );
+cmp_assert( true === $t2_agg['settings_link'], 'aggregate: settings_link comes from the home page' );
+cmp_assert( true === CMP_Scanner::aggregate( array( $t2_post, $t2_home ) )['settings_link'], 'aggregate: settings_link from home even when home is not first' );
+$t2_nohome = CMP_Scanner::aggregate( array( $t2_post ) );
+cmp_assert( ! array_key_exists( 'settings_link', $t2_nohome ), 'aggregate: no home result, no settings_link (no false warning)' );
+cmp_assert_eq( $t2_agg['time'], 101, 'aggregate: time is the newest ok page' );
+cmp_assert_eq( $t2_agg['pages'], 2, 'aggregate: counts ok pages' );
+cmp_assert_eq( $t2_agg['failed'], array( 'https://example.md/broken/' ), 'aggregate: lists failed pages' );
+cmp_assert( isset( $t2_agg['sources']['google-analytics'] ) && in_array( array( 'kind' => 'external', 'slug' => 'www.googletagmanager.com' ), $t2_agg['sources']['google-analytics'], true ) && in_array( array( 'kind' => 'external', 'slug' => 'www.google-analytics.com' ), $t2_agg['sources']['google-analytics'], true ), 'aggregate: sources merged across pages' );
+$t2_rt = array();
+foreach ( $t2_agg['resources'] as $r ) {
+	$t2_rt[] = $r['type'] . '|' . $r['host'];
+}
+cmp_assert_eq( $t2_rt, array( 'google_fonts|fonts.googleapis.com', 'gravatar|secure.gravatar.com' ), 'aggregate: resources merged, one per type+host' );
+$t2_empty = CMP_Scanner::aggregate( array( $t2_err ) );
+cmp_assert( 0 === $t2_empty['pages'] && array() === $t2_empty['services']['found'] && array() === $t2_empty['raw'], 'aggregate: only error pages gives an empty result with pages 0' );
+cmp_assert_eq( CMP_Scanner::aggregate( array( $t2_home, $t2_home ) )['sources'], CMP_Scanner::aggregate( array( $t2_home ) )['sources'], 'aggregate: sources deduped' );
+cmp_assert_eq( CMP_Scanner::font_links( array( $t2_home, $t2_post, $t2_err, $t2_home ) ), array( 'https://fonts.googleapis.com/css?family=A', 'https://fonts.googleapis.com/css?family=B' ), 'font_links: union over pages, deduped' );
+
+// Queue helpers.
+$t2_q = array( 'https://example.md/', 'https://example.md/a/', 'https://example.md/b/', 'https://example.md/c/', 'https://example.md/d/', 'https://example.md/e/' );
+$t2_s = CMP_Scanner::queue_take( $t2_q, 4 );
+cmp_assert_eq( $t2_s['take'], array_slice( $t2_q, 0, 4 ), 'queue_take: first n' );
+cmp_assert_eq( $t2_s['rest'], array_slice( $t2_q, 4 ), 'queue_take: rest' );
+cmp_assert_eq( CMP_Scanner::queue_take( array(), 4 ), array( 'take' => array(), 'rest' => array() ), 'queue_take: empty queue' );
+cmp_assert_eq( CMP_Scanner::queue_add( array( 'https://example.md/a/' ), array( 'https://example.md/a', 'https://example.md/b/', 'https://example.md/b/' ) ), array( 'https://example.md/a/', 'https://example.md/b/' ), 'queue_add: dedupes (trailing slash too)' );
+cmp_assert_eq( CMP_Scanner::queue_remove( $t2_q, array( 'https://example.md/a', 'https://example.md/' ) ), array( 'https://example.md/b/', 'https://example.md/c/', 'https://example.md/d/', 'https://example.md/e/' ), 'queue_remove: removes done urls by key' );
+cmp_assert_eq( CMP_Scanner::progress( array( 'total' => 6 ), array( 'x', 'y' ) ), array( 4, 6 ), 'progress: done of total' );
+cmp_assert( CMP_Scanner::in_backoff( array( 'status' => '500', 'time' => 1000 ), 1100 ) && ! CMP_Scanner::in_backoff( array( 'status' => '500', 'time' => 1000 ), 1301 ) && ! CMP_Scanner::in_backoff( array( 'status' => 'ok', 'time' => 1000 ), 1100 ) && ! CMP_Scanner::in_backoff( null, 1100 ), 'in_backoff: a failed page waits 5 minutes' );
+
+// ---- Task 2, fix round 1 ----
+// I-1: run one inline batch on an admin screen when cron is disabled or the run is stuck 15 min.
+cmp_assert( CMP_Scanner::should_run_inline( true, 1000, 1001 ), 'should_run_inline: cron disabled runs inline at once' );
+cmp_assert( ! CMP_Scanner::should_run_inline( false, 1000, 1000 + 900 ), 'should_run_inline: cron on, 15 min without progress is not yet stuck' );
+cmp_assert( CMP_Scanner::should_run_inline( false, 1000, 1000 + 901 ), 'should_run_inline: cron on, over 15 min without progress runs inline' );
+cmp_assert( ! CMP_Scanner::should_run_inline( false, 1000, 1100 ), 'should_run_inline: cron on and recent progress waits for cron' );
+
+// I-2: stale runs (over 1 h without progress).
+$t2_run = array( 'status' => 'running', 'started' => 1000, 'progress' => 5000, 'total' => 6 );
+cmp_assert( ! CMP_Scanner::is_stale( $t2_run, 5000 + 3600 ) && CMP_Scanner::is_stale( $t2_run, 5000 + 3601 ), 'is_stale: over 1 h since the last progress' );
+cmp_assert( CMP_Scanner::is_stale( array( 'status' => 'running', 'started' => 1000 ), 4601 + 1 ), 'is_stale: an old state without progress falls back to started' );
+cmp_assert( ! CMP_Scanner::is_stale( array( 'status' => 'idle', 'started' => 1, 'progress' => 1 ), 99999 ), 'is_stale: an idle state is never stale' );
+cmp_assert_eq( CMP_Scanner::resume_action( $t2_run, array( 'x' ), 5000 + 3601 ), 'reschedule', 'resume_action: stale with a queue is rescheduled' );
+cmp_assert_eq( CMP_Scanner::resume_action( $t2_run, array(), 5000 + 3601 ), 'reenqueue', 'resume_action: stale with an empty queue is re-enqueued' );
+cmp_assert_eq( CMP_Scanner::resume_action( $t2_run, array( 'x' ), 5100 ), 'none', 'resume_action: a live run is left alone' );
+cmp_assert_eq( CMP_Scanner::progress_for( $t2_run, array( 'x', 'y' ), 5100 ), array( 4, 6 ), 'progress_for: a live run reports done/total' );
+cmp_assert_eq( CMP_Scanner::progress_for( $t2_run, array( 'x', 'y' ), 5000 + 3601 ), null, 'progress_for: a stale run reports nothing' );
+cmp_assert_eq( CMP_Scanner::progress_for( array( 'status' => 'idle' ), array(), 1 ), null, 'progress_for: idle reports nothing' );
+
+// I-3: a failed fetch keeps the previous good result, marked stale.
+$t2_yt_ok  = CMP_Scanner::page_result( 'https://example.md/yt/', 'ok', '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>', $svcs, $h, 200 );
+$t2_yt_err = CMP_Scanner::page_result( 'https://example.md/yt/', '500', '', $svcs, $h, 300 );
+$t2_kept   = CMP_Scanner::merge_page_result( $t2_yt_ok, $t2_yt_err );
+cmp_assert( true === $t2_kept['stale'] && '500' === $t2_kept['error'] && 300 === $t2_kept['error_time'] && 'ok' === $t2_kept['status'] && 200 === $t2_kept['time'], 'merge_page_result: failure keeps the old ok result, stale with error and its time' );
+$t2_agg2 = CMP_Scanner::aggregate( array( $t2_home, $t2_kept ) );
+cmp_assert( in_array( 'youtube', $t2_agg2['services']['found'], true ), 'aggregate: a page that had YouTube and then failed still keeps youtube in found' );
+cmp_assert( in_array( 'https://example.md/yt/', $t2_agg2['failed'], true ), 'aggregate: a stale page is still listed as failed' );
+cmp_assert_eq( CMP_Scanner::merge_page_result( $t2_kept, CMP_Scanner::page_result( 'https://example.md/yt/', 'ok', '<p>no embed</p>', $svcs, $h, 400 ) )['services']['found'], array(), 'merge_page_result: only a successful fetch replaces the result' );
+cmp_assert( ! isset( CMP_Scanner::merge_page_result( $t2_kept, CMP_Scanner::page_result( 'https://example.md/yt/', 'ok', '', $svcs, $h, 400 ) )['stale'] ), 'merge_page_result: a successful fetch clears stale' );
+cmp_assert_eq( CMP_Scanner::merge_page_result( null, $t2_yt_err ), $t2_yt_err, 'merge_page_result: no previous result keeps the error' );
+cmp_assert_eq( CMP_Scanner::merge_page_result( $t2_yt_err, $t2_yt_err ), $t2_yt_err, 'merge_page_result: previous error is not a good result' );
+cmp_assert( CMP_Scanner::in_backoff( $t2_kept, 400 ) && ! CMP_Scanner::in_backoff( $t2_kept, 300 + 301 ), 'in_backoff: a stale page waits 5 minutes after its error' );
+
+// I-4: warnings computed before a save are hidden until a newer aggregate exists.
+cmp_assert( CMP_Scanner::outdated_after_save( 500, array( 'time' => 400, 'run' => 450 ) ), 'outdated_after_save: aggregate from a run started before the save' );
+cmp_assert( ! CMP_Scanner::outdated_after_save( 500, array( 'time' => 400, 'run' => 500 ) ), 'outdated_after_save: aggregate from a run started at or after the save' );
+cmp_assert( CMP_Scanner::outdated_after_save( 500, null ), 'outdated_after_save: no aggregate after a save' );
+cmp_assert( ! CMP_Scanner::outdated_after_save( 0, array( 'time' => 1 ) ), 'outdated_after_save: no save recorded' );
+cmp_assert( CMP_Scanner::outdated_after_save( 500, array( 'time' => 499 ) ), 'outdated_after_save: falls back to time when run is missing' );
+
+// M-1: the autoloaded copy keeps the legacy keys only.
+$t2_copy = CMP_Scanner::legacy_copy( $t2_agg );
+$t2_ck   = array_keys( $t2_copy );
+sort( $t2_ck );
+cmp_assert_eq( $t2_ck, array( 'blocked', 'raw', 'services', 'settings_link', 'time' ), 'legacy_copy: legacy keys only' );
+cmp_assert_eq( array_keys( CMP_Scanner::legacy_copy( $t2_nohome ) ), array( 'raw', 'blocked', 'services', 'time' ), 'legacy_copy: no settings_link when the aggregate has none' );
+
+// M-2: lock.
+cmp_assert( CMP_Scanner::lock_expired( 1000, 1000 + 181 ) && ! CMP_Scanner::lock_expired( 1000, 1100 ), 'lock_expired: a lock older than 3 minutes is taken over' );

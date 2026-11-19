@@ -17,6 +17,13 @@ foreach ( array( 'cmp_services', 'cmp_services_found', 'cmp_services_notice', 'c
 }
 delete_transient( 'cmp_db_schema_retry' );
 
+// B3: the multi-page scan (queue, per-page results, aggregate, state) and its compatibility copy.
+foreach ( array( 'cmp_scan_urls', 'cmp_scan_queue', 'cmp_scan_pages', 'cmp_scan_state', 'cmp_scan_aggregate', 'cmp_scan_lock', 'cmp_scan_saved_at' ) as $cmp_option ) {
+	delete_option( $cmp_option );
+}
+delete_transient( 'cmp_tracker_scan' );
+delete_transient( 'cmp_tracker_scan_fail' );
+
 // Thumbnail transients (cmp_thumb_fail_<id>, cmp_thumb_lock_<id>).
 global $wpdb;
 $wpdb->query(
@@ -28,6 +35,8 @@ $wpdb->query(
 );
 
 wp_clear_scheduled_hook( 'cmp_fetch_thumbs' );
+wp_clear_scheduled_hook( 'cmp_scan_run' );
+wp_clear_scheduled_hook( 'cmp_scan_daily' );
 
 // Local YouTube thumbnails: uploads/cmp-thumbs/ (flat: *.jpg plus index.php).
 $cmp_up = wp_upload_dir( null, false );

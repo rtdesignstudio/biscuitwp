@@ -162,8 +162,10 @@ class CMP_Services_Page {
 		$custom     = is_array( $stored ) && isset( $stored['custom'] ) && is_array( $stored['custom'] ) ? array_values( $stored['custom'] ) : array();
 		$can_script = current_user_can( 'unfiltered_html' );
 
-		$scan  = CMP_Blocker::scan_homepage( false );
-		$found = array();
+		CMP_Scanner::maybe_run_inline(); // no working cron: this screen moves the scan on
+		$scan     = CMP_Blocker::scan_homepage( false );
+		$progress = CMP_Scanner::current_progress();
+		$found    = array();
 		if ( is_array( $scan ) && isset( $scan['services'] ) ) {
 			$ids = isset( $scan['services']['found'] ) ? (array) $scan['services']['found'] : array_merge( (array) $scan['services']['raw'], (array) $scan['services']['blocked'] );
 			foreach ( $active as $s ) {
@@ -206,16 +208,22 @@ class CMP_Services_Page {
 				<h2>
 					<?php esc_html_e( 'Găsite pe site', 'consent-manager-pro' ); ?>
 					<?php if ( is_array( $scan ) && ! empty( $scan['time'] ) ) : ?>
-						<span class="description">(<?php echo esc_html( sprintf( /* translators: %s: time span like "12 minute" */ __( 'pagina principală, acum %s', 'consent-manager-pro' ), human_time_diff( (int) $scan['time'] ) ) ); ?>)</span>
+						<?php $cmp_np = isset( $scan['pages'] ) ? (int) $scan['pages'] : 1; ?>
+						<span class="description">(<?php echo esc_html( sprintf( /* translators: 1: number of pages, 2: time span like "12 minute" */ _n( '%1$d pagină, acum %2$s', '%1$d pagini, acum %2$s', $cmp_np, 'consent-manager-pro' ), $cmp_np, human_time_diff( (int) $scan['time'] ) ) ); ?>)</span>
+					<?php endif; ?>
+					<?php if ( null !== $progress ) : ?>
+						<span class="description"><?php echo esc_html( CMP_Scanner::progress_text( $progress ) ); ?></span>
 					<?php endif; ?>
 					<button type="submit" class="button" form="cmp-rescan-form"><?php esc_html_e( 'Rescanează', 'consent-manager-pro' ); ?></button>
 				</h2>
-				<?php if ( null === $scan ) : ?>
-					<p class="description"><?php esc_html_e( 'Pagina principală nu a putut fi citită. Încearcă „Rescanează”.', 'consent-manager-pro' ); ?></p>
+				<?php if ( null === $scan && null !== $progress ) : ?>
+					<p class="description"><?php esc_html_e( 'Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu.', 'consent-manager-pro' ); ?></p>
+				<?php elseif ( null === $scan ) : ?>
+					<p class="description"><?php esc_html_e( 'Paginile site-ului nu au putut fi citite. Încearcă „Rescanează”.', 'consent-manager-pro' ); ?></p>
 				<?php elseif ( ! isset( $scan['services'] ) ) : ?>
-					<p class="description"><?php esc_html_e( 'Apasă „Rescanează” ca să afli ce servicii încarcă pagina principală.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Apasă „Rescanează” ca să afli ce servicii încarcă site-ul.', 'consent-manager-pro' ); ?></p>
 				<?php elseif ( ! $found ) : ?>
-					<p class="description"><?php esc_html_e( 'Nu am găsit servicii care să aștepte acordul pe pagina principală.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Nu am găsit pe site servicii care să aștepte acordul.', 'consent-manager-pro' ); ?></p>
 				<?php else : ?>
 					<table class="widefat striped cmp-svc-table"><tbody>
 						<?php foreach ( $found as $s ) : ?>
@@ -335,7 +343,8 @@ class CMP_Services_Page {
 		$locked = CMP_Services::advanced_now() ? CMP_Services::MEASUREMENT_IDS : array();
 		$clean  = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own, $lib_exempt, $locked );
 		update_option( 'cmp_services', $clean );
-		delete_transient( 'cmp_tracker_scan' );
+		CMP_Scanner::mark_saved();
+		CMP_Scanner::enqueue_all(); // the next result follows the new services; the last one stays meanwhile
 		// The Cookie Policy page renders [cmp_cookie_table] live, so it is not
 		// regenerated here (that would overwrite the client's own edits). The
 		// explicit "Regenerează" in "Pagini legale" still does it.
@@ -354,7 +363,7 @@ class CMP_Services_Page {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_rescan_services' ) ) {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
-		CMP_Blocker::scan_homepage( true );
+		CMP_Blocker::scan_homepage( true ); // queues every page; the screen shows "Scanare în curs (X/Y)"
 		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

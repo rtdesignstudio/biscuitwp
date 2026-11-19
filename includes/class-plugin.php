@@ -39,6 +39,7 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/modules/class-blocker.php';
 		CMP_Blocker::register();
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
+		CMP_Scanner::register();
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
 		CMP_Fonts::register();
 		require_once CMP_PATH . 'includes/modules/class-lang.php';
@@ -137,6 +138,9 @@ class CMP_Plugin {
 				update_option( 'cmp_services_history', $seed, true );
 			}
 		}
+		// B3: the multi-page scan refreshes itself once a day (first scan: first admin visit).
+		require_once CMP_PATH . 'includes/modules/class-scanner.php';
+		CMP_Scanner::schedule_daily();
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 
@@ -154,13 +158,17 @@ class CMP_Plugin {
 	public static function activate() {
 		require_once CMP_PATH . 'includes/class-installer.php';
 		CMP_Installer::upgrade_schema();
+		require_once CMP_PATH . 'includes/modules/class-scanner.php';
+		CMP_Scanner::schedule_daily();
 		update_option( 'cmp_db_version', CMP_VERSION );
 	}
 
-	/** Deactivation: stop the thumbnail cron job only (settings and data stay). */
+	/** Deactivation: stop the cron jobs only (settings and data stay). */
 	public static function deactivate() {
 		if ( function_exists( 'wp_clear_scheduled_hook' ) ) {
 			wp_clear_scheduled_hook( 'cmp_fetch_thumbs' );
 		}
+		require_once CMP_PATH . 'includes/modules/class-scanner.php';
+		CMP_Scanner::unschedule();
 	}
 }

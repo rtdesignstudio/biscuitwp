@@ -276,6 +276,7 @@ class CMP_Legal_Page {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		CMP_Scanner::maybe_run_inline(); // no working cron: this screen moves the scan on
 		$meta   = self::meta();
 		$docs   = self::documents();
 		$wp_pid = (int) get_option( 'wp_page_for_privacy_policy' );

@@ -224,35 +224,54 @@ class CMP_Blocker {
 	}
 
 	/**
-	 * Scan the public homepage for trackers (cached 1 hour). Null when the page
-	 * could not be fetched. Used for the admin warnings only.
+	 * Pure: one page's scan in the shape the admin consumers read:
+	 * raw / blocked (categories), settings_link, services { raw, blocked, found }.
+	 */
+	public static function scan_html( $html, array $services ) {
+		$html                      = (string) $html;
+		$scan                      = self::detect_trackers( $html, $services );
+		$scan['settings_link']     = self::has_settings_link( $html );
+		$scan['services']          = self::detect_services( $html, $services );
+		$scan['services']['found'] = self::found_ids( $html, $services );
+		return $scan;
+	}
+
+	/**
+	 * The last site scan (the multi-page aggregate, see CMP_Scanner). It never
+	 * fetches a page: with $force, or when there is no result yet, the page list
+	 * is queued for the background scan (WP-Cron) and the current result (or
+	 * null) comes back. A whole scan that failed waits 5 minutes before a new
+	 * automatic one. Used for the admin warnings and screens only.
 	 */
 	public static function scan_homepage( $force = false ) {
-		$cached = $force ? false : get_transient( 'cmp_tracker_scan' );
-		if ( is_array( $cached ) ) {
-			return $cached;
+		$agg = get_option( CMP_Scanner::AGGREGATE_OPTION, false );
+		$agg = is_array( $agg ) ? $agg : null;
+		if ( ! $force && null !== $agg ) {
+			return $agg;
 		}
-		if ( ! $force && get_transient( 'cmp_tracker_scan_fail' ) ) {
-			return null;
+		if ( null === $agg ) {
+			// Right after the update: the last homepage scan (pre-B3 transient) until the first aggregate.
+			$legacy = get_transient( 'cmp_tracker_scan' );
+			$agg    = is_array( $legacy ) ? $legacy : null;
 		}
-		$res = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'redirection' => 3 ) );
-		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
-			set_transient( 'cmp_tracker_scan_fail', 1, 5 * MINUTE_IN_SECONDS );
-			return null;
+		if ( $force || ( ! get_transient( 'cmp_tracker_scan_fail' ) && ! CMP_Scanner::is_running() ) ) {
+			CMP_Scanner::enqueue_all();
 		}
-		delete_transient( 'cmp_tracker_scan_fail' );
-		$body                  = wp_remote_retrieve_body( $res );
-		$svcs                  = self::default_services();
-		$scan                  = self::detect_trackers( $body, $svcs );
-		$scan['settings_link'] = self::has_settings_link( $body );
-		$scan['services']      = self::detect_services( $body, $svcs );
-		$scan['services']['found'] = self::found_ids( $body, $svcs );
-		$scan['time']          = time();
+		return $agg;
+	}
+
+	/**
+	 * Save a finished scan: the aggregate (non-autoloaded), the services found
+	 * on the site, the cumulative history, and the cmp_tracker_scan copy (no
+	 * expiry: it is refreshed by the next scan, not by time; legacy keys only,
+	 * since it is autoloaded; sources/resources live in cmp_scan_aggregate).
+	 */
+	public static function store_scan( array $scan ) {
 		update_option( 'cmp_services_found', $scan['services']['found'], false );
 		$history = get_option( 'cmp_services_history', array() );
 		update_option( 'cmp_services_history', CMP_Services::merge_seen( is_array( $history ) ? $history : array(), (array) $scan['services']['found'] ), true );
-		set_transient( 'cmp_tracker_scan', $scan, HOUR_IN_SECONDS );
-		return $scan;
+		update_option( CMP_Scanner::AGGREGATE_OPTION, $scan, false );
+		set_transient( 'cmp_tracker_scan', CMP_Scanner::legacy_copy( $scan ) );
 	}
 
 	public static function maybe_start() {

@@ -117,14 +117,25 @@ class CMP_Fonts {
 		return (string) wp_remote_retrieve_body( $res );
 	}
 
-	/** Admin action: scan the homepage, download Google Fonts locally, build the map. */
+	/**
+	 * Admin action: collect Google Fonts links from every scanned page (the
+	 * background scan) plus the live homepage, download them locally and merge
+	 * the new entries into the map.
+	 */
 	public static function localize() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_localize_fonts' ) ) {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
 
-		$home = self::fetch( home_url( '/' ) );
+		$home  = self::fetch( home_url( '/' ) );
 		$links = self::extract_font_links( $home );
+		if ( class_exists( 'CMP_Scanner' ) ) {
+			foreach ( CMP_Scanner::scanned_font_links() as $u ) {
+				if ( ! in_array( $u, $links, true ) && self::host_is( $u, self::HOST ) ) {
+					$links[] = $u;
+				}
+			}
+		}
 
 		$dir = self::dir();
 		wp_mkdir_p( $dir );
