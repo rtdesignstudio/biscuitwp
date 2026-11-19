@@ -14,12 +14,15 @@ cmp_assert_eq( CMP_Lang::text( 'details', 'ro' ), 'Detalii', 'band: details text
 cmp_assert_eq( CMP_Lang::text( 'details', 'ru' ), 'Подробнее', 'band: details text ru' );
 cmp_assert_eq( CMP_Lang::text( 'details', 'en' ), 'Details', 'band: details text en' );
 
-// Markup: the button right after the intro, collapsed, controlling it.
+// Markup (fix wave M1): the button is the first item of the action row, so the
+// DOM order is the phone's visual order (Details, Settings, Reject, Accept).
 $band_tpl = (string) file_get_contents( __DIR__ . '/../templates/banner-bottom.php' );
 cmp_assert(
-	1 === preg_match( '#<p id="cmp-intro" class="cmp__text">.*?</p>\s*(?:<\?php //[^\n]*\?>\s*)?<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><\?php echo esc_html\( CMP_Lang::text\( \'details\' \) \); \?></button>#s', $band_tpl ),
-	'band: template has the Details button right after #cmp-intro (aria-expanded=false, aria-controls=cmp-intro, text from CMP_Lang)'
+	1 === preg_match( '#<div class="cmp__actions">\s*(?:<\?php //[^\n]*\?>\s*)?<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><\?php echo esc_html\( CMP_Lang::text\( \'details\' \) \); \?></button>\s*<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">#s', $band_tpl ),
+	'band M1: Details is the first item of .cmp__actions, right before Settings (aria-expanded=false, aria-controls=cmp-intro, text from CMP_Lang)'
 );
+cmp_assert( 1 === preg_match( '#</p>\s*(?:<\?php //[^\n]*\?>\s*)?<div class="cmp__actions">#', $band_tpl ), 'band M1: nothing between the intro and the action row' );
+cmp_assert( 1 === substr_count( $band_tpl, 'data-cmp-action="details"' ), 'band M1: a single Details button (no duplicate)' );
 cmp_assert( false !== strpos( $band_tpl, 'data-cmp-action="details"' ), 'band: template data-cmp-action="details"' );
 cmp_assert( false !== strpos( $band_tpl, 'aria-controls="cmp-intro"' ), 'band: template aria-controls="cmp-intro"' );
 // The title stays the dialog's name (only hidden visually on phones).
@@ -96,7 +99,11 @@ cmp_assert( ! $band_col, 'band: no flex-direction: column on .cmp__actions on ph
 $band_d = cmp_band_decls( $band_phone, '.cmp__actions' );
 cmp_assert( isset( $band_d['flex-wrap'] ) && 'wrap' === $band_d['flex-wrap'], 'band: phone action row wraps' );
 $band_d = cmp_band_decls( $band_phone, '.cmp__actions .cmp__choices' );
-cmp_assert( isset( $band_d['order'] ) && '-1' === $band_d['order'], 'band: Reject / Accept come first on the row' );
+cmp_assert( ! isset( $band_d['order'] ), 'band M1: no order trick, the DOM order is the visual order' );
+cmp_assert( isset( $band_d['flex'] ) && '1 1 100%' === $band_d['flex'], 'band M1: Reject / Accept on their own full-width row, below Details / Settings' );
+cmp_assert( 0 === preg_match( '/(?<![-a-z])order\s*:/i', $band_phone ), 'band M1: no `order` anywhere in the phone CSS' );
+$band_d = cmp_band_decls( $band_phone, '.cmp__more' );
+cmp_assert( isset( $band_d['margin'] ) && '0' === $band_d['margin'], 'band M1: Details sits on the row with Settings (margin: 0)' );
 $band_d = cmp_band_decls( $band_phone, '.cmp__actions [data-cmp-action="prefs"]' );
 cmp_assert( isset( $band_d['margin-left'] ) && 'auto' === $band_d['margin-left'], 'band: Settings pushed to the right (and onto its own row when it does not fit)' );
 cmp_assert( isset( $band_d['min-height'] ) && '24px' === $band_d['min-height'], 'band: Settings as text keeps a 24 px target' );

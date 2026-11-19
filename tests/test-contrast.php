@@ -14,6 +14,14 @@ cmp_assert( abs( CMP_Contrast::ratio( '#777777', '#ffffff' ) - 4.48 ) < 0.01, 'c
 cmp_assert( abs( CMP_Contrast::ratio( '#fff', '#000' ) - 21.0 ) < 0.01, 'contrast: short #rgb form, order-independent' );
 cmp_assert_eq( CMP_Contrast::blend( 'rgba(0, 0, 0, 0.5)', '#ffffff' ), '#808080', 'contrast: blend rgba over a background' );
 cmp_assert_eq( CMP_Contrast::blend( '#123456', '#ffffff' ), '#123456', 'contrast: blend of an opaque hex is the hex' );
+// Fix wave M7: an unparseable colour never passes as black (or anything else).
+cmp_assert( CMP_Contrast::is_hex( '#abc' ) && CMP_Contrast::is_hex( '#A1B2C3' ), 'contrast M7: is_hex accepts #rgb / #rrggbb' );
+foreach ( array( 'white', 'rgb(0, 0, 0)', 'var(--cmp-bg)', '', '#12345', '#ggg', null ) as $ct_bad ) {
+	cmp_assert( ! CMP_Contrast::is_hex( $ct_bad ), 'contrast M7: is_hex rejects ' . var_export( $ct_bad, true ) );
+	cmp_assert_eq( CMP_Contrast::ratio( $ct_bad, '#ffffff' ), 0.0, 'contrast M7: ratio with ' . var_export( $ct_bad, true ) . ' is 0 (fails every threshold)' );
+	cmp_assert_eq( CMP_Contrast::ratio( '#000000', $ct_bad ), 0.0, 'contrast M7: ratio against ' . var_export( $ct_bad, true ) . ' is 0' );
+}
+cmp_assert_eq( CMP_Contrast::blend( 'rgba(0, 0, 0, 0.5)', 'white' ), '', 'contrast M7: blend over a non-hex background gives no colour' );
 
 // ---- Tokens per style ----
 $ct_neutral = CMP_Contrast::tokens( $ct_css, 'neutral' );
@@ -35,9 +43,15 @@ cmp_assert( '' !== $ct_ring_var, 'contrast: focus ring colour is a --cmp-* token
 
 foreach ( array( 'neutral', 'warm', 'dark', 'egov' ) as $ct_style ) {
 	$t = CMP_Contrast::tokens( $ct_css, $ct_style );
+	// Fix wave M7: a missing token or a non-hex value is a failure, never a stand-in colour.
 	$c = function ( $name ) use ( $t ) {
-		return isset( $t[ $name ] ) ? $t[ $name ] : '#888888';
+		return isset( $t[ $name ] ) ? $t[ $name ] : '';
 	};
+	$ct_used = array( 'dark', 'bg', 'panel', 'muted', 'primary-text', 'primary', 'primary-hover', 'outline-hover', 'hover', $ct_toggle_var, $ct_ring_var );
+	foreach ( array_unique( $ct_used ) as $ct_tok ) {
+		cmp_assert( isset( $t[ $ct_tok ] ), sprintf( 'contrast %s M7: token --cmp-%s is defined', $ct_style, $ct_tok ) );
+		cmp_assert( CMP_Contrast::is_hex( $c( $ct_tok ) ), sprintf( 'contrast %s M7: token --cmp-%s is a #hex colour (got %s)', $ct_style, $ct_tok, $c( $ct_tok ) ) );
+	}
 	$text_pairs = array(
 		array( 'dark', 'bg' ),
 		array( 'dark', 'panel' ),

@@ -72,15 +72,16 @@ class CMP_Banner {
 	public function enqueue() {
 		$cmp_settings = CMP_Consent::get_settings();
 
-		// Minified build unless SCRIPT_DEBUG (see bin/build-assets.sh).
+		// Minified build unless SCRIPT_DEBUG (see bin/build-assets.sh), or the source
+		// when a .min file is missing on the server.
 		$debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-		$css   = CMP_Assets::src_or_min( 'assets/css/banner.css', $debug );
-		$js    = CMP_Assets::src_or_min( 'assets/js/banner.js', $debug );
+		$css   = CMP_Assets::src_or_min( 'assets/css/banner.css', $debug, CMP_PATH );
+		$js    = CMP_Assets::src_or_min( 'assets/js/banner.js', $debug, CMP_PATH );
 		wp_enqueue_style( 'cmp-banner', CMP_URL . $css, array(), CMP_Plugin::asset_ver( $css ) );
 		wp_enqueue_script( 'cmp-banner', CMP_URL . $js, array(), CMP_Plugin::asset_ver( $js ), true );
 		// The check-mode runner (admin "Verificare"): only on a checked page, after banner.js.
 		if ( CMP_Scanner::check_mode() ) {
-			$cjs = CMP_Assets::src_or_min( 'assets/js/banner-check.js', $debug );
+			$cjs = CMP_Assets::src_or_min( 'assets/js/banner-check.js', $debug, CMP_PATH );
 			wp_enqueue_script( 'cmp-banner-check', CMP_URL . $cjs, array( 'cmp-banner' ), CMP_Plugin::asset_ver( $cjs ), true );
 		}
 

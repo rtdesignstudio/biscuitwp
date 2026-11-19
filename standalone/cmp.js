@@ -412,6 +412,13 @@
 		if (shift) { return (active === first || active === dialog || !inside) ? last : null; }
 		return (active === last || (!inside && active !== dialog)) ? first : null;
 	}
+	// Pure: where focus goes when the banner closes: the element focused before
+	// it opened while still usable, else the reopen button (shown first by hide()),
+	// else nothing. Tested in standalone/tests/run.js (source-extracted).
+	function focusBack(last, reopen, usable) {
+		if (last && usable(last)) { return last; }
+		return reopen && usable(reopen) ? reopen : null;
+	}
 	// focusTrap:end
 	// keys:begin
 	// Pure: what Escape does. In the settings panel it goes back to the main
@@ -562,21 +569,21 @@
 					'<span class="cmp__cat-new-names" data-cmp-cat-new-names></span></span>';
 				var control;
 				if (cat.required) {
-					control = '<span class="cmp__cat-locked" aria-label="' + escapeHtml(cfg.texts.locked || 'Always active') + '">' +
+					control = '<span class="cmp__cat-locked" role="img" aria-label="' + escapeHtml(cfg.texts.locked || 'Always active') + '">' +
 						'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
 						'</span>';
 				} else {
 					control = '<label class="cmp__toggle" for="' + escapeHtml(id) + '">' +
-						'<input type="checkbox" id="' + escapeHtml(id) + '" value="' + escapeHtml(cat.slug) + '" data-cmp-cat>' +
+						'<input type="checkbox" role="switch" id="' + escapeHtml(id) + '" value="' + escapeHtml(cat.slug) + '" aria-labelledby="' + escapeHtml(id) + '-label" aria-describedby="' + escapeHtml(id) + '-desc" data-cmp-cat>' +
 						'<span class="cmp__toggle-slider"></span>' +
 						'</label>';
 				}
 				catsHtml += '<div class="cmp__cat">' +
 					'<div class="cmp__cat-body">' +
 					'<div class="cmp__cat-head">' +
-					'<span class="cmp__cat-label">' + escapeHtml(cat.label) + '</span>' + badge + newBadge +
+					'<span class="cmp__cat-label" id="' + escapeHtml(id) + '-label">' + escapeHtml(cat.label) + '</span>' + badge + newBadge +
 					'</div>' +
-					'<div class="cmp__cat-desc">' + escapeHtml(cat.description) + '</div>' +
+					'<div class="cmp__cat-desc" id="' + escapeHtml(id) + '-desc">' + escapeHtml(cat.description) + '</div>' +
 					'</div>' + control +
 					'</div>';
 			});
@@ -586,8 +593,8 @@
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
 				'<p id="cmp-intro" class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
-				'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' + escapeHtml(cfg.texts.details) + '</button>' +
 				'<div class="cmp__actions">' +
+				'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' + escapeHtml(cfg.texts.details) + '</button>' +
 				'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">' + escapeHtml(cfg.texts.prefs) + '</button>' +
 				'<span class="cmp__spacer" aria-hidden="true"></span>' +
 				'<span class="cmp__choices">' +
@@ -791,6 +798,9 @@
 		}
 		function hide() {
 			if (!banner) { return; }
+			// Focus moves only when the banner was on screen and held it: never on the
+			// GPC auto-refusal, nor off the page on a policy page read without overlay.
+			var refocus = !banner.hidden && (blocking() || banner.contains(document.activeElement));
 			banner.hidden = true;
 			document.body.classList.remove('cmp-has-banner');
 			document.documentElement.style.removeProperty('--cmp-sbw');
@@ -799,8 +809,9 @@
 			closePrefs();
 			scrollPad();
 			document.removeEventListener('keydown', onKeydown);
-			trapFocus(false);
+			// The reopen button first, so focus can land on it (see focusBack).
 			if (readCookie()) { showReopen(); }
+			if (refocus) { trapFocus(false); }
 		}
 
 		// --- Focus trap (WCAG 2.1 AA) ---
@@ -834,8 +845,14 @@
 				// the visitor tabs into the buttons.
 				focusDialog();
 			} else {
-				if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
+				var back = focusBack(lastFocus, reopenBtn, canRefocus);
+				lastFocus = null;
+				if (back) { back.focus(); }
 			}
+		}
+		// Focus can go back to el: on the page, rendered, outside the banner, not <body>.
+		function canRefocus(el) {
+			return !!el && typeof el.focus === 'function' && el !== document.body && document.documentElement.contains(el) && !banner.contains(el) && el.getClientRects().length > 0;
 		}
 
 		// The dialog on the main view, the settings title when the panel is open.
@@ -993,12 +1010,21 @@
 		}
 
 		// Third-party embeds (YouTube, Vimeo, Maps): the original iframe waits in an
-		// inert <template> inside [data-cmp-embed] and replaces the placeholder once
+		// inert <template> inside [data-cmp-embed] and takes the placeholder's place once
 		// its category is accepted, or when the visitor clicks "load" on it.
 		function loadEmbed(box) {
 			var tpl = box && box.querySelector('template[data-cmp-embed-src]');
-			if (!tpl || !tpl.content || !box.parentNode) { return; }
-			box.parentNode.replaceChild(tpl.content.cloneNode(true), box);
+			if (!tpl || !tpl.content) { return; }
+			var frag = tpl.content.cloneNode(true);
+			// The box stays, same size (aspect-ratio, margin): the iframe goes inside,
+			// so nothing below moves (CLS 0). Without data-cmp-embed it is never
+			// matched or loaded again.
+			while (box.firstChild) { box.removeChild(box.firstChild); }
+			box.removeAttribute('data-cmp-embed');
+			box.classList.remove('cmp-embed--thumb');
+			box.classList.add('cmp-embed--loaded');
+			box.style.backgroundImage = '';
+			box.appendChild(frag);
 		}
 		function unblockEmbeds(accepted) {
 			document.querySelectorAll('[data-cmp-embed]').forEach(function (box) {

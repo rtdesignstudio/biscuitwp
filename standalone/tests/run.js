@@ -881,7 +881,134 @@ ok(!!bB.m && !!bC.m && bB.m[1].replace(/^\t+/gm, '') === bC.m[1].replace(/^\t+/g
 // Standalone texts and markup.
 eq(['ro', 'ru', 'en'].map(function (l) { return cmp.CMP_DEFAULTS.i18n[l].texts.details; }), ['Detalii', 'Подробнее', 'Details'], 'B5 T5 cmp.js: details text in ro / ru / en');
 eq(cmp.normalizeConfig({ lang: 'ru' }).texts.details, 'Подробнее', 'B5 T5 cmp.js: normalizeConfig carries the details text');
-ok(/'<p id="cmp-intro" class="cmp__text">' \+ escapeHtml\(cfg\.texts\.intro\) \+ privacyLink \+ '<\/p>' \+\n\t*'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' \+ escapeHtml\(cfg\.texts\.details\) \+ '<\/button>' \+/.test(cmpSrc), 'B5 T5 cmp.js: Details button right after the intro');
+ok(/'<p id="cmp-intro" class="cmp__text">' \+ escapeHtml\(cfg\.texts\.intro\) \+ privacyLink \+ '<\/p>' \+\n\t*'<div class="cmp__actions">' \+\n\t*'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' \+ escapeHtml\(cfg\.texts\.details\) \+ '<\/button>' \+\n\t*'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">'/.test(cmpSrc), 'B5 M1 cmp.js: Details is the first item of the action row, right before Settings (DOM order = phone order)');
+eq((cmpSrc.match(/class="cmp__more"/g) || []).length, 1, 'B5 M1 cmp.js: a single Details button');
+
+// ---- B5 final-review fix wave ----
+// I1: category toggles named by their category, described by its text; the
+// "always active" mark announced (role="img" + aria-label). cmp.js markup builder.
+var rpSrc = fnBody(cmpSrc, 'renderPro');
+ok(/'<span class="cmp__cat-label" id="' \+ escapeHtml\(id\) \+ '-label">' \+ escapeHtml\(cat\.label\) \+ '<\/span>'/.test(rpSrc), 'B5 I1 cmp.js: category name has id="cmp-cat-<slug>-label"');
+ok(/'<div class="cmp__cat-desc" id="' \+ escapeHtml\(id\) \+ '-desc">' \+ escapeHtml\(cat\.description\) \+ '<\/div>'/.test(rpSrc), 'B5 I1 cmp.js: description has id="cmp-cat-<slug>-desc"');
+ok(/'<input type="checkbox" role="switch" id="' \+ escapeHtml\(id\) \+ '" value="' \+ escapeHtml\(cat\.slug\) \+ '" aria-labelledby="' \+ escapeHtml\(id\) \+ '-label" aria-describedby="' \+ escapeHtml\(id\) \+ '-desc" data-cmp-cat>'/.test(rpSrc), 'B5 I1 cmp.js: toggle = native checkbox, role="switch", labelled by the name, described by the text');
+ok(/'<span class="cmp__cat-locked" role="img" aria-label="'/.test(rpSrc), 'B5 I1 cmp.js: locked mark has role="img"');
+ok(!/aria-describedby="[^"]*new/.test(rpSrc), 'B5 I1 cmp.js: aria-describedby never points at the hidden "new" marker');
+
+// I2: loading an embed keeps its box (same size, no layout shift); the iframe
+// goes inside, the box is never matched as a placeholder again.
+function embedBox(thumb) {
+	var kids = [{ tag: 'inner' }, { tag: 'template' }], attrs = { 'data-cmp-embed': 'marketing', 'data-cmp-service': 'youtube', 'class': 'cmp-embed cmp--neutral' + (thumb ? ' cmp-embed--thumb' : '') };
+	var frag = { tag: 'iframe' }, replaced = false;
+	var cl = function () { return attrs['class'].split(/\s+/); };
+	var box = {
+		style: { backgroundImage: thumb ? "url('x.jpg')" : '' },
+		parentNode: { replaceChild: function () { replaced = true; } },
+		get firstChild() { return kids[0] || null; },
+		removeChild: function (k) { kids.splice(kids.indexOf(k), 1); return k; },
+		appendChild: function (k) { kids.push(k); return k; },
+		querySelector: function (sel) { return sel === 'template[data-cmp-embed-src]' && kids.indexOf(this._tpl) !== -1 ? this._tpl : null; },
+		getAttribute: function (k) { return Object.prototype.hasOwnProperty.call(attrs, k) ? attrs[k] : null; },
+		hasAttribute: function (k) { return Object.prototype.hasOwnProperty.call(attrs, k); },
+		removeAttribute: function (k) { delete attrs[k]; },
+		classList: {
+			add: function (c) { if (cl().indexOf(c) === -1) { attrs['class'] += ' ' + c; } },
+			remove: function (c) { attrs['class'] = cl().filter(function (x) { return x !== c; }).join(' '); },
+			contains: function (c) { return cl().indexOf(c) !== -1; }
+		},
+		kids: function () { return kids; }, wasReplaced: function () { return replaced; }
+	};
+	box._tpl = kids[1];
+	box._tpl.content = { cloneNode: function (deep) { return deep ? frag : null; } };
+	box.frag = frag;
+	return box;
+}
+[['banner.js', bannerSrc], ['cmp.js', cmpSrc]].forEach(function (t) {
+	var n = t[0], le = fnBody(t[1], 'loadEmbed');
+	var f = le ? new Function(le + '\nreturn loadEmbed;')() : null;
+	if (!f) { ok(false, 'B5 I2 ' + n + ': loadEmbed found'); return; }
+	var b = embedBox(true);
+	f(b);
+	ok(!b.wasReplaced(), 'B5 I2 ' + n + ': the placeholder box is kept (not replaced by the bare iframe)');
+	eq(b.kids().length === 1 && b.kids()[0] === b.frag, true, 'B5 I2 ' + n + ': the box now holds only the iframe');
+	eq(b.hasAttribute('data-cmp-embed'), false, 'B5 I2 ' + n + ': data-cmp-embed removed (never matched / loaded again)');
+	eq([b.classList.contains('cmp-embed--loaded'), b.classList.contains('cmp-embed--thumb'), b.classList.contains('cmp-embed')], [true, false, true], 'B5 I2 ' + n + ': .cmp-embed--loaded added, thumbnail class dropped, .cmp-embed kept');
+	eq(b.style.backgroundImage, '', 'B5 I2 ' + n + ': thumbnail background cleared');
+	eq(b.getAttribute('data-cmp-service'), 'youtube', 'B5 I2 ' + n + ': the service attributes stay (service name lookup)');
+	f(b);
+	eq(b.kids().length, 1, 'B5 I2 ' + n + ': a second call does nothing (no template left)');
+	f(null);
+	ok(true, 'B5 I2 ' + n + ': loadEmbed(null) is a no-op');
+	var p = embedBox(false);
+	f(p);
+	eq([p.kids()[0] === p.frag, p.classList.contains('cmp-embed--loaded')], [true, true], 'B5 I2 ' + n + ': plain placeholder (no thumbnail) loads the same way');
+	ok(!/replaceChild/.test(le), 'B5 I2 ' + n + ': loadEmbed no longer swaps the box out');
+});
+eq(fnBody(bannerSrc, 'loadEmbed').replace(/^\t+/gm, ''), fnBody(cmpSrc, 'loadEmbed').replace(/^\t+/gm, ''), 'B5 I2: loadEmbed identical in banner.js and cmp.js');
+
+// M2: focus after the banner closes: the element focused before it opened when
+// it is still usable, else the reopen button, else nothing.
+[['banner.js', bannerSrc], ['cmp.js', cmpSrc]].forEach(function (t) {
+	var n = t[0], m = t[1].match(/\/\/ focusTrap:begin\n([\s\S]*?)\/\/ focusTrap:end/);
+	var fb = null;
+	try { fb = m ? new Function(m[1] + '\nreturn focusBack;')() : null; } catch (e) { fb = null; }
+	if (!fb) { ok(false, 'B5 M2 ' + n + ': focusBack in the focusTrap block'); return; }
+	var LINK = { n: 'link', ok: true }, GONE = { n: 'gone', ok: false }, RE = { n: 'reopen', ok: true }, REH = { n: 'reopen-hidden', ok: false };
+	var usable = function (el) { return !!el && el.ok; };
+	eq(fb(LINK, RE, usable), LINK, 'B5 M2 ' + n + ': usable last focus -> back to it');
+	eq(fb(GONE, RE, usable), RE, 'B5 M2 ' + n + ': last focus gone / hidden / in the banner -> the reopen button');
+	eq(fb(null, RE, usable), RE, 'B5 M2 ' + n + ': no last focus (no-overlay page) -> the reopen button');
+	eq(fb(GONE, REH, usable), null, 'B5 M2 ' + n + ': nothing usable -> nothing');
+	eq(fb(null, null, usable), null, 'B5 M2 ' + n + ': no reopen button -> nothing');
+	// hide(): the reopen button is shown before focus moves; focus only moves
+	// when the banner was on screen and held the focus (not on the GPC auto-refusal).
+	var hd = fnBody(t[1], 'hide');
+	var runHide = function (hidden, block, focusIn, cookie) {
+		var log = [], bn = { hidden: hidden, contains: function () { return focusIn; } };
+		var docStub = { activeElement: {}, body: { classList: { remove: function () {} } }, documentElement: { style: { removeProperty: function () {} } }, removeEventListener: function () {} };
+		new Function('banner', 'blocking', 'document', 'window', 'details', 'closePrefs', 'scrollPad', 'onKeydown', 'trapFocus', 'readCookie', 'showReopen', hd + '\nreturn hide;')(
+			bn, function () { return block; }, docStub, { removeEventListener: function () {} }, function () {}, function () {}, function () {}, function () {},
+			function (on) { log.push('trap:' + on); }, function () { return cookie ? {} : null; }, function () { log.push('reopen'); })();
+		return log;
+	};
+	if (hd) {
+		eq(runHide(false, true, true, true), ['reopen', 'trap:false'], 'B5 M2 ' + n + ': hide() shows the reopen button, then restores focus');
+		eq(runHide(false, false, true, true), ['reopen', 'trap:false'], 'B5 M2 ' + n + ': no overlay, focus in the banner -> focus restored too');
+		eq(runHide(false, false, false, true), ['reopen'], 'B5 M2 ' + n + ': no overlay, focus on the page -> focus left alone');
+		eq(runHide(true, true, false, true), ['reopen'], 'B5 M2 ' + n + ': banner never shown (GPC auto-refusal) -> focus not taken');
+	} else { ok(false, 'B5 M2 ' + n + ': hide() found'); }
+	var tf = fnBody(t[1], 'trapFocus');
+	ok(/focusBack\(lastFocus, reopenBtn, canRefocus\)/.test(tf), 'B5 M2 ' + n + ': trapFocus(false) uses focusBack with the reopen button');
+	var cr = fnBody(t[1], 'canRefocus');
+	ok(/document\.body/.test(cr) && /banner\.contains\(el\)/.test(cr) && /getClientRects\(\)\.length/.test(cr) && /documentElement\.contains\(el\)/.test(cr), 'B5 M2 ' + n + ': canRefocus rejects body, detached, hidden and in-banner elements');
+});
+
+// M8: the shipped cmp.min.js behaves like cmp.js (same exports, same results).
+var cmpMin = require('../cmp.min.js');
+eq(Object.keys(cmpMin).sort(), Object.keys(cmp).sort(), 'B5 M8: cmp.min.js exports the same keys as cmp.js');
+(function () {
+	var catsM = cmp.normalizeConfig({ categories: ['necessary', 'statistics', 'marketing'] }).categories;
+	var ck = { v: '2', categories: ['necessary', 'marketing'], svc: { marketing: ['meta-pixel'] } };
+	var map = { marketing: ['meta-pixel', 'tiktok-pixel'] };
+	var cases = [
+		['decisionFor', [['necessary', 'statistics'], catsM]],
+		['decisionFor', [['necessary', 'statistics', 'marketing'], catsM]],
+		['decisionFor', [['necessary'], catsM]],
+		['reconsentView', [ck, map, ['necessary']]],
+		['reconsentView', [null, map, ['necessary']]],
+		['svcAllowed', [{ v: '1', svc: ['youtube', 'vimeo'] }, '1']],
+		['svcAllowed', [{ v: '0', svc: ['youtube'] }, '1']],
+		['parseConsent', ['{"v":"1","categories":["necessary"]}']],
+		['parseConsent', ['not json']],
+		['signalsFor', [catsM, ['statistics']]],
+		['normalizeConfig', [{ lang: 'ru', categories: ['statistics'] }]],
+		['escapeHtml', ['<a href="x">&\'</a>']],
+		['embedLoads', ['marketing', ['marketing']]]
+	];
+	cases.forEach(function (c) {
+		var a = JSON.stringify(cmp[c[0]].apply(null, c[1])), b = JSON.stringify(cmpMin[c[0]].apply(null, c[1]));
+		ok(a === b, 'B5 M8: cmp.min.js ' + c[0] + '(' + JSON.stringify(c[1]).slice(0, 60) + ') matches cmp.js (min ' + b + ', src ' + a + ')');
+	});
+})();
 
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

@@ -6,11 +6,23 @@
  */
 class CMP_Contrast {
 
-	/** WCAG 2.x contrast ratio between two #rgb / #rrggbb colours (1..21). */
+	/**
+	 * WCAG 2.x contrast ratio between two #rgb / #rrggbb colours (1..21).
+	 * 0.0 when either is not a hex colour (a missing token, a name, var(), rgb()):
+	 * it fails every threshold instead of passing as some stand-in colour.
+	 */
 	public static function ratio( $hex1, $hex2 ) {
+		if ( ! self::is_hex( $hex1 ) || ! self::is_hex( $hex2 ) ) {
+			return 0.0;
+		}
 		$l1 = self::luminance( $hex1 );
 		$l2 = self::luminance( $hex2 );
 		return ( max( $l1, $l2 ) + 0.05 ) / ( min( $l1, $l2 ) + 0.05 );
+	}
+
+	/** True for #rgb / #rrggbb. */
+	public static function is_hex( $v ) {
+		return is_string( $v ) && 1 === preg_match( '/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i', trim( $v ) );
 	}
 
 	/**
@@ -40,6 +52,9 @@ class CMP_Contrast {
 		$rgba = trim( (string) $rgba );
 		if ( ! preg_match( '/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i', $rgba, $m ) ) {
 			return strtolower( $rgba );
+		}
+		if ( ! self::is_hex( $bg_hex ) ) {
+			return '';
 		}
 		$a  = isset( $m[4] ) && '' !== $m[4] ? max( 0.0, min( 1.0, (float) $m[4] ) ) : 1.0;
 		$bg = self::rgb( $bg_hex );

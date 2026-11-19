@@ -26,11 +26,19 @@ class CMP_Assets {
 		return strlen( (string) gzencode( (string) file_get_contents( $path ), 9 ) );
 	}
 
-	/** foo.js -> foo.min.js (or the source itself when debugging). */
-	public static function src_or_min( $rel_src, $debug ) {
+	/**
+	 * foo.js -> foo.min.js (or the source itself when debugging). With $base (the
+	 * plugin directory), the .min is used only when it exists there: a deploy that
+	 * skipped the *.min.* files still gets a working (unminified) banner.
+	 */
+	public static function src_or_min( $rel_src, $debug, $base = null ) {
 		if ( $debug ) {
 			return $rel_src;
 		}
-		return preg_replace( '#\.(js|css)$#', '.min.$1', $rel_src );
+		$min = preg_replace( '#\.(js|css)$#', '.min.$1', $rel_src );
+		if ( null !== $base && ! is_file( rtrim( (string) $base, '/\\' ) . '/' . $min ) ) {
+			return $rel_src;
+		}
+		return $min;
 	}
 }

@@ -37,9 +37,30 @@ echo 'INFO: standalone cmp.min.js gz=' . CMP_Assets::gz_size( $root . 'standalon
 // B5 Task 2: the check-mode runner is a separate file, enqueued only in check
 // mode, after cmp-banner, in the footer (not part of the visitor budget).
 $bn_src = (string) file_get_contents( $root . 'includes/modules/class-banner.php' );
-cmp_assert( 1 === preg_match( '#if \( CMP_Scanner::check_mode\(\) \) \{\s*\$cjs = CMP_Assets::src_or_min\( \'assets/js/banner-check\.js\', \$debug \);\s*wp_enqueue_script\( \'cmp-banner-check\', CMP_URL \. \$cjs, array\( \'cmp-banner\' \), CMP_Plugin::asset_ver\( \$cjs \), true \);#', $bn_src ), 'class-banner: banner-check enqueued only in check mode, after cmp-banner, in the footer' );
+cmp_assert( 1 === preg_match( '#if \( CMP_Scanner::check_mode\(\) \) \{\s*\$cjs = CMP_Assets::src_or_min\( \'assets/js/banner-check\.js\', \$debug, CMP_PATH \);\s*wp_enqueue_script\( \'cmp-banner-check\', CMP_URL \. \$cjs, array\( \'cmp-banner\' \), CMP_Plugin::asset_ver\( \$cjs \), true \);#', $bn_src ), 'class-banner: banner-check enqueued only in check mode, after cmp-banner, in the footer' );
+// Fix wave M4: every enqueue falls back to the source when its .min is missing.
+foreach ( array( 'assets/css/banner.css', 'assets/js/banner.js', 'assets/js/banner-check.js' ) as $as_rel ) {
+	cmp_assert( false !== strpos( $bn_src, "CMP_Assets::src_or_min( '{$as_rel}', \$debug, CMP_PATH )" ), "M4: class-banner picks {$as_rel} with the file check (CMP_PATH)" );
+}
+cmp_assert( 0 === preg_match( '#src_or_min\( \'[^\']+\', \$debug \)#', $bn_src ), 'M4: no enqueue without the file check' );
 
 // src_or_min.
 cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', false ), 'assets/js/banner.min.js', 'src_or_min js -> .min' );
 cmp_assert_eq( CMP_Assets::src_or_min( 'assets/css/banner.css', false ), 'assets/css/banner.min.css', 'src_or_min css -> .min' );
 cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', true ), 'assets/js/banner.js', 'src_or_min with debug -> source' );
+
+// Fix wave M4: with a base directory, the .min is used only when it exists.
+$as_dir = sys_get_temp_dir() . '/cmp-assets-' . getmypid();
+@mkdir( $as_dir . '/assets/js', 0777, true );
+file_put_contents( $as_dir . '/assets/js/banner.js', '1' );
+cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', false, $as_dir . '/' ), 'assets/js/banner.js', 'M4: .min missing -> the source' );
+file_put_contents( $as_dir . '/assets/js/banner.min.js', '1' );
+cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', false, $as_dir . '/' ), 'assets/js/banner.min.js', 'M4: .min present -> the .min' );
+cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', true, $as_dir . '/' ), 'assets/js/banner.js', 'M4: debug -> the source even with the .min' );
+cmp_assert_eq( CMP_Assets::src_or_min( 'assets/js/banner.js', false, $as_dir ), 'assets/js/banner.min.js', 'M4: base without a trailing slash works too' );
+unlink( $as_dir . '/assets/js/banner.min.js' );
+unlink( $as_dir . '/assets/js/banner.js' );
+@rmdir( $as_dir . '/assets/js' );
+@rmdir( $as_dir . '/assets' );
+@rmdir( $as_dir );
+cmp_assert_eq( CMP_Assets::src_or_min( 'assets/css/banner.css', false, $root ), 'assets/css/banner.min.css', 'M4: the shipped .min files are found under the plugin root' );

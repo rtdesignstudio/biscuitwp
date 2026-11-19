@@ -454,6 +454,9 @@
 	}
 	function hide() {
 		if (!banner) { return; }
+		// Focus moves only when the banner was on screen and held it: never on the
+		// GPC auto-refusal, nor off the page on a policy page read without overlay.
+		var refocus = !banner.hidden && (blocking() || banner.contains(document.activeElement));
 		banner.hidden = true;
 		document.body.classList.remove('cmp-has-banner');
 		document.documentElement.style.removeProperty('--cmp-sbw');
@@ -462,8 +465,9 @@
 		closePrefs();
 		scrollPad();
 		document.removeEventListener('keydown', onKeydown);
-		trapFocus(false);
+		// The reopen button first, so focus can land on it (see focusBack).
 		if (readCookie()) { showReopen(); }
+		if (refocus) { trapFocus(false); }
 	}
 
 	// --- Focus trap (WCAG 2.1 AA) ---
@@ -488,6 +492,13 @@
 		var first = list[0], last = list[list.length - 1], inside = list.indexOf(active) !== -1;
 		if (shift) { return (active === first || active === dialog || !inside) ? last : null; }
 		return (active === last || (!inside && active !== dialog)) ? first : null;
+	}
+	// Pure: where focus goes when the banner closes: the element focused before
+	// it opened while still usable, else the reopen button (shown first by hide()),
+	// else nothing. Tested in standalone/tests/run.js (source-extracted).
+	function focusBack(last, reopen, usable) {
+		if (last && usable(last)) { return last; }
+		return reopen && usable(reopen) ? reopen : null;
 	}
 	// focusTrap:end
 	// keys:begin
@@ -538,8 +549,14 @@
 			// the visitor tabs into the buttons.
 			focusDialog();
 		} else {
-			if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
+			var back = focusBack(lastFocus, reopenBtn, canRefocus);
+			lastFocus = null;
+			if (back) { back.focus(); }
 		}
+	}
+	// Focus can go back to el: on the page, rendered, outside the banner, not <body>.
+	function canRefocus(el) {
+		return !!el && typeof el.focus === 'function' && el !== document.body && document.documentElement.contains(el) && !banner.contains(el) && el.getClientRects().length > 0;
 	}
 
 	// The dialog on the main view, the settings title when the panel is open.
@@ -715,12 +732,21 @@
 	}
 
 	// Third-party embeds (YouTube, Vimeo, Maps): the server put the original iframe
-	// in an inert <template> inside [data-cmp-embed]; it replaces the placeholder
+	// in an inert <template> inside [data-cmp-embed]; it takes the placeholder's place
 	// once its category is accepted, or when the visitor clicks "load" on it.
 	function loadEmbed(box) {
 		var tpl = box && box.querySelector('template[data-cmp-embed-src]');
-		if (!tpl || !tpl.content || !box.parentNode) { return; }
-		box.parentNode.replaceChild(tpl.content.cloneNode(true), box);
+		if (!tpl || !tpl.content) { return; }
+		var frag = tpl.content.cloneNode(true);
+		// The box stays, same size (aspect-ratio, margin): the iframe goes inside,
+		// so nothing below moves (CLS 0). Without data-cmp-embed it is never
+		// matched or loaded again.
+		while (box.firstChild) { box.removeChild(box.firstChild); }
+		box.removeAttribute('data-cmp-embed');
+		box.classList.remove('cmp-embed--thumb');
+		box.classList.add('cmp-embed--loaded');
+		box.style.backgroundImage = '';
+		box.appendChild(frag);
 	}
 	function unblockEmbeds(accepted) {
 		document.querySelectorAll('[data-cmp-embed]').forEach(function (box) {

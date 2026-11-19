@@ -36,9 +36,9 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 					<a class="cmp__link" href="<?php echo esc_url( $cmp_privacy_url ); ?>"><?php echo esc_html( CMP_Lang::text( 'privacy' ) ); ?></a>.
 				<?php endif; ?>
 			</p>
-			<?php // Phones (<= 575 px): the intro is clamped to 2 lines; "Details" shows it all, in the band. ?>
-			<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><?php echo esc_html( CMP_Lang::text( 'details' ) ); ?></button>
 			<div class="cmp__actions">
+				<?php // Phones (<= 575 px): the intro is clamped to 2 lines; "Details" shows it all. First in the row, so the DOM order is the phone's visual order. ?>
+				<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><?php echo esc_html( CMP_Lang::text( 'details' ) ); ?></button>
 				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?></button>
 				<span class="cmp__spacer" aria-hidden="true"></span>
 				<!-- Equal weight: refusing is as easy and as visible as accepting. -->
@@ -69,7 +69,8 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 					<div class="cmp__cat">
 						<div class="cmp__cat-body">
 							<div class="cmp__cat-head">
-								<span class="cmp__cat-label"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_label', CMP_Lang::localize_seed( $cmp_slug, 'label', $cmp_cat['label'] ) ) ); ?></span>
+								<?php // The toggle is named by this label and described by the text below (aria-labelledby / aria-describedby). ?>
+								<span class="cmp__cat-label" id="<?php echo esc_attr( $cmp_id ); ?>-label"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_label', CMP_Lang::localize_seed( $cmp_slug, 'label', $cmp_cat['label'] ) ) ); ?></span>
 								<?php if ( $cmp_locked ) : ?>
 									<span class="cmp__cat-badge"><?php echo esc_html( CMP_Lang::text( 'badge' ) ); ?></span>
 								<?php else : ?>
@@ -80,15 +81,15 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 									</span>
 								<?php endif; ?>
 							</div>
-							<div class="cmp__cat-desc"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_desc', CMP_Lang::localize_seed( $cmp_slug, 'description', $cmp_cat['description'] ) ) ); ?></div>
+							<div class="cmp__cat-desc" id="<?php echo esc_attr( $cmp_id ); ?>-desc"><?php echo esc_html( CMP_I18n::translate( 'cmp_cat_' . $cmp_slug . '_desc', CMP_Lang::localize_seed( $cmp_slug, 'description', $cmp_cat['description'] ) ) ); ?></div>
 						</div>
 						<?php if ( $cmp_locked ) : ?>
-							<span class="cmp__cat-locked" aria-label="<?php echo esc_attr( CMP_Lang::text( 'locked' ) ); ?>">
+							<span class="cmp__cat-locked" role="img" aria-label="<?php echo esc_attr( CMP_Lang::text( 'locked' ) ); ?>">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
 							</span>
 						<?php else : ?>
 							<label class="cmp__toggle" for="<?php echo esc_attr( $cmp_id ); ?>">
-								<input type="checkbox" id="<?php echo esc_attr( $cmp_id ); ?>" value="<?php echo esc_attr( $cmp_slug ); ?>" data-cmp-cat>
+								<input type="checkbox" role="switch" id="<?php echo esc_attr( $cmp_id ); ?>" value="<?php echo esc_attr( $cmp_slug ); ?>" aria-labelledby="<?php echo esc_attr( $cmp_id ); ?>-label" aria-describedby="<?php echo esc_attr( $cmp_id ); ?>-desc" data-cmp-cat>
 								<span class="cmp__toggle-slider"></span>
 							</label>
 						<?php endif; ?>
