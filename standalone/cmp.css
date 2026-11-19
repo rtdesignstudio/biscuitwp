@@ -120,8 +120,11 @@ body.cmp-has-banner { overflow: hidden; }
 	box-shadow: none;
 	background: none;
 }
+/* Hover thickens the line (no size or box change, so nothing moves). */
 .cmp .cmp__link:hover,
-.cmp-light .cmp-light__link:hover { opacity: 0.8; }
+.cmp-light .cmp-light__link:hover { text-decoration-thickness: 2px; }
+.cmp .cmp__link:focus-visible,
+.cmp-light .cmp-light__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; border-radius: 2px; }
 
 /* View switching: prefs hidden until modal has .is-prefs-open. */
 .cmp__prefs { display: none; }
@@ -189,6 +192,7 @@ body.cmp-has-banner { overflow: hidden; }
 	transition: background-color 150ms ease;
 }
 .cmp__collapse:hover { background: var(--cmp-hover); }
+.cmp__collapse:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 .cmp__collapse svg { width: 18px; height: 18px; }
 
 /* ---- Design presets (override custom properties; neutral = base above) ---- */
@@ -207,7 +211,7 @@ body.cmp-has-banner { overflow: hidden; }
 }
 
 .cmp--warm {
-	--cmp-primary: #2f7d4f;
+	--cmp-primary: #2e794d;
 	--cmp-primary-hover: #235e3c;
 	--cmp-primary-text: #ffffff;
 	--cmp-dark: #2c2417;
@@ -285,6 +289,8 @@ body.cmp-has-banner { overflow: hidden; }
 	inset: 0;
 	background: var(--cmp-border);
 	border-radius: 26px;
+	/* Off state: a muted inset edge so the switch reaches 3:1 on any style (WCAG 1.4.11). */
+	box-shadow: inset 0 0 0 2px var(--cmp-muted);
 	cursor: pointer;
 	transition: background-color 180ms ease;
 }
@@ -300,9 +306,9 @@ body.cmp-has-banner { overflow: hidden; }
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
 	transition: transform 180ms ease;
 }
-.cmp__toggle input:checked + .cmp__toggle-slider { background: var(--cmp-primary); }
+.cmp__toggle input:checked + .cmp__toggle-slider { background: var(--cmp-primary); box-shadow: none; }
 .cmp__toggle input:checked + .cmp__toggle-slider::before { transform: translateX(22px); }
-.cmp__toggle input:focus-visible + .cmp__toggle-slider { box-shadow: 0 0 0 3px rgba(0, 88, 210, 0.25); }
+.cmp__toggle input:focus-visible + .cmp__toggle-slider { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 
 /* Mobile */
 @media (max-width: 575px) {
@@ -374,6 +380,8 @@ body.cmp-has-banner { overflow: hidden; }
 	cursor: pointer; padding: 0; transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .cmp-reopen:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.24); }
+/* Two-tone ring (light halo + dark line): visible on any page background. */
+.cmp-reopen:focus-visible { outline: 2px solid var(--cmp-dark, #111827); outline-offset: 2px; box-shadow: 0 0 0 4px var(--cmp-bg, #fff); }
 .cmp-reopen[hidden] { display: none; }
 @media (max-width: 480px) { .cmp-reopen { left: 14px; bottom: 14px; width: 42px; height: 42px; } }
 
@@ -388,6 +396,7 @@ body.cmp-has-banner { overflow: hidden; }
 	font: inherit;
 	font-size: 13px;
 	padding: 4px 10px;
+	min-width: 24px;
 	border: 1px solid var(--cmp-border, currentColor);
 	border-radius: 999px;
 	background: transparent;
@@ -447,11 +456,16 @@ body.cmp-has-banner { overflow: hidden; }
 .cmp-embed__btn:focus-visible, .cmp-embed__always:focus-visible, .cmp-embed__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
 .cmp .cmp-embed__link, .cmp-embed__link,
 .cmp-embed__link:hover, .cmp-embed__link:focus {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px; /* 24px target (WCAG 2.5.8): a standalone action, not a link inside a sentence */
+	min-width: 24px;
 	color: var(--cmp-dark);
 	text-decoration: underline;
 	text-underline-offset: 2px;
 	text-decoration-thickness: 1px;
 }
+.cmp-embed__link:hover { text-decoration-thickness: 2px; }
 
 /* Local YouTube thumbnail behind the placeholder: the dark overlay keeps the text
    and buttons readable whatever the picture. */
