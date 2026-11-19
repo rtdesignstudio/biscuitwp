@@ -55,6 +55,7 @@ class CMP_Sanitizer {
 			'disable_emoji'    => ! empty( $input['disable_emoji'] ),
 			'disable_gravatar' => ! empty( $input['disable_gravatar'] ),
 			'reopen_button'    => ! empty( $input['reopen_button'] ),
+			'delete_data_on_uninstall' => ! empty( $input['delete_data_on_uninstall'] ),
 			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
 			'texts'            => $texts,
 		);

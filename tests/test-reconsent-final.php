@@ -180,7 +180,7 @@ if ( method_exists( 'CMP_Legal_Page', 'regenerated_types' ) && method_exists( 'C
 }
 cmp_assert( 1 === preg_match( "/function handle\(\).*?CMP_Legal_Page::all_regenerated\(|function handle\(\).*?self::all_regenerated\(/s", $fx_lp ), 'M3: handle() clears the notice only when all types are done' );
 cmp_assert( 1 === preg_match( "/function dismiss_templates_notice\(\).*?delete_option\( 'cmp_templates_notice' \);\s*delete_option\( 'cmp_templates_regenerated' \);/s", $fx_lp ), 'M3: dismiss clears the notice and the tracking option' );
-$fx_uninst = $fx_src( 'uninstall.php' );
+$fx_uninst = $fx_src( 'includes/class-uninstaller.php' );
 cmp_assert( false !== strpos( $fx_uninst, "'cmp_templates_notice'" ), 'M2: uninstall removes cmp_templates_notice' );
 cmp_assert( false !== strpos( $fx_uninst, "'cmp_templates_regenerated'" ), 'M3: uninstall removes cmp_templates_regenerated' );
 

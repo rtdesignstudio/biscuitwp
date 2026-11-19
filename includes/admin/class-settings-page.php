@@ -274,6 +274,16 @@ class CMP_Settings_Page {
 						</td>
 					</tr>
 				</table>
+				<h2><?php esc_html_e( 'Date', 'consent-manager-pro' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Șterge toate datele la dezinstalare', 'consent-manager-pro' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="cmp[delete_data_on_uninstall]" value="1" <?php checked( ! empty( $s['delete_data_on_uninstall'] ) ); ?>> <?php esc_html_e( 'Șterge toate datele la dezinstalare', 'consent-manager-pro' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Include registrul de consimțăminte, care e dovada legală a alegerilor vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să ștergi pluginul cu această bifă pornită.', 'consent-manager-pro' ); ?></p>
+						</td>
+					</tr>
+				</table>
 				<?php submit_button( __( 'Salvează setările', 'consent-manager-pro' ) ); ?>
 			</form>
 

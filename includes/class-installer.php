@@ -62,6 +62,7 @@ class CMP_Installer {
 			'block_scripts'    => true,
 			'disable_emoji'    => false,
 			'disable_gravatar' => false,
+			'delete_data_on_uninstall' => false,
 			'measurement'      => 'strict',
 		);
 	}

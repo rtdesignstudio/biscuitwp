@@ -316,7 +316,7 @@ if ( method_exists( 'CMP_Legal_Page', 'operator_note_html' ) ) {
 }
 $t7_src = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
 cmp_assert( false !== strpos( $t7_src, "get_option( 'cmp_operator_note_seen' )" ) && false !== strpos( $t7_src, "update_option( 'cmp_operator_note_seen'" ), 'legal screen: note seen option read and set' );
-cmp_assert( false !== strpos( (string) file_get_contents( __DIR__ . '/../uninstall.php' ), "'cmp_operator_note_seen'" ), 'uninstall removes cmp_operator_note_seen' );
+cmp_assert( false !== strpos( (string) file_get_contents( __DIR__ . '/../includes/class-uninstaller.php' ), "'cmp_operator_note_seen'" ), 'uninstall removes cmp_operator_note_seen' );
 
 // B2 Task 4: legal texts for the Advanced measurement mode, per-page mode notice.
 require_once __DIR__ . '/../includes/class-services.php';
