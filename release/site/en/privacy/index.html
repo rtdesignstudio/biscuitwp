@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>Privacy · Consent Manager Pro</title>
 <meta name="description" content="What Consent Manager Pro sends, to whom, and what it keeps on your site.">
 <link rel="stylesheet" href="../../style.css">
@@ -12,16 +12,16 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
 <div class="wrap">
-<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<p class="brand"><a href="/en/">Consent Manager Pro</a></p>
 <nav aria-label="Pages">
 <ul>
-<li><a href="../">Home</a></li>
-<li><a href="../../changelog/" hreflang="ro">Changelog</a></li>
-<li><a href="../security/">Security</a></li>
-<li><a href="./" aria-current="page">Privacy</a></li>
+<li><a href="/en/security/">Security</a></li>
+<li><a href="/en/privacy/" aria-current="page">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
 </ul>
 </nav>
-<p class="lang"><a href="../../confidentialitate/" hreflang="ro" lang="ro">Română</a></p>
+<p class="lang"><a href="/confidentialitate/" hreflang="ro" lang="ro">Română</a></p>
 </div>
 </header>
 <main id="main" class="wrap">
@@ -77,12 +77,40 @@
 <li><strong>Our recommendation:</strong> host <code>cmp.js</code> and <code>cmp.css</code> on your own server. Copy the two files and include them with your own path, as in <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone/README.md</a>. Then our server sees nothing.</li>
 </ul>
 
-<h2 id="contact">6. Contact</h2>
+<h2 id="instrument">6. The "Check your site" tool</h2>
+<p>On the <a href="/en/#verifica">home page</a> you can check a site. This is how it works:</p>
+<ul>
+<li><strong>What we read:</strong> only the homepage of the address you enter, once, as a new visitor would: no cookies, no password, following at most 3 redirects. Our server identifies itself with the user agent <code>ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)</code>. We only read public sites: addresses in private or reserved networks are refused.</li>
+<li><strong>What we keep:</strong> nothing from the check. We keep neither the checked address nor the result, and we do not write them to logs. The address reaches <code>/api/verifica.php</code> in the request body, so the server's access log sees, as for any page, your IP address, your browser and that a check was made, but not which site you checked.</li>
+<li><strong>Usage limit:</strong> to prevent abuse, the tool allows at most 10 checks a minute and 100 a day from the same IP address. For IPv6 the limit applies per /64 network, plus a limit for the whole /48 network (30 a minute and 300 a day).
+<ul>
+<li>We count checks in temporary files on the server, outside the public folder. Each file is named after an HMAC-SHA-256 hash of the IP address (or network) with a secret salt kept in a file on the server. The IP address is not written anywhere. The file holds only the times of the checks.</li>
+<li>A shared counter keeps only the times of all checks, without any IP address, to limit the total volume.</li>
+<li>A few small lock files limit how many checks run at the same time.</li>
+<li>Counter files untouched for a day are deleted at a later check (the cleanup runs at most once an hour).</li>
+</ul></li>
+<li><strong>The result</strong> is shown only to you, in your browser. The page sends it nowhere else.</li>
+</ul>
+
+<h2 id="pages">7. The consent.rt.md pages</h2>
+<ul>
+<li>The pages of this site use no statistics, no cookies and no external resources: fonts, styles and scripts are all served from <code>consent.rt.md</code>. We only see the approximate number of visitors in the server's access log.</li>
+<li><strong>The banner demo</strong> (<code>/demo/</code>) sets a single, strictly necessary cookie, <code>cmp_consent</code>: it remembers your choice in the demo for a day and stays on <code>/demo/</code> only. The "Show again" button deletes it. The demo loads no trackers.</li>
+</ul>
+
+<h2 id="contact">8. Contact</h2>
 <p>Have a privacy question? Write to <a href="mailto:security@rt.md">security@rt.md</a>, the project's contact address.</p>
 </main>
 <footer class="site">
 <div class="wrap">
-<p>Consent Manager Pro is free and open-source software, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Source code: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+<p class="made">Made by <a href="https://rt.md/">RT Design Studio</a>. Free and open-source, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>.</p>
+<ul>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
+<li><a href="/en/security/">Security</a></li>
+<li><a href="/en/privacy/">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="/confidentialitate/" hreflang="ro" lang="ro">Română</a></li>
+</ul>
 </div>
 </footer>
 </body>

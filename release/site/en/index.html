@@ -3,42 +3,311 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Consent Manager Pro</title>
-<meta name="description" content="Consent Manager Pro: a free and open-source cookie consent plugin for WordPress.">
+<meta name="color-scheme" content="light">
+<title>Consent Manager Pro · Compliant cookies for sites in Moldova</title>
+<meta name="description" content="A free and open-source WordPress cookie consent plugin, built for Moldova's Law 195/2024. Check your site in a few seconds.">
 <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body class="landing">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
 <div class="wrap">
-<p class="brand"><a href="./">Consent Manager Pro</a></p>
+<p class="brand"><a href="/en/" aria-current="page">Consent Manager Pro</a></p>
 <nav aria-label="Pages">
 <ul>
-<li><a href="./" aria-current="page">Home</a></li>
-<li><a href="../changelog/" hreflang="ro">Changelog</a></li>
-<li><a href="security/">Security</a></li>
-<li><a href="privacy/">Privacy</a></li>
+<li><a href="/en/security/">Security</a></li>
+<li><a href="/en/privacy/">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
 </ul>
 </nav>
-<p class="lang"><a href="../" hreflang="ro" lang="ro">Română</a></p>
+<p class="lang"><a href="/" hreflang="ro" lang="ro">Română</a></p>
 </div>
 </header>
-<main id="main" class="wrap">
-<h1>Consent Manager Pro</h1>
-<p class="lead">A free and open-source cookie consent plugin for WordPress. The banner blocks scripts and embeds until the visitor decides. It supports Google Consent Mode v2 and includes legal texts and a consent log. Made by <a href="https://rt.md">RT</a>. “Pro” means professional, not paid.</p>
-<ul>
-<li><a href="https://github.com/rtdesignstudio/consent-manager-pro/releases/latest">Download the latest version</a> (GitHub Releases)</li>
-<li><a href="../changelog/" hreflang="ro">Changelog</a>: what changed in each version (in Romanian; <a href="../changelog/feed.xml">RSS</a>)</li>
-<li><a href="security/">Security</a>: how to report a vulnerability, how updates are signed, the public keys</li>
-<li><a href="privacy/">Privacy</a>: what the plugin sends, to whom, and what it keeps on your site</li>
-<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">Source code</a> on GitHub</li>
+<main id="main">
+
+<section class="hero" aria-labelledby="titlu">
+<div class="wrap">
+<p class="eyebrow">WordPress cookie plugin · Law 195/2024</p>
+<h1 id="titlu">Cookies by consent, not by luck.</h1>
+<div class="hero-foot">
+<p class="lead">Consent Manager Pro keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Free, open-source, no data sent to us.</p>
+<p class="actions">
+<a class="btn" data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Download</a>
+<a class="btn btn-ghost" href="#verifica">Check your site</a>
+</p>
+</div>
+<ul class="facts">
+<li>Free, no paid version</li>
+<li>GPL licence</li>
+<li>Romanian, Russian, English</li>
+<li>WordPress 6.0+ and PHP 7.4+</li>
 </ul>
+</div>
+</section>
+
+<section id="verifica" aria-labelledby="verifica-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">01 · Check</p>
+<h2 id="verifica-titlu">Check your site</h2></div>
+<p>Enter your site's address. We read the homepage as a new visitor would, without cookies, and tell you what starts before consent.</p>
+<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
+<label for="verifica-url">Site address</label>
+<div class="tool-row">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="example.com" required maxlength="2048" aria-describedby="verifica-nota">
+<button type="submit" class="btn" id="verifica-buton">Check</button>
+<button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button>
+</div>
+<p id="verifica-nota" class="muted small">We keep neither the address nor the result. Details in <a href="/en/privacy/#instrument">Privacy</a>.</p>
+</form>
+<noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or check it yourself with the steps below.</p></noscript>
+<div id="verifica-rezultat" class="result" aria-live="polite"></div>
+
+<details class="limits">
+<summary>What we cannot see from here</summary>
+<p>The check only reads the code of the homepage. It does not see:</p>
+<ul>
+<li>the site's other pages;</li>
+<li>what Tag Manager or other scripts load after the page starts;</li>
+<li>cookies set from JavaScript;</li>
+<li>trackers in event attributes (<code>onload</code>, <code>onclick</code>), in <code>iframe srcdoc</code> or in <code>&lt;noscript&gt;</code>;</li>
+<li>addresses built from pieces of text or encoded;</li>
+<li>what the site does with the data and what its policy says.</li>
+</ul>
+<p>"No problems found" only means we found nothing on the homepage. It is not a guarantee that the site is compliant.</p>
+</details>
+
+<div id="cum-verifici" class="howto">
+<h3>Check it yourself in 5 minutes</h3>
+<ol>
+<li>Open a private (incognito) window in Chrome or Firefox. You start with no cookies and no saved consent.</li>
+<li>Open DevTools (F12, or right-click and "Inspect"), go to the Network tab and tick "Disable cache".</li>
+<li>Open the site. Do not click anything in the banner.</li>
+<li>In the Network filter, type your services' domains one by one, for example <code>google-analytics.com</code>, <code>googletagmanager.com</code>, <code>facebook.net</code>, <code>clarity.ms</code>. No request to them should show up.</li>
+<li>In the Application tab (Storage in Firefox), under Cookies, there should be no <code>_ga</code>, <code>_fbp</code>, <code>_clck</code> or other tracking cookies.</li>
+<li>Click "Accept" in the banner. Now the requests and cookies should appear. That shows blocking holds exactly until consent.</li>
+</ol>
+</div>
+</div>
+</section>
+
+<section id="legea" aria-labelledby="legea-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">02 · The law</p>
+<h2 id="legea-titlu">What the law asks</h2></div>
+<p>In Moldova, the cookie rule comes from two laws. <strong>Law No. 72/2025 on electronic communications</strong>, art. 116, in force since 1 January 2026, says when you may store or read anything on a visitor's device. <strong>Law No. 195/2024 on personal data protection</strong>, in force since 23 August 2026, says what consent must look like and what you must be able to prove. In short:</p>
+<ol class="rules">
+<li><strong>Consent first, not after.</strong> Analytics and marketing start only after the visitor says yes. Art. 116 itself asks for information; consent comes from Law 195/2024 as soon as the cookie identifies the visitor. <span class="law">Law 195/2024 art. 6-7, Law 72/2025 art. 116</span></li>
+<li><strong>Say clearly, beforehand, what you collect and why.</strong> Clear and complete information about the purposes, before any cookie that is not strictly necessary. <span class="law">Law 72/2025 art. 116(5), Law 195/2024 art. 12-13</span></li>
+<li><strong>Strictly necessary needs no consent.</strong> Session, cart, security and the cookie that remembers the choice work without asking. <span class="law">Law 72/2025 art. 116(6)</span></li>
+<li><strong>You can prove consent.</strong> You must be able to show the visitor consented. <span class="law">Law 195/2024 art. 7(1)</span></li>
+<li><strong>Withdrawing is as easy as consenting.</strong> Visitors can change their mind at any time, just as simply. <span class="law">Law 195/2024 art. 7(3)</span></li>
+<li><strong>Not through "I accept the terms".</strong> Consent given by accepting the terms and conditions as a whole is not valid. <span class="law">Law 195/2024 art. 7, CNPDCP practice</span></li>
+<li><strong>EU visitors call for the EU standard.</strong> For them the GDPR and their country's law (in Romania, Law 506/2004) apply directly, and both require explicit consent. <span class="law">GDPR art. 3(2)</span></li>
+</ol>
+<p>Fines under Law 195/2024 go up to MDL 1,000,000 or 1% of turnover, and up to MDL 2,000,000 or 2% for serious breaches (art. 86-88). They are phased in: 10% of the fine in the first year, 40% in the second, 100% from the third (art. 90(4)).</p>
+<p class="muted small">This page explains the law in plain words. It is not legal advice. For your case, ask a lawyer in Moldova.</p>
+</div>
+</section>
+
+<section id="functii" aria-labelledby="functii-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">03 · The plugin</p>
+<h2 id="functii-titlu">What the plugin does</h2></div>
+<ul class="feat">
+<li><h3>Blocks until consent</h3><p>Scripts and embeds (YouTube, Vimeo, Google Maps) stay off until the visitor chooses. With Google Consent Mode v2 and a Strict or Advanced measurement mode.</p></li>
+<li><h3>Knows the services</h3><p>A library of 18 services, from Google Analytics and Meta Pixel to Hotjar and Tawk.to, blocked from day one. You add what is missing.</p></li>
+<li><h3>Scans and checks</h3><p>Scans up to 20 pages of your site daily and tests in the browser what loads before and after consent. It also shows resources that send the visitor's IP address.</p></li>
+<li><h3>Legal texts for Moldova</h3><p>Cookie policy, privacy policy and terms in Romanian, Russian and English, citing Law 195/2024, Law 72/2025 and the GDPR. The cookie table builds itself.</p></li>
+<li><h3>Keeps the proof</h3><p>A consent log in your own database, with an ID per visitor. The IP address is kept only as a salted hash. CSV and JSON export.</p></li>
+<li><h3>Works for everyone</h3><p>Accessible to WCAG 2.2 AA: contrast, visible focus, the Escape key, 24 px targets, reduced motion. On phones, a two-line bar.</p></li>
+<li><h3>Looks like your site</h3><p>Three styles, your colours, bar, card or modal. Whatever you pick, "Accept" and "Reject" stay equally visible: same style, same size.</p></li>
+<li><h3>Signed updates</h3><p>Every update is signed with Ed25519 and checked by your site before it installs. No telemetry: the update check carries nothing about your site.</p></li>
+</ul>
+<p class="actions"><a class="btn" data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Download the plugin</a></p>
+</div>
+</section>
+
+<section id="demo" aria-labelledby="demo-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">04 · Demo</p>
+<h2 id="demo-titlu">Try the banner</h2></div>
+<p>This is the real banner, in its version without WordPress. Pick a style. The demo loads no trackers.</p>
+<p class="switch" role="group" aria-label="Banner style">
+<a href="/demo/en/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
+<a href="/demo/en/embed/?style=brand" target="cmp-demo" data-style="brand" aria-current="true">Brand</a>
+<a href="/demo/en/embed/?style=friendly" target="cmp-demo" data-style="friendly">Friendly</a>
+</p>
+<div class="frame"><iframe src="/demo/en/embed/?style=brand" name="cmp-demo" title="Demo: the Consent Manager Pro banner" loading="lazy"></iframe></div>
+</div>
+</section>
+
+<section id="comparatie" aria-labelledby="comparatie-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">05 · Comparison</p>
+<h2 id="comparatie-titlu">How it compares</h2></div>
+<p>We read the official pages of the other three plugins on 20 November 2026. Every claim has its source in the notes. Where we found no information, we say so.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
+<table class="compare">
+<thead>
+<tr><th scope="col">Criterion</th><th scope="col">Consent Manager Pro</th><th scope="col">Complianz</th><th scope="col">CookieYes</th><th scope="col">Cookiebot</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">Price</th>
+<td>Free. There is no paid version.</td>
+<td>The base plugin is free. Premium from $59 (or €59) a year for one site.<sup><a href="#n-cz-pret">1</a></sup></td>
+<td>The plugin is free. Web app: free up to 5,000 pageviews a month, then from $10 a month or $100 a year.<sup><a href="#n-cy-pret">5</a></sup></td>
+<td>Free up to 50 subpages, one domain and one language. Paid from €7 a month.<sup><a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Data sent to the vendor</th>
+<td>Nothing about visitors. From us, the plugin only fetches the update manifest. The consent log stays in your database.</td>
+<td>Visitor data stays on the site. Scan results (cookie names, domains, the plugin list) go to cookiedatabase.org.<sup><a href="#n-cz-wporg">2</a></sup></td>
+<td>With the account connected, scanning and the consent log run in the CookieYes cloud, in EU data centres.<sup><a href="#n-cy-wporg">6</a></sup></td>
+<td>Needs an account. The banner, scanner and consent storage run in the Cookiebot service. For each consent it keeps an anonymized ID, the choice, the page URL, an IP-based country and the date.<sup><a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Texts for Law 195/2024</th>
+<td>Yes: starting texts, to be reviewed by a lawyer. Cookie policy, privacy policy and terms, in RO, RU and EN.</td>
+<td>Not found. Stated coverage: US, EU, UK, Australia and Canada.<sup><a href="#n-cz-regiuni">3</a></sup></td>
+<td>We found no texts for Moldova on their site.<sup><a href="#n-cy-moldova">7</a></sup></td>
+<td>We found no texts for Moldova on their site.<sup><a href="#n-cb-moldova">11</a></sup></td>
+</tr>
+<tr><th scope="row">Romanian and Russian</th>
+<td>Banner, legal texts and admin in RO, RU and EN.</td>
+<td>Has a Romanian translation. No Russian language pack on translate.wordpress.org.<sup><a href="#n-cz-limbi">4</a></sup></td>
+<td>The banner has RO and RU. On the free plan, one language at a time.<sup><a href="#n-cy-limbi">8</a></sup></td>
+<td>The banner has RO and RU. On the free plan, one language.<sup><a href="#n-cb-limbi">12</a>,&#8202;<a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Open-source</th>
+<td>Yes, GPL-2.0-or-later. All the code is on GitHub.</td>
+<td>The plugin: GPL2 licence.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>The plugin: GPLv3 licence. Scanning and the log run in their cloud.<sup><a href="#n-cy-readme">14</a>,&#8202;<a href="#n-cy-wporg">6</a></sup></td>
+<td>The WordPress plugin: GPLv2 or later. The banner runs in the Cookiebot service.<sup><a href="#n-cb-readme">15</a>,&#8202;<a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Blocking without setup</th>
+<td>Yes, for the 18 services in the library. You add the rest.</td>
+<td>Script blocking is included in the free version.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>Without an account, it blocks only the cookies you add. With the account connected, the scanner adds them.<sup><a href="#n-cy-wporg">6</a></sup></td>
+<td>Yes: automatic mode, on by default since version 4.5.0.<sup><a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Site scanning</th>
+<td>On your server: up to 20 pages, daily, plus an in-browser check before and after consent.</td>
+<td>Automatic scan in the free version. Premium adds a hybrid scan with simulated visits.<sup><a href="#n-cz-readme">13</a>,&#8202;<a href="#n-cz-pret">1</a></sup></td>
+<td>In the cloud: 5 free scans a month, up to 100 pages each. Unknown cookies are classified automatically.<sup><a href="#n-cy-pret">5</a>,&#8202;<a href="#n-cy-wporg">6</a></sup></td>
+<td>In the cloud, automatic, monthly (daily at extra cost).<sup><a href="#n-cb-functii">16</a>,&#8202;<a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Signed updates</th>
+<td>Yes: Ed25519, with a signed manifest and public keys on the <a href="/en/security/">Security</a> page.</td>
+<td>No information found.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>No information found.<sup><a href="#n-cy-readme">14</a></sup></td>
+<td>No information found.<sup><a href="#n-cb-readme">15</a></sup></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>Where the others are better</h3>
+<ul>
+<li><strong>IAB TCF</strong>, the framework some ad networks require: all three have it, on paid plans.<sup><a href="#n-cz-pret">1</a>,&#8202;<a href="#n-cy-pret">5</a>,&#8202;<a href="#n-cb-pret">9</a></sup> Consent Manager Pro does not.</li>
+<li><strong>Cookiebot's automated cloud scanning</strong> finds new cookies across the whole site, monthly, on its own.<sup><a href="#n-cb-functii">16</a></sup> Our scan stops at 20 pages.</li>
+<li><strong>More languages:</strong> CookieYes and Cookiebot show the banner in over 40 languages on paid plans.<sup><a href="#n-cy-limbi">8</a>,&#8202;<a href="#n-cb-pret">9</a></sup> We have three.</li>
+<li><strong>Larger service libraries</strong>, kept up to date by dedicated teams. Ours has 18 services.</li>
+</ul>
+<p>If you need IAB TCF or the banner in many languages, pick one of them. If you want a free plugin with texts for Moldova and no visitor data sent out, pick Consent Manager Pro.</p>
+<h3>Sources</h3>
+<ol class="notes">
+<li id="n-cz-pret">Complianz, pricing: <a href="https://complianz.io/pricing/">complianz.io/pricing</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cz-wporg">Complianz, plugin page: <a href="https://wordpress.org/plugins/complianz-gdpr/">wordpress.org/plugins/complianz-gdpr</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cz-regiuni">Complianz, covered regions: <a href="https://complianz.io/how-to-show-the-cookiebanner-in-extra-regions/">complianz.io/how-to-show-the-cookiebanner-in-extra-regions</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cz-limbi">Complianz, plugin translations: <a href="https://translate.wordpress.org/projects/wp-plugins/complianz-gdpr/">translate.wordpress.org/projects/wp-plugins/complianz-gdpr</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cy-pret">CookieYes, pricing: <a href="https://www.cookieyes.com/pricing/">cookieyes.com/pricing</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cy-wporg">CookieYes, plugin page: <a href="https://wordpress.org/plugins/cookie-law-info/">wordpress.org/plugins/cookie-law-info</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cy-moldova">CookieYes, documentation: <a href="https://www.cookieyes.com/documentation/">cookieyes.com/documentation</a>. We searched their site for "Moldova" and "195/2024" and found nothing about Moldova. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cy-limbi">CookieYes, banner languages: <a href="https://www.cookieyes.com/documentation/banner-languages/">cookieyes.com/documentation/banner-languages</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-pret">Cookiebot, pricing: <a href="https://www.cookiebot.com/en/pricing/">cookiebot.com/en/pricing</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-wporg">Cookiebot, plugin page: <a href="https://wordpress.org/plugins/cookiebot/">wordpress.org/plugins/cookiebot</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-moldova">Cookiebot, page on cookie laws: <a href="https://www.cookiebot.com/en/cookie-law/">cookiebot.com/en/cookie-law</a>. We searched their site for "Moldova" and "195/2024" and found nothing about Moldova. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-limbi">Cookiebot, banner languages: <a href="https://support.cookiebot.com/hc/en-us/articles/360004259374-What-languages-are-available-for-the-cookie-banner">support.cookiebot.com, "What languages are available for the cookie banner?"</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cz-readme">Complianz, the plugin's readme (licence, what the free version includes): <a href="https://plugins.svn.wordpress.org/complianz-gdpr/trunk/readme.txt">plugins.svn.wordpress.org/complianz-gdpr/trunk/readme.txt</a>. We found nothing on signed updates. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cy-readme">CookieYes, the plugin's readme (licence): <a href="https://plugins.svn.wordpress.org/cookie-law-info/trunk/readme.txt">plugins.svn.wordpress.org/cookie-law-info/trunk/readme.txt</a>. We found nothing on signed updates. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-readme">Cookiebot, the plugin's readme (licence): <a href="https://plugins.svn.wordpress.org/cookiebot/trunk/readme.txt">plugins.svn.wordpress.org/cookiebot/trunk/readme.txt</a>. We found nothing on signed updates. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+<li id="n-cb-functii">Cookiebot, features: <a href="https://www.cookiebot.com/en/cookie-consent-solution/">cookiebot.com/en/cookie-consent-solution</a>. Checked on <time datetime="2026-11-20">20 November 2026</time>.</li>
+</ol>
+</div>
+</section>
+
+<section id="resurse" aria-labelledby="resurse-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">06 · External resources</p>
+<h2 id="resurse-titlu">Google Fonts and other resources that send the IP address</h2></div>
+<p>When a page loads a font from Google, the visitor's browser connects to Google's servers and sends them its IP address. Nobody asked the visitor. The IP address is personal data.</p>
+<p>In January 2022 a court in Munich (Landgericht München I, case 3 O 17493/20) ruled that a site loading Google Fonts from Google's servers breached the GDPR, because the fonts can also be used locally without the visitor's IP address leaving. The site had to pay €100 in damages to the visitor who complained. It is a German court's decision and is not law in Moldova, but it shows how the GDPR is read in the EU.</p>
+<p>The same happens with Adobe Fonts, Font Awesome, public CDNs, Gravatar avatars and WordPress emoji.</p>
+<h3>What the plugin does</h3>
+<ul>
+<li><strong>Finds them:</strong> the scan shows, page by page, the "Resources that send the IP address": Google Fonts, Adobe Fonts, Font Awesome, CDNs, Gravatar, WordPress emoji.</li>
+<li><strong>Moves Google Fonts to your server:</strong> you turn on "Localize Google Fonts" in Settings, click "Localize fonts" and your server downloads the fonts once. From then on visitors no longer contact Google.</li>
+<li><strong>Turns off emoji and Gravatar:</strong> two switches in Settings.</li>
+<li><strong>You move the rest:</strong> for Adobe Fonts, Font Awesome and CDNs the plugin shows you where they are, and you host the files on your server.</li>
+</ul>
+</div>
+</section>
+
+<section id="incredere" aria-labelledby="incredere-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">07 · Trust</p>
+<h2 id="incredere-titlu">You can check everything</h2></div>
+<ul class="checks">
+<li><strong>Open-source.</strong> All the code is on <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, under GPL-2.0-or-later.</li>
+<li><strong>Signed updates.</strong> The public keys and the commands to verify a package by hand are on the <a href="/en/security/">Security</a> page.</li>
+<li><strong>No telemetry.</strong> The plugin sends us nothing about your visitors, and the update check carries neither your site's address nor other data about it. What it sends, and to whom, is in <a href="/en/privacy/">Privacy</a>.</li>
+<li><strong>Public history.</strong> Every version is in the <a href="/changelog/" hreflang="ro">Changelog</a> (in Romanian), with an RSS feed.</li>
+</ul>
+</div>
+</section>
+
+<section id="instalare" aria-labelledby="instalare-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">08 · Install</p>
+<h2 id="instalare-titlu">Running in 5 minutes</h2></div>
+<ol class="steps">
+<li><a data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Download</a> <code>consent-manager-pro.zip</code>. In WordPress, under Plugins, upload the zip file and activate the plugin.</li>
+<li><strong>Settings:</strong> keep Pro mode (the banner with consent per category). Keep "Block tracking scripts until consent" ticked and the measurement mode on Strict.</li>
+<li><strong>Services:</strong> look at the "Found on the site" list. The plugin scans on its own. Make sure nothing you know the site uses is missing.</li>
+<li><strong>Legal pages:</strong> fill in the operator's details and click "Generate" for each document. Read the pages and publish them.</li>
+<li><strong>The "Cookie settings" link</strong> in the footer, with the <code>[cmp_cookie_settings_link]</code> shortcode. Visitors use it to change or withdraw consent.</li>
+<li><strong>Check:</strong> click "Check in browser". No page should come out red.</li>
+</ol>
+<p>The full guide is inside the plugin, under Consent Manager, "Guide". Not on WordPress? Use the <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>.</p>
+</div>
+</section>
+
+<section id="intrebari" aria-labelledby="intrebari-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">09 · Questions</p>
+<h2 id="intrebari-titlu">Frequently asked questions</h2></div>
+<details><summary>Why is it free?</summary><p>Because we want every site in Moldova to be able to ask for consent properly without paying for it. The code is public, under the GPL. There is no licence key, no subscription and no hidden features.</p></details>
+<details><summary>Does "Pro" mean there is a paid version?</summary><p>No. "Pro" means professional. There is no paid version and no paid service.</p></details>
+<details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>
+<details><summary>What data reaches RT?</summary><p>From the plugin, only the update check: your site downloads a static manifest from <code>consent.rt.md</code>, without the site's address and without visitor data. From the check on this page: the address you type, used only for the check and not kept. It is all in <a href="/en/privacy/">Privacy</a>.</p></details>
+<details><summary>Is the plugin enough to make my site compliant?</summary><p>Not on its own. The plugin does the banner, the blocking, the consent log and starting texts. Still up to you: the record of processing activities, a data protection officer where required, data transfers abroad and the final wording of the legal texts. Ask a lawyer about those.</p></details>
+<details><summary>What about Google Tag Manager?</summary><p>The plugin blocks what is in the page code. In Strict mode, Tag Manager starts only after consent. What Tag Manager loads after it starts is controlled from Tag Manager, through Google Consent Mode, which the plugin sends.</p></details>
+<details><summary>Which versions does it support?</summary><p>WordPress 6.0 or later and PHP 7.4 or later. It also works on multisite.</p></details>
+<details><summary>How do I report a security issue?</summary><p>Write to <a href="mailto:security@rt.md">security@rt.md</a>. Details on the <a href="/en/security/">Security</a> page.</p></details>
+</div>
+</section>
+
 </main>
 <footer class="site">
 <div class="wrap">
-<p>Consent Manager Pro is free and open-source software, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Source code: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+<p class="made">Made by <a href="https://rt.md/">RT Design Studio</a>. Free and open-source, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>.</p>
+<ul>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
+<li><a href="/en/security/">Security</a></li>
+<li><a href="/en/privacy/">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="/" hreflang="ro" lang="ro">Română</a></li>
+</ul>
 </div>
 </footer>
+<script src="/assets/verifica.js" defer></script>
 </body>
 </html>

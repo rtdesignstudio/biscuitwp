@@ -3,42 +3,311 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Consent Manager Pro</title>
-<meta name="description" content="Consent Manager Pro: plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri.">
+<meta name="color-scheme" content="light">
+<title>Consent Manager Pro · Cookie-uri conforme pentru site-urile din Moldova</title>
+<meta name="description" content="Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri, făcut pentru Legea 195/2024. Verifică-ți site-ul în câteva secunde.">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="landing">
 <a class="skip" href="#main">Sari la conținut</a>
 <header class="site">
 <div class="wrap">
-<p class="brand"><a href="./">Consent Manager Pro</a></p>
+<p class="brand"><a href="/" aria-current="page">Consent Manager Pro</a></p>
 <nav aria-label="Pagini">
 <ul>
-<li><a href="./" aria-current="page">Acasă</a></li>
-<li><a href="changelog/">Changelog</a></li>
-<li><a href="securitate/">Securitate</a></li>
-<li><a href="confidentialitate/">Confidențialitate</a></li>
+<li><a href="/securitate/">Securitate</a></li>
+<li><a href="/confidentialitate/">Confidențialitate</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
 </ul>
 </nav>
-<p class="lang"><a href="en/" hreflang="en" lang="en">English</a></p>
+<p class="lang"><a href="/en/" hreflang="en" lang="en">English</a></p>
 </div>
 </header>
-<main id="main" class="wrap">
-<h1>Consent Manager Pro</h1>
-<p class="lead">Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri. Bannerul blochează scripturile și embed-urile până decide vizitatorul. Are Google Consent Mode v2, texte legale și un registru de consimțăminte. Îl face <a href="https://rt.md">RT</a>. „Pro” înseamnă profesional, nu plătit.</p>
-<ul>
-<li><a href="https://github.com/rtdesignstudio/consent-manager-pro/releases/latest">Descarcă ultima versiune</a> (GitHub Releases)</li>
-<li><a href="changelog/">Changelog</a>: ce s-a schimbat în fiecare versiune (și <a href="changelog/feed.xml">RSS</a>)</li>
-<li><a href="securitate/">Securitate</a>: cum raportezi o vulnerabilitate, cum sunt semnate update-urile, cheile publice</li>
-<li><a href="confidentialitate/">Confidențialitate</a>: ce trimite pluginul, cui, și ce păstrează pe site-ul tău</li>
-<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">Codul sursă</a> pe GitHub</li>
+<main id="main">
+
+<section class="hero" aria-labelledby="titlu">
+<div class="wrap">
+<p class="eyebrow">Plugin WordPress pentru cookie-uri · Legea 195/2024</p>
+<h1 id="titlu">Cookie-uri cu acord, nu cu noroc.</h1>
+<div class="hero-foot">
+<p class="lead">Consent Manager Pro oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Gratuit, open-source, fără date trimise nouă.</p>
+<p class="actions">
+<a class="btn" data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Descarcă</a>
+<a class="btn btn-ghost" href="#verifica">Verifică-ți site-ul</a>
+</p>
+</div>
+<ul class="facts">
+<li>Gratuit, fără versiune plătită</li>
+<li>Licență GPL</li>
+<li>Română, rusă, engleză</li>
+<li>WordPress 6.0+ și PHP 7.4+</li>
 </ul>
+</div>
+</section>
+
+<section id="verifica" aria-labelledby="verifica-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">01 · Verificare</p>
+<h2 id="verifica-titlu">Verifică-ți site-ul</h2></div>
+<p>Scrie adresa site-ului. Citim pagina principală ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord.</p>
+<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
+<label for="verifica-url">Adresa site-ului</label>
+<div class="tool-row">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="exemplu.md" required maxlength="2048" aria-describedby="verifica-nota">
+<button type="submit" class="btn" id="verifica-buton">Verifică</button>
+<button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Anulează</button>
+</div>
+<p id="verifica-nota" class="muted small">Nu păstrăm adresa și nici rezultatul. Detalii în <a href="/confidentialitate/#instrument">Confidențialitate</a>.</p>
+</form>
+<noscript><p class="notice">Verificarea are nevoie de JavaScript. Pornește-l în browser și reîncarcă pagina, sau verifică singur, cu pașii de mai jos.</p></noscript>
+<div id="verifica-rezultat" class="result" aria-live="polite"></div>
+
+<details class="limits">
+<summary>Ce nu vedem de aici</summary>
+<p>Verificarea citește doar codul paginii principale. Nu vede:</p>
+<ul>
+<li>alte pagini ale site-ului;</li>
+<li>ce încarcă Tag Manager-ul sau alte scripturi după ce pornește pagina;</li>
+<li>cookie-urile puse din JavaScript;</li>
+<li>trackerele puse în atribute de eveniment (<code>onload</code>, <code>onclick</code>), în <code>iframe srcdoc</code> sau în <code>&lt;noscript&gt;</code>;</li>
+<li>adresele construite din bucăți de text sau codificate;</li>
+<li>ce face site-ul cu datele și ce scrie în politica lui.</li>
+</ul>
+<p>„N-am găsit probleme” înseamnă doar că pe pagina principală nu am găsit nimic. Nu e o garanție că site-ul e conform.</p>
+</details>
+
+<div id="cum-verifici" class="howto">
+<h3>Cum verifici singur, în 5 minute</h3>
+<ol>
+<li>Deschide o fereastră privată (incognito) în Chrome sau Firefox. Pornești fără cookie-uri și fără un acord salvat.</li>
+<li>Deschide DevTools (tasta F12 sau clic dreapta, apoi „Inspectează”), mergi la tab-ul Network („Rețea”) și bifează „Disable cache”.</li>
+<li>Intră pe site. Nu apăsa nimic în banner.</li>
+<li>În filtrul din Network, scrie pe rând domeniile serviciilor tale, de exemplu <code>google-analytics.com</code>, <code>googletagmanager.com</code>, <code>facebook.net</code>, <code>clarity.ms</code>. Nu trebuie să apară nicio cerere spre ele.</li>
+<li>În tab-ul Application (în Firefox, Storage), la Cookies, nu trebuie să fie <code>_ga</code>, <code>_fbp</code>, <code>_clck</code> sau alte cookie-uri de urmărire.</li>
+<li>Apasă „Acceptă” în banner. Acum cererile și cookie-urile trebuie să apară. Așa știi că blocarea ține exact până la acord.</li>
+</ol>
+</div>
+</div>
+</section>
+
+<section id="legea" aria-labelledby="legea-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">02 · Legea</p>
+<h2 id="legea-titlu">Ce cere legea</h2></div>
+<p>În Moldova, regula despre cookie-uri vine din două legi. <strong>Legea nr. 72/2025 a comunicațiilor electronice</strong>, art. 116, în vigoare din 1 ianuarie 2026, spune când ai voie să scrii sau să citești ceva pe dispozitivul vizitatorului. <strong>Legea nr. 195/2024 privind protecția datelor cu caracter personal</strong>, în vigoare din 23 august 2026, spune cum trebuie să arate acordul și ce trebuie să poți dovedi. Pe scurt:</p>
+<ol class="rules">
+<li><strong>Acord înainte, nu după.</strong> Analiza și marketingul pornesc doar după ce vizitatorul spune „Da”. Art. 116 cere în text informarea; acordul vine din Legea 195/2024, de îndată ce cookie-ul identifică vizitatorul. <span class="law">Legea 195/2024 art. 6-7, Legea 72/2025 art. 116</span></li>
+<li><strong>Spui clar, dinainte, ce colectezi și de ce.</strong> Informații clare și complete despre scopuri, înainte de orice cookie care nu e strict necesar. <span class="law">Legea 72/2025 art. 116 alin. (5), Legea 195/2024 art. 12-13</span></li>
+<li><strong>Strict necesarul nu cere acord.</strong> Sesiunea, coșul, securitatea și cookie-ul care ține minte alegerea merg fără întrebare. <span class="law">Legea 72/2025 art. 116 alin. (6)</span></li>
+<li><strong>Poți dovedi acordul.</strong> Trebuie să poți arăta că vizitatorul și-a dat acordul. <span class="law">Legea 195/2024 art. 7 alin. (1)</span></li>
+<li><strong>Retragerea e la fel de ușoară ca acordul.</strong> Vizitatorul se răzgândește oricând, la fel de simplu. <span class="law">Legea 195/2024 art. 7 alin. (3)</span></li>
+<li><strong>Nu prin „accept termenii”.</strong> Acordul dat prin acceptarea globală a termenilor și condițiilor nu e valid. <span class="law">Legea 195/2024 art. 7, practica CNPDCP</span></li>
+<li><strong>Vizitatorii din UE cer standardul UE.</strong> Pentru ei se aplică direct GDPR și legea statului lor (în România, Legea 506/2004), care cer consimțământ explicit. <span class="law">GDPR art. 3 alin. (2)</span></li>
+</ol>
+<p>Amenzile din Legea 195/2024 ajung până la 1 000 000 MDL sau 1% din cifra de afaceri, iar pentru încălcările grave până la 2 000 000 MDL sau 2% (art. 86-88). În primii ani se aplică treptat: 10% din amendă în primul an, 40% în al doilea, 100% din al treilea (art. 90 alin. 4).</p>
+<p class="muted small">Pagina asta explică legea pe înțeles. Nu e consultanță juridică. Pentru cazul tău, întreabă un jurist din Moldova.</p>
+</div>
+</section>
+
+<section id="functii" aria-labelledby="functii-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">03 · Pluginul</p>
+<h2 id="functii-titlu">Ce face pluginul</h2></div>
+<ul class="feat">
+<li><h3>Blochează până la acord</h3><p>Scripturile și embed-urile (YouTube, Vimeo, Google Maps) stau oprite până alege vizitatorul. Cu Google Consent Mode v2 și un mod de măsurare Strict sau Advanced.</p></li>
+<li><h3>Știe serviciile</h3><p>O bibliotecă de 18 servicii, de la Google Analytics și Meta Pixel la Hotjar și Tawk.to, blocate din prima zi. Adaugi singur ce lipsește.</p></li>
+<li><h3>Scanează și verifică</h3><p>Scanează până la 20 de pagini ale site-ului, zilnic, și testează în browser ce se încarcă înainte și după acord. Arată și resursele care trimit IP-ul vizitatorului.</p></li>
+<li><h3>Texte legale pentru Moldova</h3><p>Politica de cookie-uri, de confidențialitate și termenii, în română, rusă și engleză, cu Legea 195/2024, Legea 72/2025 și GDPR. Tabelul de cookie-uri se face singur.</p></li>
+<li><h3>Ține dovada</h3><p>Un registru de consimțăminte în baza ta de date, cu un ID pentru fiecare vizitator. IP-ul se păstrează doar ca amprentă, cu sare. Export CSV și JSON.</p></li>
+<li><h3>Merge pentru oricine</h3><p>Accesibil după WCAG 2.2 AA: contrast, focus vizibil, tasta Escape, ținte de 24 px, mișcare redusă. Pe telefon, o bandă pe două rânduri.</p></li>
+<li><h3>Arată ca site-ul tău</h3><p>Trei stiluri, culorile tale, bară, card sau fereastră. Orice alegi, „Accept” și „Refuz” rămân la fel de vizibile: același stil, aceeași mărime.</p></li>
+<li><h3>Update-uri semnate</h3><p>Fiecare update e semnat cu Ed25519 și verificat de site înainte de instalare. Fără telemetrie: cererea de update nu conține nimic despre site.</p></li>
+</ul>
+<p class="actions"><a class="btn" data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Descarcă pluginul</a></p>
+</div>
+</section>
+
+<section id="demo" aria-labelledby="demo-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">04 · Demo</p>
+<h2 id="demo-titlu">Încearcă bannerul</h2></div>
+<p>E bannerul real, în versiunea fără WordPress. Alege un stil. Demo-ul nu încarcă niciun tracker.</p>
+<p class="switch" role="group" aria-label="Stilul bannerului">
+<a href="/demo/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
+<a href="/demo/embed/?style=brand" target="cmp-demo" data-style="brand" aria-current="true">Brand</a>
+<a href="/demo/embed/?style=friendly" target="cmp-demo" data-style="friendly">Prietenos</a>
+</p>
+<div class="frame"><iframe src="/demo/embed/?style=brand" name="cmp-demo" title="Demo: bannerul Consent Manager Pro" loading="lazy"></iframe></div>
+</div>
+</section>
+
+<section id="comparatie" aria-labelledby="comparatie-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">05 · Comparație</p>
+<h2 id="comparatie-titlu">Cum se compară</h2></div>
+<p>Am citit paginile oficiale ale celorlalte trei pluginuri pe 20 noiembrie 2026. Fiecare afirmație are sursa în note. Unde n-am găsit informații, scrie asta.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
+<table class="compare">
+<thead>
+<tr><th scope="col">Criteriu</th><th scope="col">Consent Manager Pro</th><th scope="col">Complianz</th><th scope="col">CookieYes</th><th scope="col">Cookiebot</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">Preț</th>
+<td>Gratuit. Nu există versiune plătită.</td>
+<td>Pluginul de bază e gratuit. Premium de la 59 $ (sau 59 €) pe an, pentru un site.<sup><a href="#n-cz-pret">1</a></sup></td>
+<td>Pluginul e gratuit. Aplicația web: gratuit până la 5 000 de afișări pe lună, apoi de la 10 $ pe lună sau 100 $ pe an.<sup><a href="#n-cy-pret">5</a></sup></td>
+<td>Gratuit până la 50 de subpagini, un domeniu și o limbă. Plătit de la 7 € pe lună.<sup><a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Ce date ajung la furnizor</th>
+<td>Nimic despre vizitatori. De la noi, pluginul cere doar manifestul de update. Registrul stă în baza ta de date.</td>
+<td>Datele vizitatorilor rămân pe site. Rezultatele scanării (numele cookie-urilor, domeniile, lista de pluginuri) ajung la cookiedatabase.org.<sup><a href="#n-cz-wporg">2</a></sup></td>
+<td>Cu contul conectat, scanarea și registrul de consimțăminte rulează în cloud-ul CookieYes, în centre de date din UE.<sup><a href="#n-cy-wporg">6</a></sup></td>
+<td>Cere cont. Bannerul, scanarea și registrul rulează în serviciul Cookiebot. Pentru fiecare acord păstrează un ID anonimizat, alegerea, adresa paginii, țara după IP și data.<sup><a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Texte pentru Legea 195/2024</th>
+<td>Da: texte de pornire, de revizuit cu un jurist. Politica de cookie-uri, de confidențialitate și termenii, în RO, RU și EN.</td>
+<td>Nu am găsit. Acoperirea declarată: SUA, UE, Marea Britanie, Australia și Canada.<sup><a href="#n-cz-regiuni">3</a></sup></td>
+<td>Nu am găsit texte pentru Moldova pe site-ul lor.<sup><a href="#n-cy-moldova">7</a></sup></td>
+<td>Nu am găsit texte pentru Moldova pe site-ul lor.<sup><a href="#n-cb-moldova">11</a></sup></td>
+</tr>
+<tr><th scope="row">Română și rusă</th>
+<td>Bannerul, textele legale și administrarea, în RO, RU și EN.</td>
+<td>Are traducere în română. Nu are pachet de traducere în rusă pe translate.wordpress.org.<sup><a href="#n-cz-limbi">4</a></sup></td>
+<td>Bannerul are RO și RU. În planul gratuit, o singură limbă odată.<sup><a href="#n-cy-limbi">8</a></sup></td>
+<td>Bannerul are RO și RU. În planul gratuit, o singură limbă.<sup><a href="#n-cb-limbi">12</a>,&#8202;<a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Open-source</th>
+<td>Da, GPL-2.0-or-later. Tot codul e pe GitHub.</td>
+<td>Pluginul: licența GPL2.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>Pluginul: licența GPLv3. Scanarea și registrul rulează în cloud-ul lor.<sup><a href="#n-cy-readme">14</a>,&#8202;<a href="#n-cy-wporg">6</a></sup></td>
+<td>Pluginul WordPress: GPLv2 sau mai nouă. Bannerul rulează în serviciul Cookiebot.<sup><a href="#n-cb-readme">15</a>,&#8202;<a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Blocare fără configurare</th>
+<td>Da, pentru cele 18 servicii din bibliotecă. Restul le adaugi tu.</td>
+<td>Blocarea scripturilor e inclusă în versiunea gratuită.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>Fără cont, blochează doar cookie-urile adăugate de tine. Cu contul conectat, scanerul le adaugă singur.<sup><a href="#n-cy-wporg">6</a></sup></td>
+<td>Da: modul automat, pornit implicit de la versiunea 4.5.0.<sup><a href="#n-cb-wporg">10</a></sup></td>
+</tr>
+<tr><th scope="row">Scanarea site-ului</th>
+<td>Pe serverul tău: până la 20 de pagini, zilnic, plus verificarea în browser înainte și după acord.</td>
+<td>Scanare automată în versiunea gratuită. Premium adaugă scanarea hibridă, cu vizite simulate.<sup><a href="#n-cz-readme">13</a>,&#8202;<a href="#n-cz-pret">1</a></sup></td>
+<td>În cloud: gratuit 5 scanări pe lună, de până la 100 de pagini. Cookie-urile necunoscute sunt clasificate automat.<sup><a href="#n-cy-pret">5</a>,&#8202;<a href="#n-cy-wporg">6</a></sup></td>
+<td>În cloud, automat, lunar (zilnic contra cost).<sup><a href="#n-cb-functii">16</a>,&#8202;<a href="#n-cb-pret">9</a></sup></td>
+</tr>
+<tr><th scope="row">Update-uri semnate</th>
+<td>Da: Ed25519, cu manifest semnat și chei publice pe pagina <a href="/securitate/">Securitate</a>.</td>
+<td>Nu am găsit informații.<sup><a href="#n-cz-readme">13</a></sup></td>
+<td>Nu am găsit informații.<sup><a href="#n-cy-readme">14</a></sup></td>
+<td>Nu am găsit informații.<sup><a href="#n-cb-readme">15</a></sup></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>Unde sunt alții mai buni</h3>
+<ul>
+<li><strong>IAB TCF</strong>, cadrul cerut de unele rețele de reclame: îl au toate trei, în planurile plătite.<sup><a href="#n-cz-pret">1</a>,&#8202;<a href="#n-cy-pret">5</a>,&#8202;<a href="#n-cb-pret">9</a></sup> Consent Manager Pro nu îl are.</li>
+<li><strong>Scanarea automată în cloud</strong> a Cookiebot găsește singură, lunar, cookie-urile noi de pe tot site-ul.<sup><a href="#n-cb-functii">16</a></sup> Scanarea noastră se oprește la 20 de pagini.</li>
+<li><strong>Mai multe limbi:</strong> CookieYes și Cookiebot au bannerul în peste 40 de limbi, în planurile plătite.<sup><a href="#n-cy-limbi">8</a>,&#8202;<a href="#n-cb-pret">9</a></sup> Noi avem trei.</li>
+<li><strong>Biblioteci de servicii mai mari</strong>, ținute la zi de echipe dedicate. A noastră are 18 servicii.</li>
+</ul>
+<p>Dacă ai nevoie de IAB TCF sau de bannerul în multe limbi, alege unul dintre ei. Dacă vrei un plugin gratuit, cu textele pentru Moldova și fără date despre vizitatori trimise în afară, alege Consent Manager Pro.</p>
+<h3>Surse</h3>
+<ol class="notes">
+<li id="n-cz-pret">Complianz, prețuri: <a href="https://complianz.io/pricing/">complianz.io/pricing</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cz-wporg">Complianz, pagina pluginului: <a href="https://wordpress.org/plugins/complianz-gdpr/">wordpress.org/plugins/complianz-gdpr</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cz-regiuni">Complianz, regiunile acoperite: <a href="https://complianz.io/how-to-show-the-cookiebanner-in-extra-regions/">complianz.io/how-to-show-the-cookiebanner-in-extra-regions</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cz-limbi">Complianz, traducerile pluginului: <a href="https://translate.wordpress.org/projects/wp-plugins/complianz-gdpr/">translate.wordpress.org/projects/wp-plugins/complianz-gdpr</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cy-pret">CookieYes, prețuri: <a href="https://www.cookieyes.com/pricing/">cookieyes.com/pricing</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cy-wporg">CookieYes, pagina pluginului: <a href="https://wordpress.org/plugins/cookie-law-info/">wordpress.org/plugins/cookie-law-info</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cy-moldova">CookieYes, documentația: <a href="https://www.cookieyes.com/documentation/">cookieyes.com/documentation</a>. Am căutat pe site „Moldova” și „195/2024” și nu am găsit nimic despre Moldova. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cy-limbi">CookieYes, limbile bannerului: <a href="https://www.cookieyes.com/documentation/banner-languages/">cookieyes.com/documentation/banner-languages</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-pret">Cookiebot, prețuri: <a href="https://www.cookiebot.com/en/pricing/">cookiebot.com/en/pricing</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-wporg">Cookiebot, pagina pluginului: <a href="https://wordpress.org/plugins/cookiebot/">wordpress.org/plugins/cookiebot</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-moldova">Cookiebot, pagina despre legile cookie-urilor: <a href="https://www.cookiebot.com/en/cookie-law/">cookiebot.com/en/cookie-law</a>. Am căutat pe site „Moldova” și „195/2024” și nu am găsit nimic despre Moldova. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-limbi">Cookiebot, limbile bannerului: <a href="https://support.cookiebot.com/hc/en-us/articles/360004259374-What-languages-are-available-for-the-cookie-banner">support.cookiebot.com, „What languages are available for the cookie banner?”</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cz-readme">Complianz, fișierul readme al pluginului (licența, ce include versiunea gratuită): <a href="https://plugins.svn.wordpress.org/complianz-gdpr/trunk/readme.txt">plugins.svn.wordpress.org/complianz-gdpr/trunk/readme.txt</a>. Despre semnarea update-urilor nu am găsit nimic. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cy-readme">CookieYes, fișierul readme al pluginului (licența): <a href="https://plugins.svn.wordpress.org/cookie-law-info/trunk/readme.txt">plugins.svn.wordpress.org/cookie-law-info/trunk/readme.txt</a>. Despre semnarea update-urilor nu am găsit nimic. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-readme">Cookiebot, fișierul readme al pluginului (licența): <a href="https://plugins.svn.wordpress.org/cookiebot/trunk/readme.txt">plugins.svn.wordpress.org/cookiebot/trunk/readme.txt</a>. Despre semnarea update-urilor nu am găsit nimic. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+<li id="n-cb-functii">Cookiebot, funcțiile: <a href="https://www.cookiebot.com/en/cookie-consent-solution/">cookiebot.com/en/cookie-consent-solution</a>. Verificat pe <time datetime="2026-11-20">20 noiembrie 2026</time>.</li>
+</ol>
+</div>
+</section>
+
+<section id="resurse" aria-labelledby="resurse-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">06 · Resurse externe</p>
+<h2 id="resurse-titlu">Google Fonts și alte resurse care trimit IP-ul</h2></div>
+<p>Când o pagină încarcă un font de la Google, browserul vizitatorului se conectează la serverele Google și le trimite adresa IP. Fără să-l fi întrebat cineva. IP-ul e o dată personală.</p>
+<p>În ianuarie 2022, un tribunal din München (Landgericht München I, dosarul 3 O 17493/20) a decis că un site care încărca Google Fonts de pe serverele Google a încălcat GDPR, pentru că fonturile se pot folosi și local, fără să plece IP-ul vizitatorului. Site-ul a fost obligat să plătească 100 € despăgubire vizitatorului care a reclamat. Decizia e a unui tribunal german, nu face lege în Moldova, dar arată cum e citit GDPR-ul în UE.</p>
+<p>Același lucru se întâmplă cu Adobe Fonts, Font Awesome, CDN-urile publice, avatarele Gravatar și emoji-urile WordPress.</p>
+<h3>Ce face pluginul</h3>
+<ul>
+<li><strong>Le găsește:</strong> scanarea arată, pe fiecare pagină, „Resurse care trimit IP-ul”: Google Fonts, Adobe Fonts, Font Awesome, CDN-uri, Gravatar, emoji WordPress.</li>
+<li><strong>Mută Google Fonts local:</strong> pornești opțiunea „Localizare Google Fonts” în Setări, apeși „Localizează fonturile” și serverul tău descarcă o dată fonturile. De atunci, vizitatorii nu mai contactează Google.</li>
+<li><strong>Oprește emoji-urile și Gravatar:</strong> două comutatoare în Setări.</li>
+<li><strong>Restul îl muți tu:</strong> pentru Adobe Fonts, Font Awesome și CDN-uri, pluginul îți arată unde sunt, iar fișierele le găzduiești pe serverul tău.</li>
+</ul>
+</div>
+</section>
+
+<section id="incredere" aria-labelledby="incredere-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">07 · Încredere</p>
+<h2 id="incredere-titlu">Poți verifica tot</h2></div>
+<ul class="checks">
+<li><strong>Open-source.</strong> Tot codul e pe <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, sub licența GPL-2.0-or-later.</li>
+<li><strong>Update-uri semnate.</strong> Cheile publice și comenzile cu care verifici un pachet de mână sunt pe pagina <a href="/securitate/">Securitate</a>.</li>
+<li><strong>Fără telemetrie.</strong> Pluginul nu ne trimite nimic despre vizitatorii tăi, iar cererea de update nu conține adresa site-ului sau alte date despre el. Ce trimite și cui scrie în <a href="/confidentialitate/">Confidențialitate</a>.</li>
+<li><strong>Istoric public.</strong> Fiecare versiune e în <a href="/changelog/">Changelog</a>, cu flux RSS.</li>
+</ul>
+</div>
+</section>
+
+<section id="instalare" aria-labelledby="instalare-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">08 · Instalare</p>
+<h2 id="instalare-titlu">Pornit în 5 minute</h2></div>
+<ol class="steps">
+<li><a data-download href="https://github.com/rtdesignstudio/consent-manager-pro/releases/tag/v1.0.0">Descarcă</a> <code>consent-manager-pro.zip</code>. În WordPress, la Module, încarcă fișierul zip și activează pluginul.</li>
+<li><strong>Setări:</strong> lasă modul Pro (bannerul cu consimțământ pe categorii). Lasă bifat „Blochează scripturile de tracking până la consimțământ” și modul de măsurare pe Strict.</li>
+<li><strong>Servicii:</strong> uită-te la lista „Găsite pe site”. Pluginul scanează singur. Verifică să nu lipsească nimic din ce știi că folosește site-ul.</li>
+<li><strong>Pagini legale:</strong> completează datele operatorului și apasă „Generează” la fiecare document. Citește paginile și publică-le.</li>
+<li><strong>Linkul „Setări cookie”</strong> în footer, cu shortcode-ul <code>[cmp_cookie_settings_link]</code>. Prin el vizitatorul își schimbă sau își retrage acordul.</li>
+<li><strong>Verificare:</strong> apasă „Verifică în browser”. Nicio pagină nu trebuie să iasă roșie.</li>
+</ol>
+<p>Ghidul complet e în plugin, la Consent Manager, „Ghid”. Site-ul nu e pe WordPress? Folosește <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">versiunea standalone</a>.</p>
+</div>
+</section>
+
+<section id="intrebari" aria-labelledby="intrebari-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">09 · Întrebări</p>
+<h2 id="intrebari-titlu">Întrebări frecvente</h2></div>
+<details><summary>De ce e gratuit?</summary><p>Pentru că vrem ca orice site din Moldova să poată cere acordul corect, fără să plătească pentru asta. Codul e public, sub licența GPL. Nu există cheie de licență, abonament sau funcții ascunse.</p></details>
+<details><summary>„Pro” înseamnă că există o versiune plătită?</summary><p>Nu. „Pro” înseamnă profesional. Nu există versiune plătită și nici serviciu plătit.</p></details>
+<details><summary>Merge fără WordPress?</summary><p>Da. Pentru site-urile statice există <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">versiunea standalone</a>: două fișiere, <code>cmp.js</code> și <code>cmp.css</code>. Marchezi singur scripturile care așteaptă acordul. Nu are registru de consimțăminte.</p></details>
+<details><summary>Ce date ajung la RT?</summary><p>De la plugin, doar cererea de update: site-ul tău descarcă un manifest static de pe <code>consent.rt.md</code>, fără adresa site-ului și fără date despre vizitatori. De la verificarea de pe pagina asta: adresa pe care o scrii, folosită doar pentru verificare și nepăstrată. Totul e în <a href="/confidentialitate/">Confidențialitate</a>.</p></details>
+<details><summary>E suficient pluginul ca site-ul să fie conform?</summary><p>Nu singur. Pluginul face bannerul, blocarea, registrul și textele de pornire. Rămân la tine: registrul activităților de prelucrare, responsabilul cu protecția datelor, unde e cazul, transferurile de date în afara țării și forma finală a textelor juridice. Pentru ele, cere sfatul unui jurist.</p></details>
+<details><summary>Ce se întâmplă cu Google Tag Manager?</summary><p>Pluginul blochează ce e în codul paginii. În modul Strict, Tag Manager-ul pornește doar după acord. Ce încarcă Tag Manager-ul după pornire se controlează din Tag Manager, prin Google Consent Mode, pe care pluginul îl trimite.</p></details>
+<details><summary>Pe ce versiuni merge?</summary><p>WordPress 6.0 sau mai nou și PHP 7.4 sau mai nou. Merge și pe multisite.</p></details>
+<details><summary>Cum raportez o problemă de securitate?</summary><p>Scrie la <a href="mailto:security@rt.md">security@rt.md</a>. Detalii pe pagina <a href="/securitate/">Securitate</a>.</p></details>
+</div>
+</section>
+
 </main>
 <footer class="site">
 <div class="wrap">
-<p>Consent Manager Pro e gratuit și open-source, sub licența <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Cod sursă: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+<p class="made">Făcut de <a href="https://rt.md/">RT Design Studio</a>. Gratuit și open-source, sub licența <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>.</p>
+<ul>
+<li><a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a></li>
+<li><a href="/securitate/">Securitate</a></li>
+<li><a href="/confidentialitate/">Confidențialitate</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+<li><a href="/en/" hreflang="en" lang="en">English</a></li>
+</ul>
 </div>
 </footer>
+<script src="/assets/verifica.js" defer></script>
 </body>
 </html>
