@@ -305,6 +305,7 @@ foreach ( array( $cmp_site_out1 => 'out', $cmp_site_root . '/site' => 'site' ) a
 	cmp_assert( false !== strpos( $css, ':focus-visible' ), "{$label}/style.css: visible focus" );
 }
 
+$cmp_site_widget = '<script>(function(k,u){try{if(localStorage.getItem(\'wsa-feedback-\'+k)||/[#&]wsa=/.test(location.hash)){var s=document.createElement(\'script\');s.src=u;s.async=true;document.head.appendChild(s)}}catch(e){}})(\'wd7raatys6vat1uk7ehwrm7g\',\'https://cemainou.rt.md/api/widget/wd7raatys6vat1uk7ehwrm7g.js\');</script>';
 // No external resources, in the sources and in the output. The only scripts are
 // our own files, loaded from this site, with no inline code (Task 4: the tool and the demo).
 $cmp_site_ext = array(
@@ -320,6 +321,8 @@ foreach ( array( 'site' => $cmp_site_root . '/site', 'out' => $cmp_site_out1 ) a
 			continue;
 		}
 		$c = (string) file_get_contents( $dir . '/' . $f );
+		// The one allowed inline script: the RT team's feedback widget loader (exact text; loads nothing for visitors).
+		$c = str_replace( $cmp_site_widget, '', $c );
 		foreach ( $cmp_site_ext as $what => $re ) {
 			cmp_assert( 0 === preg_match( $re, $c ), "{$label}/{$f}: no {$what}" );
 		}
@@ -639,7 +642,8 @@ foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html'
 	} else {
 		cmp_assert( false !== strpos( $html, '<header class="site">' ) && false !== strpos( $html, '<footer class="site">' ), "{$page}: has the site header and footer" );
 	}
-	preg_match_all( '#<script\b[^>]*>#', $html, $sm2 );
+	cmp_assert_eq( substr_count( $html, $cmp_site_widget ), $bare ? 0 : 1, "{$page}: feedback widget loader " . ( $bare ? 'absent (bare embed)' : 'present once' ) );
+	preg_match_all( '#<script\b[^>]*>#', str_replace( $cmp_site_widget, '', $html ), $sm2 );
 	cmp_assert_eq( $sm2[0], array_merge( array( '<script src="/demo/demo.js">', '<script src="/demo/cmp.min.js" defer>' ), $bare ? array() : array( '<script src="/assets/site.js" defer>' ) ), "{$page}: loads only demo.js, the local cmp.min.js" . ( $bare ? '' : ' and site.js' ) );
 	preg_match_all( '#<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"#', $html, $lm3 );
 	cmp_assert( in_array( '/demo/cmp.min.css', $lm3[1], true ), "{$page}: loads the local cmp.min.css" );
@@ -863,3 +867,10 @@ cmp_assert_eq( cmp_site_tree_hash( $cmp_site_root . '/release' ), $cmp_site_rele
 cmp_assert_eq( is_dir( $cmp_site_root . '/release/site' ), $cmp_site_release_site, 'build-site tests: release/site not created' );
 
 cmp_site_rmdir( $cmp_site_tmp );
+
+// The RT feedback widget loader is on every page with the site footer, and only there.
+foreach ( cmp_site_files( $cmp_site_out1 ) as $f ) {
+	if ( '.html' !== substr( $f, -5 ) ) { continue; }
+	$h = (string) file_get_contents( $cmp_site_out1 . '/' . $f );
+	cmp_assert_eq( substr_count( $h, $cmp_site_widget ), false !== strpos( $h, '<footer class="site">' ) ? 1 : 0, "out/{$f}: feedback widget loader with the footer only" );
+}
