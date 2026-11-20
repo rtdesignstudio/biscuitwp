@@ -21,6 +21,8 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/class-assets.php';
 		require_once CMP_PATH . 'includes/class-consent.php';
 		require_once CMP_PATH . 'includes/functions.php';
+		require_once CMP_PATH . 'includes/class-contrast.php';
+		require_once CMP_PATH . 'includes/class-appearance.php';
 		require_once CMP_PATH . 'includes/class-sanitizer.php';
 		require_once CMP_PATH . 'includes/class-services.php';
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
@@ -44,6 +46,9 @@ class CMP_Plugin {
 		CMP_Blocker::register();
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
 		CMP_Scanner::register();
+		// B6 "Vezi pe site": the appearance preview (inert without a valid ?cmp_preview nonce).
+		require_once CMP_PATH . 'includes/modules/class-preview.php';
+		CMP_Preview::register();
 		require_once CMP_PATH . 'includes/modules/class-fonts.php';
 		CMP_Fonts::register();
 		require_once CMP_PATH . 'includes/modules/class-privacy-tweaks.php';

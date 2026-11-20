@@ -21,9 +21,9 @@ class CMP_Consent {
 			: array( 'consent' => self::COOKIE, 'svc' => 'cmp_svc' );
 	}
 
-	/** The consent cookie name for this request (the check cookie in check mode). */
+	/** The consent cookie name for this request (the check cookie in check mode and in the appearance preview). */
 	public static function cookie_name(): string {
-		$check = class_exists( 'CMP_Scanner' ) && CMP_Scanner::check_mode();
+		$check = class_exists( 'CMP_Scanner' ) && CMP_Scanner::isolated();
 		return self::cookie_names( $check )['consent'];
 	}
 

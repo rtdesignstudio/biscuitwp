@@ -81,9 +81,15 @@ cmp_assert( 1 === preg_match( '/\.cmp__toggle input:checked \+ \.cmp__toggle-sli
 cmp_assert( 1 === preg_match( '/\.cmp__toggle input:focus-visible \+ \.cmp__toggle-slider\s*\{[^}]*outline:\s*2px solid CanvasText/', $b5f_fc ), 'M3: forced colours: the toggle focus ring is CanvasText' );
 cmp_assert( false !== strpos( (string) file_get_contents( $b5f_root . 'assets/css/banner.min.css' ), 'forced-colors:active' ), 'M3: banner.min.css keeps the forced-colors rules' );
 
-// ---- M5: the .min keeps the plain `content` fallback for the chevron ----
+// ---- M5 (fix wave add-on): the "Settings ›" chevron is markup, hidden from screen readers ----
+// <span class="cmp__chev" aria-hidden="true"> &#8250;</span> (" ›") in the prefs button (template + standalone);
+// no generated content for it in CSS; shown on phones only.
 foreach ( array( 'assets/css/banner.min.css', 'standalone/cmp.min.css' ) as $b5f_f ) {
 	$b5f_min = (string) file_get_contents( $b5f_root . $b5f_f );
-	cmp_assert( 1 === preg_match( '#content:" \\\\203A "[;}]#i', $b5f_min ), "M5: {$b5f_f} keeps the plain content fallback (old browsers)" );
-	cmp_assert( 1 === preg_match( '#content:" \\\\203A "/""#i', $b5f_min ), "M5: {$b5f_f} keeps the alt-text content (chevron silent for screen readers)" );
+	cmp_assert( false === stripos( $b5f_min, '203A' ) && false === strpos( $b5f_min, '@supports (content:""/"")' ), "M5: {$b5f_f} has no ::after chevron content" );
+	cmp_assert( 1 === preg_match( '#\.cmp__chev(?:,[^{}]*)?\{display:none\}#', $b5f_min ), "M5: {$b5f_f} hides the chevron by default (desktop)" );
+	cmp_assert( 1 === preg_match( '#@media \(max-width:575px\)\{[^@]*\.cmp__chev\{display:inline\}#', $b5f_min ), "M5: {$b5f_f} shows the chevron on phones" );
 }
+$b5f_chev = '<span class="cmp__chev" aria-hidden="true"> &#8250;</span>';
+cmp_assert( 1 === substr_count( (string) file_get_contents( $b5f_root . 'templates/banner-bottom.php' ), "'prefs' ) ) ); ?>" . $b5f_chev . '</button>' ), 'M5: banner-bottom.php prefs button ends with the aria-hidden chevron span' );
+cmp_assert( 1 === substr_count( (string) file_get_contents( $b5f_root . 'standalone/cmp.js' ), "escapeHtml(cfg.texts.prefs) + '" . $b5f_chev . "</button>'" ), 'M5: standalone renderPro prefs button ends with the aria-hidden chevron span' );

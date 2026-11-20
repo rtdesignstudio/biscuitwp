@@ -6,26 +6,29 @@
  *
  * @var array  $categories  List of category arrays (slug/label/description/required/...).
  * @var array  $settings    Plugin settings.
- * @var string $preset      Active design preset.
+ * @var array  $cmp_a       The appearance (CMP_Appearance::from_settings), optional.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$cmp_t = isset( $settings['texts'] ) && is_array( $settings['texts'] ) ? $settings['texts'] : array();
-$cmp_text = function ( $key, $default ) use ( $cmp_t ) {
-	$stored = isset( $cmp_t[ $key ] ) ? $cmp_t[ $key ] : '';
-	return CMP_I18n::text( 'banner_' . $key, $stored, $default );
+// B6: the appearance (CMP_Banner::render() passes it; computed here otherwise).
+$cmp_a    = isset( $cmp_a ) && is_array( $cmp_a ) ? $cmp_a : CMP_Appearance::from_settings( $settings );
+$cmp_lang = CMP_Lang::current();
+// Texts: per language without WPML / Polylang, today's path with them (CMP_Banner::text).
+$cmp_text = function ( $key, $default ) use ( $settings, $cmp_a, $cmp_lang ) {
+	return CMP_Banner::text( $key, $settings, $cmp_a, $cmp_lang, $default );
 };
+$cmp_classes = implode( ' ', CMP_Banner::classes( $settings, $cmp_a, 'pro' ) );
 
 $cmp_privacy_id  = isset( $settings['privacy_page_id'] ) ? (int) $settings['privacy_page_id'] : 0;
 // Link only a published page: a draft would be a 404 for visitors.
 $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_privacy_id ) ) ? get_permalink( $cmp_privacy_id ) : '';
 ?>
-<?php $cmp_position = isset( $settings['position'] ) ? $settings['position'] : 'modal-center'; ?>
 <?php $cmp_no_overlay = ! empty( $no_overlay ); // Policy pages: readable behind a non-blocking banner. ?>
-<div id="cmp-overlay" class="cmp cmp--<?php echo esc_attr( $preset ); ?> cmp--pos-<?php echo esc_attr( $cmp_position ); ?><?php echo $cmp_no_overlay ? ' cmp--no-overlay' : ''; ?>" lang="<?php echo esc_attr( CMP_Lang::current() ); ?>" data-cmp hidden>
-	<div class="cmp__modal" role="dialog" aria-modal="<?php echo $cmp_no_overlay ? 'false' : 'true'; ?>" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>
+<div id="cmp-overlay" class="cmp <?php echo esc_attr( $cmp_classes ); ?><?php echo $cmp_no_overlay ? ' cmp--no-overlay' : ''; ?>" lang="<?php echo esc_attr( CMP_Lang::current() ); ?>" data-cmp hidden>
+	<?php /* One signal for "does not block the page" (policy pages, backdrop "none"): aria-modal="false"; the JS blocking() reads it. */ ?>
+	<div class="cmp__modal" role="dialog" aria-modal="<?php echo $cmp_no_overlay || 'none' === $cmp_a['backdrop'] ? 'false' : 'true'; ?>" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>
 
 		<!-- View 1: main message + actions -->
 		<div class="cmp__main" data-cmp-view="main">
@@ -39,7 +42,7 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 			<div class="cmp__actions">
 				<?php // Phones (<= 575 px): the intro is clamped to 2 lines; "Details" shows it all. First in the row, so the DOM order is the phone's visual order. ?>
 				<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><?php echo esc_html( CMP_Lang::text( 'details' ) ); ?></button>
-				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?></button>
+				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?><span class="cmp__chev" aria-hidden="true"> &#8250;</span></button>
 				<span class="cmp__spacer" aria-hidden="true"></span>
 				<!-- Equal weight: refusing is as easy and as visible as accepting. -->
 				<span class="cmp__choices">

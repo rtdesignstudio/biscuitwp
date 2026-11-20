@@ -212,6 +212,8 @@
 			privacyUrl: safeUrl(raw.privacyUrl),
 			respectGPC: !!raw.respectGPC,
 			reopenButton: true === raw.reopenButton,
+			// B6: classes + CSS variables, delay, theme, reopen shape; null = today's look.
+			appearance: normAppearance(raw.appearance, raw.preset),
 			reloadOnDecision: true === raw.reloadOnDecision,
 			cookieDays: cd,
 			// Re-consent (B4): {slug: [serviceIds]} written by hand; anything else = unknown.
@@ -634,6 +636,238 @@
 	}
 	// api:end
 
+	// appearance:begin
+	// Pure helpers for the appearance (B6). Tested in standalone/tests/run.js
+	// (source-extracted, identical in both files).
+	// The display delay in ms: 0-2 s in 0.1 s steps; anything else = none.
+	function delayMs(s) {
+		s = parseFloat(s);
+		return s > 0 ? Math.round(Math.min(s, 2) * 10) * 100 : 0;
+	}
+	// Theme "like the site": dark only when <html> or <body> matches the
+	// selector list; no match = light (the OS decides only with theme "auto").
+	// A bad selector never throws.
+	function siteDark(sel, html, body) {
+		try { return !!sel && (html.matches(sel) || (!!body && body.matches(sel))); } catch (e) { return false; }
+	}
+	// Re-checked on every show (no observer): .cmp--dark for theme "site";
+	// `own` = the Dark palette's own class, never removed.
+	function applySiteTheme(el, a, own, doc) {
+		if (!el || !a || a.theme !== 'site') { return; }
+		if (own || siteDark(a.darkSelector, doc.documentElement, doc.body)) { el.classList.add('cmp--dark'); } else { el.classList.remove('cmp--dark'); }
+	}
+	// Compliance guard (B6.18): the backstop behind the sanitizer and the custom
+	// CSS cleaner. m = measure(): v visibility, o opacity (with its
+	// ancestors up to the banner), w/h (0 = not rendered), x/y in the viewport, s inside a scrolling
+	// area of the banner, c text contrast. True = a decision button is not plainly
+	// usable (hidden, faded, < 24 px, off screen, unreadable) or the two differ by
+	// more than 2 px; ctx = { vw, vh, box: the dialog's measure }.
+	function guardBad(m, ctx) {
+		return !m || m.v !== 'visible' || !(m.o >= 0.9) || !(m.w >= 24 && m.h >= 24) || !(m.c >= 3) ||
+			m.x < -1 || m.x + m.w > ctx.vw + 1 || (!m.s && (m.y < -1 || m.y + m.h > ctx.vh + 1));
+	}
+	function guardNeeded(a, b, ctx) {
+		var x = ctx.box;
+		return !!(x && !(x.w > 0 && x.v === 'visible' && x.o >= 0.9)) || guardBad(a, ctx) || guardBad(b, ctx) || Math.abs(a.w - b.w) > 2 || Math.abs(a.h - b.h) > 2;
+	}
+	// Computed colours other than rgb()/rgba() (oklch, color()) are not parsed:
+	// read as transparent (background) and the contrast is skipped (text) - fails open.
+	function rgba(s) { var m = /^rgba?\(/.test(s) ? s.match(/[\d.]+/g) : [0, 0, 0, 0]; return [+m[0], +m[1], +m[2], m[3] == null ? 1 : +m[3]]; }
+	// f (with alpha) over the opaque b: [r, g, b].
+	function over(f, b) { return [0, 1, 2].map(function (i) { return f[i] * f[3] + b[i] * (1 - f[3]); }); }
+	// Relative luminance + 0.05 (sRGB curve approximated by gamma 2.2: within 0.1 of WCAG here).
+	function lum(c) { var p = function (i) { return Math.pow(c[i] / 255, 2.2); }; return 0.2126 * p(0) + 0.7152 * p(1) + 0.0722 * p(2) + 0.05; }
+	// WCAG ratio of a computed text colour (blended) on an opaque background.
+	function contrast(color, bg) { var f = lum(over(rgba(color), bg)), b = lum(bg); return f > b ? f / b : b / f; }
+	function measure(el, root, win) {
+		if (!el) { return null; }
+		var r = el.getBoundingClientRect(), cs = win.getComputedStyle(el), o = 1, s = false, bg, p, ps, c;
+		for (p = el; p; p = p === root ? null : p.parentElement) {
+			ps = win.getComputedStyle(p);
+			o *= parseFloat(ps.opacity);
+			if (p !== el && p.scrollHeight > p.clientHeight + 1 && /auto|scroll/.test(ps.overflowY)) { s = true; }
+			// The effective background: the first non-transparent one (transparent = look further), on white.
+			c = rgba(ps.backgroundColor);
+			if (!bg && c[3] > 0) { bg = c; }
+		}
+		bg = over(bg || [0, 0, 0, 0], [255, 255, 255]);
+		return { v: cs.visibility, o: o, w: r.width, h: r.height, x: r.left, y: r.top, s: s, c: /^rgba?\(/.test(cs.color) ? contrast(cs.color, bg) : 21 };
+	}
+	// The reset, inline and !important: it outweighs any stylesheet rule (ids,
+	// @layer, !important). Both buttons get the same default (solid) style, in
+	// the safe Neutral colours (never the --cmp-primary* ones, which may be the failing pair).
+	var GV = 'visibility:visible;opacity:1;transform:none;clip-path:none;';
+	var GB = GV + 'display:block;position:static;width:100%;min-height:44px;padding:10px 12px;font-size:14px;color:#fff;background:#111827;border:1px solid #fff;pointer-events:auto;';
+	// The decision buttons (.cmp__btn--primary: Reject, Accept, Save) and their
+	// equal-columns group; every declaration gets !important.
+	function guardFix(root) {
+		var c = function (e, css) { e.style.cssText += ';' + css.replace(/;/g, '!important;'); };
+		c(root, 'display:flex;' + GV);
+		c(root.querySelector('.cmp__modal'), GV);
+		[].forEach.call(root.querySelectorAll('.cmp__btn--primary'), function (b) { c(b, GB); c(b.parentNode, GV + 'display:grid;grid-template-columns:1fr 1fr;gap:8px;'); });
+	}
+	// Run on the banner once it is on screen (no getAnimations, old browser: not checked). Still animating (first frame late; finished CSS
+	// animations without fill are no longer listed):
+	// measured once more 400 ms later. On a failure: .cmp--guard, the inline reset
+	// (re-applied on every later show) and one console warning.
+	function runGuard(root, win, again) {
+		try {
+			if (!root || root.hidden) { return; }
+			if (root.classList.contains('cmp--guard')) { guardFix(root); return; }
+			if (!again && root.getAnimations({ subtree: true }).length) { win.setTimeout(function () { runGuard(root, win, 1); }, 400); return; }
+			var m = root.querySelector('.cmp__modal'), v = m && m.classList.contains('is-prefs-open') ? 'prefs' : 'main';
+			var q = function (a) { return measure(root.querySelector('[data-cmp-view="' + v + '"] [data-cmp-action="' + a + '"]'), root, win); };
+			if (guardNeeded(q('reject'), q(v === 'main' ? 'accept' : 'save'), { vw: win.innerWidth, vh: win.innerHeight, box: measure(m, root, win) })) {
+				root.classList.add('cmp--guard');
+				guardFix(root);
+				win.console.warn('CMP: appearance guard reset the consent buttons');
+			}
+		} catch (e) {}
+	}
+	// appearance:end
+
+	// --- Appearance (B6), standalone: CMP_CONFIG.appearance gives the same
+	// classes and CSS variables as the WordPress plugin (CMP_Appearance in PHP;
+	// tested against its output in standalone/tests/run.js). No `appearance` =
+	// today's look, unchanged.
+	// Style => [radius, shadow, buttons, anim, maxw] (the spec's table).
+	var AP_STYLES = { minimal: [4, 'none', 'outline', 'fade', 640], brand: [12, 'medium', 'solid', 'none', 720], friendly: [20, 'large', 'solid', 'slide', 680] };
+	var AP_SHADOWS = { none: 'none', small: '0 4px 14px rgba(0,0,0,.12)', medium: '0 20px 50px rgba(0,0,0,.25)', large: '0 28px 70px rgba(0,0,0,.28)' };
+	// Format => position => the cmp--pos-* class (the first position is the fallback).
+	var AP_POS = {
+		bar: { bottom: 'bottom', top: 'top' },
+		card: { 'bottom-right': 'bottom-right', 'bottom-left': 'bottom-left', 'top-right': 'top-right', 'top-left': 'top-left' },
+		modal: { center: 'middle-center', top: 'top-center', bottom: 'bottom-center' }
+	};
+	var AP_DIM = { neutral: 55, warm: 50, dark: 60, egov: 60 };
+	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10] };
+	var AP_DARK_SEL = '.dark, [data-theme="dark"], .is-dark-theme';
+	var AP_SCOPE = '.cmp,.cmp-light,.cmp-reopen,.cmp-embed';
+
+	function apPick(v, list, d) { return list.indexOf(v) !== -1 ? v : d; }
+	function apNum(v, k, d) {
+		var n = typeof v === 'number' || typeof v === 'string' ? parseFloat(v) : NaN;
+		return isNaN(n) ? d : Math.max(AP_RANGES[k][0], Math.min(AP_RANGES[k][1], Math.round(n)));
+	}
+	function apHex(v) {
+		var m = typeof v === 'string' && v.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+		if (!m) { return ''; }
+		var h = m[1].toLowerCase();
+		return '#' + (h.length === 3 ? h[0] + h[0] + h[1] + h[1] + h[2] + h[2] : h);
+	}
+
+	// Pure: CMP_CONFIG.appearance validated (unknown -> the style's / default
+	// value), or null when there is none. The palette defaults to `preset`.
+	function normAppearance(raw, preset) {
+		if (!raw || typeof raw !== 'object' || Array.isArray(raw)) { return null; }
+		var pal = ['neutral', 'warm', 'dark', 'egov'];
+		var style = apPick(raw.style, ['minimal', 'brand', 'friendly'], 'brand'), sd = AP_STYLES[style];
+		var format = apPick(raw.format, ['bar', 'card', 'modal'], 'modal');
+		var sel = typeof raw.darkSelector === 'string' ? raw.darkSelector.trim() : '';
+		var delay = parseFloat(raw.delay);
+		return {
+			style: style,
+			palette: apPick(raw.palette, pal, apPick(preset, pal, 'neutral')),
+			accent: apHex(raw.accent),
+			font: apPick(raw.font, ['system', 'inherit'], 'system'),
+			theme: apPick(raw.theme, ['light', 'dark', 'auto', 'site'], 'light'),
+			darkSelector: sel && sel.length <= 200 && /^[A-Za-z0-9_\-.#\[\]="' ,:()>~+*]+$/.test(sel) ? sel : AP_DARK_SEL,
+			format: format,
+			position: Object.prototype.hasOwnProperty.call(AP_POS[format], raw.position) ? raw.position : Object.keys(AP_POS[format])[0],
+			backdrop: apPick(raw.backdrop, ['blur', 'dim', 'none'], 'blur'),
+			dim: raw.dim === null || raw.dim === undefined || raw.dim === '' ? null : apNum(raw.dim, 'dim', null),
+			blur: apNum(raw.blur, 'blur', 5),
+			radius: apNum(raw.radius, 'radius', sd[0]),
+			shadow: Object.prototype.hasOwnProperty.call(AP_SHADOWS, raw.shadow) ? raw.shadow : sd[1],
+			maxw: apNum(raw.maxw, 'maxw', sd[4]),
+			gap: apNum(raw.gap, 'gap', 24),
+			buttons: apPick(raw.buttons, ['solid', 'outline', 'text'], sd[2]),
+			anim: apPick(raw.anim, ['none', 'fade', 'slide'], sd[3]),
+			delay: delay > 0 ? Math.round(Math.min(delay, 2) * 10) / 10 : 0,
+			reopen: apPick(raw.reopen, ['none', 'icon', 'text', 'both'], 'icon')
+		};
+	}
+
+	// Pure: the container classes ('pro' | 'light'), as CMP_Appearance::container_classes().
+	function appearanceClasses(a, mode) {
+		var pro = mode !== 'light', c = ['cmp--' + a.palette, 'cmp--style-' + a.style];
+		if (pro) { c.push('cmp--fmt-' + a.format, 'cmp--pos-' + AP_POS[a.format][a.position], 'cmp--btn-' + a.buttons); }
+		c.push('cmp--anim-' + a.anim, 'cmp--theme-' + a.theme);
+		if (pro) { c.push('cmp--backdrop-' + a.backdrop); }
+		if (a.theme === 'dark' && a.palette !== 'dark') { c.push('cmp--dark'); }
+		return c;
+	}
+
+	// WCAG contrast (as CMP_Contrast) and the HSL steps of CMP_Appearance.
+	function apLum(hex) {
+		var l = [1, 3, 5].map(function (i) {
+			var v = parseInt(hex.substr(i, 2), 16) / 255;
+			return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+		});
+		return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+	}
+	function apRatio(a, b) { var x = apLum(a), y = apLum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+	function apText(c) { return apRatio(c, '#ffffff') >= apRatio(c, '#000000') ? '#ffffff' : '#000000'; }
+	function apHsl(hex) {
+		var r = parseInt(hex.substr(1, 2), 16) / 255, g = parseInt(hex.substr(3, 2), 16) / 255, b = parseInt(hex.substr(5, 2), 16) / 255;
+		var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, h = 0, s = 0, d = max - min;
+		if (d > 0) {
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+			h = (max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60;
+		}
+		return [h, s * 100, l * 100];
+	}
+	function apFromHsl(h, s, l) {
+		s /= 100; l /= 100;
+		var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+		var rgb = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor(h / 60) % 6];
+		return '#' + rgb.map(function (v) { var n = Math.max(0, Math.min(255, Math.round((v + m) * 255))); return (n < 16 ? '0' : '') + n.toString(16); }).join('');
+	}
+	// The accent's --cmp-primary / -hover / -text (hover moves away from the text colour).
+	function apAccent(accent, text) {
+		var hsl = apHsl(accent), l = text === '#ffffff' ? Math.max(0, hsl[2] - 8) : Math.min(100, hsl[2] + 8);
+		return ['--cmp-primary:' + accent, '--cmp-primary-hover:' + apFromHsl(hsl[0], hsl[1], l), '--cmp-primary-text:' + text];
+	}
+	// The closest shade of the accent that passes 4.5:1 on the Dark background (accent_suggestion).
+	function apDarkAccent(hex) {
+		var bg = '#1e242e';
+		function score(c) { var t = apText(c); return [Math.min(apRatio(c, t), apRatio(c, bg)), t]; }
+		var s0 = score(hex);
+		if (s0[0] >= 4.5) { return [hex, s0[1]]; }
+		var hsl = apHsl(hex);
+		for (var i = 1; i <= 200; i++) {
+			for (var k = 0; k < 2; k++) {
+				var l2 = hsl[2] + (k ? 1 : -1) * i * 0.5;
+				if (l2 < 0 || l2 > 100) { continue; }
+				var c = apFromHsl(hsl[0], hsl[1], l2), sc = score(c);
+				if (sc[0] >= 4.5) { return [c, sc[1]]; }
+			}
+		}
+		var b = score('#000000'), w = score('#ffffff');
+		return b[0] >= w[0] ? ['#000000', b[1]] : ['#ffffff', w[1]];
+	}
+	// Pure: the inline CSS, as CMP_Appearance::inline_css() (only what differs
+	// from Brand and the palette; '' for Brand). Built from validated values only.
+	function appearanceCss(a) {
+		var v = [], css = '', dv;
+		if (a.accent) { v = v.concat(apAccent(a.accent, apText(a.accent))); }
+		if (a.radius !== 12) { v.push('--cmp-radius:' + a.radius + 'px'); }
+		if (a.maxw !== 720) { v.push('--cmp-maxw:' + a.maxw + 'px'); }
+		if (a.gap !== 24) { v.push('--cmp-gap:' + a.gap + 'px'); }
+		if (a.blur !== 5) { v.push('--cmp-blur:' + a.blur + 'px'); }
+		if (a.shadow !== 'medium') { v.push('--cmp-shadow:' + AP_SHADOWS[a.shadow]); }
+		if (a.dim !== null && a.dim !== AP_DIM[a.palette]) { v.push('--cmp-dim:' + String(a.dim / 100).replace(/^0\./, '.')); }
+		if (a.font === 'inherit') { v.push('font-family:inherit'); } // a real declaration (lot review I1)
+		if (v.length) { css = AP_SCOPE + '{' + v.join(';') + '}'; }
+		if (a.accent && (a.theme !== 'light' || a.palette === 'dark')) {
+			var d = apDarkAccent(a.accent);
+			dv = apAccent(d[0], d[1]).join(';');
+			css += '.cmp--dark{' + dv + '}';
+			if (a.theme === 'auto') { css += '@media (prefers-color-scheme:dark){.cmp--theme-auto{' + dv + '}}'; }
+		}
+		return css;
+	}
+
 	if (typeof document !== 'undefined') {
 
 		var COOKIE_NAME = 'cmp_consent';
@@ -646,7 +880,7 @@
 			var root = document.createElement('div');
 			root.id = 'cmp-overlay';
 			var noOverlay = isPolicyPage(cfg.privacyUrl, window.location.href);
-			root.className = 'cmp cmp--' + cfg.preset + ' cmp--pos-' + cfg.position + (noOverlay ? ' cmp--no-overlay' : '');
+			root.className = 'cmp ' + (cfg.appearance ? appearanceClasses(cfg.appearance, 'pro').join(' ') : 'cmp--' + cfg.preset + ' cmp--pos-' + cfg.position) + (noOverlay ? ' cmp--no-overlay' : '');
 			root.setAttribute('data-cmp', '');
 			root.setAttribute('lang', cfg.lang);
 			root.hidden = true;
@@ -686,13 +920,13 @@
 			});
 
 			root.innerHTML =
-				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay ? 'false' : 'true') + '" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>' +
+				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay || (cfg.appearance && cfg.appearance.backdrop === 'none') ? 'false' : 'true') + '" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>' +
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
 				'<p id="cmp-intro" class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +
 				'<div class="cmp__actions">' +
 				'<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro">' + escapeHtml(cfg.texts.details) + '</button>' +
-				'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">' + escapeHtml(cfg.texts.prefs) + '</button>' +
+				'<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs">' + escapeHtml(cfg.texts.prefs) + '<span class="cmp__chev" aria-hidden="true"> &#8250;</span></button>' +
 				'<span class="cmp__spacer" aria-hidden="true"></span>' +
 				'<span class="cmp__choices">' +
 				'<button type="button" class="cmp__btn cmp__btn--primary" data-cmp-action="reject">' + escapeHtml(cfg.texts.reject) + '</button>' +
@@ -730,7 +964,7 @@
 
 		function renderLight(cfg) {
 			var root = document.createElement('div');
-			root.className = 'cmp-light cmp--' + cfg.preset;
+			root.className = 'cmp-light ' + (cfg.appearance ? appearanceClasses(cfg.appearance, 'light').join(' ') : 'cmp--' + cfg.preset);
 			root.setAttribute('data-cmp-light', '');
 			root.setAttribute('lang', cfg.lang);
 			root.hidden = true;
@@ -753,20 +987,46 @@
 		var cfg = null;
 		var banner = null;
 		var reopenBtn = null;
+		// B6: CMP_CONFIG.appearance (delay, theme "like the site"); {} = today's behaviour.
+		var A = {};
+		var ownDark = false;
+		var showT = 0;
+		// Opening by itself (first visit, re-consent), after the display delay.
+		function autoShow() {
+			var ms = delayMs(A.delay);
+			if (ms) { showT = setTimeout(show, ms); } else { show(); }
+		}
 
 		/** Floating round cookie-settings button (pro mode); shown after a decision. */
 		function renderReopen(c) {
-			if (!c.reopenButton) { return null; }
+			// The reopenButton switch as before; CMP_CONFIG.appearance.reopen picks the shape.
+			var shape = c.appearance ? c.appearance.reopen : 'icon';
+			if (!c.reopenButton || shape === 'none') { return null; }
+			var label = c.texts.reopen || 'Cookie settings';
+			var icon = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="14.5" r="1"/><circle cx="9" cy="15" r="1"/></svg>';
 			var b = document.createElement('button');
 			b.type = 'button';
-			b.className = 'cmp-reopen';
+			b.className = shape === 'icon' ? 'cmp-reopen' : 'cmp-reopen cmp-reopen--text';
 			b.setAttribute('data-cmp-reopen', '');
 			b.hidden = true;
-			b.setAttribute('aria-label', c.texts.reopen || 'Cookie settings');
-			b.setAttribute('title', c.texts.reopen || 'Cookie settings');
-			b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="14.5" r="1"/><circle cx="9" cy="15" r="1"/></svg>';
+			if (shape === 'icon') {
+				b.setAttribute('aria-label', label);
+				b.setAttribute('title', label);
+				b.innerHTML = icon;
+			} else {
+				b.innerHTML = (shape === 'both' ? icon : '') + '<span class="cmp-reopen__label">' + escapeHtml(label) + '</span>';
+			}
 			document.body.appendChild(b);
 			return b;
+		}
+		// The appearance variables, after cmp.css (appended last in <head>); none for Brand.
+		function renderAppearanceCss(c) {
+			var css = c.appearance ? appearanceCss(c.appearance) : '';
+			if (!css) { return; }
+			var st = document.createElement('style');
+			st.id = 'cmp-appearance-css';
+			st.textContent = css;
+			(document.head || document.body).appendChild(st);
 		}
 		function showReopen() { if (reopenBtn) { reopenBtn.hidden = false; } }
 		function hideReopen() { if (reopenBtn) { reopenBtn.hidden = true; } }
@@ -865,8 +1125,9 @@
 			return out;
 		}
 
-		// Policy page (.cmp--no-overlay): no scroll lock and no focus trap.
-		function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
+		// Policy pages and backdrop "none": the dialog says aria-modal="false" (one
+		// signal, set by renderPro): no scroll lock and no focus trap.
+		function blocking() { return !!banner.querySelector('[aria-modal="true"]'); }
 		// The Details button on the main view (phones).
 		function details(on) { var main = banner.querySelector('[data-cmp-view="main"]'); return main ? toggleDetails(main, main.querySelector('[data-cmp-action="details"]'), on) : false; }
 		// No overlay (policy pages): the page's own scrolling (anchors, focus) stops
@@ -885,7 +1146,9 @@
 		}
 		function show() {
 			if (!banner) { return; }
+			if (showT) { clearTimeout(showT); showT = 0; }
 			var wasHidden = banner.hidden;
+			applySiteTheme(banner, A, ownDark, document);
 			hideReopen();
 			banner.hidden = false;
 			if (blocking()) {
@@ -901,9 +1164,16 @@
 			// Trap (and remember the focus to restore) only when it appears; already on
 			// screen (openPreferences while it shows), just focus the view.
 			if (blocking() && wasHidden) { trapFocus(true); } else if (!wasHidden || prefsOpen()) { focusDialog(); }
+			// B6.18: check the two decisions 400 ms after a drawn frame (the 0.35 s opening
+			// animation has started; hidden tabs draw nothing, so nothing is judged there).
+			requestAnimationFrame(function () { setTimeout(function () { runGuard(banner, window); }, 400); });
 		}
 		function hide() {
 			if (!banner) { return; }
+			// The guard's inline display:flex (runGuard) would keep it on screen.
+			banner.style.removeProperty('display');
+			// A decision during the display delay (API, check mode): no later auto-open.
+			if (showT) { clearTimeout(showT); showT = 0; }
 			// Focus moves only when the banner was on screen and held it: never on the
 			// GPC auto-refusal, nor off the page on a policy page read without overlay.
 			var refocus = !banner.hidden && (blocking() || banner.contains(document.activeElement));
@@ -1004,6 +1274,8 @@
 			// Screen readers start on the panel title (no-op while the banner is hidden: show() focuses it).
 			var t = banner.querySelector('[data-cmp-prefs-title]');
 			if (t) { t.focus(); }
+			// B6.18: the Reject / Save pair now on screen.
+			runGuard(banner, window);
 			// Its height changed: the policy page's scroll padding follows.
 			scrollPad();
 		}
@@ -1079,7 +1351,10 @@
 			var bar = document.querySelector('[data-cmp-light]');
 			if (!bar) { return; }
 			try { if (localStorage.getItem('cmp_light_dismissed')) { return; } } catch (e) {}
-			bar.hidden = false;
+			// B6: after the display delay; theme "like the site".
+			var own = bar.classList.contains('cmp--dark'), ms = delayMs(A.delay);
+			var open = function () { applySiteTheme(bar, A, own, document); bar.hidden = false; };
+			if (ms) { setTimeout(open, ms); } else { open(); }
 			var btn = bar.querySelector('[data-cmp-light-dismiss]');
 			if (btn) {
 				btn.addEventListener('click', function () {
@@ -1255,6 +1530,8 @@
 		document.addEventListener('DOMContentLoaded', function () {
 			cfg = normalizeConfig(window.CMP_CONFIG || {});
 			setConsentModeDefaults();
+			A = cfg.appearance || {};
+			renderAppearanceCss(cfg);
 
 			if (cfg.mode === 'light') {
 				renderLight(cfg);
@@ -1262,6 +1539,7 @@
 			} else {
 				renderPro(cfg);
 				banner = document.querySelector('[data-cmp]');
+				ownDark = !!banner && banner.classList.contains('cmp--dark');
 				bind();
 				reopenBtn = renderReopen(cfg);
 			}
@@ -1345,7 +1623,7 @@
 					// No "decide later": it would be tacit consent to the new service.
 					firstDecision = true;
 					openPrefs();
-					show();
+					autoShow();
 					return;
 				}
 				showReopen();
@@ -1355,12 +1633,12 @@
 				save(requiredSlugs(), 'rejected_all');
 			} else {
 				firstDecision = true;
-				show();
+				autoShow();
 			}
 		});
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl, svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories, reconsentView: reconsentView, backfillSvc: backfillSvc, remainingMaxAge: remainingMaxAge, svcFlat: svcFlat, nameMap: nameMap };
+		module.exports = { parseSvcCookie: parseSvcCookie, svcLogPayload: svcLogPayload, fillName: fillName, svcAllowed: svcAllowed, stripAlwaysButtons: stripAlwaysButtons, withSvc: withSvc, svcAfterReject: svcAfterReject, CMP_DEFAULTS: CMP_DEFAULTS, normalizeConfig: normalizeConfig, signalsFor: signalsFor, fbqConsentFor: fbqConsentFor, embedLoads: embedLoads, gpcOn: gpcOn, isPolicyPage: isPolicyPage, consentIdFor: consentIdFor, decisionFor: decisionFor, isToggleOn: isToggleOn, storedCategories: storedCategories, serializeConsent: serializeConsent, parseConsent: parseConsent, escapeHtml: escapeHtml, safeUrl: safeUrl, svcSnapshot: svcSnapshot, newServices: newServices, effectiveCategories: effectiveCategories, reconsentView: reconsentView, backfillSvc: backfillSvc, remainingMaxAge: remainingMaxAge, svcFlat: svcFlat, nameMap: nameMap, normAppearance: normAppearance, appearanceClasses: appearanceClasses, appearanceCss: appearanceCss, delayMs: delayMs };
 	}
 })();

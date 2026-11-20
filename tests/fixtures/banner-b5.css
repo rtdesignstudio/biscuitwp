@@ -1,0 +1,553 @@
+/* Consent Manager Pro — full-page overlay + centered modal (egov design system).
+ * Theme-agnostic: everything scoped under .cmp with custom properties. The
+ * overlay blocks the page (blur + scrim) and scroll is locked via the
+ * body.cmp-has-banner class (added by banner.js) until the user decides. */
+
+.cmp, .cmp-light, .cmp-embed {
+	/* Neutral monochrome default — no brand colour, drops onto any site.
+	   Coloured looks are opt-in via the .cmp--egov / --warm / --dark presets. */
+	--cmp-primary: #111827;
+	--cmp-primary-hover: #000000;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #111827;
+	--cmp-muted: #4b5563;
+	--cmp-bg: #ffffff;
+	--cmp-panel: #f5f5f5;
+	--cmp-border: #d0d5dd;
+	--cmp-radius: 12px;
+	--cmp-scrim: rgba(17, 24, 39, 0.55);
+	--cmp-hover: #f2f2f2;
+	--cmp-outline-hover: #f2f2f2;
+}
+.cmp {
+	position: fixed;
+	inset: 0;
+	z-index: 2147483600; /* above admin bar, sticky menus, anything */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	overflow-y: auto;
+	background: var(--cmp-scrim);
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+	color: var(--cmp-dark);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+.cmp[hidden] { display: none; }
+
+/* Banner position (vertical anchor of the modal within the overlay). */
+.cmp--pos-bottom { align-items: flex-end; }
+.cmp--pos-top { align-items: flex-start; }
+.cmp--pos-modal-center { align-items: center; }
+
+/* Full position set: vertical (align-items) × horizontal (modal margin).
+   Legacy classes above remain as aliases (bottom=bottom-center, etc.). */
+.cmp--pos-top-center,
+.cmp--pos-top-left,
+.cmp--pos-top-right { align-items: flex-start; }
+.cmp--pos-middle-center { align-items: center; }
+.cmp--pos-bottom-center,
+.cmp--pos-bottom-left,
+.cmp--pos-bottom-right { align-items: flex-end; }
+/* Horizontal anchor (base .cmp__modal is margin-inline:auto = centered). */
+.cmp--pos-top-left .cmp__modal,
+.cmp--pos-bottom-left .cmp__modal { margin-inline: 0 auto; }
+.cmp--pos-top-right .cmp__modal,
+.cmp--pos-bottom-right .cmp__modal { margin-inline: auto 0; }
+
+/* Policy pages: no overlay. The page stays readable, scrollable and clickable;
+   the banner sits at the bottom whatever the configured position. */
+.cmp.cmp--no-overlay {
+	background: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	pointer-events: none;
+	align-items: flex-end;
+	overflow: visible;
+}
+.cmp.cmp--no-overlay .cmp__modal {
+	pointer-events: auto;
+	margin-inline: auto;
+	max-height: calc(100vh - 48px);
+	overflow-y: auto;
+	box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.18), 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Scroll lock while the banner is open (class added by JS). */
+/* --cmp-sbw = the body's own padding-right plus the scrollbar width (when the
+   lock removes one), set by JS when the lock starts: nothing shifts (CLS). */
+body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
+
+.cmp__modal {
+	background: var(--cmp-bg);
+	border-radius: var(--cmp-radius);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+	padding: 28px 32px;
+	width: 100%;
+	max-width: 720px;
+	margin-inline: auto; /* horizontal centering only; vertical position via align-items */
+}
+
+.cmp__title {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 0 0 12px;
+	color: var(--cmp-dark);
+}
+
+.cmp__text {
+	font-size: 14px;
+	line-height: 1.55;
+	margin: 0 0 24px;
+	color: var(--cmp-muted);
+}
+/* Fixed underline in every state: themes often swap text-decoration for a
+   border-bottom / padding / offset on a:hover, which makes the line jump. */
+.cmp .cmp__link,
+.cmp .cmp__link:hover,
+.cmp .cmp__link:focus,
+.cmp-light .cmp-light__link,
+.cmp-light .cmp-light__link:hover,
+.cmp-light .cmp-light__link:focus {
+	color: var(--cmp-primary);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+	border: 0;
+	padding: 0;
+	box-shadow: none;
+	background: none;
+}
+/* Hover thickens the line (no size or box change, so nothing moves). */
+.cmp .cmp__link:hover,
+.cmp-light .cmp-light__link:hover { text-decoration-thickness: 2px; }
+.cmp .cmp__link:focus-visible,
+.cmp-light .cmp-light__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; border-radius: 2px; }
+
+/* View switching: prefs hidden until modal has .is-prefs-open. */
+.cmp__prefs { display: none; }
+.cmp__modal.is-prefs-open .cmp__main { display: none; }
+.cmp__modal.is-prefs-open .cmp__prefs { display: block; }
+
+/* Action rows */
+.cmp__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cmp__spacer { flex: 1 1 auto; }
+.cmp__prefs-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+/* The two decisions (reject / accept, reject / save) side by side in two equal
+   columns, same style: refusing must weigh as much as accepting. */
+.cmp__choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cmp__choices .cmp__btn { width: 100%; text-align: center; }
+
+.cmp__btn {
+	appearance: none;
+	border: 1px solid transparent;
+	background: transparent;
+	border-radius: 8px;
+	padding: 12px 22px;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.cmp__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+/* The dialog receives focus on open (for screen readers); no ring on it. */
+.cmp__modal:focus { outline: none; }
+/* The settings title takes focus when the panel opens (screen readers start there); not a control, no ring. */
+.cmp__title:focus { outline: none; }
+
+.cmp__btn--ghost { color: var(--cmp-dark); border-color: var(--cmp-dark); background: var(--cmp-bg); }
+.cmp__btn--ghost:hover { background: var(--cmp-hover); }
+
+.cmp__btn--outline { color: var(--cmp-primary); border-color: var(--cmp-primary); background: var(--cmp-bg); }
+.cmp__btn--outline:hover { background: var(--cmp-outline-hover); }
+
+.cmp__btn--primary { color: var(--cmp-primary-text); background: var(--cmp-primary); border-color: var(--cmp-primary); }
+.cmp__btn--primary:hover { background: var(--cmp-primary-hover); border-color: var(--cmp-primary-hover); }
+
+/* Preferences header + back button */
+.cmp__prefs-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+.cmp__collapse {
+	appearance: none;
+	border: 1px solid var(--cmp-border);
+	background: var(--cmp-bg);
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: var(--cmp-muted);
+	transition: background-color 150ms ease;
+}
+.cmp__collapse:hover { background: var(--cmp-hover); }
+.cmp__collapse:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+.cmp__collapse svg { width: 18px; height: 18px; }
+
+/* "Details" (phones only, shown in the media query below): expands the intro. */
+.cmp__more {
+	display: none;
+	align-items: center;
+	min-height: 24px;
+	min-width: 24px;
+	margin: 0 0 14px;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	font-weight: 600;
+	color: var(--cmp-primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	cursor: pointer;
+}
+.cmp__more:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; border-radius: 2px; }
+
+/* ---- Design presets (override custom properties; neutral = base above) ---- */
+.cmp--egov {
+	--cmp-primary: #003e96;
+	--cmp-primary-hover: #00285f;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #001b35;
+	--cmp-muted: #475467;
+	--cmp-bg: #ffffff;
+	--cmp-panel: #eef3fb;
+	--cmp-border: #cdd7e6;
+	--cmp-hover: #e7eefb;
+	--cmp-outline-hover: #e0eaff;
+	--cmp-scrim: rgba(0, 27, 53, 0.6);
+}
+
+.cmp--warm {
+	--cmp-primary: #2e794d;
+	--cmp-primary-hover: #235e3c;
+	--cmp-primary-text: #ffffff;
+	--cmp-dark: #2c2417;
+	--cmp-muted: #6b5d47;
+	--cmp-bg: #fbf9f4;
+	--cmp-panel: #f2ede1;
+	--cmp-border: #ded3bf;
+	--cmp-hover: #efe8d8;
+	--cmp-outline-hover: #e6f2ea;
+	--cmp-scrim: rgba(44, 36, 23, 0.5);
+}
+
+.cmp--dark {
+	--cmp-primary: #5b9bff;
+	--cmp-primary-hover: #3f80e6;
+	--cmp-primary-text: #0b1017;
+	--cmp-dark: #f2f4f7;
+	--cmp-muted: #aab4c2;
+	--cmp-bg: #1e242e;
+	--cmp-panel: #28303b;
+	--cmp-border: #3a434f;
+	--cmp-hover: #2f3946;
+	--cmp-outline-hover: #263043;
+	--cmp-scrim: rgba(0, 0, 0, 0.6);
+}
+.cmp--dark .cmp__modal { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+
+/* Category list */
+.cmp__cats {
+	background: var(--cmp-panel);
+	border-radius: 10px;
+	padding: 8px 24px;
+	margin-bottom: 20px;
+}
+.cmp__cat {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 0;
+}
+.cmp__cat + .cmp__cat { border-top: 1px solid var(--cmp-border); }
+
+.cmp__cat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.cmp__cat-label { font-size: 15px; font-weight: 700; color: var(--cmp-dark); }
+.cmp__cat-badge {
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--cmp-primary);
+	border: 1px solid var(--cmp-primary);
+	border-radius: 6px;
+	padding: 2px 8px;
+	line-height: 1.4;
+}
+/* Re-consent (B4): "new" marker with the new services' names, and the reason text. */
+.cmp__cat-head { flex-wrap: wrap; }
+.cmp__cat-new { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cmp__cat-new[hidden] { display: none; }
+.cmp__cat-badge--new { color: var(--cmp-primary-text); background: var(--cmp-primary); }
+.cmp__cat-new-names { font-size: 12px; line-height: 1.4; color: var(--cmp-muted); }
+.cmp__reconsent-text { margin: -8px 0 16px; }
+.cmp__reconsent-text[hidden] { display: none; }
+.cmp__collapse[hidden] { display: none; }
+.cmp__cat-desc { font-size: 13px; line-height: 1.55; color: var(--cmp-muted); max-width: 520px; }
+
+.cmp__cat-locked { width: 28px; height: 28px; color: var(--cmp-primary); display: flex; align-items: center; justify-content: center; }
+.cmp__cat-locked svg { width: 24px; height: 24px; }
+
+/* Toggle switch */
+.cmp__toggle { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+.cmp__toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cmp__toggle-slider {
+	position: absolute;
+	inset: 0;
+	background: var(--cmp-border);
+	border-radius: 26px;
+	/* Off state: a muted inset edge so the switch reaches 3:1 on any style (WCAG 1.4.11). */
+	box-shadow: inset 0 0 0 2px var(--cmp-muted);
+	cursor: pointer;
+	transition: background-color 180ms ease;
+}
+.cmp__toggle-slider::before {
+	content: "";
+	position: absolute;
+	left: 3px;
+	top: 3px;
+	width: 20px;
+	height: 20px;
+	background: #ffffff;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+	transition: transform 180ms ease;
+}
+.cmp__toggle input:checked + .cmp__toggle-slider { background: var(--cmp-primary); box-shadow: none; }
+.cmp__toggle input:checked + .cmp__toggle-slider::before { transform: translateX(22px); }
+.cmp__toggle input:focus-visible + .cmp__toggle-slider { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+
+/* Mobile */
+@media (max-width: 575px) {
+	.cmp { padding: 0; align-items: flex-end; }
+	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; }
+	/* Collapse every position to a centered bottom sheet on phones. Same
+	   specificity (0,2,0) as the corner rules but later in source, so it wins. */
+	.cmp .cmp__modal { margin-inline: auto; }
+	.cmp__title { font-size: 19px; }
+	/* Band: [intro, 2 lines] / Details ... Settings › / [Reject] [Accept]; DOM order = visual order.
+	   The title stays the dialog's name (aria-labelledby), hidden visually. */
+	.cmp__main .cmp__title { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+	.cmp__main .cmp__text { margin: 0 0 4px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; -webkit-hyphens: auto; hyphens: auto; }
+	/* Collapsed, the policy link is cut off: out of the tab order until Details. */
+	.cmp__main:not(.is-expanded) .cmp__link { visibility: hidden; }
+	.cmp__main.is-expanded .cmp__text { display: block; -webkit-line-clamp: none; line-clamp: none; max-height: 50vh; overflow-y: auto; }
+	.cmp__more { display: inline-flex; margin: 0; }
+	/* Details (left) and Settings as text (right) on one row; Reject / Accept,
+	   together and equal, on the full-width row below. */
+	.cmp__actions { flex-wrap: wrap; gap: 8px 12px; }
+	.cmp__spacer { display: none; }
+	.cmp__actions .cmp__choices { flex: 1 1 100%; }
+	.cmp__choices { display: flex; gap: 8px; }
+	.cmp__choices .cmp__btn { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 10px 12px; -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
+	.cmp__actions [data-cmp-action="prefs"] { margin-left: auto; min-height: 24px; padding: 2px 4px; border-color: transparent; background: none; text-decoration: underline; text-underline-offset: 2px; }
+	.cmp__actions [data-cmp-action="prefs"]::after { content: " \203A"; }
+	.cmp__prefs-actions { flex-direction: column; }
+	.cmp__prefs-actions .cmp__choices { width: 100%; }
+}
+
+/* The chevron is decoration: silent for screen readers where alt text in `content`
+   works. A separate block, so the minifier keeps the plain fallback above. */
+@supports (content: "" / "") {
+	@media (max-width: 575px) {
+		.cmp__actions [data-cmp-action="prefs"]::after { content: " \203A" / ""; }
+	}
+}
+
+/* Windows High Contrast / forced colours: backgrounds and shadows are dropped,
+   so the toggle draws its state with system colours (border, knob, fill). */
+@media (forced-colors: active) {
+	.cmp__toggle-slider { forced-color-adjust: none; border: 2px solid CanvasText; background: Canvas; box-shadow: none; }
+	.cmp__toggle-slider::before { top: 1px; left: 1px; background: CanvasText; box-shadow: none; }
+	.cmp__toggle input:checked + .cmp__toggle-slider { background: Highlight; border-color: Highlight; }
+	.cmp__toggle input:checked + .cmp__toggle-slider::before { background: HighlightText; }
+	.cmp__toggle input:focus-visible + .cmp__toggle-slider { outline: 2px solid CanvasText; }
+}
+
+/* ---- Light mode: small floating card, bottom-left corner (non-blocking) ---- */
+.cmp-light {
+	position: fixed;
+	left: 24px;
+	right: auto;
+	bottom: 24px;
+	z-index: 2147483600;
+	max-width: 380px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 18px 20px;
+	background: var(--cmp-bg);
+	color: var(--cmp-dark);
+	border: 1px solid var(--cmp-border);
+	border-radius: 16px;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+.cmp-light[hidden] { display: none; }
+.cmp-light__text { margin: 0; color: var(--cmp-muted); }
+.cmp-light__btn {
+	appearance: none;
+	border: 1px solid var(--cmp-primary);
+	background: var(--cmp-primary);
+	color: var(--cmp-primary-text);
+	border-radius: 999px;
+	padding: 10px 26px;
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+.cmp-light__btn:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+
+/* On small screens the card stretches near full width. */
+@media (max-width: 575px) {
+	.cmp-light { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+}
+
+/* ---- Floating reopen button (bottom-left) ---- */
+.cmp-reopen {
+	position: fixed; left: 20px; bottom: 20px; z-index: 2147483000;
+	width: 46px; height: 46px; border-radius: 50%;
+	background: var(--cmp-bg, #fff); color: var(--cmp-dark, #111827);
+	border: 1px solid var(--cmp-border, #d0d5dd);
+	box-shadow: 0 4px 14px rgba(0,0,0,.18);
+	display: inline-flex; align-items: center; justify-content: center;
+	cursor: pointer; padding: 0; transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.cmp-reopen:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.24); }
+/* Two-tone ring (light halo + dark line): visible on any page background. */
+.cmp-reopen:focus-visible { outline: 2px solid var(--cmp-dark, #111827); outline-offset: 2px; box-shadow: 0 0 0 4px var(--cmp-bg, #fff); }
+.cmp-reopen[hidden] { display: none; }
+@media (max-width: 480px) { .cmp-reopen { left: 14px; bottom: 14px; width: 42px; height: 42px; } }
+
+/* The visitor's consent ID, under the preferences (to quote in a data request). */
+.cmp__consent-id { margin: 14px 0 0; font-size: 12px; color: var(--cmp-muted); text-align: right; }
+.cmp__consent-id[hidden] { display: none; }
+.cmp__always { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 13px; color: var(--cmp-muted); }
+.cmp__always[hidden] { display: none; }
+.cmp__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.cmp__always-items { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.cmp__always-item {
+	font: inherit;
+	font-size: 13px;
+	padding: 4px 10px;
+	min-width: 24px;
+	border: 1px solid var(--cmp-border, currentColor);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--cmp-dark);
+	cursor: pointer;
+}
+.cmp__always-item:hover { border-color: var(--cmp-primary); color: var(--cmp-primary); }
+.cmp__always-item:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+.cmp__consent-id code { font-size: 12px; background: none; padding: 0; color: inherit; user-select: all; overflow-wrap: anywhere; }
+
+/* Third-party embed placeholder (YouTube, Vimeo, Maps) until consent. Takes the
+   iframe's aspect ratio so the page does not jump when the video loads. */
+.cmp-embed {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	max-width: 100%;
+	min-height: 180px;
+	margin: 0 0 1em;
+	padding: 20px;
+	background: var(--cmp-panel);
+	border: 1px solid var(--cmp-border);
+	border-radius: var(--cmp-radius);
+	color: var(--cmp-dark);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+	text-align: center;
+}
+.cmp-embed__inner { max-width: 440px; }
+.cmp-embed__text { margin: 0 0 14px; color: var(--cmp-dark); }
+.cmp-embed__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; margin: 0; }
+.cmp-embed__btn {
+	font: inherit;
+	font-weight: 600;
+	padding: 10px 18px;
+	border: 1px solid var(--cmp-primary);
+	border-radius: 8px;
+	background: var(--cmp-primary);
+	color: var(--cmp-primary-text);
+	cursor: pointer;
+}
+.cmp-embed__btn:hover { background: var(--cmp-primary-hover); border-color: var(--cmp-primary-hover); }
+.cmp-embed__always {
+	font: inherit;
+	font-weight: 600;
+	padding: 10px 18px;
+	border: 1px solid var(--cmp-primary);
+	border-radius: 8px;
+	background: transparent;
+	color: var(--cmp-primary);
+	cursor: pointer;
+}
+.cmp-embed__always:hover { background: var(--cmp-primary); color: var(--cmp-primary-text); }
+.cmp-embed__btn:focus-visible, .cmp-embed__always:focus-visible, .cmp-embed__link:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; }
+.cmp .cmp-embed__link, .cmp-embed__link,
+.cmp-embed__link:hover, .cmp-embed__link:focus {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px; /* 24px target (WCAG 2.5.8): a standalone action, not a link inside a sentence */
+	min-width: 24px;
+	color: var(--cmp-dark);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	text-decoration-thickness: 1px;
+}
+.cmp-embed__link:hover { text-decoration-thickness: 2px; }
+
+/* Loaded: the same box (aspect-ratio, max-width, min-height, margin), now only
+   the iframe's frame, so unblocking moves nothing on the page (CLS 0).
+   The iframe is positioned, so its own width / height attributes never size the box. */
+.cmp-embed--loaded { position: relative; padding: 0; border: 0; background: none; display: block; }
+.cmp-embed--loaded > iframe { position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; border: 0; }
+
+/* Local YouTube thumbnail behind the placeholder: the dark overlay keeps the text
+   and buttons readable whatever the picture. */
+.cmp-embed--thumb {
+	position: relative;
+	background-color: #1d2327;
+	background-size: cover;
+	background-position: center;
+	color: #fff;
+}
+.cmp-embed--thumb::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: rgba(0, 0, 0, 0.68);
+}
+.cmp-embed--thumb .cmp-embed__inner { position: relative; }
+.cmp-embed--thumb .cmp-embed__text { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.cmp-embed--thumb .cmp-embed__always { background: #fff; border-color: #fff; color: #1d2327; }
+.cmp-embed--thumb .cmp-embed__always:hover { background: var(--cmp-primary); border-color: var(--cmp-primary); color: var(--cmp-primary-text); }
+.cmp .cmp-embed--thumb .cmp-embed__link, .cmp-embed--thumb .cmp-embed__link,
+.cmp-embed--thumb .cmp-embed__link:hover, .cmp-embed--thumb .cmp-embed__link:focus { color: #fff; }
+.cmp-embed--thumb .cmp-embed__btn:focus-visible, .cmp-embed--thumb .cmp-embed__always:focus-visible, .cmp-embed--thumb .cmp-embed__link:focus-visible { outline-color: #fff; }
+
+/* Reduced motion: no slide or fade for visitors who asked for less motion (pseudo-elements too: the toggle knob). */
+@media (prefers-reduced-motion: reduce) { .cmp *, .cmp *::before, .cmp *::after, .cmp-light *, .cmp-light *::before, .cmp-light *::after, .cmp-reopen { transition: none !important; animation: none !important; } }

@@ -1,0 +1,42 @@
+{
+	"_comment": "theme.json palettes (wp_get_global_settings( array( 'color', 'palette', 'theme' ) )) of the default block themes, for CMP_Appearance::theme_colors (lot review I4).",
+	"twentytwentythree": [
+		{ "slug": "base", "color": "#ffffff", "name": "Base" },
+		{ "slug": "contrast", "color": "#000000", "name": "Contrast" },
+		{ "slug": "primary", "color": "#9DFF20", "name": "Primary" },
+		{ "slug": "secondary", "color": "#345C00", "name": "Secondary" },
+		{ "slug": "tertiary", "color": "#F6F6F6", "name": "Tertiary" }
+	],
+	"twentytwentyfour": [
+		{ "slug": "base", "color": "#F9F9F9", "name": "Base" },
+		{ "slug": "base-2", "color": "#FFFFFF", "name": "Base / Two" },
+		{ "slug": "contrast", "color": "#111111", "name": "Contrast" },
+		{ "slug": "contrast-2", "color": "#636363", "name": "Contrast / Two" },
+		{ "slug": "contrast-3", "color": "#A4A4A4", "name": "Contrast / Three" },
+		{ "slug": "accent", "color": "#cfcabe", "name": "Accent" },
+		{ "slug": "accent-2", "color": "#c2a990", "name": "Accent / Two" },
+		{ "slug": "accent-3", "color": "#d8613c", "name": "Accent / Three" },
+		{ "slug": "accent-4", "color": "#b1c5a4", "name": "Accent / Four" },
+		{ "slug": "accent-5", "color": "#b5bdbc", "name": "Accent / Five" }
+	],
+	"twentytwentyfive": [
+		{ "slug": "base", "color": "#FFFFFF", "name": "Base" },
+		{ "slug": "contrast", "color": "#111111", "name": "Contrast" },
+		{ "slug": "accent-1", "color": "#FFEE58", "name": "Accent 1" },
+		{ "slug": "accent-2", "color": "#F6CFF4", "name": "Accent 2" },
+		{ "slug": "accent-3", "color": "#503AA8", "name": "Accent 3" },
+		{ "slug": "accent-4", "color": "#686868", "name": "Accent 4" },
+		{ "slug": "accent-5", "color": "#FBFAF3", "name": "Accent 5" },
+		{ "slug": "accent-6", "color": "color-mix(in srgb, currentColor 20%, transparent)", "name": "Accent 6" }
+	],
+	"passing": [
+		{ "slug": "background", "color": "#fffdf8", "name": "Background" },
+		{ "slug": "foreground", "color": "#222222", "name": "Foreground" },
+		{ "slug": "primary", "color": "#0a5c36", "name": "Primary" }
+	],
+	"dark-background": [
+		{ "slug": "base", "color": "#000000", "name": "Base" },
+		{ "slug": "contrast", "color": "#ffffff", "name": "Contrast" },
+		{ "slug": "primary", "color": "#0a5c36", "name": "Primary" }
+	]
+}

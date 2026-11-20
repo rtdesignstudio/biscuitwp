@@ -15,6 +15,10 @@ class CMP_Admin {
 		require_once CMP_PATH . 'includes/admin/class-settings-page.php';
 		add_action( 'admin_post_cmp_save_settings', array( 'CMP_Settings_Page', 'save' ) );
 
+		require_once CMP_PATH . 'includes/admin/class-appearance-page.php';
+		add_action( 'admin_post_cmp_save_appearance', array( 'CMP_Appearance_Page', 'save' ) );
+		add_action( 'cmp_appearance_actions', array( 'CMP_Appearance_Page', 'render_preview_button' ) );
+
 		require_once CMP_PATH . 'includes/admin/class-categories-page.php';
 		add_action( 'admin_post_cmp_save_categories', array( 'CMP_Categories_Page', 'save' ) );
 
@@ -71,6 +75,7 @@ class CMP_Admin {
 			80
 		);
 		add_submenu_page( self::SLUG, __( 'Setări', 'consent-manager-pro' ), __( 'Setări', 'consent-manager-pro' ), 'manage_options', self::SLUG, array( 'CMP_Settings_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Aspect', 'consent-manager-pro' ), __( 'Aspect', 'consent-manager-pro' ), 'manage_options', CMP_Appearance_Page::SLUG, array( 'CMP_Appearance_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Categorii', 'consent-manager-pro' ), __( 'Categorii', 'consent-manager-pro' ), 'manage_options', 'cmp-categories', array( 'CMP_Categories_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Servicii', 'consent-manager-pro' ), __( 'Servicii', 'consent-manager-pro' ), 'manage_options', 'cmp-services', array( 'CMP_Services_Page', 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Verificare', 'consent-manager-pro' ), __( 'Verificare', 'consent-manager-pro' ), 'manage_options', CMP_Check_Page::SLUG, array( 'CMP_Check_Page', 'render' ) );
@@ -88,6 +93,10 @@ class CMP_Admin {
 		if ( false !== strpos( (string) $hook, CMP_Check_Page::SLUG ) && current_user_can( 'manage_options' ) ) {
 			wp_enqueue_script( 'cmp-check', CMP_URL . 'assets/js/check.js', array(), CMP_Plugin::asset_ver( 'assets/js/check.js' ), true );
 			wp_localize_script( 'cmp-check', 'CMP_CHECK', CMP_Check_Page::script_data() );
+		}
+		if ( false !== strpos( (string) $hook, CMP_Appearance_Page::SLUG ) ) {
+			wp_enqueue_script( 'cmp-appearance', CMP_URL . 'assets/js/admin-appearance.js', array(), CMP_Plugin::asset_ver( 'assets/js/admin-appearance.js' ), true );
+			wp_localize_script( 'cmp-appearance', 'CMP_APPEARANCE', CMP_Appearance_Page::script_data() );
 		}
 	}
 

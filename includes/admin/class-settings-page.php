@@ -91,22 +91,6 @@ class CMP_Settings_Page {
 			return;
 		}
 		$s = CMP_Consent::get_settings();
-		$positions = array(
-			'top-left'      => __( 'Stânga sus', 'consent-manager-pro' ),
-			'top-center'    => __( 'Sus centru', 'consent-manager-pro' ),
-			'top-right'     => __( 'Dreapta sus', 'consent-manager-pro' ),
-			'middle-center' => __( 'Mijloc centru', 'consent-manager-pro' ),
-			'bottom-left'   => __( 'Stânga jos', 'consent-manager-pro' ),
-			'bottom-center' => __( 'Jos centru', 'consent-manager-pro' ),
-			'bottom-right'  => __( 'Dreapta jos', 'consent-manager-pro' ),
-		);
-		// Map legacy stored values onto the new set for the selected() display.
-		$cmp_pos = isset( $s['position'] ) ? $s['position'] : 'middle-center';
-		$cmp_pos_alias = array( 'bottom' => 'bottom-center', 'top' => 'top-center', 'modal-center' => 'middle-center' );
-		if ( isset( $cmp_pos_alias[ $cmp_pos ] ) ) {
-			$cmp_pos = $cmp_pos_alias[ $cmp_pos ];
-		}
-		$presets   = array( 'neutral' => 'Neutral', 'warm' => 'Warm', 'dark' => 'Dark', 'egov' => 'eGov' );
 		?>
 		<div class="wrap cmp-admin">
 			<h1><?php esc_html_e( 'Consent Manager — Setări', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'modes' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
@@ -132,13 +116,12 @@ class CMP_Settings_Page {
 							<p class="description"><?php esc_html_e( 'Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, Tag Manager și Meta Pixel sunt blocate permanent; dacă ai nevoie de ele, folosește Pro.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
-					<tr data-cmp-mode="pro">
-						<th scope="row"><?php esc_html_e( 'Poziție banner', 'consent-manager-pro' ); ?></th>
-						<td><select name="cmp[position]">
-							<?php foreach ( $positions as $k => $lbl ) : ?>
-								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $cmp_pos, $k ); ?>><?php echo esc_html( $lbl ); ?></option>
-							<?php endforeach; ?>
-						</select></td>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Aspect', 'consent-manager-pro' ); ?></th>
+						<td>
+							<?php esc_html_e( 'Culorile, poziția, textele bannerului și butonul de redeschidere se setează în ecranul Aspect.', 'consent-manager-pro' ); ?>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . CMP_Appearance_Page::SLUG ) ); ?>"><?php esc_html_e( 'Deschide Aspect', 'consent-manager-pro' ); ?></a>
+						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Memorarea consimțământului (zile)', 'consent-manager-pro' ); ?></th>
@@ -146,14 +129,6 @@ class CMP_Settings_Page {
 							<input type="number" name="cmp[cookie_days]" min="1" max="396" value="<?php echo esc_attr( isset( $s['cookie_days'] ) ? (int) $s['cookie_days'] : 180 ); ?>" class="small-text">
 							<p class="description"><?php esc_html_e( 'Câte zile ține minte browserul alegerea vizitatorului înainte să reapară bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de retenția registrului de consimțăminte.', 'consent-manager-pro' ); ?></p>
 						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Preset design', 'consent-manager-pro' ); ?></th>
-						<td><select name="cmp[preset]">
-							<?php foreach ( $presets as $k => $lbl ) : ?>
-								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $s['preset'], $k ); ?>><?php echo esc_html( $lbl ); ?></option>
-							<?php endforeach; ?>
-						</select></td>
 					</tr>
 					<tr data-cmp-mode="pro">
 						<th scope="row"><?php esc_html_e( 'Blocare scripturi tracking', 'consent-manager-pro' ); ?></th>
@@ -177,14 +152,6 @@ class CMP_Settings_Page {
 								</p>
 							</fieldset>
 							<p class="description" data-cmp-measurement-note<?php echo $cmp_meas_avail ? ' style="display:none"' : ''; ?>><?php esc_html_e( 'Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu are niciun efect, iar alegerea salvată se păstrează.', 'consent-manager-pro' ); ?></p>
-						</td>
-					</tr>
-					<tr data-cmp-mode="pro">
-						<th scope="row"><?php esc_html_e( 'Buton flotant redeschidere', 'consent-manager-pro' ); ?></th>
-						<td>
-							<label><input type="checkbox" name="cmp[reopen_button]" value="1" <?php checked( ! empty( $s['reopen_button'] ) ); ?>> <?php esc_html_e( 'Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor de cookie-uri', 'consent-manager-pro' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Recomandat: oprit, cu un link „Setări cookie-uri” în footer — shortcode [cmp_cookie_settings_link] sau un link de meniu cu URL-ul #cmp-settings.', 'consent-manager-pro' ); ?></p>
-							<p class="description"><?php esc_html_e( 'Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar în modul Pro.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
@@ -227,35 +194,6 @@ class CMP_Settings_Page {
 						<th scope="row"><?php esc_html_e( 'Retenție log (luni)', 'consent-manager-pro' ); ?></th>
 						<td><input type="number" min="1" name="cmp[retention_months]" value="<?php echo esc_attr( $s['retention_months'] ); ?>" class="small-text"></td>
 					</tr>
-					<?php
-					$cmp_texts = isset( $s['texts'] ) && is_array( $s['texts'] ) ? $s['texts'] : array();
-					$cmp_field = function ( $key ) use ( $cmp_texts ) {
-						return isset( $cmp_texts[ $key ] ) ? $cmp_texts[ $key ] : '';
-					};
-					$cmp_text_fields = array(
-						'title'       => array( __( 'Titlu banner', 'consent-manager-pro' ), 'pro' ),
-						'intro'       => array( __( 'Text introductiv', 'consent-manager-pro' ), 'pro' ),
-						'light_intro' => array( __( 'Text notice (Light)', 'consent-manager-pro' ), 'light' ),
-						'accept'      => array( __( 'Buton „Accept"', 'consent-manager-pro' ), '' ),
-						'reject'      => array( __( 'Buton „Doar necesare"', 'consent-manager-pro' ), 'pro' ),
-						'prefs'       => array( __( 'Buton „Gestionează"', 'consent-manager-pro' ), 'pro' ),
-						'save'        => array( __( 'Buton „Confirmă selecția"', 'consent-manager-pro' ), 'pro' ),
-						'prefs_title' => array( __( 'Titlu preferințe', 'consent-manager-pro' ), 'pro' ),
-					);
-					?>
-					<?php foreach ( $cmp_text_fields as $tk => $tf ) : ?>
-						<?php list( $tlabel, $tmode ) = $tf; ?>
-						<tr<?php echo $tmode ? ' data-cmp-mode="' . esc_attr( $tmode ) . '"' : ''; ?>>
-							<th scope="row"><?php echo esc_html( $tlabel ); ?></th>
-							<td>
-								<?php if ( 'intro' === $tk || 'light_intro' === $tk ) : ?>
-									<textarea name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" class="large-text" rows="2" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>"><?php echo esc_textarea( $cmp_field( $tk ) ); ?></textarea>
-								<?php else : ?>
-									<input type="text" class="regular-text" name="cmp[texts][<?php echo esc_attr( $tk ); ?>]" value="<?php echo esc_attr( $cmp_field( $tk ) ); ?>" placeholder="<?php esc_attr_e( '(implicit)', 'consent-manager-pro' ); ?>">
-								<?php endif; ?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Pagini legale', 'consent-manager-pro' ); ?></th>
 						<td>
@@ -317,7 +255,8 @@ class CMP_Settings_Page {
 		$old   = CMP_Consent::get_settings();
 		// Legal page links and operator data are managed on the "Pagini legale" screen.
 		$old   = is_array( $old ) ? $old : array();
-		$clean = CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( $raw ), $old );
+		// Appearance and the old keys moved to "Aspect" are not on this form: keep them.
+		$clean = CMP_Sanitizer::keep_appearance( CMP_Sanitizer::keep_legal( CMP_Sanitizer::settings( $raw, $old ), $old ), $old );
 		$meas  = CMP_Sanitizer::measurement( $raw, $old );
 		$clean['measurement'] = $meas['value'];
 		update_option( 'cmp_settings', $clean );

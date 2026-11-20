@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	// Standalone-loadable for tests.
 }
+require_once __DIR__ . '/class-appearance.php';
 
 class CMP_Sanitizer {
 
@@ -17,7 +18,13 @@ class CMP_Sanitizer {
 		return min( $days, self::MAX_COOKIE_DAYS );
 	}
 
-	public static function settings( array $input ) {
+	/**
+	 * @param array $input Posted settings.
+	 * @param array $old   Stored cmp_settings: a posted appearance is merged over the
+	 *                     stored one (CMP_Appearance::from_settings), so fields not
+	 *                     posted (e.g. disabled in Light) keep their values.
+	 */
+	public static function settings( array $input, array $old = array() ) {
 		$positions = array(
 			'top-center', 'middle-center', 'bottom-center',
 			'top-left', 'bottom-left', 'top-right', 'bottom-right',
@@ -40,7 +47,7 @@ class CMP_Sanitizer {
 			$texts[ $tk ] = isset( $texts_in[ $tk ] ) ? trim( strip_tags( (string) $texts_in[ $tk ] ) ) : '';
 		}
 
-		return array(
+		$out = array(
 			'position'         => in_array( $pos, $positions, true ) ? $pos : 'middle-center',
 			'preset'           => in_array( $pre, $presets, true ) ? $pre : 'neutral',
 			'mode'             => in_array( $mode, $modes, true ) ? $mode : 'pro',
@@ -59,6 +66,76 @@ class CMP_Sanitizer {
 			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
 			'texts'            => $texts,
 		);
+		// B6: the appearance array, only when posted (the "Aspect" screen). Without it the
+		// old keys above stay the source (CMP_Appearance::from_settings migrates lazily).
+		if ( isset( $input['appearance'] ) && is_array( $input['appearance'] ) ) {
+			$out['appearance'] = CMP_Appearance::sanitize( $input['appearance'], CMP_Appearance::from_settings( $old ) );
+		}
+		return $out;
+	}
+
+	/** Old keys edited on the "Aspect" screen since B6 (still read while 'appearance' is missing). */
+	const ASPECT_LEGACY_KEYS = array( 'position', 'preset', 'reopen_button', 'texts' );
+
+	/**
+	 * Pure: carry the stored appearance over from the old settings. It is managed
+	 * on the "Aspect" screen, so the main settings form does not post it and must
+	 * not drop it (same idea as keep_legal()). The old keys that moved to Aspect
+	 * (ASPECT_LEGACY_KEYS) are kept too: a legacy site still reads them, and the
+	 * Settings form would otherwise reset them to their defaults.
+	 */
+	public static function keep_appearance( array $clean, array $old ) {
+		if ( ! isset( $clean['appearance'] ) && isset( $old['appearance'] ) && is_array( $old['appearance'] ) ) {
+			$clean['appearance'] = $old['appearance'];
+		}
+		foreach ( self::ASPECT_LEGACY_KEYS as $k ) {
+			if ( array_key_exists( $k, $old ) ) {
+				$clean[ $k ] = $old[ $k ];
+			}
+		}
+		return $clean;
+	}
+
+	/**
+	 * Pure: the "Aspect" screen save. Returns the full settings: the stored ones
+	 * ($old) with the appearance sanitized over the stored appearance (through
+	 * settings( …, $old ), so fields not posted, e.g. disabled in Light, keep
+	 * their values), plus the old keys kept in sync:
+	 *  - reopen_button = appearance.reopen !== 'none', when reopen was posted
+	 *    (the banner shows the button only when both allow it);
+	 *  - preset = the palette (embed placeholders still read preset);
+	 *  - texts: without WPML / Polylang the per-language texts are the source,
+	 *    so the old single texts are cleared (an emptied field falls back to the
+	 *    default, not to an old text); with them, the single texts are posted
+	 *    and saved as today (CMP_I18n registers them).
+	 *
+	 * @param array $input        Posted cmp[] (appearance, and texts with WPML / Polylang).
+	 * @param array $old          Stored cmp_settings.
+	 * @param bool  $multilingual WPML or Polylang active.
+	 */
+	public static function aspect( array $input, array $old, $multilingual ) {
+		$out = $old;
+		$ap  = isset( $input['appearance'] ) && is_array( $input['appearance'] ) ? $input['appearance'] : array();
+		$in  = array( 'appearance' => $ap );
+		if ( $multilingual && isset( $input['texts'] ) && is_array( $input['texts'] ) ) {
+			$in['texts'] = $input['texts'];
+		}
+		$clean = self::settings( $in, $old );
+
+		$out['appearance'] = $clean['appearance'];
+		$out['preset']     = $clean['appearance']['palette'];
+		if ( array_key_exists( 'reopen', $ap ) ) {
+			$out['reopen_button'] = 'none' !== $clean['appearance']['reopen'];
+		}
+		if ( ! $multilingual ) {
+			$out['texts'] = array_fill_keys( CMP_Appearance::TEXT_KEYS, '' );
+		} elseif ( isset( $in['texts'] ) ) {
+			// Only the posted keys: the fields disabled in the other mode are not
+			// posted and keep their stored texts (lot review I3).
+			$stored = isset( $old['texts'] ) && is_array( $old['texts'] ) ? array_intersect_key( $old['texts'], $clean['texts'] ) : array();
+			$out['texts'] = array_merge( array_fill_keys( CMP_Appearance::TEXT_KEYS, '' ), $stored, array_intersect_key( $clean['texts'], $in['texts'] ) );
+		}
+		return $out;
 	}
 
 	/**

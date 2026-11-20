@@ -984,20 +984,47 @@ class CMP_Scanner {
 	}
 
 	/* ------------------------------------------------------------------
-	 * WordPress side of the check mode (front end, ?cmp_check=<nonce>).
+	 * WordPress side of the isolated admin session (front end): the check mode
+	 * (?cmp_check=<nonce>, B3) and the appearance preview (?cmp_preview=<nonce>,
+	 * B6, CMP_Preview). Both: a nonce of the current user with manage_options,
+	 * otherwise the parameter is ignored completely; no cache, the session check
+	 * cookies (so the banner shows even after the admin decided, and nothing is
+	 * logged), no auto-open exclusions, the admin bar hidden.
 	 * ------------------------------------------------------------------ */
 
-	/** @var bool|null Check mode of this request, computed once (after init). */
-	private static $check = null;
+	/** @var bool[] Token modes of this request (param => active), computed once (after init). */
+	private static $modes = array();
 
 	/**
-	 * Is this front-end request in check mode? A valid cmp_check nonce of a user
-	 * with manage_options; otherwise the parameter is ignored completely. Before
-	 * `init` (no current user yet) it answers false without remembering it.
+	 * Pure: the token of a token mode. $cookie null: the nonce is the value of
+	 * ?$param (check mode). $cookie set: ?$param is only a marker and must be
+	 * exactly '1'; the nonce is the cookie (preview: no nonce in any URL, so an
+	 * old ?cmp_preview=<nonce> link or a leaked marker does nothing). Null when
+	 * missing or not a string.
 	 */
-	public static function check_mode(): bool {
-		if ( null !== self::$check ) {
-			return self::$check;
+	public static function token_from( array $get, array $cookies, string $param, ?string $cookie ): ?string {
+		if ( ! isset( $get[ $param ] ) || ! is_string( $get[ $param ] ) ) {
+			return null;
+		}
+		if ( null === $cookie ) {
+			return $get[ $param ];
+		}
+		if ( '1' !== $get[ $param ] || ! isset( $cookies[ $cookie ] ) || ! is_string( $cookies[ $cookie ] ) ) {
+			return null;
+		}
+		return $cookies[ $cookie ];
+	}
+
+	/**
+	 * Is this front-end request in the token mode $param (a valid $action nonce
+	 * of a user with manage_options: in ?$param, or with $cookie in that cookie
+	 * plus the marker ?$param=1)? Otherwise the parameter is ignored
+	 * completely. Before `init` (no current user yet) it answers false without
+	 * remembering it.
+	 */
+	public static function token_mode( string $param, string $action, ?string $cookie = null ): bool {
+		if ( isset( self::$modes[ $param ] ) ) {
+			return self::$modes[ $param ];
 		}
 		if ( ! function_exists( 'did_action' ) || ! did_action( 'init' ) ) {
 			return false;
@@ -1007,7 +1034,8 @@ class CMP_Scanner {
 		$rest = ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() )
 			|| self::is_rest_uri( $uri, $_GET, function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json' );
-		$raw  = isset( $_GET['cmp_check'] ) && is_string( $_GET['cmp_check'] ) ? sanitize_text_field( wp_unslash( $_GET['cmp_check'] ) ) : null;
+		$raw  = self::token_from( $_GET, $_COOKIE, $param, $cookie );
+		$raw  = null === $raw ? null : sanitize_text_field( wp_unslash( $raw ) );
 		// phpcs:enable
 		$r = self::check_request(
 			array(
@@ -1018,28 +1046,41 @@ class CMP_Scanner {
 				'rest'   => $rest,
 			),
 			$raw,
-			function ( $token ) {
-				return false !== wp_verify_nonce( $token, 'cmp_check' ) && current_user_can( 'manage_options' );
+			function ( $token ) use ( $action ) {
+				return false !== wp_verify_nonce( $token, $action ) && current_user_can( 'manage_options' );
 			}
 		);
 		if ( $r['final'] ) {
-			self::$check = $r['active'];
+			self::$modes[ $param ] = $r['active'];
 		}
 		return $r['active'];
 	}
 
-	/** show_admin_bar: hidden on a check page (the measured page must look like a visitor's). */
-	public static function check_admin_bar( $show ) {
-		return self::check_mode() ? false : $show;
+	/** Is this front-end request in check mode (?cmp_check, admin "Verificare")? */
+	public static function check_mode(): bool {
+		return self::token_mode( 'cmp_check', 'cmp_check' );
 	}
 
 	/**
-	 * template_redirect: a check page is never cached, and every check page
-	 * starts as a new visitor: the check cookies of an earlier page (same
-	 * session) are expired and ignored for this request.
+	 * Is this front-end request an isolated admin session: the check mode or
+	 * the appearance preview (CMP_Preview::active())?
+	 */
+	public static function isolated(): bool {
+		return self::check_mode() || ( class_exists( 'CMP_Preview' ) && CMP_Preview::active() );
+	}
+
+	/** show_admin_bar: hidden in an isolated session (the page must look like a visitor's). */
+	public static function check_admin_bar( $show ) {
+		return self::isolated() ? false : $show;
+	}
+
+	/**
+	 * template_redirect: an isolated page (check or preview) is never cached,
+	 * and every such page starts as a new visitor: the check cookies of an
+	 * earlier page (same session) are expired and ignored for this request.
 	 */
 	public static function check_page_setup() {
-		if ( ! self::check_mode() ) {
+		if ( ! self::isolated() ) {
 			return;
 		}
 		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
@@ -1047,7 +1088,7 @@ class CMP_Scanner {
 		}
 		nocache_headers();
 		if ( ! headers_sent() ) {
-			// The token stays on this site (the URL is also cleaned in banner.js).
+			// The token stays on this site (the cmp_check URL is also cleaned in banner.js).
 			header( 'Referrer-Policy: same-origin' );
 			// Only the admin screen (same origin) may frame a check page.
 			header( 'X-Frame-Options: SAMEORIGIN' );
@@ -1068,7 +1109,7 @@ class CMP_Scanner {
 		add_action( self::RUN_HOOK, array( __CLASS__, 'run_batch' ) );
 		add_action( self::DAILY_HOOK, array( __CLASS__, 'enqueue_all' ) );
 		add_action( 'admin_init', array( __CLASS__, 'maybe_first_scan' ) );
-		// Check mode (front end only; inert without a valid ?cmp_check nonce).
+		// Isolated admin session: check mode and preview (front end only; inert without a valid nonce).
 		add_filter( 'show_admin_bar', array( __CLASS__, 'check_admin_bar' ), 99 );
 		add_action( 'template_redirect', array( __CLASS__, 'check_page_setup' ), 0 );
 	}

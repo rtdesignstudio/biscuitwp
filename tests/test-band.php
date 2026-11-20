@@ -121,11 +121,11 @@ cmp_assert( isset( $band_d['display'] ) && 'none' !== $band_d['display'], 'band:
 // Scrollbar compensation while the page is locked (CLS).
 $band_d = cmp_band_decls( $band_base, 'body.cmp-has-banner' );
 cmp_assert( isset( $band_d['overflow'] ) && 'hidden' === $band_d['overflow'], 'band: body.cmp-has-banner overflow: hidden' );
-cmp_assert( isset( $band_d['padding-right'] ) && 'var(--cmp-sbw, 0px)' === $band_d['padding-right'], 'band: body.cmp-has-banner padding-right: var(--cmp-sbw, 0px)' );
+cmp_assert( isset( $band_d['padding-right'] ) && 1 === preg_match( '/^var\(--cmp-sbw, ?0px\)$/', $band_d['padding-right'] ), 'band: body.cmp-has-banner padding-right: var(--cmp-sbw, 0px)' );
 
 // The standalone copy carries the same band.
 $band_sa = (string) @file_get_contents( __DIR__ . '/../standalone/cmp.css' );
-cmp_assert( false !== strpos( $band_sa, '.cmp__more' ) && false !== strpos( $band_sa, 'var(--cmp-sbw, 0px)' ), 'band: standalone/cmp.css has the band' );
+cmp_assert( false !== strpos( $band_sa, '.cmp__more' ) && false !== strpos( $band_sa, 'var(--cmp-sbw,0px)' ), 'band: standalone/cmp.css has the band' );
 
 // Fix round 1: RU at 200% zoom hyphenates instead of cutting words anywhere.
 $band_d = cmp_band_decls( $band_phone, '.cmp__choices .cmp__btn' );
@@ -137,5 +137,6 @@ cmp_assert( isset( $band_d['hyphens'] ) && 'auto' === $band_d['hyphens'], 'band 
 foreach ( array( 'assets/css/banner.min.css', 'standalone/cmp.min.css' ) as $band_f ) {
 	$band_min = (string) @file_get_contents( __DIR__ . '/../' . $band_f );
 	cmp_assert( '' !== $band_min && 0 === preg_match( '/[^\x00-\x7F]/', $band_min ), "band fix: $band_f is pure ASCII" );
-	cmp_assert( false !== stripos( $band_min, '\\203a' ), "band fix: $band_f keeps the Settings chevron as a CSS escape" );
+	// Fix wave add-on: the Settings chevron is markup now (aria-hidden span), not CSS content.
+	cmp_assert( false === stripos( $band_min, '\\203a' ) && false !== strpos( $band_min, '.cmp__chev' ), "band fix: $band_f has no chevron content, only the .cmp__chev display rules" );
 }

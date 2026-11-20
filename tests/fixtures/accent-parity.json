@@ -1,0 +1,398 @@
+[
+    {
+        "accent": "#ffd400",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 1.43,
+            "suggest": "#8c7500",
+            "text": "#000000",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#ffd400",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 1.36,
+            "suggest": "#877000",
+            "text": "#ffffff",
+            "suggest_ratio": 4.59
+        }
+    },
+    {
+        "accent": "#ffd400",
+        "bg": "#1e242e",
+        "result": {
+            "ok": true,
+            "ratio": 10.89,
+            "suggest": "#ffd400",
+            "text": "#000000",
+            "suggest_ratio": 10.89
+        }
+    },
+    {
+        "accent": "#e4572e",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 3.68,
+            "suggest": "#d3451b",
+            "text": "#000000",
+            "suggest_ratio": 4.52
+        }
+    },
+    {
+        "accent": "#e4572e",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 3.5,
+            "suggest": "#cc421a",
+            "text": "#ffffff",
+            "suggest_ratio": 4.57
+        }
+    },
+    {
+        "accent": "#e4572e",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 4.23,
+            "suggest": "#e56039",
+            "text": "#000000",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#003e96",
+        "bg": "#ffffff",
+        "result": {
+            "ok": true,
+            "ratio": 9.86,
+            "suggest": "#003e96",
+            "text": "#ffffff",
+            "suggest_ratio": 9.86
+        }
+    },
+    {
+        "accent": "#003e96",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": true,
+            "ratio": 9.37,
+            "suggest": "#003e96",
+            "text": "#ffffff",
+            "suggest_ratio": 9.37
+        }
+    },
+    {
+        "accent": "#003e96",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 1.58,
+            "suggest": "#3589ff",
+            "text": "#000000",
+            "suggest_ratio": 4.58
+        }
+    },
+    {
+        "accent": "#777777",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 4.47,
+            "suggest": "#767676",
+            "text": "#000000",
+            "suggest_ratio": 4.54
+        }
+    },
+    {
+        "accent": "#777777",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 4.25,
+            "suggest": "#737373",
+            "text": "#ffffff",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#777777",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 3.48,
+            "suggest": "#8a8a8a",
+            "text": "#000000",
+            "suggest_ratio": 4.51
+        }
+    },
+    {
+        "accent": "#00ff00",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 1.37,
+            "suggest": "#008a00",
+            "text": "#000000",
+            "suggest_ratio": 4.53
+        }
+    },
+    {
+        "accent": "#00ff00",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 1.3,
+            "suggest": "#008500",
+            "text": "#ffffff",
+            "suggest_ratio": 4.58
+        }
+    },
+    {
+        "accent": "#00ff00",
+        "bg": "#1e242e",
+        "result": {
+            "ok": true,
+            "ratio": 11.36,
+            "suggest": "#00ff00",
+            "text": "#000000",
+            "suggest_ratio": 11.36
+        }
+    },
+    {
+        "accent": "#ff00ff",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 3.13,
+            "suggest": "#d100d1",
+            "text": "#000000",
+            "suggest_ratio": 4.53
+        }
+    },
+    {
+        "accent": "#ff00ff",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 2.98,
+            "suggest": "#c900c9",
+            "text": "#ffffff",
+            "suggest_ratio": 4.61
+        }
+    },
+    {
+        "accent": "#ff00ff",
+        "bg": "#1e242e",
+        "result": {
+            "ok": true,
+            "ratio": 4.97,
+            "suggest": "#ff00ff",
+            "text": "#000000",
+            "suggest_ratio": 4.97
+        }
+    },
+    {
+        "accent": "#123456",
+        "bg": "#ffffff",
+        "result": {
+            "ok": true,
+            "ratio": 12.71,
+            "suggest": "#123456",
+            "text": "#ffffff",
+            "suggest_ratio": 12.71
+        }
+    },
+    {
+        "accent": "#123456",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": true,
+            "ratio": 12.08,
+            "suggest": "#123456",
+            "text": "#ffffff",
+            "suggest_ratio": 12.08
+        }
+    },
+    {
+        "accent": "#123456",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 1.22,
+            "suggest": "#458fd8",
+            "text": "#000000",
+            "suggest_ratio": 4.58
+        }
+    },
+    {
+        "accent": "#5b9bff",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 2.77,
+            "suggest": "#0f6cff",
+            "text": "#000000",
+            "suggest_ratio": 4.55
+        }
+    },
+    {
+        "accent": "#5b9bff",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 2.63,
+            "suggest": "#0768ff",
+            "text": "#ffffff",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#5b9bff",
+        "bg": "#1e242e",
+        "result": {
+            "ok": true,
+            "ratio": 5.62,
+            "suggest": "#5b9bff",
+            "text": "#000000",
+            "suggest_ratio": 5.62
+        }
+    },
+    {
+        "accent": "#fff",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 1,
+            "suggest": "#757575",
+            "text": "#ffffff",
+            "suggest_ratio": 4.6
+        }
+    },
+    {
+        "accent": "#fff",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 1.05,
+            "suggest": "#737373",
+            "text": "#ffffff",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#fff",
+        "bg": "#1e242e",
+        "result": {
+            "ok": true,
+            "ratio": 15.59,
+            "suggest": "#ffffff",
+            "text": "#000000",
+            "suggest_ratio": 15.59
+        }
+    },
+    {
+        "accent": "#2e794d",
+        "bg": "#ffffff",
+        "result": {
+            "ok": true,
+            "ratio": 5.3,
+            "suggest": "#2e794d",
+            "text": "#ffffff",
+            "suggest_ratio": 5.3
+        }
+    },
+    {
+        "accent": "#2e794d",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": true,
+            "ratio": 5.04,
+            "suggest": "#2e794d",
+            "text": "#ffffff",
+            "suggest_ratio": 5.04
+        }
+    },
+    {
+        "accent": "#2e794d",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 2.93,
+            "suggest": "#3b9c63",
+            "text": "#000000",
+            "suggest_ratio": 4.54
+        }
+    },
+    {
+        "accent": "#c0392b",
+        "bg": "#ffffff",
+        "result": {
+            "ok": true,
+            "ratio": 5.43,
+            "suggest": "#c0392b",
+            "text": "#ffffff",
+            "suggest_ratio": 5.43
+        }
+    },
+    {
+        "accent": "#c0392b",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": true,
+            "ratio": 5.16,
+            "suggest": "#c0392b",
+            "text": "#ffffff",
+            "suggest_ratio": 5.16
+        }
+    },
+    {
+        "accent": "#c0392b",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 2.86,
+            "suggest": "#da675b",
+            "text": "#000000",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#808080",
+        "bg": "#ffffff",
+        "result": {
+            "ok": false,
+            "ratio": 3.94,
+            "suggest": "#767676",
+            "text": "#000000",
+            "suggest_ratio": 4.54
+        }
+    },
+    {
+        "accent": "#808080",
+        "bg": "#fbf9f4",
+        "result": {
+            "ok": false,
+            "ratio": 3.75,
+            "suggest": "#737373",
+            "text": "#ffffff",
+            "suggest_ratio": 4.5
+        }
+    },
+    {
+        "accent": "#808080",
+        "bg": "#1e242e",
+        "result": {
+            "ok": false,
+            "ratio": 3.94,
+            "suggest": "#8a8a8a",
+            "text": "#000000",
+            "suggest_ratio": 4.51
+        }
+    }
+]

@@ -83,6 +83,77 @@ add_filter(
 	}
 );
 
+/**
+ * B6.18 guarantees (appearance scenarios): the runner sets the cookie
+ * cmp_e2e_look = <style>.<buttons> (e.g. friendly.text); the stored appearance
+ * is replaced by that style with that button style, through the plugin's own
+ * sanitizer (CMP_Appearance::from_settings). Loopback only.
+ */
+add_filter(
+	'option_cmp_settings',
+	function ( $v ) {
+		if ( ! cmp_e2e_local_request() || ! isset( $_COOKIE['cmp_e2e_look'] ) ) {
+			return $v;
+		}
+		$v    = is_array( $v ) ? $v : array();
+		$look = explode( '.', (string) $_COOKIE['cmp_e2e_look'] );
+		$v['mode']       = 'pro';
+		$v['appearance'] = array(
+			'style'   => $look[0],
+			'buttons' => isset( $look[1] ) ? $look[1] : '',
+		);
+		return $v;
+	},
+	20
+);
+
+/**
+ * Lot review I1 + I2 (cookie cmp_e2e_backdrop=none): the stored appearance gets
+ * backdrop "none" (the page stays usable: no lock, no trap, aria-modal="false")
+ * and the theme font ("inherit"). Combined with cmp_e2e_mode for the tracker
+ * checks. Loopback only.
+ */
+add_filter(
+	'option_cmp_settings',
+	function ( $v ) {
+		if ( ! cmp_e2e_local_request() || ! isset( $_COOKIE['cmp_e2e_backdrop'] ) ) {
+			return $v;
+		}
+		$v = is_array( $v ) ? $v : array();
+		$a = isset( $v['appearance'] ) && is_array( $v['appearance'] ) ? $v['appearance'] : array();
+		$v['mode']       = 'pro';
+		$v['appearance'] = array_merge( $a, array( 'backdrop' => (string) $_COOKIE['cmp_e2e_backdrop'], 'font' => 'inherit' ) );
+		return $v;
+	},
+	21
+);
+
+/**
+ * Sabotage (cookie cmp_e2e_sabotage=1|id|layer): a theme / plugin prints CSS
+ * that hides Reject, bypassing the custom-CSS cleaner. The banner's JS guard must reset
+ * both buttons (.cmp--guard) so Reject is visible again.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( ! cmp_e2e_local_request() || ! isset( $_COOKIE['cmp_e2e_sabotage'] ) ) {
+			return;
+		}
+		// 1 = plain selector; id = beats any class-based reset; layer = layered
+		// !important (beats every unlayered !important, whatever the specificity).
+		$rules = array(
+			'1'     => '[data-cmp-action="reject"]{display:none !important}',
+			'id'    => '#cmp-overlay [data-cmp-action="reject"]{display:none !important} #cmp-overlay .cmp__choices{visibility:hidden !important}',
+			'layer' => '@layer cmpx { [data-cmp-action="reject"]{display:none !important} .cmp__modal{opacity:0 !important} }',
+		);
+		$kind  = (string) $_COOKIE['cmp_e2e_sabotage'];
+		if ( isset( $rules[ $kind ] ) ) {
+			echo "\n<style id=\"cmp-e2e-sabotage\">" . $rules[ $kind ] . "</style>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		}
+	},
+	999
+);
+
 add_action(
 	'wp_head',
 	function () {

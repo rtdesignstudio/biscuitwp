@@ -57,9 +57,9 @@ if ( ! is_file( $guide_class_file ) ) {
 }
 require_once $guide_class_file;
 
-$guide_expected = array( 'start', 'modes', 'services', 'examples', 'verify', 'legal', 'update', 'register', 'developers' );
+$guide_expected = array( 'start', 'modes', 'appearance', 'services', 'examples', 'verify', 'legal', 'update', 'register', 'developers' );
 cmp_assert( class_exists( 'CMP_Guide' ), 'guide: CMP_Guide exists' );
-cmp_assert_eq( CMP_Guide::ANCHORS, $guide_expected, 'guide: ANCHORS are the 9 sections, in order' );
+cmp_assert_eq( CMP_Guide::ANCHORS, $guide_expected, 'guide: ANCHORS are the 10 sections, in order' );
 cmp_assert_eq( CMP_Guide::SLUG, 'cmp-guide', 'guide: page slug is cmp-guide' );
 
 // The rendered page: one id per anchor, a table of contents linking to each.
@@ -102,6 +102,7 @@ unset( $GLOBALS['cmp_guide_tr']['Ghid'] );
 // Contextual links: each plugin screen links to its section, with a known anchor.
 $guide_screens = array(
 	'class-settings-page.php'   => 'modes',
+	'class-appearance-page.php' => 'appearance',
 	'class-services-page.php'   => 'services',
 	'class-categories-page.php' => 'services',
 	'class-check-page.php'      => 'verify',
@@ -123,7 +124,7 @@ foreach ( array_merge( glob( __DIR__ . '/../includes/admin/*.php' ), glob( __DIR
 		}
 	}
 }
-cmp_assert( count( $guide_all ) >= 6, 'guide: at least 6 contextual links found (' . count( $guide_all ) . ')' );
+cmp_assert( count( $guide_all ) >= 7, 'guide: at least 7 contextual links found (' . count( $guide_all ) . ')' );
 
 // Menu: "Ghid" is registered last, manage_options, slug cmp-guide.
 $guide_admin = (string) file_get_contents( __DIR__ . '/../includes/admin/class-admin.php' );

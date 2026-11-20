@@ -12,13 +12,14 @@ class CMP_Guide {
 	const SLUG = 'cmp-guide';
 
 	/** Section anchors, in page order. */
-	const ANCHORS = array( 'start', 'modes', 'services', 'examples', 'verify', 'legal', 'update', 'register', 'developers' );
+	const ANCHORS = array( 'start', 'modes', 'appearance', 'services', 'examples', 'verify', 'legal', 'update', 'register', 'developers' );
 
 	/** Section titles, keyed by anchor. */
 	public static function titles() {
 		return array(
 			'start'      => __( 'Pornire în 5 minute', 'consent-manager-pro' ),
 			'modes'      => __( 'Ce mod alegi', 'consent-manager-pro' ),
+			'appearance' => __( 'Aspectul bannerului', 'consent-manager-pro' ),
 			'services'   => __( 'Servicii', 'consent-manager-pro' ),
 			'examples'   => __( 'Exemple', 'consent-manager-pro' ),
 			'verify'     => __( 'Cum verifici blocarea', 'consent-manager-pro' ),
@@ -26,6 +27,33 @@ class CMP_Guide {
 			'update'     => __( 'După un update', 'consent-manager-pro' ),
 			'register'   => __( 'Registru și date', 'consent-manager-pro' ),
 			'developers' => __( 'Pentru developeri', 'consent-manager-pro' ),
+		);
+	}
+
+	/**
+	 * The --cmp-* custom properties a site's own CSS can set (on .cmp,
+	 * .cmp-light, .cmp-reopen or .cmp-embed), with what each one does. Shown on
+	 * the "Aspect" screen and in the guide's `appearance` section.
+	 *
+	 * @return array variable => description
+	 */
+	public static function variables() {
+		return array(
+			'--cmp-primary'       => __( 'culoarea principală: fundalul butoanelor „Accept” și „Refuz”, linkurile', 'consent-manager-pro' ),
+			'--cmp-primary-hover' => __( 'culoarea principală la trecerea mouse-ului', 'consent-manager-pro' ),
+			'--cmp-primary-text'  => __( 'textul de pe butoanele principale', 'consent-manager-pro' ),
+			'--cmp-bg'            => __( 'fundalul bannerului', 'consent-manager-pro' ),
+			'--cmp-dark'          => __( 'culoarea textului', 'consent-manager-pro' ),
+			'--cmp-muted'         => __( 'textul secundar', 'consent-manager-pro' ),
+			'--cmp-border'        => __( 'liniile și chenarele', 'consent-manager-pro' ),
+			'--cmp-panel'         => __( 'fundalul blocurilor din preferințe', 'consent-manager-pro' ),
+			'--cmp-radius'        => __( 'rotunjirea colțurilor (px)', 'consent-manager-pro' ),
+			'--cmp-shadow'        => __( 'umbra ferestrei (box-shadow)', 'consent-manager-pro' ),
+			'--cmp-maxw'          => __( 'lățimea maximă a ferestrei (px)', 'consent-manager-pro' ),
+			'--cmp-gap'           => __( 'distanța față de marginea ecranului (px)', 'consent-manager-pro' ),
+			'--cmp-dim'           => __( 'intensitatea întunecării fundalului paginii, de la 0 la 0.8', 'consent-manager-pro' ),
+			'--cmp-blur'          => __( 'blurul fundalului paginii (px)', 'consent-manager-pro' ),
+			'--cmp-font'          => __( 'fontul (font-family)', 'consent-manager-pro' ),
 		);
 	}
 

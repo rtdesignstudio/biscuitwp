@@ -423,7 +423,7 @@ ok(/function renderReconsent\(view\) \{[\s\S]*?\[data-cmp-action="back"\][\s\S]*
 ok(/function openPrefs\(\) \{[\s\S]*?renderReconsent\(pendingReconsent\(\)\)/.test(cmpSrc), 'T4: cmp.js openPrefs renders re-consent');
 ok(/textContent = ids\.map\(svcLabel\)/.test(cmpSrc), 'T4: cmp.js names the new services via textContent');
 ok(/data-cmp-reconsent-text/.test(cmpSrc) && /data-cmp-cat-new=/.test(cmpSrc), 'T4: cmp.js renders the re-consent text and badges');
-ok(/if \(pendingReconsent\(\)\.show\) \{[\s\S]*?firstDecision = true;\s*openPrefs\(\);\s*show\(\);\s*return;/.test(cmpSrc), 'T4: cmp.js re-prompts on load straight on the preferences');
+ok(/if \(pendingReconsent\(\)\.show\) \{[\s\S]*?firstDecision = true;\s*openPrefs\(\);\s*(?:show|autoShow)\(\);\s*return;/.test(cmpSrc), 'T4: cmp.js re-prompts on load straight on the preferences (B6: after the display delay)');
 ok(/openPreferences: function \(\) \{[\s\S]*?openPrefs\(\);\s*show\(\);/.test(cmpSrc), 'T4: cmp.js openPreferences: prefs first, then show');
 // Light mode untouched: renderLight has no re-consent.
 ok(!/function renderLight[\s\S]*?reconsent[\s\S]*?function renderReopen/.test(cmpSrc), 'T4: Light mode untouched');
@@ -740,10 +740,12 @@ ok(!!kB.m && !!kC.m && kB.m[1].replace(/^\t+/gm, '') === kC.m[1].replace(/^\t+/g
 		var docStub = { body: { classList: { add: function (c) { log.push('class:' + c); } } }, addEventListener: function () { log.push('listen'); },
 			documentElement: { clientWidth: 985, style: { setProperty: function (k, v) { log.push('set:' + k + '=' + v); } } } };
 		var winStub = { innerWidth: 1000, addEventListener: function (ev) { log.push('win:' + ev); } };
-		var f = new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', shSrc + '\nreturn show;')(
+		var f = new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', 'showT', 'clearTimeout', 'applySiteTheme', 'A', 'ownDark', 'requestAnimationFrame', shSrc + '\nreturn show;')(
 			bn, function () { return block; }, function () { return open; },
 			function (on) { log.push('trap:' + on); }, function () { log.push('focus'); }, function () {}, docStub, function () {}, winStub, function () { log.push('pad'); },
-			function () { return { overflowY: 'visible', scrollbarGutter: 'auto', paddingRight: '0px' }; }, function () { return '15px'; });
+			function () { return { overflowY: 'visible', scrollbarGutter: 'auto', paddingRight: '0px' }; }, function () { return '15px'; },
+			// B6: the display-delay timer and the theme "like the site" (no-ops here).
+			0, function () {}, function () {}, {}, false, function () {});
 		f();
 		var BAND = /^(class:|set:|win:|pad$)/;
 		return { log: log.filter(function (x) { return x !== 'listen' && !BAND.test(x); }), band: log.filter(function (x) { return BAND.test(x); }), hidden: bn.hidden };
@@ -814,9 +816,10 @@ ok(!!bB.m && !!bC.m && bB.m[1].replace(/^\t+/gm, '') === bC.m[1].replace(/^\t+/g
 		var winStub = { innerWidth: 1000, addEventListener: function (ev, fn) { log.push('win:' + ev + ':' + (fn === padFn)); } };
 		var padFn = function () { log.push('pad'); };
 		var lp = bandFn(t[1].m, 'lockPad') || function () { return '?'; };
-		new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', shSrc + '\nreturn show;')(
+		new Function('banner', 'blocking', 'prefsOpen', 'trapFocus', 'focusDialog', 'hideReopen', 'document', 'onKeydown', 'window', 'scrollPad', 'getComputedStyle', 'lockPad', 'showT', 'clearTimeout', 'applySiteTheme', 'A', 'ownDark', 'requestAnimationFrame', shSrc + '\nreturn show;')(
 			bn, function () { return block; }, function () { return false; }, function () {}, function () {}, function () {}, docStub, function () {}, winStub, padFn,
-			function (el) { return el === docStub.body ? { paddingRight: bodyPad || '0px' } : { overflowY: 'visible', scrollbarGutter: 'auto' }; }, lp)();
+			function (el) { return el === docStub.body ? { paddingRight: bodyPad || '0px' } : { overflowY: 'visible', scrollbarGutter: 'auto' }; }, lp,
+			0, function () {}, function () {}, {}, false, function () {})();
 		return log;
 	};
 	if (shSrc) {
@@ -963,11 +966,13 @@ eq(fnBody(bannerSrc, 'loadEmbed').replace(/^\t+/gm, ''), fnBody(cmpSrc, 'loadEmb
 	// when the banner was on screen and held the focus (not on the GPC auto-refusal).
 	var hd = fnBody(t[1], 'hide');
 	var runHide = function (hidden, block, focusIn, cookie) {
-		var log = [], bn = { hidden: hidden, contains: function () { return focusIn; } };
+		var log = [], bn = { hidden: hidden, contains: function () { return focusIn; }, style: { removeProperty: function () {} } };
 		var docStub = { activeElement: {}, body: { classList: { remove: function () {} } }, documentElement: { style: { removeProperty: function () {} } }, removeEventListener: function () {} };
-		new Function('banner', 'blocking', 'document', 'window', 'details', 'closePrefs', 'scrollPad', 'onKeydown', 'trapFocus', 'readCookie', 'showReopen', hd + '\nreturn hide;')(
+		new Function('banner', 'blocking', 'document', 'window', 'details', 'closePrefs', 'scrollPad', 'onKeydown', 'trapFocus', 'readCookie', 'showReopen', 'showT', 'clearTimeout', 'A', hd + '\nreturn hide;')(
 			bn, function () { return block; }, docStub, { removeEventListener: function () {} }, function () {}, function () {}, function () {}, function () {},
-			function (on) { log.push('trap:' + on); }, function () { return cookie ? {} : null; }, function () { log.push('reopen'); })();
+			function (on) { log.push('trap:' + on); }, function () { return cookie ? {} : null; }, function () { log.push('reopen'); },
+			// B6: the display-delay timer (none pending here) and the appearance data.
+			0, function () {}, {})();
 		return log;
 	};
 	if (hd) {
@@ -1213,7 +1218,9 @@ function bootCmp(file, opts) {
 		CustomEvent: function (t, i) { this.type = t; this.detail = i && i.detail; },
 		getComputedStyle: function () { return {}; },
 		localStorage: { getItem: function () { return null; }, setItem: noop },
-		innerWidth: 1000, innerHeight: 800, addEventListener: noop, removeEventListener: noop
+		innerWidth: 1000, innerHeight: 800, addEventListener: noop, removeEventListener: noop,
+		// B6 T5: show() schedules the guard; never run here (no layout in this stub).
+		setTimeout: function () { return 0; }, clearTimeout: noop, requestAnimationFrame: noop
 	};
 	ctx.window = ctx;
 	if (opts.data) { ctx.CMP_DATA = opts.data; }
@@ -1370,5 +1377,295 @@ BUILDS.forEach(function (B) {
 ok(/version: String\(D\.pluginVersion \|\| ''\)/.test(bannerSrc), 'B7.4: banner.js CMP.version from CMP_DATA.pluginVersion');
 var pkgM = cmpSrc.match(/var PKG_VERSION = '([^']+)';/), plugM = require('fs').readFileSync(require('path').join(__dirname, '../../consent-manager-pro.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/);
 ok(!!pkgM && !!plugM && pkgM[1] === plugM[1], 'B7.4: cmp.js PKG_VERSION equals CMP_VERSION (got ' + (pkgM && pkgM[1]) + ' vs ' + (plugM && plugM[1]) + ')');
+// ---- B6 Task 3: appearance (shared pure block, standalone CMP_CONFIG.appearance, banner behaviour) ----
+function apBlock(src) { var m = src.match(/\/\/ appearance:begin\n([\s\S]*?)\/\/ appearance:end/); return m; }
+function apFn(m, name) { try { return m ? new Function(m[1] + '\nreturn ' + name + ';')() : null; } catch (e) { return null; } }
+var apB = apBlock(bannerSrc), apC = apBlock(cmpSrc);
+ok(!!apB && !!apC, 'B6 T3: banner.js and cmp.js have the appearance block');
+ok(!!apB && !!apC && apB[1].replace(/^\t+/gm, '') === apC[1].replace(/^\t+/gm, ''), 'B6 T3: appearance blocks identical in banner.js and cmp.js');
+function apEl(matchSel) {
+	var e = stubEl();
+	e.matches = function (sel) { if (/[{}<]/.test(sel)) { throw new Error('SyntaxError'); } return sel.split(',').some(function (x) { return x.trim() === matchSel; }); };
+	return e;
+}
+[['banner.js', apB], ['cmp.js', apC]].forEach(function (t) {
+	var n = 'B6 T3 ' + t[0] + ': ', delayMs = apFn(t[1], 'delayMs'), siteDark = apFn(t[1], 'siteDark'), applySiteTheme = apFn(t[1], 'applySiteTheme');
+	ok(typeof delayMs === 'function' && typeof siteDark === 'function' && typeof applySiteTheme === 'function', n + 'helpers present');
+	if (!delayMs || !siteDark || !applySiteTheme) { return; }
+	eq([delayMs(0), delayMs(0.3), delayMs('1.25'), delayMs(2), delayMs(5), delayMs(-1), delayMs('x'), delayMs(null), delayMs(undefined)], [0, 300, 1300, 2000, 2000, 0, 0, 0, 0], n + 'delayMs clamps to 0-2 s, 0.1 s steps, bad -> 0');
+	var sel = '.dark, [data-theme="dark"], .is-dark-theme';
+	eq(siteDark(sel, apEl('.dark'), apEl('')), true, n + 'siteDark: <html> matches -> dark');
+	eq(siteDark(sel, apEl(''), apEl('.is-dark-theme')), true, n + 'siteDark: <body> matches -> dark');
+	eq(siteDark(sel, apEl(''), apEl('')), false, n + 'siteDark: no match -> light');
+	eq(siteDark(sel, apEl(''), apEl(''), true), false, n + 'siteDark: no match, even on a dark OS -> light (ruling: the OS only for "auto")');
+	eq(siteDark('x{', apEl(''), apEl('')), false, n + 'siteDark: a bad selector never throws -> light');
+	eq(siteDark('', apEl('.dark'), null), false, n + 'siteDark: no selector / no body -> light');
+	var win = function (dark) { return { matchMedia: function (q) { return { matches: dark && /prefers-color-scheme: dark/.test(q) }; } }; };
+	var doc = function (h, b) { return { documentElement: apEl(h), body: apEl(b) }; };
+	var b1 = stubEl();
+	applySiteTheme(b1, { theme: 'light', darkSelector: sel }, false, doc('.dark', ''), win(true));
+	eq(b1.classList.contains('cmp--dark'), false, n + 'applySiteTheme: only for theme "site"');
+	applySiteTheme(b1, { theme: 'site', darkSelector: sel }, false, doc('', '[data-theme="dark"]'), win(false));
+	eq(b1.classList.contains('cmp--dark'), true, n + 'applySiteTheme: site dark -> cmp--dark');
+	applySiteTheme(b1, { theme: 'site', darkSelector: sel }, false, doc('', ''), win(false));
+	eq(b1.classList.contains('cmp--dark'), false, n + 'applySiteTheme: re-checked on show, site light again -> removed');
+	applySiteTheme(b1, { theme: 'site', darkSelector: sel }, true, doc('', ''), win(false));
+	eq(b1.classList.contains('cmp--dark'), true, n + 'applySiteTheme: the Dark palette\'s own cmp--dark is kept');
+	applySiteTheme(b1, { theme: 'site', darkSelector: sel }, false, doc('', ''), win(true));
+	eq(b1.classList.contains('cmp--dark'), false, n + 'applySiteTheme: site light on a dark OS -> stays light');
+	applySiteTheme(null, { theme: 'site' }, false, doc('', ''), {});
+	applySiteTheme(b1, null, false, doc('', ''), {});
+	ok(true, n + 'applySiteTheme: no element / no appearance -> no-op');
+});
+// Standalone CMP_CONFIG.appearance: same classes and CSS as the PHP (values from CMP_Appearance).
+eq(cmp.normalizeConfig({}).appearance, null, 'B6 T3 cmp.js: no appearance -> null (legacy look unchanged)');
+eq(cmp.normalizeConfig({ appearance: 'x' }).appearance, null, 'B6 T3 cmp.js: non-object appearance -> null');
+var AP_CASES = [
+	[{ style: 'friendly', accent: '#e4572e', theme: 'auto' },
+		['cmp--neutral', 'cmp--style-friendly', 'cmp--fmt-modal', 'cmp--pos-middle-center', 'cmp--btn-solid', 'cmp--anim-slide', 'cmp--theme-auto', 'cmp--backdrop-blur'],
+		['cmp--neutral', 'cmp--style-friendly', 'cmp--anim-slide', 'cmp--theme-auto'],
+		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}'],
+	[{ style: 'minimal', palette: 'egov', format: 'card', position: 'top-left', radius: 0, gap: 10, dim: 30, blur: 0, font: 'inherit', backdrop: 'dim' },
+		['cmp--egov', 'cmp--style-minimal', 'cmp--fmt-card', 'cmp--pos-top-left', 'cmp--btn-outline', 'cmp--anim-fade', 'cmp--theme-light', 'cmp--backdrop-dim'],
+		['cmp--egov', 'cmp--style-minimal', 'cmp--anim-fade', 'cmp--theme-light'],
+		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:0px;--cmp-maxw:640px;--cmp-gap:10px;--cmp-blur:0px;--cmp-shadow:none;--cmp-dim:.3;font-family:inherit}'],
+	[{ palette: 'dark', accent: '#ffd400', theme: 'site', format: 'bar', position: 'top', maxw: 900, shadow: 'small', buttons: 'outline', anim: 'fade' },
+		['cmp--dark', 'cmp--style-brand', 'cmp--fmt-bar', 'cmp--pos-top', 'cmp--btn-outline', 'cmp--anim-fade', 'cmp--theme-site', 'cmp--backdrop-blur'],
+		['cmp--dark', 'cmp--style-brand', 'cmp--anim-fade', 'cmp--theme-site'],
+		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#ffd400;--cmp-primary-hover:#ffdb29;--cmp-primary-text:#000000;--cmp-maxw:900px;--cmp-shadow:0 4px 14px rgba(0,0,0,.12)}.cmp--dark{--cmp-primary:#ffd400;--cmp-primary-hover:#ffdb29;--cmp-primary-text:#000000}'],
+	[{ theme: 'dark', accent: '#003e96' },
+		['cmp--neutral', 'cmp--style-brand', 'cmp--fmt-modal', 'cmp--pos-middle-center', 'cmp--btn-solid', 'cmp--anim-none', 'cmp--theme-dark', 'cmp--backdrop-blur', 'cmp--dark'],
+		['cmp--neutral', 'cmp--style-brand', 'cmp--anim-none', 'cmp--theme-dark', 'cmp--dark'],
+		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#003e96;--cmp-primary-hover:#002d6d;--cmp-primary-text:#ffffff}.cmp--dark{--cmp-primary:#3589ff;--cmp-primary-hover:#5ea1ff;--cmp-primary-text:#000000}'],
+	[{},
+		['cmp--neutral', 'cmp--style-brand', 'cmp--fmt-modal', 'cmp--pos-middle-center', 'cmp--btn-solid', 'cmp--anim-none', 'cmp--theme-light', 'cmp--backdrop-blur'],
+		['cmp--neutral', 'cmp--style-brand', 'cmp--anim-none', 'cmp--theme-light'],
+		'']
+];
+AP_CASES.forEach(function (c, i) {
+	var a = cmp.normalizeConfig({ appearance: c[0] }).appearance;
+	eq(cmp.appearanceClasses(a, 'pro'), c[1], 'B6 T3 cmp.js: case ' + i + ' Pro classes = PHP container_classes');
+	eq(cmp.appearanceClasses(a, 'light'), c[2], 'B6 T3 cmp.js: case ' + i + ' Light classes = PHP container_classes');
+	eq(cmp.appearanceCss(a), c[3], 'B6 T3 cmp.js: case ' + i + ' CSS = PHP inline_css');
+});
+var apBad = cmp.normalizeConfig({ preset: 'warm', appearance: { style: 'x', format: 'bar', position: 'top-left', radius: 99, maxw: 10, gap: -5, dim: 200, blur: 'x', delay: 7, darkSelector: 'x{}</style>', accent: 'red', theme: 'night', reopen: 'big', shadow: 'huge' } }).appearance;
+eq([apBad.style, apBad.palette, apBad.position, apBad.radius, apBad.maxw, apBad.gap, apBad.dim, apBad.blur, apBad.delay, apBad.darkSelector, apBad.accent, apBad.theme, apBad.reopen, apBad.shadow],
+	['brand', 'warm', 'bottom', 24, 360, 0, 80, 5, 2, '.dark, [data-theme="dark"], .is-dark-theme', '', 'light', 'icon', 'medium'],
+	'B6 T3 cmp.js: values validated (ranges, enums, the palette from preset, safe selector, delay 0-2)');
+eq(cmp.normalizeConfig({ appearance: { darkSelector: 'body.night, html[data-mode="dark"]', delay: '0.75' } }).appearance.darkSelector, 'body.night, html[data-mode="dark"]', 'B6 T3 cmp.js: a safe selector list is kept');
+eq(cmp.normalizeConfig({ appearance: { delay: '0.75' } }).appearance.delay, 0.8, 'B6 T3 cmp.js: delay rounded to 0.1 s');
+eq(cmp.appearanceCss(cmp.normalizeConfig({ appearance: { accent: '#e4572e;}</style><script>' } }).appearance), '', 'B6 T3 cmp.js: a bad accent never reaches the CSS');
+ok(/appearance/.test(require('fs').readFileSync(require('path').join(__dirname, '../README.md'), 'utf8')), 'B6 T3: standalone README documents CMP_CONFIG.appearance');
+// Behaviour (banner.js + cmp.js): delay, excluded page, theme "site".
+(function () {
+	function timers(ctx, list) { ctx.setTimeout = function (f, ms) { list.push([f, ms]); return list.length; }; ctx.clearTimeout = function (id) { if (list[id - 1]) { list[id - 1][0] = null; } }; }
+	var tl = [];
+	var wd = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', appearance: { delay: 1.5, theme: 'light', noAutoOpen: false } }, before: function (ctx) { timers(ctx, tl); } });
+	var wb = wd.ctx.document.querySelector('[data-cmp]');
+	eq([wb.hidden, tl.length && tl[0][1]], [true, 1500], 'B6 T3 banner.js: delay -> shown after 1.5 s, not at once');
+	tl[0][0]();
+	eq(wb.hidden, false, 'B6 T3 banner.js: shown when the delay ends');
+	var tl2 = [];
+	var wo = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', appearance: { delay: 2 } }, before: function (ctx) { timers(ctx, tl2); } });
+	wo.ctx.CMP.openPreferences();
+	eq(tl2[0][0], null, 'B6 T3 banner.js: opening the settings during the delay cancels the timer');
+	var we = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', appearance: { delay: 0, noAutoOpen: true } } });
+	eq([we.ctx.document.querySelector('[data-cmp]').hidden, we.cookie('cmp_consent'), we.writes.length, we.posts.length], [true, null, 0, 0], 'B6 T3 banner.js: excluded page -> no auto-open, nothing decided (blocking stays)');
+	eq(we.ctx.CMP.isAllowed('marketing'), false, 'B6 T3 banner.js: excluded page -> marketing still not allowed');
+	we.ctx.CMP.openPreferences();
+	eq(we.ctx.document.querySelector('[data-cmp]').hidden, false, 'B6 T3 banner.js: excluded page -> the settings still open on demand');
+	var wl = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x' } });
+	eq(wl.ctx.document.querySelector('[data-cmp]').hidden, false, 'B6 T3 banner.js: no appearance data -> shown at once (legacy)');
+	// I2: a decision during the delay (API, check mode) -> the timer never opens the banner.
+	[['banner.js', '../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', appearance: { delay: 2 } } }],
+		['cmp.js', '../cmp.js', { config: { categories: ['necessary', 'marketing'], appearance: { delay: 2 } } }]].forEach(function (t) {
+		var tq = [], o = t[2];
+		o.before = function (ctx) { timers(ctx, tq); };
+		var w = bootCmp(t[1], o), bn = w.ctx.document.querySelector('[data-cmp]');
+		eq([bn.hidden, tq.length], [true, 1], 'B6 T3 I2 ' + t[0] + ': delayed show pending');
+		w.gesture(true);
+		eq(w.ctx.CMP.allowCategory('marketing'), true, 'B6 T3 I2 ' + t[0] + ': a decision during the delay');
+		eq(tq[0][0], null, 'B6 T3 I2 ' + t[0] + ': the decision cancels the pending show');
+		if (tq[0][0]) { tq[0][0](); }
+		eq(bn.hidden, true, 'B6 T3 I2 ' + t[0] + ': the banner never opens after the decision');
+	});
+	var cs = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', appearance: { delay: 2 } }, before: function (ctx) { timers(ctx, []); } });
+	cs.click('accept');
+	eq(cs.ctx.document.querySelector('[data-cmp]').hidden, true, 'B6 T3 I2 banner.js: check-mode style click on the hidden Accept during the delay -> stays closed');
+	var tl3 = [];
+	var sd = bootCmp('../cmp.js', { config: { categories: ['necessary', 'statistics'], appearance: { delay: 0.5 } }, before: function (ctx) { timers(ctx, tl3); } });
+	eq(tl3.length && tl3[0][1], 500, 'B6 T3 cmp.js: CMP_CONFIG.appearance.delay honoured');
+})();
+
+// --- B6 Task 4: the "Aspect" admin screen JS (assets/js/admin-appearance.js). ---
+// The accent contrast is the same formula as CMP_Appearance::accent_suggestion:
+// tests/fixtures/accent-parity.json holds the PHP output (tests/test-page-appearance.php
+// checks the PHP side against the same file).
+(function () {
+	var ap = require('../../assets/js/admin-appearance.js');
+	var fx = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../../tests/fixtures/accent-parity.json'), 'utf8'));
+	ok(fx.length >= 30, 'B6 T4 parity: fixture loaded');
+	fx.forEach(function (row) {
+		var got = ap.accentSuggestion(row.accent, row.bg, '');
+		var exp = row.result;
+		ok(got.ok === exp.ok && got.suggest === exp.suggest && got.text === exp.text
+			&& Math.abs(got.ratio - exp.ratio) < 1e-9 && Math.abs(got.suggest_ratio - exp.suggest_ratio) < 1e-9,
+			'B6 T4 parity: ' + row.accent + ' on ' + row.bg + ' = PHP (got ' + JSON.stringify(got) + ', want ' + JSON.stringify(exp) + ')');
+	});
+	eq(Math.round(ap.ratio('#000000', '#ffffff') * 100) / 100, 21, 'B6 T4: WCAG ratio black/white = 21');
+	eq(ap.ratio('red', '#fff'), 0, 'B6 T4: a non-hex colour has no ratio (like CMP_Contrast)');
+	eq(ap.hex6('#ABC'), '#aabbcc', 'B6 T4: #rgb expands, lowercase');
+	eq(ap.hex6('#abcd'), '', 'B6 T4: invalid hex -> empty');
+	eq(ap.accentSuggestion('nope', '#ffffff', '').suggest, '', 'B6 T4: invalid accent -> no suggestion');
+	eq(ap.accentSuggestion('#ffd400', '#ffffff', '#000000').text, '#000000', 'B6 T4: a fixed text colour is kept');
+	eq(ap.fromHsl.apply(null, ap.hsl('#e4572e')), '#e4572e', 'B6 T4: HSL round trip');
+	// Style switch: warn only when the current values are adjustments.
+	var brand = { radius: 12, shadow: 'medium', buttons: 'solid', anim: 'none', maxw: 720 };
+	eq(ap.adjusted({ radius: '12', shadow: 'medium', buttons: 'solid', anim: 'none', maxw: '720' }, brand), false, 'B6 T4: style values untouched -> no warning needed');
+	eq(ap.adjusted({ radius: '9', shadow: 'medium', buttons: 'solid', anim: 'none', maxw: '720' }, brand), true, 'B6 T4: an adjusted value -> warn before the switch');
+	eq(ap.fmt('Contrast %1$s:1, propusă %2$s (%3$s:1).', [3.5, '#cc421a', 4.57]), 'Contrast 3.5:1, propusă #cc421a (4.57:1).', 'B6 T4: positional placeholders');
+	eq(ap.fmt('Contrast %s:1', [5.2]), 'Contrast 5.2:1', 'B6 T4: plain placeholder');
+	var apSrc = require('fs').readFileSync(require('path').join(__dirname, '../../assets/js/admin-appearance.js'), 'utf8');
+	ok(!/\b(let|const|class)\s|=>|`/.test(apSrc), 'B6 T4: admin-appearance.js is ES5');
+	ok(/window\.confirm\(T\.confirmStyle/.test(apSrc), 'B6 T4: the style switch asks before losing adjustments');
+})();
+// --- B6 Task 5: compliance guard (B6.18), pure decision + DOM measure, both files. ---
+[['banner.js', apB], ['cmp.js', apC]].forEach(function (t) {
+	var n = 'B6 T5 ' + t[0] + ': ', guardNeeded = apFn(t[1], 'guardNeeded'), contrast = apFn(t[1], 'contrast'), runGuard = apFn(t[1], 'runGuard');
+	ok(typeof guardNeeded === 'function' && typeof contrast === 'function' && typeof runGuard === 'function', n + 'guard helpers present');
+	if (!guardNeeded || !contrast || !runGuard) { return; }
+	var ctx = { vw: 1280, vh: 800, box: { w: 600, v: 'visible', o: 1 } };
+	function btn(o) { var b = { v: 'visible', o: 1, w: 160, h: 44, x: 600, y: 600, s: false, c: 4.6 }; for (var k in o) { b[k] = o[k]; } return b; }
+	eq(guardNeeded(btn({}), btn({}), ctx), false, n + 'equal, visible, opaque, in view, readable -> no guard');
+	eq(guardNeeded(btn({ w: 161.9 }), btn({ h: 45.5 }), ctx), false, n + 'within 2px -> no guard');
+	eq(guardNeeded(btn({ o: 0.9 }), btn({ c: 3 }), ctx), false, n + 'opacity 0.9 and contrast 3 are the limits (allowed)');
+	eq(guardNeeded(btn({ x: 0, y: 0 }), btn({ x: 1280 - 160, y: 800 - 44 }), ctx), false, n + 'touching the viewport edges -> no guard');
+	eq(guardNeeded(btn({ y: 1200, s: true }), btn({ y: 1200, s: true }), ctx), false, n + 'below the fold inside a scrolling band -> no guard');
+	eq(guardNeeded(btn({}), btn({}), { vw: 1280, vh: 800 }), false, n + 'no banner box measured -> buttons only');
+	var bad = [
+		['not rendered (display:none -> 0x0)', { w: 0, h: 0 }],
+		['visibility hidden', { v: 'hidden' }],
+		['visibility collapse', { v: 'collapse' }],
+		['opacity below 0.9 (own or ancestors)', { o: 0.89 }],
+		['opacity 0', { o: 0 }],
+		['opacity NaN', { o: NaN }],
+		['narrower than 24px', { w: 23 }],
+		['lower than 24px', { h: 23 }],
+		['off the left edge', { x: -40 }],
+		['off the right edge', { x: 1200 }],
+		['above the viewport', { y: -60 }],
+		['below the viewport, no scrolling band', { y: 790 }],
+		['contrast below 3', { c: 2.9 }],
+		['contrast unknown', { c: NaN }]
+	];
+	bad.forEach(function (c) {
+		eq(guardNeeded(btn(c[1]), btn({}), ctx), true, n + 'reject ' + c[0] + ' -> guard');
+		eq(guardNeeded(btn({}), btn(c[1]), ctx), true, n + 'accept ' + c[0] + ' -> guard');
+	});
+	eq(guardNeeded(btn({ w: 163 }), btn({}), ctx), true, n + 'widths differ by more than 2px -> guard');
+	eq(guardNeeded(btn({}), btn({ h: 41 }), ctx), true, n + 'heights differ by more than 2px -> guard');
+	eq(guardNeeded(null, btn({}), ctx), true, n + 'reject missing -> guard');
+	eq(guardNeeded(btn({}), null, ctx), true, n + 'accept missing -> guard');
+	eq(guardNeeded(btn({}), btn({}), { vw: 1280, vh: 800, box: { w: 0, v: 'visible', o: 1 } }), true, n + 'banner box not rendered -> guard');
+	eq(guardNeeded(btn({}), btn({}), { vw: 1280, vh: 800, box: { w: 600, v: 'hidden', o: 1 } }), true, n + 'banner box hidden -> guard');
+	eq(guardNeeded(btn({}), btn({}), { vw: 1280, vh: 800, box: { w: 600, v: 'visible', o: 0.2 } }), true, n + 'banner box faded -> guard');
+	eq(Math.round(contrast('rgb(0, 0, 0)', [255, 255, 255, 1]) * 100) / 100, 21, n + 'contrast black on white = 21');
+	eq(contrast('rgba(0, 0, 0, 0)', [255, 255, 255, 1]), 1, n + 'transparent text = contrast 1');
+	ok(Math.abs(contrast('rgb(255, 255, 255)', [37, 99, 235, 1]) - 5.17) < 0.15, n + 'white on #2563eb ~ 5.17 (WCAG, gamma 2.2 approximation)');
+	ok(Math.abs(contrast('rgb(118, 118, 118)', [255, 255, 255, 1]) - 4.54) < 0.15 && Math.abs(contrast('rgb(149, 149, 149)', [255, 255, 255, 1]) - 3.03) < 0.15, n + 'grey limits close to WCAG (4.54, 3.03)');
+	ok(contrast('rgba(0, 0, 0, 0.5)', [255, 255, 255, 1]) < 4 && contrast('rgba(0, 0, 0, 0.5)', [255, 255, 255, 1]) > 3, n + 'half-transparent text is blended over the background');
+	// runGuard on a measured DOM stub: the class + console.warn only on failure, once.
+	function dom(rejectOpacity) {
+		var root = stubEl(), warns = [];
+		root.hidden = false;
+		function node(cs, rect, parent) { var e = stubEl(); e.cs = cs; e.rect = rect; e.parentElement = parent; e.parentNode = parent; e.style = { cssText: '' }; e.scrollHeight = 0; e.clientHeight = 0; e.getBoundingClientRect = function () { return rect; }; e.getClientRects = function () { return rect.width ? [rect] : []; }; return e; }
+		var base = { visibility: 'visible', opacity: '1', color: 'rgb(255, 255, 255)', backgroundColor: 'rgba(0, 0, 0, 0)', overflowY: 'visible' };
+		function cs(o) { var c = {}; for (var k in base) { c[k] = base[k]; } for (k in o) { c[k] = o[k]; } return c; }
+		root.cs = cs({ backgroundColor: 'rgba(0, 0, 0, 0.5)', overflowY: 'auto' }); root.parentElement = null; root.scrollHeight = 0; root.clientHeight = 0; root.style = { cssText: '' };
+		var modal = node(cs({ backgroundColor: 'rgb(255, 255, 255)' }), { width: 600, height: 300, left: 340, top: 250 }, root);
+		var choices = node(cs({}), { width: 340, height: 44, left: 600, top: 480 }, modal);
+		var rej = node(cs({ backgroundColor: 'rgb(37, 99, 235)', opacity: String(rejectOpacity) }), { width: 160, height: 44, left: 600, top: 480 }, choices);
+		var acc = node(cs({ backgroundColor: 'rgb(37, 99, 235)' }), { width: 160, height: 44, left: 780, top: 480 }, choices);
+		modal.classList.add('cmp__modal');
+		root.querySelector = function (sel) { return /reject/.test(sel) ? rej : /accept/.test(sel) ? acc : /modal/.test(sel) ? modal : null; };
+		root.getAnimations = function () { return []; };
+		root.querySelectorAll = function (sel) { return /cmp__btn/.test(sel) ? [rej, acc] : /cmp__choices/.test(sel) ? [choices] : /cmp__modal/.test(sel) ? [modal] : []; };
+		var timers = [];
+		var win = { innerWidth: 1280, innerHeight: 800, getComputedStyle: function (e) { return e.cs; }, console: { warn: function (m) { warns.push(m); } }, setTimeout: function (f, ms) { timers.push([f, ms]); } };
+		return { root: root, win: win, warns: warns, rej: rej, acc: acc, choices: choices, modal: modal, timers: timers, cs: cs };
+	}
+	var okDom = dom(1);
+	runGuard(okDom.root, okDom.win);
+	eq([okDom.root.classList.contains('cmp--guard'), okDom.warns.length], [false, 0], n + 'runGuard: default buttons -> no class, no warning');
+	var badDom = dom(0);
+	runGuard(badDom.root, badDom.win);
+	eq([badDom.root.classList.contains('cmp--guard'), badDom.warns], [true, ['CMP: appearance guard reset the consent buttons']], n + 'runGuard: invisible Reject -> cmp--guard + console.warn');
+	ok(/display:block!important/.test(badDom.rej.style.cssText) && /display:block!important/.test(badDom.acc.style.cssText) && badDom.rej.style.cssText === badDom.acc.style.cssText, n + 'runGuard: the same inline !important reset on both buttons (fix I2)');
+	ok(/visibility:visible!important/.test(badDom.rej.style.cssText) && /opacity:1!important/.test(badDom.rej.style.cssText) && /min-height:44px!important/.test(badDom.rej.style.cssText) && /color:#fff!important;background:#111827!important/.test(badDom.rej.style.cssText) && !/var\(--cmp-primary/.test(badDom.rej.style.cssText) && /pointer-events:auto!important/.test(badDom.rej.style.cssText), n + 'runGuard: reset = visible, opaque, >= 44 px, safe Neutral colours (not --cmp-primary*), clickable');
+	ok(/display:grid!important/.test(badDom.choices.style.cssText) && /grid-template-columns:1fr 1fr!important/.test(badDom.choices.style.cssText), n + 'runGuard: the choices container back to two equal columns (inline !important)');
+	ok(/display:flex!important/.test(badDom.root.style.cssText) && /visibility:visible!important/.test(badDom.root.style.cssText), n + 'runGuard: the banner itself kept visible (inline !important)');
+	ok(/opacity:1!important/.test(badDom.modal.style.cssText), n + 'runGuard: the dialog kept opaque (inline !important)');
+	runGuard(badDom.root, badDom.win);
+	eq(badDom.warns.length, 1, n + 'runGuard: warns once per page (already reset)');
+	badDom.rej.style.cssText = ''; badDom.root.style.cssText = '';
+	runGuard(badDom.root, badDom.win);
+	ok(/display:block!important/.test(badDom.rej.style.cssText) && /display:flex!important/.test(badDom.root.style.cssText), n + 'runGuard: a later show re-applies the inline reset');
+	// I1: an opening animation still running -> measure again later (once), never judge it.
+	var anDom = dom(0), anRuns = 0;
+	anDom.root.getAnimations = function (o) { anRuns++; return o && o.subtree ? [{ playState: 'running' }] : []; };
+	runGuard(anDom.root, anDom.win);
+	eq([anDom.root.classList.contains('cmp--guard'), anDom.timers.length, anDom.timers[0] && anDom.timers[0][1]], [false, 1, 400], n + 'runGuard: animation running -> re-scheduled in 400 ms, not judged (I1)');
+	anDom.timers[0][0]();
+	eq([anDom.root.classList.contains('cmp--guard'), anDom.timers.length], [true, 1], n + 'runGuard: the re-check judges even if still animating (no endless loop)');
+	var okAn = dom(1);
+	okAn.root.getAnimations = function () { return []; };
+	runGuard(okAn.root, okAn.win);
+	eq([okAn.root.classList.contains('cmp--guard'), okAn.timers.length], [false, 0], n + 'runGuard: no animation left -> judged at once');
+	// measure(): transparent (outline / text) button on the dialog background, ancestor opacity, scrolling band, non-rgb colours.
+	var measure = apFn(t[1], 'measure');
+	var md = dom(1);
+	md.rej.cs = md.cs({ color: 'rgb(37, 99, 235)', backgroundColor: 'rgba(0, 0, 0, 0)' });
+	var mm = measure(md.rej, md.root, md.win);
+	ok(Math.abs(mm.c - 5.17) < 0.15, n + 'measure: transparent button -> contrast on the dialog background');
+	md.choices.cs = md.cs({ opacity: '0.5' });
+	eq(measure(md.rej, md.root, md.win).o, 0.5, n + 'measure: an ancestor\'s opacity counts (product up to the banner)');
+	eq(guardNeeded(measure(md.rej, md.root, md.win), measure(md.acc, md.root, md.win), { vw: 1280, vh: 800 }), true, n + 'measure: faded container -> guard');
+	md.modal.cs = md.cs({ backgroundColor: 'rgb(255, 255, 255)', overflowY: 'auto' }); md.modal.scrollHeight = 900; md.modal.clientHeight = 300;
+	eq(measure(md.rej, md.root, md.win).s, true, n + 'measure: inside a scrolling dialog -> s');
+	md.modal.cs = md.cs({ backgroundColor: 'rgb(255, 255, 255)', overflowY: 'visible' });
+	eq(measure(md.rej, md.root, md.win).s, false, n + 'measure: overflow visible -> not a scrolling area');
+	md.rej.cs = md.cs({ color: 'oklch(0.5 0.2 260)', backgroundColor: 'color(srgb 0.1 0.2 0.9)' });
+	eq(measure(md.rej, md.root, md.win).c, 21, n + 'measure: a non-rgb computed colour is not misread (contrast skipped, M3)');
+	var hidDom = dom(0);
+	hidDom.root.hidden = true;
+	runGuard(hidDom.root, hidDom.win);
+	eq(hidDom.root.classList.contains('cmp--guard'), false, n + 'runGuard: banner hidden (decided meanwhile) -> nothing measured');
+	runGuard(null, okDom.win);
+	ok(true, n + 'runGuard: no banner -> no-op');
+});
+// The guard runs on every show of the Pro banner, after the opening animation.
+[['banner.js', bannerSrc], ['cmp.js', cmpSrc]].forEach(function (t) {
+	var show = (t[1].match(/function show\(\) \{[\s\S]*?function hide\(/) || [''])[0];
+	ok(/requestAnimationFrame\(function \(\) \{ setTimeout\(function \(\) \{ runGuard\(banner, window\); \}, 400\); \}\)/.test(show), 'B6 T5 ' + t[0] + ': show() schedules runGuard 400 ms after a drawn frame (fix I1)');
+	var hideFn = (t[1].match(/function hide\(\) \{[\s\S]*?\n\t+\}\n/) || [''])[0];
+	ok(/banner\.style\.removeProperty\('display'\)/.test(hideFn), 'B6 T5 ' + t[0] + ': hide() drops the guard\'s inline display (the banner can hide again)');
+	var op = (t[1].match(/function openPrefs\(\) \{[\s\S]*?\n\t+\}\n/) || [''])[0];
+	ok(/runGuard\(banner, window\)/.test(op), 'B6 T5 ' + t[0] + ': opening the preferences re-checks Reject / Save (M1)');
+});
+// B6.18: no consent by scroll / navigation / leaving; no close (X) control; Escape never decides.
+[['banner.js', bannerSrc], ['cmp.js', cmpSrc]].forEach(function (t) {
+	var n = 'B6 T5 ' + t[0] + ': ', src = t[1];
+	ok(!/addEventListener\(\s*['"](scroll|wheel|touchmove|touchstart|mousemove|visibilitychange|beforeunload|unload|popstate|hashchange|blur|focusout)['"]/.test(src), n + 'no scroll / navigation / visibility listener (no implied consent)');
+	ok(!/\.on(scroll|wheel|touchmove|visibilitychange|beforeunload|unload|popstate|hashchange)\s*=/.test(src), n + 'no on<scroll|navigation> handler property');
+	ok(!/IntersectionObserver/.test(src), n + 'no IntersectionObserver (no consent by reading on)');
+	var click = (src.match(/banner\.addEventListener\('click', function \(e\) \{[\s\S]*?\n\t+\}\);/) || [''])[0];
+	var allRe = /save\((D|cfg)\.categories\.map/g;
+	ok((src.match(allRe) || []).length === 1 && (click.match(allRe) || []).length === 1 && /action === 'accept'\) \{ save\(/.test(click), n + 'accept-all saved only from the Accept click (one place)');
+	ok(/save\(sel, decision\)/.test(click) && (src.match(/save\(sel, decision\)/g) || []).length === 1, n + 'a chosen set saved only from the Save click');
+	ok(!/data-cmp-action="(close|dismiss)"|action === '(close|dismiss)'|aria-label="[^"]*(close|închide|закрыть)/i.test(src), n + 'no close / X control in the banner (nothing to treat as a decision)');
+	var esc = (src.match(/function onKeydown\(e\) \{[\s\S]*?\n\t+\}\n/) || [''])[0];
+	ok(!!esc && !/save\(|hide\(\)/.test(esc), n + 'Escape never saves nor closes the banner');
+	ok(!/<input[^>]*data-cmp-cat[^>]*\bchecked|<input[^>]*\bchecked[^>]*data-cmp-cat/.test(src), n + 'no pre-checked category toggle markup');
+});
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

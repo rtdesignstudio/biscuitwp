@@ -7,15 +7,16 @@
 	/* Neutral monochrome default — no brand colour, drops onto any site.
 	   Coloured looks are opt-in via the .cmp--egov / --warm / --dark presets. */
 	--cmp-primary: #111827;
-	--cmp-primary-hover: #000000;
-	--cmp-primary-text: #ffffff;
+	--cmp-primary-hover: #000;
+	--cmp-primary-text: #fff;
 	--cmp-dark: #111827;
 	--cmp-muted: #4b5563;
-	--cmp-bg: #ffffff;
+	--cmp-bg: #fff;
 	--cmp-panel: #f5f5f5;
 	--cmp-border: #d0d5dd;
 	--cmp-radius: 12px;
-	--cmp-scrim: rgba(17, 24, 39, 0.55);
+	--cmp-scrim: rgba(17,24,39,.55);
+	--cmp-scrim-rgb: 17,24,39; /* the scrim colour, for a custom --cmp-dim alpha */
 	--cmp-hover: #f2f2f2;
 	--cmp-outline-hover: #f2f2f2;
 }
@@ -26,29 +27,33 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 24px;
+	padding: var(--cmp-gap,24px);
 	overflow-y: auto;
-	background: var(--cmp-scrim);
-	-webkit-backdrop-filter: blur(5px);
-	backdrop-filter: blur(5px);
+	/* B6: the appearance variables (inline block) with today's values as fallbacks.
+	   --cmp-dimmed is invalid without --cmp-dim, so the palette scrim stays. */
+	--cmp-dimmed: rgba(var(--cmp-scrim-rgb),var(--cmp-dim));
+	background: var(--cmp-dimmed,var(--cmp-scrim));
+	-webkit-backdrop-filter: blur(var(--cmp-blur,5px));
+	backdrop-filter: blur(var(--cmp-blur,5px));
 	color: var(--cmp-dark);
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-family: var(--cmp-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif);
 	font-size: 14px;
 	line-height: 1.5;
 }
 .cmp[hidden] { display: none; }
+/* Backdrop "dim": the scrim without the blur. */
+.cmp--backdrop-dim { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
 /* Banner position (vertical anchor of the modal within the overlay). */
 .cmp--pos-bottom { align-items: flex-end; }
 .cmp--pos-top { align-items: flex-start; }
-.cmp--pos-modal-center { align-items: center; }
 
 /* Full position set: vertical (align-items) × horizontal (modal margin).
-   Legacy classes above remain as aliases (bottom=bottom-center, etc.). */
+   Legacy classes above remain as aliases (bottom=bottom-center, etc.).
+   Centred (modal-center, middle-center) needs no rule: .cmp centres. */
 .cmp--pos-top-center,
 .cmp--pos-top-left,
 .cmp--pos-top-right { align-items: flex-start; }
-.cmp--pos-middle-center { align-items: center; }
 .cmp--pos-bottom-center,
 .cmp--pos-bottom-left,
 .cmp--pos-bottom-right { align-items: flex-end; }
@@ -59,35 +64,53 @@
 .cmp--pos-bottom-right .cmp__modal { margin-inline: auto 0; }
 
 /* Policy pages: no overlay. The page stays readable, scrollable and clickable;
-   the banner sits at the bottom whatever the configured position. */
-.cmp.cmp--no-overlay {
+   the banner sits at the bottom whatever the configured position.
+   Backdrop "none" (B6) is the same, at the chosen position. */
+.cmp.cmp--no-overlay,
+.cmp.cmp--backdrop-none {
 	background: transparent;
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
 	pointer-events: none;
-	align-items: flex-end;
 	overflow: visible;
 }
-.cmp.cmp--no-overlay .cmp__modal {
+.cmp.cmp--no-overlay { align-items: flex-end; }
+.cmp.cmp--no-overlay .cmp__modal,
+.cmp.cmp--backdrop-none .cmp__modal {
 	pointer-events: auto;
-	margin-inline: auto;
 	max-height: calc(100vh - 48px);
 	overflow-y: auto;
+}
+.cmp.cmp--no-overlay .cmp__modal {
+	margin-inline: auto;
 	box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.18), 0 20px 50px rgba(0, 0, 0, 0.25);
 }
+
+/* Format "bar" (B6, new sites only): full width at the top or bottom edge, the
+   content centred up to 1200px. Not on phones: the band below wins there. */
+@media (min-width: 576px) {
+	.cmp--fmt-bar { padding: 0; }
+	.cmp--fmt-bar .cmp__modal { box-sizing: border-box; max-width: none; border-radius: 0; padding-inline: max(32px, calc(50% - 600px)); }
+}
+
+/* Animation (B6): fade or slide in on show; none under prefers-reduced-motion (below). */
+@keyframes cmp-fade { from { opacity: 0; } }
+@keyframes cmp-slide { from { opacity: 0; transform: translateY(16px); } }
+.cmp.cmp--anim-fade, .cmp.cmp--anim-slide, .cmp-light.cmp--anim-fade { animation: cmp-fade 0.3s ease-out; }
+.cmp.cmp--anim-slide .cmp__modal, .cmp-light.cmp--anim-slide { animation: cmp-slide 0.35s ease-out; }
 
 /* Scroll lock while the banner is open (class added by JS). */
 /* --cmp-sbw = the body's own padding-right plus the scrollbar width (when the
    lock removes one), set by JS when the lock starts: nothing shifts (CLS). */
-body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
+body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw,0px); }
 
 .cmp__modal {
 	background: var(--cmp-bg);
 	border-radius: var(--cmp-radius);
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+	box-shadow: var(--cmp-shadow,0 20px 50px rgba(0,0,0,.25));
 	padding: 28px 32px;
 	width: 100%;
-	max-width: 720px;
+	max-width: var(--cmp-maxw,720px);
 	margin-inline: auto; /* horizontal centering only; vertical position via align-items */
 }
 
@@ -170,6 +193,16 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 .cmp__btn--primary { color: var(--cmp-primary-text); background: var(--cmp-primary); border-color: var(--cmp-primary); }
 .cmp__btn--primary:hover { background: var(--cmp-primary-hover); border-color: var(--cmp-primary-hover); }
 
+/* Button style (B6): one class on the banner, so Reject, Accept and Save always
+   look the same. Only colours change: same box, same 2px focus ring. */
+.cmp--btn-outline .cmp__btn--primary { color: var(--cmp-primary); border-color: var(--cmp-primary); background: var(--cmp-bg); }
+.cmp--btn-text .cmp__btn--primary { color: var(--cmp-primary); border-color: transparent; background: transparent; text-decoration: underline; text-underline-offset: 2px; }
+.cmp--btn-outline .cmp__btn--primary:hover { background: var(--cmp-outline-hover); border-color: var(--cmp-primary); }
+.cmp--btn-text .cmp__btn--primary:hover { background: var(--cmp-outline-hover); border-color: transparent; }
+/* Style shapes the variables can not: pill buttons (Friendly), crisp ones (Minimal). */
+.cmp--style-friendly .cmp__btn { border-radius: 999px; }
+.cmp--style-minimal .cmp__btn, .cmp--style-minimal .cmp-light__btn { border-radius: min(8px, var(--cmp-radius)); }
+
 /* Preferences header + back button */
 .cmp__prefs-header {
 	display: flex;
@@ -214,27 +247,30 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	text-underline-offset: 2px;
 	cursor: pointer;
 }
+/* "Settings ›": the chevron is markup (aria-hidden, never read), shown on phones only. */
+.cmp__chev { display: none; }
 .cmp__more:focus-visible { outline: 2px solid var(--cmp-primary); outline-offset: 2px; border-radius: 2px; }
 
 /* ---- Design presets (override custom properties; neutral = base above) ---- */
 .cmp--egov {
 	--cmp-primary: #003e96;
 	--cmp-primary-hover: #00285f;
-	--cmp-primary-text: #ffffff;
+	--cmp-primary-text: #fff;
 	--cmp-dark: #001b35;
 	--cmp-muted: #475467;
-	--cmp-bg: #ffffff;
+	--cmp-bg: #fff;
 	--cmp-panel: #eef3fb;
 	--cmp-border: #cdd7e6;
 	--cmp-hover: #e7eefb;
 	--cmp-outline-hover: #e0eaff;
-	--cmp-scrim: rgba(0, 27, 53, 0.6);
+	--cmp-scrim: rgba(0,27,53,.6);
+	--cmp-scrim-rgb: 0,27,53;
 }
 
 .cmp--warm {
 	--cmp-primary: #2e794d;
 	--cmp-primary-hover: #235e3c;
-	--cmp-primary-text: #ffffff;
+	--cmp-primary-text: #fff;
 	--cmp-dark: #2c2417;
 	--cmp-muted: #6b5d47;
 	--cmp-bg: #fbf9f4;
@@ -242,7 +278,8 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	--cmp-border: #ded3bf;
 	--cmp-hover: #efe8d8;
 	--cmp-outline-hover: #e6f2ea;
-	--cmp-scrim: rgba(44, 36, 23, 0.5);
+	--cmp-scrim: rgba(44,36,23,.5);
+	--cmp-scrim-rgb: 44,36,23;
 }
 
 .cmp--dark {
@@ -256,9 +293,30 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	--cmp-border: #3a434f;
 	--cmp-hover: #2f3946;
 	--cmp-outline-hover: #263043;
-	--cmp-scrim: rgba(0, 0, 0, 0.6);
+	--cmp-scrim: rgba(0,0,0,.6);
+	--cmp-scrim-rgb: 0,0,0;
 }
-.cmp--dark .cmp__modal { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+.cmp--dark .cmp__modal { box-shadow: var(--cmp-shadow,0 20px 50px rgba(0,0,0,.5)); }
+/* Theme "auto" (B6): the Dark tokens when the visitor's system is dark. Theme
+   "dark" and "like the site" get .cmp--dark (server / banner JS). After the
+   palettes, so it wins over eGov / Warm. */
+@media (prefers-color-scheme: dark) {
+	.cmp--theme-auto {
+		--cmp-primary: #5b9bff;
+		--cmp-primary-hover: #3f80e6;
+		--cmp-primary-text: #0b1017;
+		--cmp-dark: #f2f4f7;
+		--cmp-muted: #aab4c2;
+		--cmp-bg: #1e242e;
+		--cmp-panel: #28303b;
+		--cmp-border: #3a434f;
+		--cmp-hover: #2f3946;
+		--cmp-outline-hover: #263043;
+		--cmp-scrim: rgba(0,0,0,.6);
+		--cmp-scrim-rgb: 0,0,0;
+	}
+	.cmp--theme-auto .cmp__modal { box-shadow: var(--cmp-shadow,0 20px 50px rgba(0,0,0,.5)); }
+}
 
 /* Category list */
 .cmp__cats {
@@ -333,7 +391,8 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 
 /* Mobile */
 @media (max-width: 575px) {
-	.cmp { padding: 0; align-items: flex-end; }
+	/* No backdrop blur on phones (cost on small GPUs): the scrim alone. */
+	.cmp { padding: 0; align-items: flex-end; -webkit-backdrop-filter: none; backdrop-filter: none; }
 	.cmp__modal { padding: 24px 20px; border-radius: 16px 16px 0 0; max-width: 100%; }
 	/* Collapse every position to a centered bottom sheet on phones. Same
 	   specificity (0,2,0) as the corner rules but later in source, so it wins. */
@@ -355,17 +414,9 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	.cmp__choices { display: flex; gap: 8px; }
 	.cmp__choices .cmp__btn { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 10px 12px; -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
 	.cmp__actions [data-cmp-action="prefs"] { margin-left: auto; min-height: 24px; padding: 2px 4px; border-color: transparent; background: none; text-decoration: underline; text-underline-offset: 2px; }
-	.cmp__actions [data-cmp-action="prefs"]::after { content: " \203A"; }
+	.cmp__chev { display: inline; }
 	.cmp__prefs-actions { flex-direction: column; }
 	.cmp__prefs-actions .cmp__choices { width: 100%; }
-}
-
-/* The chevron is decoration: silent for screen readers where alt text in `content`
-   works. A separate block, so the minifier keeps the plain fallback above. */
-@supports (content: "" / "") {
-	@media (max-width: 575px) {
-		.cmp__actions [data-cmp-action="prefs"]::after { content: " \203A" / ""; }
-	}
 }
 
 /* Windows High Contrast / forced colours: backgrounds and shadows are dropped,
@@ -381,9 +432,9 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 /* ---- Light mode: small floating card, bottom-left corner (non-blocking) ---- */
 .cmp-light {
 	position: fixed;
-	left: 24px;
+	left: var(--cmp-gap,24px);
 	right: auto;
-	bottom: 24px;
+	bottom: var(--cmp-gap,24px);
 	z-index: 2147483600;
 	max-width: 380px;
 	display: flex;
@@ -394,9 +445,10 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	background: var(--cmp-bg);
 	color: var(--cmp-dark);
 	border: 1px solid var(--cmp-border);
-	border-radius: 16px;
-	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	--cmp-radius: 16px; /* the card's own default; a style's radius (inline block, later) replaces it */
+	border-radius: var(--cmp-radius);
+	box-shadow: var(--cmp-shadow,0 12px 32px rgba(0,0,0,.18));
+	font-family: var(--cmp-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif);
 	font-size: 14px;
 	line-height: 1.5;
 }
@@ -425,17 +477,20 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 .cmp-reopen {
 	position: fixed; left: 20px; bottom: 20px; z-index: 2147483000;
 	width: 46px; height: 46px; border-radius: 50%;
-	background: var(--cmp-bg, #fff); color: var(--cmp-dark, #111827);
-	border: 1px solid var(--cmp-border, #d0d5dd);
+	background: var(--cmp-bg,#fff); color: var(--cmp-dark,#111827);
+	border: 1px solid var(--cmp-border,#d0d5dd);
 	box-shadow: 0 4px 14px rgba(0,0,0,.18);
 	display: inline-flex; align-items: center; justify-content: center;
 	cursor: pointer; padding: 0; transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .cmp-reopen:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.24); }
 /* Two-tone ring (light halo + dark line): visible on any page background. */
-.cmp-reopen:focus-visible { outline: 2px solid var(--cmp-dark, #111827); outline-offset: 2px; box-shadow: 0 0 0 4px var(--cmp-bg, #fff); }
+.cmp-reopen:focus-visible { outline: 2px solid var(--cmp-dark,#111827); outline-offset: 2px; box-shadow: 0 0 0 4px var(--cmp-bg,#fff); }
 .cmp-reopen[hidden] { display: none; }
 @media (max-width: 480px) { .cmp-reopen { left: 14px; bottom: 14px; width: 42px; height: 42px; } }
+/* B6: reopen as text ("Cookie settings") or icon + text: a pill sized to its label. */
+.cmp-reopen--text { width: auto; padding: 0 16px; gap: 8px; border-radius: 999px; font: 600 14px/1 var(--cmp-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif); }
+@media (max-width: 480px) { .cmp-reopen--text { height: 44px; } }
 
 /* The visitor's consent ID, under the preferences (to quote in a data request). */
 .cmp__consent-id { margin: 14px 0 0; font-size: 12px; color: var(--cmp-muted); text-align: right; }
@@ -449,7 +504,7 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	font-size: 13px;
 	padding: 4px 10px;
 	min-width: 24px;
-	border: 1px solid var(--cmp-border, currentColor);
+	border: 1px solid var(--cmp-border,currentColor);
 	border-radius: 999px;
 	background: transparent;
 	color: var(--cmp-dark);
@@ -475,7 +530,7 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 	border: 1px solid var(--cmp-border);
 	border-radius: var(--cmp-radius);
 	color: var(--cmp-dark);
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+	font-family: var(--cmp-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif);
 	font-size: 15px;
 	line-height: 1.5;
 	text-align: center;
@@ -550,4 +605,4 @@ body.cmp-has-banner { overflow: hidden; padding-right: var(--cmp-sbw, 0px); }
 .cmp-embed--thumb .cmp-embed__btn:focus-visible, .cmp-embed--thumb .cmp-embed__always:focus-visible, .cmp-embed--thumb .cmp-embed__link:focus-visible { outline-color: #fff; }
 
 /* Reduced motion: no slide or fade for visitors who asked for less motion (pseudo-elements too: the toggle knob). */
-@media (prefers-reduced-motion: reduce) { .cmp *, .cmp *::before, .cmp *::after, .cmp-light *, .cmp-light *::before, .cmp-light *::after, .cmp-reopen { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .cmp, .cmp *, .cmp *::before, .cmp *::after, .cmp-light, .cmp-light *, .cmp-light *::before, .cmp-light *::after, .cmp-reopen { transition: none !important; animation: none !important; } }

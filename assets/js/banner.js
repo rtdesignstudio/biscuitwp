@@ -4,6 +4,10 @@
 	var D = window.CMP_DATA || { categories: [], version: '1', cookieName: 'cmp_consent' };
 	var banner = document.querySelector('[data-cmp]');
 	var reopenBtn = document.querySelector('[data-cmp-reopen]');
+	// B6: display delay, theme "like the site", excluded page (CMP_DATA.appearance).
+	var A = D.appearance || {};
+	var ownDark = !!banner && banner.classList.contains('cmp--dark');
+	var showT = 0;
 	function showReopen() { if (reopenBtn) { reopenBtn.hidden = false; } }
 	function hideReopen() { if (reopenBtn) { reopenBtn.hidden = true; } }
 
@@ -426,9 +430,9 @@
 		return out;
 	}
 
-	// On the policy pages the banner has no overlay (.cmp--no-overlay): no scroll
-	// lock and no focus trap, so the visitor can read the policy before deciding.
-	function blocking() { return !banner.classList.contains('cmp--no-overlay'); }
+	// Policy pages and backdrop "none": the dialog says aria-modal="false" (one
+	// signal, set by the server): no scroll lock and no focus trap.
+	function blocking() { return !!banner.querySelector('[aria-modal="true"]'); }
 	// The Details button on the main view (phones).
 	function details(on) { var main = banner.querySelector('[data-cmp-view="main"]'); return main ? toggleDetails(main, main.querySelector('[data-cmp-action="details"]'), on) : false; }
 	// No overlay (policy pages): the page's own scrolling (anchors, focus) stops
@@ -447,7 +451,9 @@
 	}
 	function show() {
 		if (!banner) { return; }
+		if (showT) { clearTimeout(showT); showT = 0; }
 		var wasHidden = banner.hidden;
+		applySiteTheme(banner, A, ownDark, document);
 		banner.hidden = false;
 		if (blocking()) {
 			// The scrollbar goes away under the lock: the body takes its width as extra
@@ -463,9 +469,16 @@
 		// Trap (and remember the focus to restore) only when it appears; already on
 		// screen (openPreferences while it shows), just focus the view.
 		if (blocking() && wasHidden) { trapFocus(true); } else if (!wasHidden || prefsOpen()) { focusDialog(); }
+		// B6.18: check the two decisions 400 ms after a drawn frame (the 0.35 s opening
+		// animation has started; hidden tabs draw nothing, so nothing is judged there).
+		requestAnimationFrame(function () { setTimeout(function () { runGuard(banner, window); }, 400); });
 	}
 	function hide() {
 		if (!banner) { return; }
+		// The guard's inline display:flex (runGuard) would keep it on screen.
+		banner.style.removeProperty('display');
+		// A decision during the display delay (API, check mode): no later auto-open.
+		if (showT) { clearTimeout(showT); showT = 0; }
 		// Focus moves only when the banner was on screen and held it: never on the
 		// GPC auto-refusal, nor off the page on a policy page read without overlay.
 		var refocus = !banner.hidden && (blocking() || banner.contains(document.activeElement));
@@ -478,8 +491,16 @@
 		scrollPad();
 		document.removeEventListener('keydown', onKeydown);
 		// The reopen button first, so focus can land on it (see focusBack).
-		if (readCookie()) { showReopen(); }
+		if (readCookie() || A.noAutoOpen) { showReopen(); }
 		if (refocus) { trapFocus(false); }
+	}
+	// Opening by itself (first visit, re-consent): never on an excluded page
+	// (its reopen button stays), after the display delay otherwise. Blocking
+	// does not wait: nothing was unblocked.
+	function autoShow() {
+		if (A.noAutoOpen) { showReopen(); return; }
+		var ms = delayMs(A.delay);
+		if (ms) { showT = setTimeout(show, ms); } else { show(); }
 	}
 
 	// --- Focus trap (WCAG 2.1 AA) ---
@@ -542,6 +563,95 @@
 		return ((parseFloat(padRight) || 0) + gap) + 'px';
 	}
 	// band:end
+	// appearance:begin
+	// Pure helpers for the appearance (B6). Tested in standalone/tests/run.js
+	// (source-extracted, identical in both files).
+	// The display delay in ms: 0-2 s in 0.1 s steps; anything else = none.
+	function delayMs(s) {
+		s = parseFloat(s);
+		return s > 0 ? Math.round(Math.min(s, 2) * 10) * 100 : 0;
+	}
+	// Theme "like the site": dark only when <html> or <body> matches the
+	// selector list; no match = light (the OS decides only with theme "auto").
+	// A bad selector never throws.
+	function siteDark(sel, html, body) {
+		try { return !!sel && (html.matches(sel) || (!!body && body.matches(sel))); } catch (e) { return false; }
+	}
+	// Re-checked on every show (no observer): .cmp--dark for theme "site";
+	// `own` = the Dark palette's own class, never removed.
+	function applySiteTheme(el, a, own, doc) {
+		if (!el || !a || a.theme !== 'site') { return; }
+		if (own || siteDark(a.darkSelector, doc.documentElement, doc.body)) { el.classList.add('cmp--dark'); } else { el.classList.remove('cmp--dark'); }
+	}
+	// Compliance guard (B6.18): the backstop behind the sanitizer and the custom
+	// CSS cleaner. m = measure(): v visibility, o opacity (with its
+	// ancestors up to the banner), w/h (0 = not rendered), x/y in the viewport, s inside a scrolling
+	// area of the banner, c text contrast. True = a decision button is not plainly
+	// usable (hidden, faded, < 24 px, off screen, unreadable) or the two differ by
+	// more than 2 px; ctx = { vw, vh, box: the dialog's measure }.
+	function guardBad(m, ctx) {
+		return !m || m.v !== 'visible' || !(m.o >= 0.9) || !(m.w >= 24 && m.h >= 24) || !(m.c >= 3) ||
+			m.x < -1 || m.x + m.w > ctx.vw + 1 || (!m.s && (m.y < -1 || m.y + m.h > ctx.vh + 1));
+	}
+	function guardNeeded(a, b, ctx) {
+		var x = ctx.box;
+		return !!(x && !(x.w > 0 && x.v === 'visible' && x.o >= 0.9)) || guardBad(a, ctx) || guardBad(b, ctx) || Math.abs(a.w - b.w) > 2 || Math.abs(a.h - b.h) > 2;
+	}
+	// Computed colours other than rgb()/rgba() (oklch, color()) are not parsed:
+	// read as transparent (background) and the contrast is skipped (text) - fails open.
+	function rgba(s) { var m = /^rgba?\(/.test(s) ? s.match(/[\d.]+/g) : [0, 0, 0, 0]; return [+m[0], +m[1], +m[2], m[3] == null ? 1 : +m[3]]; }
+	// f (with alpha) over the opaque b: [r, g, b].
+	function over(f, b) { return [0, 1, 2].map(function (i) { return f[i] * f[3] + b[i] * (1 - f[3]); }); }
+	// Relative luminance + 0.05 (sRGB curve approximated by gamma 2.2: within 0.1 of WCAG here).
+	function lum(c) { var p = function (i) { return Math.pow(c[i] / 255, 2.2); }; return 0.2126 * p(0) + 0.7152 * p(1) + 0.0722 * p(2) + 0.05; }
+	// WCAG ratio of a computed text colour (blended) on an opaque background.
+	function contrast(color, bg) { var f = lum(over(rgba(color), bg)), b = lum(bg); return f > b ? f / b : b / f; }
+	function measure(el, root, win) {
+		if (!el) { return null; }
+		var r = el.getBoundingClientRect(), cs = win.getComputedStyle(el), o = 1, s = false, bg, p, ps, c;
+		for (p = el; p; p = p === root ? null : p.parentElement) {
+			ps = win.getComputedStyle(p);
+			o *= parseFloat(ps.opacity);
+			if (p !== el && p.scrollHeight > p.clientHeight + 1 && /auto|scroll/.test(ps.overflowY)) { s = true; }
+			// The effective background: the first non-transparent one (transparent = look further), on white.
+			c = rgba(ps.backgroundColor);
+			if (!bg && c[3] > 0) { bg = c; }
+		}
+		bg = over(bg || [0, 0, 0, 0], [255, 255, 255]);
+		return { v: cs.visibility, o: o, w: r.width, h: r.height, x: r.left, y: r.top, s: s, c: /^rgba?\(/.test(cs.color) ? contrast(cs.color, bg) : 21 };
+	}
+	// The reset, inline and !important: it outweighs any stylesheet rule (ids,
+	// @layer, !important). Both buttons get the same default (solid) style, in
+	// the safe Neutral colours (never the --cmp-primary* ones, which may be the failing pair).
+	var GV = 'visibility:visible;opacity:1;transform:none;clip-path:none;';
+	var GB = GV + 'display:block;position:static;width:100%;min-height:44px;padding:10px 12px;font-size:14px;color:#fff;background:#111827;border:1px solid #fff;pointer-events:auto;';
+	// The decision buttons (.cmp__btn--primary: Reject, Accept, Save) and their
+	// equal-columns group; every declaration gets !important.
+	function guardFix(root) {
+		var c = function (e, css) { e.style.cssText += ';' + css.replace(/;/g, '!important;'); };
+		c(root, 'display:flex;' + GV);
+		c(root.querySelector('.cmp__modal'), GV);
+		[].forEach.call(root.querySelectorAll('.cmp__btn--primary'), function (b) { c(b, GB); c(b.parentNode, GV + 'display:grid;grid-template-columns:1fr 1fr;gap:8px;'); });
+	}
+	// Run on the banner once it is on screen (no getAnimations, old browser: not checked). Still animating (first frame late; finished CSS
+	// animations without fill are no longer listed):
+	// measured once more 400 ms later. On a failure: .cmp--guard, the inline reset
+	// (re-applied on every later show) and one console warning.
+	function runGuard(root, win, again) {
+		try {
+			if (!root || root.hidden) { return; }
+			if (root.classList.contains('cmp--guard')) { guardFix(root); return; }
+			if (!again && root.getAnimations({ subtree: true }).length) { win.setTimeout(function () { runGuard(root, win, 1); }, 400); return; }
+			var m = root.querySelector('.cmp__modal'), v = m && m.classList.contains('is-prefs-open') ? 'prefs' : 'main';
+			var q = function (a) { return measure(root.querySelector('[data-cmp-view="' + v + '"] [data-cmp-action="' + a + '"]'), root, win); };
+			if (guardNeeded(q('reject'), q(v === 'main' ? 'accept' : 'save'), { vw: win.innerWidth, vh: win.innerHeight, box: measure(m, root, win) })) {
+				root.classList.add('cmp--guard');
+				guardFix(root);
+				win.console.warn('CMP: appearance guard reset the consent buttons');
+			}
+		} catch (e) {}
+	}
+	// appearance:end
 	// api:begin
 	// Public API (B7.4), identical in banner.js and standalone/cmp.js; tested in
 	// standalone/tests/run.js (source-extracted). Pure: each build passes its hooks.
@@ -709,6 +819,8 @@
 		// Screen readers start on the panel title (no-op while the banner is hidden: show() focuses it).
 		var t = banner.querySelector('[data-cmp-prefs-title]');
 		if (t) { t.focus(); }
+		// B6.18: the Reject / Save pair now on screen.
+		runGuard(banner, window);
 		// Its height changed: the policy page's scroll padding follows.
 		scrollPad();
 	}
@@ -800,7 +912,12 @@
 		if (!bar) { return; }
 		// Check mode: always shown (the measured page is a first visit).
 		if (!D.check) { try { if (localStorage.getItem('cmp_light_dismissed')) { return; } } catch (e) {} }
-		bar.hidden = false;
+		// B6: not on an excluded page; after the display delay; theme "like the site".
+		if (!A.noAutoOpen) {
+			var own = bar.classList.contains('cmp--dark'), ms = delayMs(A.delay);
+			var open = function () { applySiteTheme(bar, A, own, document); bar.hidden = false; };
+			if (ms) { setTimeout(open, ms); } else { open(); }
+		}
 		var btn = bar.querySelector('[data-cmp-light-dismiss]');
 		if (btn) {
 			btn.addEventListener('click', function () {
@@ -1043,7 +1160,7 @@
 				// No "decide later": it would be tacit consent to the new service.
 				firstDecision = true;
 				openPrefs();
-				show();
+				autoShow();
 				return;
 			}
 			showReopen();
@@ -1056,7 +1173,7 @@
 			save(requiredSlugs(), 'rejected_all');
 		} else {
 			firstDecision = true;
-			show();
+			autoShow();
 		}
 	});
 })();

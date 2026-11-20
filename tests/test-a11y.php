@@ -8,6 +8,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 require_once __DIR__ . '/../includes/modules/class-lang.php';
 require_once __DIR__ . '/../includes/modules/class-i18n.php';
+// B6: the templates read the appearance (CMP_Appearance) and the texts / classes (CMP_Banner).
+require_once __DIR__ . '/../includes/class-contrast.php';
+require_once __DIR__ . '/../includes/class-appearance.php';
+require_once __DIR__ . '/../includes/modules/class-banner.php';
 foreach ( array( 'esc_attr', 'esc_html', 'esc_url' ) as $a11y_fn ) {
 	if ( ! function_exists( $a11y_fn ) ) {
 		eval( "function $a11y_fn( \$t ) { return htmlspecialchars( (string) \$t, ENT_QUOTES, 'UTF-8' ); }" );
@@ -25,8 +29,8 @@ if ( ! function_exists( 'get_permalink' ) ) {
 }
 
 /** Render a banner template the way CMP_Banner::render() includes it. */
-function cmp_a11y_render( $file, $no_overlay = false ) {
-	$settings   = array( 'texts' => array(), 'position' => 'bottom-bar' );
+function cmp_a11y_render( $file, $no_overlay = false, $extra = array() ) {
+	$settings   = array_merge( array( 'texts' => array(), 'position' => 'bottom-bar' ), $extra );
 	$categories = array(
 		array( 'slug' => 'necessary', 'label' => 'N', 'description' => 'n', 'required' => true ),
 		array( 'slug' => 'statistics', 'label' => 'S', 'description' => 's', 'required' => false ),
@@ -60,8 +64,8 @@ foreach ( array( 'banner-bottom.php', 'banner-light.php' ) as $a11y_tpl ) {
 // Reduced motion: no slide / fade for visitors who asked for less motion.
 $a11y_css = (string) file_get_contents( __DIR__ . '/../assets/css/banner.css' );
 cmp_assert(
-	1 === preg_match( '/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\.cmp \*,\s*\.cmp \*::before,\s*\.cmp \*::after,\s*\.cmp-light \*,\s*\.cmp-light \*::before,\s*\.cmp-light \*::after,\s*\.cmp-reopen\s*\{\s*transition:\s*none !important;\s*animation:\s*none !important;\s*\}\s*\}/', $a11y_css ),
-	'a11y: banner.css has the prefers-reduced-motion rule (incl. ::before/::after, e.g. the toggle knob)'
+	1 === preg_match( '/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\.cmp,\s*\.cmp \*,\s*\.cmp \*::before,\s*\.cmp \*::after,\s*\.cmp-light,\s*\.cmp-light \*,\s*\.cmp-light \*::before,\s*\.cmp-light \*::after,\s*\.cmp-reopen\s*\{\s*transition:\s*none !important;\s*animation:\s*none !important;\s*\}\s*\}/', $a11y_css ),
+	'a11y: banner.css has the prefers-reduced-motion rule (incl. ::before/::after, e.g. the toggle knob, and the B6 fade/slide on .cmp / .cmp-light themselves)'
 );
 $a11y_min = (string) file_get_contents( __DIR__ . '/../assets/css/banner.min.css' );
 cmp_assert( false !== strpos( $a11y_min, 'prefers-reduced-motion' ), 'a11y: banner.min.css keeps the reduced-motion rule' );

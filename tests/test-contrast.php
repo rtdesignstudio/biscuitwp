@@ -157,3 +157,13 @@ foreach ( $ct_targets as $ct_sel ) {
 	$w      = max( cmp_ct_px( isset( $d['width'] ) ? $d['width'] : '' ), cmp_ct_px( isset( $d['min-width'] ) ? $d['min-width'] : '' ), cmp_ct_pad( $d, 'x' ) + $border );
 	cmp_assert( $h >= 24 && $w >= 24, sprintf( 'targets: %s at least 24x24 (%.1f x %.1f)', $ct_sel, $w, $h ) );
 }
+
+// B6 Task 2: theme "auto" uses the Dark tokens under prefers-color-scheme: dark, so
+// every Dark pair above also holds there (the dark variant of every palette).
+$ct_auto = '';
+if ( preg_match( '/@media \(prefers-color-scheme: dark\)\s*\{\s*\.cmp--theme-auto\s*\{([^}]*)\}/', (string) preg_replace( '#/\*.*?\*/#s', '', $ct_css ), $ct_m ) ) {
+	$ct_auto = $ct_m[1];
+}
+cmp_assert( '' !== $ct_auto, 'contrast: banner.css has the auto dark tokens (.cmp--theme-auto under prefers-color-scheme: dark)' );
+$ct_auto_t = CMP_Contrast::tokens( '.cmp--autodark{' . $ct_auto . '}' . $ct_css, 'autodark' );
+cmp_assert_eq( $ct_auto_t, CMP_Contrast::tokens( $ct_css, 'dark' ), 'contrast: auto dark tokens = Dark tokens (same contrast on every palette in a dark system)' );

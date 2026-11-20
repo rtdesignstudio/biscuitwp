@@ -51,7 +51,7 @@ CMPCODE;
 			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Servicii screen */ __( '%1$sServicii%2$s: uită-te la lista „Găsite pe site”. Pluginul scanează singur paginile site-ului. Dacă lista e goală, apasă „Rescanează”. Verifică să nu lipsească nimic din ce știi că folosește site-ul.', 'consent-manager-pro' ), 'cmp-services' ) ); ?></li>
 			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Pagini legale screen */ __( '%1$sPagini legale%2$s: completează „Datele operatorului”, apoi apasă „Generează” la fiecare document (sau „Regenerează”, dacă documentul are deja o pagină: textul ei va fi înlocuit). O pagină nouă se salvează ca ciornă: citește-o și publică-o din editor.', 'consent-manager-pro' ), 'cmp-legal' ) ); ?></li>
 			<li><?php echo wp_kses_post( sprintf( /* translators: 1: the shortcode, 2: the menu link URL */ __( 'Pune în footer linkul „Setări cookie”: shortcode-ul %1$s sau un link de meniu cu URL-ul %2$s. Prin el vizitatorul își schimbă sau își retrage acordul.', 'consent-manager-pro' ), CMP_Guide::code( '[cmp_cookie_settings_link]' ), CMP_Guide::code( '#cmp-settings' ) ) ); ?>
-				<?php esc_html_e( 'În modul Pro, dacă linkul lipsește de pe pagina principală, ecranul Setări arată avertismentul „Lipsește linkul „Setări cookie””. În loc de link poți porni „Buton flotant redeschidere” (doar în Pro), dar linkul din footer e varianta recomandată.', 'consent-manager-pro' ); ?></li>
+				<?php esc_html_e( 'În modul Pro, dacă linkul lipsește de pe pagina principală, ecranul Setări arată avertismentul „Lipsește linkul „Setări cookie””. În loc de link poți porni butonul plutitor din Aspect, la „Redeschidere” (doar în Pro), dar linkul din footer e varianta recomandată.', 'consent-manager-pro' ); ?></li>
 			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Verificare screen; %3$s, %4$s: link to the "Cum verifici blocarea" section */ __( '%1$sVerificare%2$s: apasă „Verifică în browser”. Nicio pagină nu trebuie să iasă roșie. Galbenul nu e o blocare ratată, dar merită citit. Dacă o pagină e roșie, citește %3$sCum verifici blocarea%4$s.', 'consent-manager-pro' ), 'cmp-check', '#verify' ) ); ?></li>
 		</ol>
 		<p><?php esc_html_e( 'Secțiunile de mai jos explică fiecare pas pe larg.', 'consent-manager-pro' ); ?></p>
@@ -77,7 +77,30 @@ CMPCODE;
 		<p><?php esc_html_e( 'Ce spune textul legal: în Advanced, dacă pe site s-au găsit Google Analytics sau Tag Manager (sau dacă site-ul nu a fost încă scanat), Politica de cookie-uri descrie măsurarea fără cookie-uri, iar Politica de confidențialitate îi dă temeiul: interesul legitim. După ce schimbi modul, regenerează paginile legale. Ecranul Setări îți amintește printr-un mesaj.', 'consent-manager-pro' ); ?></p>
 	</section>
 
-	<?php /* 3. Services */ ?>
+	<?php /* 3. Appearance */ ?>
+	<section class="cmp-guide-section">
+		<h2 id="appearance"><?php echo esc_html( $titles['appearance'] ); ?></h2>
+		<p><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Aspect screen */ __( 'Cum arată bannerul se alege în %1$sAspect%2$s: stilul, culorile, tema, formatul și poziția, fundalul, detaliile, butoanele, textele, animația, butonul de redeschidere, paginile excluse și CSS-ul propriu. Site-urile care aveau pluginul înainte arată la fel; o salvare a ecranului nu schimbă aspectul. Fără WPML sau Polylang, textele vechi ale bannerului devin textele limbii curente a site-ului, iar celelalte limbi folosesc textele implicite până le completezi.', 'consent-manager-pro' ), 'cmp-appearance' ) ); ?></p>
+		<ul>
+			<li><?php esc_html_e( 'Stilul dă forma (Minimal, Brand, Prietenos): colțurile, umbra, lățimea, butoanele și animația. Brand e aspectul de până acum. Când schimbi stilul, aceste valori revin la cele ale stilului nou, iar ecranul te avertizează înainte.', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( 'Culorile se aleg separat: o paletă, culorile temei sau un accent propriu. Pentru accent, ecranul arată contrastul și, sub 4,5:1, propune nuanța cea mai apropiată care se citește bine.', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( 'Tema: Luminos, Întunecat, Automat (după setarea dispozitivului) sau „Ca site-ul” (după o clasă a temei pe html sau body).', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( '„Accept” și „Refuz” arată mereu la fel, indiferent de setări și de CSS-ul propriu. Nu există acord prin derulare, iar categoriile nu sunt bifate din oficiu.', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( 'Excluderile opresc doar deschiderea automată a bannerului pe acele pagini. Blocarea rămâne activă.', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( 'În modul Light, câmpurile care nu se aplică cardului Light sunt dezactivate.', 'consent-manager-pro' ); ?></li>
+			<li><?php esc_html_e( 'Fără WPML sau Polylang, textele bannerului se scriu pe limbi (RO, RU, EN). Cu unul dintre ele, scrii textele de bază și le traduci în pluginul de traduceri.', 'consent-manager-pro' ); ?></li>
+		</ul>
+		<h3><?php esc_html_e( 'CSS propriu și variabile', 'consent-manager-pro' ); ?></h3>
+		<p><?php esc_html_e( 'CSS-ul propriu se adaugă după CSS-ul bannerului. La salvare, pluginul elimină @import, adresele spre alte site-uri și regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și „Refuz”, apoi îți arată ce a eliminat.', 'consent-manager-pro' ); ?></p>
+		<p><?php echo wp_kses_post( sprintf( /* translators: 1: .cmp, 2: .cmp-light, 3: example rule */ __( 'Cel mai simplu e să schimbi variabilele, pe %1$s (sau pe %2$s în modul Light), de exemplu %3$s. Variabilele disponibile:', 'consent-manager-pro' ), CMP_Guide::code( '.cmp' ), CMP_Guide::code( '.cmp-light' ), CMP_Guide::code( '.cmp{--cmp-radius:6px}' ) ) ); ?></p>
+		<ul>
+			<?php foreach ( CMP_Guide::variables() as $cmp_var => $cmp_desc ) : ?>
+				<li><?php echo wp_kses_post( CMP_Guide::code( $cmp_var ) . ': ' . esc_html( $cmp_desc ) ); ?></li>
+			<?php endforeach; ?>
+		</ul>
+	</section>
+
+	<?php /* 4. Services */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="services"><?php echo esc_html( $titles['services'] ); ?></h2>
 
@@ -112,7 +135,7 @@ CMPCODE;
 		<p><?php esc_html_e( '„Încarcă mereu” apare doar la conținutul unui serviciu din bibliotecă sau al unui serviciu personalizat, nu și la un iframe marcat cu atributul data-cmp-category.', 'consent-manager-pro' ); ?></p>
 	</section>
 
-	<?php /* 4. Examples */ ?>
+	<?php /* 5. Examples */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="examples"><?php echo esc_html( $titles['examples'] ); ?></h2>
 		<p><?php esc_html_e( 'Cazuri frecvente, fiecare cu pașii de urmat.', 'consent-manager-pro' ); ?></p>
@@ -158,7 +181,7 @@ CMPCODE;
 		</ol>
 	</section>
 
-	<?php /* 5. Verify */ ?>
+	<?php /* 6. Verify */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="verify"><?php echo esc_html( $titles['verify'] ); ?></h2>
 
@@ -201,7 +224,7 @@ CMPCODE;
 		<p><?php esc_html_e( 'În modul Advanced e normal să vezi cereri spre Google Analytics și Tag Manager înainte de acord, dar fără cookie-ul _ga.', 'consent-manager-pro' ); ?></p>
 	</section>
 
-	<?php /* 6. Legal */ ?>
+	<?php /* 7. Legal */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="legal"><?php echo esc_html( $titles['legal'] ); ?></h2>
 		<p><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Pagini legale screen */ __( 'Pe ecranul %1$sPagini legale%2$s, pluginul generează trei documente din șabloane: Politica de confidențialitate, Termeni și condiții și Politica de cookie-uri. Șabloanele sunt scrise pentru Moldova și există în română, rusă și engleză.', 'consent-manager-pro' ), 'cmp-legal' ) ); ?></p>
@@ -229,7 +252,7 @@ CMPCODE;
 		<p><?php esc_html_e( 'Regenerarea actualizează și traducerile paginii create de plugin (WPML sau Polylang). Traducerile făcute de tine nu sunt atinse.', 'consent-manager-pro' ); ?></p>
 	</section>
 
-	<?php /* 7. After an update */ ?>
+	<?php /* 8. After an update */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="update"><?php echo esc_html( $titles['update'] ); ?></h2>
 		<p><?php esc_html_e( 'Pluginul se actualizează din ecranul Plugins, ca orice plugin. După un update, fă trei verificări:', 'consent-manager-pro' ); ?></p>
@@ -245,7 +268,7 @@ CMPCODE;
 		<p><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Setări screen */ __( 'Vrei să întrebi din nou toți vizitatorii, de exemplu după o schimbare mare în politică? Mărește „Versiune politică” în %1$sSetări%2$s.', 'consent-manager-pro' ), 'cmp-settings' ) ); ?></p>
 	</section>
 
-	<?php /* 8. Register and data */ ?>
+	<?php /* 9. Register and data */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="register"><?php echo esc_html( $titles['register'] ); ?></h2>
 		<p><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Registru consimțăminte screen */ __( '%1$sRegistru consimțăminte%2$s păstrează dovada alegerilor făcute de vizitatori, cerută de Legea 195/2024. Registrul există doar în modul Pro: în Light nu se cere acord.', 'consent-manager-pro' ), 'cmp-audit' ) ); ?></p>
@@ -265,7 +288,7 @@ CMPCODE;
 		<p><?php esc_html_e( 'Paginile legale generate rămân pe site. Le ștergi tu, din Pagini, dacă nu mai ai nevoie de ele.', 'consent-manager-pro' ); ?></p>
 	</section>
 
-	<?php /* 9. Developers */ ?>
+	<?php /* 10. Developers */ ?>
 	<section class="cmp-guide-section">
 		<h2 id="developers"><?php echo esc_html( $titles['developers'] ); ?></h2>
 		<p><?php esc_html_e( 'Pluginul are un API JavaScript și o funcție PHP, ca să legi codul tău de acordul vizitatorului.', 'consent-manager-pro' ); ?></p>

@@ -50,3 +50,29 @@
 .cmp-guide .cmp-guide-section ol { margin-left: 22px; }
 .cmp-guide .cmp-guide-code { max-width: 100%; overflow-x: auto; padding: 8px 12px; background: #f6f7f7; border: 1px solid #dcdcde; border-radius: 4px; }
 .cmp-guide .cmp-guide-code code { padding: 0; background: none; }
+
+/* B6: the "Aspect" screen. */
+.cmp-ap .cmp-ap-choice { display: inline-block; margin: 0 16px 4px 0; }
+.cmp-ap .cmp-ap-inline { margin-left: 12px; }
+.cmp-ap .cmp-ap-inline[hidden], .cmp-ap [hidden] { display: none; }
+.cmp-ap .cmp-ap-accent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 4px; }
+.cmp-ap .cmp-ap-accent__input { width: 8em; font-family: Menlo, Consolas, monospace; }
+.cmp-ap .cmp-ap-swatch { display: inline-block; width: 24px; height: 24px; border: 1px solid #8c8f94; border-radius: 4px; background: repeating-linear-gradient(45deg, #fff 0 4px, #dcdcde 4px 8px); }
+.cmp-ap .cmp-ap-accent__status.is-ok { color: #00753a; font-weight: 600; }
+.cmp-ap .cmp-ap-accent__status.is-bad { color: #b32d2e; font-weight: 600; }
+.cmp-ap .cmp-ap-details label { display: inline-flex; align-items: center; gap: 6px; margin: 0 18px 8px 0; }
+.cmp-ap .cmp-ap-details output { min-width: 2ch; text-align: right; font-variant-numeric: tabular-nums; }
+.cmp-ap .cmp-ap-na { color: #8a6d00; }
+.cmp-ap .cmp-ap-tabs { display: flex; gap: 4px; margin: 8px 0 0; border-bottom: 1px solid #c3c4c7; }
+.cmp-ap .cmp-ap-tab { padding: 6px 14px; border: 1px solid #c3c4c7; border-bottom: 0; border-radius: 4px 4px 0 0; background: #f6f7f7; cursor: pointer; font-weight: 600; margin-bottom: -1px; }
+.cmp-ap .cmp-ap-tab[aria-selected="true"] { background: #fff; border-bottom: 1px solid #fff; }
+.cmp-ap .cmp-ap-tab:focus-visible { outline: 2px solid #2271b1; outline-offset: 1px; }
+.cmp-ap .cmp-ap-panel { padding: 4px 0 0; }
+.cmp-ap .cmp-ap-text { margin: 10px 0; }
+.cmp-ap .cmp-ap-vars { margin-top: 10px; }
+.cmp-ap .cmp-ap-vars summary { cursor: pointer; font-weight: 600; }
+.cmp-ap .cmp-ap-vars ul { margin: 6px 0 0 18px; list-style: disc; }
+.cmp-ap .cmp-ap-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cmp-ap .cmp-ap-preview:empty { display: none; }
+.cmp-ap-removed ul { margin: 4px 0 8px 18px; list-style: disc; }
+.cmp-ap-removed code { word-break: break-all; }

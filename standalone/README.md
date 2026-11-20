@@ -78,6 +78,7 @@ All keys are **optional**. Defaults are applied if not specified.
 | `services` | object | — | Services per category, `{ slug: [ids] }`, written by hand. Enables re-consent (see below). Missing or invalid = unknown: behaviour as before. |
 | `serviceNames` | object | — | Optional `{ id: "Display name" }` for the "new" badges. Without it the id is shown. |
 | `cookieDays` | number | `180` | Number of days the consent choice is remembered before the banner reappears. Clamped to 1-3650, else falls back to 180. |
+| `appearance` | object | — | Style, format, colours, theme, delay and reopen shape (see "Appearance" below). Missing = today's look (`preset` / `position`). |
 
 ### Example: Custom texts
 ```javascript
@@ -91,6 +92,48 @@ window.CMP_CONFIG = {
   }
 };
 ```
+
+### Appearance (`appearance`)
+
+The same options as the WordPress "Aspect" screen. They give the banner the same
+classes and CSS variables as the plugin: the script adds the classes and a small
+`<style id="cmp-appearance-css">` (only what differs from the Brand style; none for
+Brand) at the end of `<head>`, after `cmp.css`. Every value is validated; an unknown
+or out-of-range value falls back to the default or is clamped. Without `appearance`
+nothing changes (`preset` / `position` as before). With it, `position` is ignored
+and `palette` replaces `preset` (default: `preset` when it is a palette name).
+
+| Key | Values | Default |
+|-----|--------|---------|
+| `style` | `"minimal"`, `"brand"`, `"friendly"` | `"brand"` |
+| `palette` | `"neutral"`, `"warm"`, `"dark"`, `"egov"` | `preset`, else `"neutral"` |
+| `accent` | `"#rrggbb"` / `"#rgb"`: the button colour (text, hover and a dark-mode shade are computed) | none |
+| `theme` | `"light"`, `"dark"`, `"auto"` (the visitor's OS), `"site"` (like the site, see `darkSelector`) | `"light"` |
+| `darkSelector` | selectors matched on `<html>` or `<body>` for `theme: "site"` (letters, digits, `.#[]="' ,:()>~+*_-`, at most 200 characters); no match = light (use `"auto"` to follow the visitor's OS) | `.dark, [data-theme="dark"], .is-dark-theme` |
+| `format` | `"bar"`, `"card"`, `"modal"` | `"modal"` |
+| `position` | bar: `"bottom"`, `"top"` · card: `"bottom-right"`, `"bottom-left"`, `"top-right"`, `"top-left"` · modal: `"center"`, `"top"`, `"bottom"` | the format's first |
+| `backdrop` | `"blur"`, `"dim"`, `"none"` | `"blur"` |
+| `dim` | 0–80 (% darkening of the page) | the palette's |
+| `blur` | 0–10 (px) | 5 |
+| `radius` | 0–24 (px) | the style's (4 / 12 / 20) |
+| `shadow` | `"none"`, `"small"`, `"medium"`, `"large"` | the style's |
+| `maxw` | 360–960 (px, banner width) | the style's (640 / 720 / 680) |
+| `gap` | 0–40 (px, distance from the screen edge) | 24 |
+| `buttons` | `"solid"`, `"outline"`, `"text"` (one look for both decision buttons) | the style's |
+| `anim` | `"none"`, `"fade"`, `"slide"` (none with reduced motion) | the style's |
+| `font` | `"system"`, `"inherit"` (the page's font) | `"system"` |
+| `delay` | 0–2 (seconds before the banner shows; trackers stay blocked meanwhile) | 0 |
+| `reopen` | `"icon"`, `"text"`, `"both"`, `"none"`: the shape of the `reopenButton` (which still turns it on) | `"icon"` |
+
+```javascript
+window.CMP_CONFIG = {
+  reopenButton: true,
+  appearance: { style: 'friendly', palette: 'warm', accent: '#e4572e', theme: 'auto', format: 'card', position: 'bottom-left', delay: 1, reopen: 'both' }
+};
+```
+
+The page exclusions and the per-language texts of the WordPress screen do not apply
+here: load the script only where it should show, and use `lang` / `texts`.
 
 ---
 
