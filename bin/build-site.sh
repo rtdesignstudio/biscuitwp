@@ -10,7 +10,22 @@
 #   security pages         <!-- KEYS --> (public keys + SHA-256 fingerprints, read
 #                          from includes/modules/class-updater.php), {{SIGN_PUBLIC_KEY}},
 #                          <!-- REVOKED --> (the `revoked` list of the stable manifest);
-#   .well-known/security.txt from security.txt.in ({{EXPIRES}} = now + 180 days).
+#   .well-known/security.txt from security.txt.in ({{EXPIRES}} = now + 180 days);
+#   api/services.json      a copy of data/services.json, for api/verifica.php;
+#   demo/cmp.min.{js,css}  copies of standalone/cmp.min.{js,css}, for the live demo;
+#   every page      <!-- DOWNLOAD_URL --> (any number of times): the download link,
+#                   https://github.com/rtdesignstudio/consent-manager-pro/releases/latest
+#                   when a stable manifest exists, else releases/tag/v<version> of the
+#                   beta manifest, else the releases page;
+#   every page      <!-- HEADER page=<key> alt=<url> --> and <!-- FOOTER --> are replaced
+#                   by site/partials/{header,footer}.<lang>.html (lang = the page's
+#                   <html lang>); page = the current nav item (home, security, privacy,
+#                   changelog), alt = the paired page for the language switch.
+#                   site/partials/ itself is not copied to the output. The footer
+#                   repeats the language switch ({{ALT}}).
+#                   A page with <!-- BARE --> instead (the demo embedded in the
+#                   landing's iframe) gets neither; it must not carry the other two.
+#   junk            .DS_Store, ._*, *.swp and *~ files are left out of the output.
 # The output is deterministic: the same inputs give the same files, except
 # Expires (pin it with CMP_BUILD_NOW).
 #
@@ -18,6 +33,8 @@
 #   CMP_CHANGELOG        the changelog to read (default CHANGELOG.md)
 #   CMP_STABLE_MANIFEST  the stable manifest (default release/manifest-stable.json;
 #                        a missing file means "no revoked versions")
+#   CMP_BETA_MANIFEST    the beta manifest (default release/manifest-beta.json), read
+#                        only for the download link when there is no stable manifest
 #   CMP_BUILD_NOW        Unix timestamp used for Expires (default: now)
 #
 # <dir> is replaced as a whole. A non-empty <dir> that does not look like a
@@ -54,12 +71,14 @@ abs() {
 [ -z "$OUT" ] || OUT="$(abs "$OUT")"
 CHANGELOG="$(abs "${CMP_CHANGELOG:-CHANGELOG.md}")"
 [ -z "${CMP_STABLE_MANIFEST:-}" ] || MANIFEST="$(abs "$CMP_STABLE_MANIFEST")"
+[ -z "${CMP_BETA_MANIFEST:-}" ] || BETA_MANIFEST="$(abs "$CMP_BETA_MANIFEST")"
 
 cd "$(dirname "$0")/.."
 ROOT="$(pwd -P)"
 [ -n "$OUT" ] || OUT="$ROOT/release/site"
 [ -n "${CMP_CHANGELOG:-}" ] || CHANGELOG="$ROOT/CHANGELOG.md"
 [ -n "${CMP_STABLE_MANIFEST:-}" ] || MANIFEST="$ROOT/release/manifest-stable.json"
+[ -n "${CMP_BETA_MANIFEST:-}" ] || BETA_MANIFEST="$ROOT/release/manifest-beta.json"
 NOW="${CMP_BUILD_NOW:-$(date +%s)}"
 
 command -v php >/dev/null 2>&1 || die "php not found"
@@ -67,6 +86,11 @@ echo "$NOW" | grep -Eq '^[0-9]+$' || die "CMP_BUILD_NOW must be a Unix timestamp
 [ -d "$ROOT/site" ] || die "site/ not found"
 [ -r "$CHANGELOG" ] || die "changelog not found at $CHANGELOG"
 [ -r "$ROOT/includes/modules/class-updater.php" ] || die "includes/modules/class-updater.php not found"
+[ -r "$ROOT/data/services.json" ] || die "data/services.json not found"
+for f in cmp.min.js cmp.min.css; do
+	[ -r "$ROOT/standalone/$f" ] || die "standalone/$f not found (run bin/build-assets.sh)"
+done
+php -r 'exit( is_array( json_decode( (string) file_get_contents( $argv[1] ), true ) ) ? 0 : 1 );' -- "$ROOT/data/services.json" || die "data/services.json is not valid JSON"
 # The output is uploaded next to the manifests: it must never carry one.
 if [ -n "$(find "$ROOT/site" -name 'manifest-*' -print)" ]; then
 	die "site/ must not contain manifest-* files"
@@ -104,7 +128,13 @@ trap cleanup EXIT
 
 mkdir -p "$TMP"
 cp -R "$ROOT/site/." "$TMP/"
-find "$TMP" -name '.DS_Store' -type f -delete
+find "$TMP" \( -name '.DS_Store' -o -name '._*' -o -name '*.swp' -o -name '*~' \) -type f -delete
+# The site check API (site/api/) reads the plugin's service library next to it.
+[ -d "$TMP/api" ] || die "site/api/ not found"
+cp "$ROOT/data/services.json" "$TMP/api/services.json"
+# The live demo (site/demo/) runs the standalone banner, served from this site.
+[ -d "$TMP/demo" ] || die "site/demo/ not found"
+cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$TMP/demo/"
 
 # ---- Generator (PHP 7.4+) --------------------------------------------------
 read -r -d '' PHP_GEN <<'PHP' || true
@@ -180,7 +210,7 @@ function fill( $html, $marker, $with, $file ) {
 	return str_replace( $marker, $with, $html );
 }
 
-list( , $dir, $changelog, $manifest, $now, $updater ) = $argv;
+list( , $dir, $changelog, $manifest, $now, $updater, $beta ) = $argv;
 $now  = (int) $now;
 $base = "https://consent.rt.md/";
 
@@ -325,6 +355,66 @@ $tpl = $dir . "/.well-known/security.txt.in";
 wr( $dir . "/.well-known/security.txt", fill( rd( $tpl ), "{{EXPIRES}}", gmdate( "Y-m-d\TH:i:s\Z", $now + 180 * 86400 ), "security.txt.in" ) );
 if ( ! unlink( $tpl ) ) { fail( "could not remove " . $tpl ); }
 
+// ---- Download link ("Lămuriri" 5 of the landing spec) ----------------------------------
+$releases = "https://github.com/rtdesignstudio/consent-manager-pro/releases";
+if ( is_file( $manifest ) ) {
+	$download = $releases . "/latest"; // Validated above (revoked list).
+} elseif ( is_file( $beta ) ) {
+	$bm = json_decode( rd( $beta ), true );
+	if ( ! is_array( $bm ) || ! isset( $bm["version"] ) || ! is_string( $bm["version"] ) || ! preg_match( "/^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$/", $bm["version"] ) ) {
+		fail( "the beta manifest has no valid version" );
+	}
+	$download = $releases . "/tag/v" . $bm["version"];
+} else {
+	$download = $releases;
+}
+
+// ---- Shared header and footer (site/partials) -------------------------------------
+$partials = array();
+foreach ( array( "header", "footer" ) as $kind ) {
+	foreach ( array( "ro", "en" ) as $l ) {
+		$partials[ $kind ][ $l ] = rtrim( rd( $dir . "/partials/" . $kind . "." . $l . ".html" ), "\n" );
+	}
+}
+$nav_keys = array( "home", "security", "privacy", "changelog" );
+$pit      = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir . "/partials", FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+$pages    = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ) );
+foreach ( $pages as $f ) {
+	if ( ! preg_match( "/\.html$/", $f->getFilename() ) || 0 === strpos( $f->getPathname(), $dir . "/partials/" ) ) { continue; }
+	$p    = $f->getPathname();
+	$rel  = substr( $p, strlen( $dir ) + 1 );
+	$html = rd( $p );
+	if ( ! preg_match( '/<html lang="(ro|en)"/', $html, $lm ) ) { fail( $rel . ": <html lang> must be ro or en" ); }
+	$l = $lm[1];
+	if ( false !== strpos( $html, "<!-- BARE" ) ) {
+		// A bare page: no shared header or footer at all.
+		if ( 1 !== substr_count( $html, "<!-- BARE -->" ) || false !== strpos( $html, "<!-- HEADER" ) || false !== strpos( $html, "<!-- FOOTER" ) ) {
+			fail( $rel . ": a bare page has <!-- BARE --> exactly once and no header or footer marker" );
+		}
+		$html = str_replace( "<!-- BARE -->\n", "", str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html ) );
+		wr( $p, str_replace( "<!-- BARE -->", "", $html ) );
+		continue;
+	}
+	if ( 1 !== preg_match_all( '/<!-- HEADER( [^>]*?)? -->/', $html, $hm ) ) { fail( $rel . ": expected the marker <!-- HEADER ... --> exactly once" ); }
+	$attrs = array();
+	if ( preg_match_all( '/([a-z]+)=(\S+)/', $hm[1][0], $am, PREG_SET_ORDER ) ) {
+		foreach ( $am as $a ) { $attrs[ $a[1] ] = $a[2]; }
+	}
+	$page = isset( $attrs["page"] ) ? $attrs["page"] : "";
+	$alt  = isset( $attrs["alt"] ) ? $attrs["alt"] : "";
+	if ( "" !== $page && ! in_array( $page, $nav_keys, true ) ) { fail( $rel . ": unknown page=" . $page . " in the header marker" ); }
+	if ( ! preg_match( "#^/[A-Za-z0-9/_.-]*$#", $alt ) ) { fail( $rel . ": the header marker needs alt=/path/ (the paired page)" ); }
+	$header = $partials["header"][ $l ];
+	foreach ( $nav_keys as $k ) { $header = str_replace( "{{CUR_" . $k . "}}", $page === $k ? " aria-current=\"page\"" : "", $header ); }
+	$header = str_replace( "{{ALT}}", h( $alt ), $header );
+	$html   = preg_replace_callback( '/<!-- HEADER( [^>]*?)? -->/', function () use ( $header ) { return $header; }, $html );
+	$html   = fill( $html, "<!-- FOOTER -->", str_replace( "{{ALT}}", h( $alt ), $partials["footer"][ $l ] ), $rel );
+	$html   = str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html );
+	wr( $p, $html );
+}
+foreach ( $pit as $f ) { $f->isDir() ? rmdir( $f->getPathname() ) : unlink( $f->getPathname() ); }
+if ( ! rmdir( $dir . "/partials" ) ) { fail( "could not remove " . $dir . "/partials" ); }
+
 // ---- Final checks -------------------------------------------------------------------
 $it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $it as $f ) {
@@ -332,14 +422,14 @@ foreach ( $it as $f ) {
 	if ( 0 === strpos( $name, "manifest-" ) ) { fail( "the output must not contain manifest-* files (" . $name . ")" ); }
 	if ( preg_match( "/\.html$/", $name ) ) {
 		$c = rd( $f->getPathname() );
-		foreach ( array( "<!-- CHANGELOG -->", "<!-- KEYS -->", "<!-- REVOKED -->", "{{" ) as $mk ) {
+		foreach ( array( "<!-- CHANGELOG -->", "<!-- KEYS -->", "<!-- REVOKED -->", "<!-- HEADER", "<!-- FOOTER", "<!-- BARE", "<!-- DOWNLOAD_URL -->", "{{" ) as $mk ) {
 			if ( false !== strpos( $c, $mk ) ) { fail( $f->getPathname() . " still contains " . $mk ); }
 		}
 	}
 }
 PHP
 
-php -r "$PHP_GEN" -- "$TMP" "$CHANGELOG" "$MANIFEST" "$NOW" "$ROOT/includes/modules/class-updater.php"
+php -r "$PHP_GEN" -- "$TMP" "$CHANGELOG" "$MANIFEST" "$NOW" "$ROOT/includes/modules/class-updater.php" "$BETA_MANIFEST"
 
 rm -rf "$OUT"
 mv "$TMP" "$OUT"

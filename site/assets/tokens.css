@@ -1,0 +1,121 @@
+/* ─────────────────────────────────────────────────────────────
+   RT Design System - Tokens
+   Aliniat cu paleta rt.md (rt-dark / rt-light, OKLCH).
+   Toate token-urile semantice sunt derivate din --b1/--bc/--p,
+   astfel încât schimbarea data-theme actualizează totul automat.
+   ─────────────────────────────────────────────────────────── */
+
+/* ─── Default = rt-dark (preluat din css/style.css) ─── */
+:root,
+[data-theme="rt-dark"] {
+  color-scheme: dark;
+  --p:  76.7623% 0.104 131.063;  --pc: 18% 0.01 264;   /* emerald green accent */
+  --s:  78%  0.05  264;     --sc: 18% 0.01 264;
+  --n:  28%  0.014 264;     --nc: 95% 0    0;
+  --b1: 23.2% 0.014 264;
+  --b2: 19.8% 0.013 264;
+  --b3: 16.6% 0.011 264;
+  --bc: 95%  0    0;
+}
+
+/* rt-light - bazat pe DaisyUI 4 Emerald. Verde primary, alb pur. */
+[data-theme="rt-light"] {
+  color-scheme: light;
+  --p:  76.7623% 0.104 131.063;     --pc: 33.3866% 0.040 131.063;
+  --s:  64.5604% 0.046 26.3;        --sc: 12.9302% 0.013 28;
+  --a:  76.6347% 0.135 207.808;     --ac: 14.6884% 0.026 209.279;
+  --n:  35.5662% 0.027 256.848;     --nc: 98.4625% 0.001 247.838;
+  --b1: 100% 0 0;
+  --b2: 96.1151% 0 0;
+  --b3: 92.2521% 0 0;
+  --bc: 36.6531% 0.027 255.978;
+}
+
+/* ─── Semantic tokens - derivate din paleta rt.md ─── */
+:root {
+  /* Surfaces */
+  --rt-bg:        oklch(var(--b1));            /* page background */
+  --rt-bg-2:      oklch(var(--b2));            /* card surface */
+  --rt-bg-3:      oklch(var(--b3));            /* deeper surface */
+
+  /* Text */
+  --rt-fg:        oklch(var(--bc));            /* primary text */
+  --rt-fg-2:      oklch(var(--bc) / .85);      /* secondary */
+  --rt-fg-3:      oklch(var(--bc) / .6);       /* captions, muted */
+  --rt-fg-4:      oklch(var(--bc) / .4);       /* hints, disabled */
+
+  /* Lines */
+  --rt-line:        oklch(var(--bc) / .14);    /* hairlines */
+  --rt-line-strong: oklch(var(--bc) / .28);    /* prominent borders */
+
+  /* Accent (sky blue from rt.md primary) */
+  --rt-accent:      oklch(var(--p));
+  --rt-accent-soft: oklch(var(--p) / .15);
+  --rt-accent-on:   oklch(var(--pc));          /* text on accent bg */
+
+  /* Inverse (for hover bg subtle) */
+  --rt-tint:        oklch(var(--bc) / .04);
+  --rt-tint-2:      oklch(var(--bc) / .08);
+
+  /* ─── Type families ─── */
+  --rt-font-display: 'Libre Caslon Text', 'Times New Roman', Georgia, serif;
+  --rt-font-sans:    'Figtree', system-ui, -apple-system, sans-serif;
+  --rt-font-title:   'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --rt-font-body:    'Figtree', system-ui, -apple-system, sans-serif;
+  --rt-font-mono:    'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* ─── Type scale (modular, ~1.25 ratio) ─── */
+  --rt-text-xs:   12px;
+  --rt-text-sm:   14px;
+  --rt-text-base: 16px;
+  --rt-text-md:   18px;
+  --rt-text-lg:   22px;
+  --rt-text-xl:   28px;
+  --rt-text-2xl:  36px;
+  --rt-text-3xl:  48px;
+  --rt-text-4xl:  64px;
+  --rt-text-5xl:  88px;
+  --rt-text-6xl:  120px;
+  --rt-text-display: clamp(80px, 14vw, 200px);
+
+  /* ─── Line heights ─── */
+  --rt-lh-tight:  1.05;
+  --rt-lh-snug:   1.15;
+  --rt-lh-normal: 1.55;
+  --rt-lh-loose:  1.7;
+
+  /* ─── Letter spacing ─── */
+  --rt-tracking-tight:  -0.03em;
+  --rt-tracking-snug:   -0.015em;
+  --rt-tracking-normal: 0;
+  --rt-tracking-wide:   0.05em;
+  --rt-tracking-mono:   0.04em;
+
+  /* ─── Spacing (4px base) ─── */
+  --rt-space-1:  4px;
+  --rt-space-2:  8px;
+  --rt-space-3:  12px;
+  --rt-space-4:  16px;
+  --rt-space-5:  24px;
+  --rt-space-6:  32px;
+  --rt-space-7:  48px;
+  --rt-space-8:  64px;
+  --rt-space-9:  96px;
+  --rt-space-10: 128px;
+  --rt-space-11: 192px;
+
+  /* ─── Radii ─── */
+  --rt-radius-sm: 4px;
+  --rt-radius:    8px;
+  --rt-radius-lg: 12px;
+  --rt-radius-pill: 999px;
+
+  /* ─── Container widths ─── */
+  --rt-container-sm: 640px;
+  --rt-container:    980px;
+  --rt-container-lg: 1200px;
+
+  /* ─── Motion ─── */
+  --rt-ease:     cubic-bezier(0.32, 0.72, 0, 1);
+  --rt-duration: 240ms;
+}

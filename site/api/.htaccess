@@ -1,0 +1,6 @@
+# The libraries are never served: each one also answers 404 on its own when
+# requested directly (CMP_CHECK guard), in case these rules are ignored.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^lib/ - [F,L]
+</IfModule>

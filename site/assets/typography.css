@@ -1,0 +1,136 @@
+/* ─────────────────────────────────────────────────────────────
+   RT Design System - Typography
+   Două familii de display: serif (Libre Caslon Text) și
+   sans bold (Plus Jakarta Sans 800). Folosește varianta sans
+   pentru titluri care vor mai multă greutate / industrial vibe.
+   ─────────────────────────────────────────────────────────── */
+
+/* ─── Display - hero giant ─── */
+.rt-display {
+  font-family: var(--rt-font-display);
+  font-size: var(--rt-text-display);
+  font-weight: 400;
+  line-height: var(--rt-lh-tight);
+  letter-spacing: var(--rt-tracking-tight);
+  color: var(--rt-fg);
+  margin: 0;
+}
+.rt-display--sans {
+  font-family: var(--rt-font-title);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+/* ─── H1 - page heading ─── */
+.rt-h1 {
+  font-family: var(--rt-font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 400;
+  line-height: var(--rt-lh-tight);
+  letter-spacing: var(--rt-tracking-snug);
+  color: var(--rt-fg);
+  margin: 0;
+}
+.rt-h1--sans {
+  font-family: var(--rt-font-title);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+/* ─── H2 - section heading ─── */
+.rt-h2 {
+  font-family: var(--rt-font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 400;
+  line-height: var(--rt-lh-snug);
+  letter-spacing: var(--rt-tracking-snug);
+  color: var(--rt-fg);
+  margin: 0;
+}
+.rt-h2--sans {
+  font-family: var(--rt-font-title);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+/* ─── H3 - block heading ─── */
+.rt-h3 {
+  font-family: var(--rt-font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
+  line-height: var(--rt-lh-snug);
+  color: var(--rt-fg);
+  margin: 0;
+}
+.rt-h3--sans {
+  font-family: var(--rt-font-title);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: var(--rt-tracking-snug);
+}
+
+/* ─── Body & lead ─── */
+.rt-lead {
+  font-family: var(--rt-font-body);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 450;
+  line-height: var(--rt-lh-loose);
+  color: var(--rt-fg-2);
+  margin: 0;
+  max-width: 56ch;
+}
+.rt-body {
+  font-family: var(--rt-font-body);
+  font-size: var(--rt-text-md);
+  font-weight: 500;
+  line-height: var(--rt-lh-normal);
+  color: var(--rt-fg-2);
+  margin: 0;
+  max-width: 64ch;
+}
+.rt-body-sm {
+  font-family: var(--rt-font-body);
+  font-size: var(--rt-text-sm);
+  font-weight: 500;
+  line-height: var(--rt-lh-normal);
+  color: var(--rt-fg-3);
+  margin: 0;
+}
+
+/* ─── Mono - labels & numbers ─── */
+.rt-mono {
+  font-family: var(--rt-font-mono);
+  font-size: var(--rt-text-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: var(--rt-tracking-mono);
+  text-transform: uppercase;
+  color: var(--rt-fg-3);
+}
+.rt-mono-num {
+  font-family: var(--rt-font-mono);
+  font-size: clamp(64px, 12vw, 160px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--rt-fg);
+}
+
+/* ─── Inline emphasis ─── */
+.rt-em-italic { font-style: italic; }
+.rt-em-strong { font-weight: 700; color: var(--rt-fg); }
+.rt-em-accent { color: var(--rt-accent); }
+
+/* ─── Links ─── */
+.rt-link {
+  color: var(--rt-fg);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--rt-line-strong);
+  transition: text-decoration-color var(--rt-duration) var(--rt-ease);
+}
+.rt-link:hover { text-decoration-color: var(--rt-fg); }

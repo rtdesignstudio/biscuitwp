@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Demo · Consent Manager Pro</title>
+<meta name="description" content="Bannerul Consent Manager Pro, în trei stiluri. Fără trackere.">
+<link rel="stylesheet" href="/assets/tokens.css">
+<link rel="stylesheet" href="/assets/typography.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/demo/cmp.min.css">
+<script src="/demo/demo.js"></script>
+<script src="/demo/cmp.min.js" defer></script>
+</head>
+<body class="demo">
+<!-- HEADER alt=/demo/en/ -->
+<main id="main" class="wrap">
+<h1>Demo: bannerul</h1>
+<p>Așa vede bannerul un vizitator nou. Alege un stil, apoi încearcă butoanele. Pagina nu încarcă niciun tracker.</p>
+<p class="switch" role="group" aria-label="Stilul bannerului">
+<a href="/demo/?style=minimal" data-style="minimal">Minimal</a>
+<a href="/demo/?style=brand" data-style="brand">Brand</a>
+<a href="/demo/?style=friendly" data-style="friendly">Prietenos</a>
+</p>
+<p class="actions">
+<button type="button" class="btn" id="demo-reset">Arată din nou</button>
+<a class="btn btn-ghost" href="#cmp-settings" data-cmp-settings>Setări cookie</a>
+</p>
+<p class="muted small">Demo-ul pune un singur cookie, <code>cmp_consent</code>, strict necesar: ține minte alegerea ta o zi, doar pe <code>/demo/</code>. „Arată din nou” îl șterge.</p>
+</main>
+<!-- FOOTER -->
+</body>
+</html>
