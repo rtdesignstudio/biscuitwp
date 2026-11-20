@@ -54,7 +54,8 @@ cmp_assert_eq( CMP_Updater::BASE, 'https://consent.rt.md/', 'BASE is the static 
 cmp_assert_eq( CMP_Updater::PACKAGE_PREFIX, 'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/', 'PACKAGE_PREFIX is the public GitHub releases path' );
 cmp_assert_eq( CMP_Updater::EXPIRY_DAYS, 60, 'EXPIRY_DAYS = 60' );
 cmp_assert_eq( CMP_Updater::MAX_MANIFEST, 65536, 'MAX_MANIFEST = 64 KB' );
-cmp_assert_eq( CMP_Updater::RESCUE_PUBLIC_KEY, 'RESCUE_KEY_NOT_SET', 'RESCUE_PUBLIC_KEY placeholder until Sergiu provides it' );
+cmp_assert_eq( strlen( (string) base64_decode( CMP_Updater::RESCUE_PUBLIC_KEY, true ) ), 32, 'RESCUE_PUBLIC_KEY is a real 32-byte key' );
+cmp_assert( CMP_Updater::RESCUE_PUBLIC_KEY !== CMP_Updater::SIGN_PUBLIC_KEY && CMP_Updater::RESCUE_PUBLIC_KEY !== CMP_Updater::MANIFEST_PUBLIC_KEY, 'RESCUE_PUBLIC_KEY differs from the release and manifest keys' );
 
 // Manifest URLs.
 cmp_assert_eq( CMP_Updater::manifest_url( 'stable' ), 'https://consent.rt.md/manifest-stable.json', 'manifest_url: stable' );

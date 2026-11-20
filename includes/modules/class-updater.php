@@ -51,7 +51,7 @@ class CMP_Updater {
 	 */
 	const MANIFEST_PUBLIC_KEY = '9XrkCKvjusbXCC6fQjKNy7A6DsPNiUcbybEZVdyBssA=';
 	/** Offline emergency key: may sign packages or manifests. Placeholder (verifies nothing) until set. */
-	const RESCUE_PUBLIC_KEY = 'RESCUE_KEY_NOT_SET';
+	const RESCUE_PUBLIC_KEY = '684HoPUDxOrnCrm+ORFYLCZTmJVpF81unp8j9VKmT8E=';
 
 	/** Option: highest `issued` timestamp seen per channel ({beta, stable}), anti-rollback. */
 	const ISSUED_OPTION = 'cmp_manifest_issued';

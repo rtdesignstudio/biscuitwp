@@ -315,7 +315,7 @@ cmp_assert( 'junk' !== (string) @file_get_contents( $cmp_rel_root . '/dist/state
 // Rescue key preflight (CMP_TEST_RESCUE_KEY is honoured only with CMP_RELEASE_PREFLIGHT_ONLY=1).
 $cmp_rel_pf = array( 'CMP_RELEASE_PREFLIGHT_ONLY' => '1', 'CMP_RELEASE_STATE' => null, 'CMP_CHANGELOG' => null ) + $cmp_rel_env;
 foreach ( array(
-	'empty'          => '',
+	'blank'          => ' ', // proc_open drops empty env values, so a blank stands in for "empty"
 	'garbage'        => 'not base64 !!',
 	'16 bytes'       => base64_encode( str_repeat( 'a', 16 ) ),
 	'= manifest key' => CMP_Updater::MANIFEST_PUBLIC_KEY,
