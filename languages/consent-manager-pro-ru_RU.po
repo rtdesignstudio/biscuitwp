@@ -3921,26 +3921,3 @@ msgid ""
 msgstr ""
 "В режиме Light решения нет: allowCategory и denyCategory ничего не делают, а "
 "onConsent и whenAllowed не вызывают функцию для необязательных категорий."
-
-#~ msgid "https://github.com/rtgit003/consent-manager-pro"
-#~ msgstr "https://github.com/rtgit003/consent-manager-pro"
-
-#~ msgid "Preset design"
-#~ msgstr "Стиль оформления"
-
-#~ msgid "Buton flotant redeschidere"
-#~ msgstr "Плавающая кнопка повторного открытия"
-
-#~ msgid ""
-#~ "Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor "
-#~ "de cookie-uri"
-#~ msgstr ""
-#~ "Показывать круглую кнопку (слева внизу) для повторного открытия настроек "
-#~ "cookie"
-
-#~ msgid ""
-#~ "Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar "
-#~ "în modul Pro."
-#~ msgstr ""
-#~ "Появляется после того, как посетитель сделал выбор. Действует только в "
-#~ "режиме Pro."

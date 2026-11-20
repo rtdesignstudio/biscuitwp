@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Securitate · Consent Manager Pro</title>
+<meta name="description" content="Cum raportezi o vulnerabilitate în Consent Manager Pro și cum sunt protejate update-urile.">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Sari la conținut</a>
+<header class="site">
+<div class="wrap">
+<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<nav aria-label="Pagini">
+<ul>
+<li><a href="../">Acasă</a></li>
+<li><a href="../changelog/">Changelog</a></li>
+<li><a href="./" aria-current="page">Securitate</a></li>
+<li><a href="../confidentialitate/">Confidențialitate</a></li>
+</ul>
+</nav>
+<p class="lang"><a href="../en/security/" hreflang="en" lang="en">English</a></p>
+</div>
+</header>
+<main id="main" class="wrap">
+<h1>Securitate</h1>
+<p class="lead">Cum ne raportezi o vulnerabilitate și cum sunt protejate update-urile pluginului. <span lang="en">This page is also available <a href="../en/security/" hreflang="en">in English</a>.</span></p>
+
+<h2 id="raportare">Raportează o vulnerabilitate</h2>
+<p>Nu deschide un issue public. Folosește unul din cele două canale private:</p>
+<ol>
+<li><strong>Raportarea privată pe GitHub</strong> (preferată): <a href="https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new">deschide un raport</a>.</li>
+<li><strong>E-mail:</strong> <a href="mailto:security@rt.md">security@rt.md</a>.</li>
+</ol>
+
+<h2 id="raport">Ce să conțină raportul</h2>
+<ul>
+<li>versiunea pluginului, a WordPress și a PHP;</li>
+<li>ce ai găsit și unde (fișier, funcție sau adresă);</li>
+<li>pașii de reproducere, ideal o dovadă de concept;</li>
+<li>ce impact crezi că are.</li>
+</ul>
+<p>Testează doar pe site-uri care îți aparțin. Nu accesa date care nu sunt ale tale.</p>
+
+<h2 id="termene">Termene</h2>
+<ul>
+<li>Confirmăm primirea raportului în <strong>72 de ore</strong>.</li>
+<li>Pentru o vulnerabilitate confirmată, publicăm un fix în <strong>30 de zile</strong>. Dacă durează mai mult, îți spunem de ce și stabilim împreună o dată.</li>
+<li>Divulgarea e coordonată: publicăm detaliile după fix sau după cel mult <strong>90 de zile</strong>, dacă nu convenim altfel. Dacă vrei, te menționăm.</li>
+</ul>
+
+<h2 id="versiuni">Versiuni suportate</h2>
+<p>Fixurile de securitate apar în <strong>cea mai nouă versiune</strong>, pe care site-urile o primesc ca update automat. Pentru versiunea minoră anterioară (de exemplu 1.0.x când ultima e 1.1.x) publicăm fixul doar în GitHub Releases, ca zip semnat, fără update automat. Înainte să raportezi, actualizează la ultima versiune.</p>
+
+<h2 id="update-uri">Cum sunt protejate update-urile</h2>
+<p>Pluginul nu ia update-uri de pe wordpress.org. Le ia așa:</p>
+<ul>
+<li><strong>Manifest semnat.</strong> Pe consent.rt.md stă câte un manifest pentru fiecare canal (stable și beta), cu o semnătură Ed25519 separată. Manifestul spune ce versiune e disponibilă, de unde se descarcă și ce amprentă SHA-256 are pachetul. Pluginul îl folosește doar dacă semnătura e validă.</li>
+<li><strong>Pachet semnat.</strong> Zip-ul vine din GitHub Releases. Înainte de instalare, pluginul verifică amprenta SHA-256 și semnătura Ed25519 a zip-ului. Acceptă doar adresa exactă din manifestul verificat. Dacă ceva nu se potrivește, pachetul e șters și update-ul e refuzat.</li>
+<li><strong>Anti-rollback.</strong> Pluginul ține minte cel mai nou manifest văzut pe fiecare canal și refuză unul mai vechi. Așa, nimeni nu-ți poate servi un manifest vechi, dar valid, ca să te țină pe o versiune vulnerabilă.</li>
+<li><strong>Expirare.</strong> Un manifest e valabil cel mult 60 de zile. Îl semnăm din nou în fiecare lună. Un manifest expirat nu mai oferă update-uri, iar în admin apare un avertisment.</li>
+<li><strong>Versiuni retrase.</strong> Manifestul semnat are lista versiunilor retrase. O versiune retrasă nu e oferită niciodată. Dacă o ai instalată, în admin apare un avertisment.</li>
+<li><strong>Fără extensia PHP sodium</strong>, semnăturile nu pot fi verificate. Atunci pluginul nu instalează update-uri și îți spune de ce.</li>
+</ul>
+
+<h2 id="chei">Cheile publice</h2>
+<p>Pluginul are trei chei publice Ed25519. Amprenta e SHA-256 (hex) a celor 32 de octeți ai cheii.</p>
+<!-- KEYS -->
+
+<h2 id="verificare">Verifică manual un zip</h2>
+<ol>
+<li>Descarcă din <a href="https://github.com/rtdesignstudio/consent-manager-pro/releases">GitHub Releases</a> fișierele <code>consent-manager-pro.zip</code> și <code>consent-manager-pro.zip.sig</code>, din aceeași versiune.</li>
+<li>Calculează amprenta zip-ului și compar-o cu câmpul <code>sha256</code> din <a href="../manifest-stable.json">manifest-stable.json</a> (pentru versiunea din manifest):
+<pre><code>shasum -a 256 consent-manager-pro.zip</code></pre></li>
+<li>Verifică semnătura cu cheia de release. Comanda trebuie să afișeze <code>OK</code>:
+<pre><code>php -r '$k = base64_decode("{{SIGN_PUBLIC_KEY}}"); $s = base64_decode(trim(file_get_contents("consent-manager-pro.zip.sig"))); $z = file_get_contents("consent-manager-pro.zip"); echo sodium_crypto_sign_verify_detached($s, $z, $k) ? "OK\n" : "INVALID\n";'</code></pre></li>
+</ol>
+<p>Dacă vezi o eroare, fișierul .sig lipsește sau e greșit.</p>
+<p>Dacă un release a fost semnat cu cheia de rezervă, pune cheia de rezervă în comandă. Dacă verificarea nu trece, nu instala zip-ul și scrie-ne.</p>
+
+<h2 id="retrase">Versiuni retrase</h2>
+<p>Versiunile retrase din canalul stable, din manifestul semnat:</p>
+<!-- REVOKED -->
+
+<h2 id="contact">Contact</h2>
+<p>Pentru cercetători și orice întrebare de securitate: <a href="mailto:security@rt.md">security@rt.md</a>. Informațiile de contact sunt și în <a href="../.well-known/security.txt">security.txt</a>.</p>
+</main>
+<footer class="site">
+<div class="wrap">
+<p>Consent Manager Pro e gratuit și open-source, sub licența <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Cod sursă: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+</div>
+</footer>
+</body>
+</html>

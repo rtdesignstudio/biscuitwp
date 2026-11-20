@@ -3898,24 +3898,3 @@ msgstr ""
 "In Light mode there is no decision: allowCategory and denyCategory do "
 "nothing, and onConsent and whenAllowed don’t call the function for optional "
 "categories."
-
-#~ msgid "https://github.com/rtgit003/consent-manager-pro"
-#~ msgstr "https://github.com/rtgit003/consent-manager-pro"
-
-#~ msgid "Preset design"
-#~ msgstr "Design preset"
-
-#~ msgid "Buton flotant redeschidere"
-#~ msgstr "Floating reopen button"
-
-#~ msgid ""
-#~ "Afișează un buton rotund (jos-stânga) pentru redeschiderea preferințelor "
-#~ "de cookie-uri"
-#~ msgstr "Show a round button (bottom left) to reopen the cookie preferences"
-
-#~ msgid ""
-#~ "Apare după ce vizitatorul face o alegere de consimțământ. Se aplică doar "
-#~ "în modul Pro."
-#~ msgstr ""
-#~ "Appears after the visitor makes a consent choice. Applies only in Pro "
-#~ "mode."

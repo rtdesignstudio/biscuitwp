@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Privacy · Consent Manager Pro</title>
+<meta name="description" content="What Consent Manager Pro sends, to whom, and what it keeps on your site.">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+<div class="wrap">
+<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<nav aria-label="Pages">
+<ul>
+<li><a href="../">Home</a></li>
+<li><a href="../../changelog/" hreflang="ro">Changelog</a></li>
+<li><a href="../security/">Security</a></li>
+<li><a href="./" aria-current="page">Privacy</a></li>
+</ul>
+</nav>
+<p class="lang"><a href="../../confidentialitate/" hreflang="ro" lang="ro">Română</a></p>
+</div>
+</header>
+<main id="main" class="wrap">
+<h1>Privacy</h1>
+<p class="lead">What Consent Manager Pro sends, to whom, and what it keeps on your site. In short: the plugin has no telemetry and sends us no data about your visitors.</p>
+
+<h2 id="to-rt">1. What the plugin sends to us (RT)</h2>
+<p>One thing only: the update check.</p>
+<ul>
+<li>Your site requests the manifest of the selected channel (<code>manifest-stable.json</code> or <code>manifest-beta.json</code>) and its signature (<code>.sig</code>) from <code>consent.rt.md</code>.</li>
+<li>This happens when WordPress checks for updates (automatically, twice a day) or when you click “Check for updates”. The answer is cached for 6 hours (one hour after an error), so the request goes out at most once every 6 hours, apart from a manual check.</li>
+<li>The request carries no site address, no parameters, no cookies and no extra headers. The user agent is just <code>Consent-Manager-Pro/&lt;version&gt;</code>, without the site address WordPress normally adds.</li>
+<li>Like any web server, ours sees the IP address of your server, not of your visitors, and the time of the request.</li>
+<li>We keep access logs only for their usual rotation. We use them to estimate the number of active installs and for server security, nothing else.</li>
+</ul>
+
+<h2 id="to-others">2. What it sends to others, only because of your actions or settings</h2>
+<ul>
+<li><strong>GitHub</strong> (<code>github.com</code> and its file servers): when you install an update, your server downloads the zip from GitHub Releases, with the same anonymous user agent. GitHub sees your server's IP address.</li>
+<li><strong>Google Fonts</strong> (<code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code>): only when you click “Localize fonts” (in Settings) or “Localize” (in Check). The plugin reads your site's home page to find the fonts. Your server then downloads the CSS and font files from Google once and stores them locally. From then on your visitors no longer contact Google for fonts. The request comes from your server, with a regular browser user agent so that Google serves woff2 fonts.</li>
+<li><strong>YouTube thumbnails</strong> (<code>i.ytimg.com</code>): when a page has a YouTube video blocked until consent, your server downloads the video thumbnail once and stores it locally. The request contains only the video ID. The visitor sees the local copy and does not contact YouTube until they accept.</li>
+<li><strong>After consent</strong>, never before: if the visitor accepts, their browser loads YouTube embeds from <code>www.youtube-nocookie.com</code> (YouTube's reduced-cookie variant) and the services you put on your site from their providers. That is the visitor's browser, not the plugin.</li>
+</ul>
+
+<h2 id="not-sent">3. What it does not send</h2>
+<ul>
+<li>No telemetry and no usage statistics.</li>
+<li>No visitor data: no IP addresses, no choices, no consent log. The consent log stays in your database.</li>
+<li>Not your plugin list, theme, WordPress version or site address. (WordPress itself sends its plugin list to wordpress.org; that is not the plugin.)</li>
+<li>The scanner on the “Verificare” (Check) screen, and the daily scan, start only from your own site's pages, on the same domain, including the WordPress sitemap. They send no cookies.</li>
+<li>The browser check on the same screen opens your pages in your own browser and clicks “Accept all”, so the services on your site load in your browser, as for any visitor who accepts.</li>
+</ul>
+
+<h2 id="on-site">4. What the plugin keeps on your site</h2>
+<p>This data is yours, as the site operator. We never see it.</p>
+<ul>
+<li><strong>The <code>cmp_consent</code> cookie</strong>, in the visitor's browser: their choice (decision, accepted categories, the services active at that time, policy version, date) and a random consent ID. It lasts 180 days by default. You can change the duration, up to 13 months at most. Attributes: <code>SameSite=Lax</code>, <code>path=/</code>.</li>
+<li><strong>The <code>cmp_svc</code> cookie</strong>, only if the visitor chooses “Always load” on an embed: it remembers the allowed services, with the same duration.</li>
+<li><strong>In Light mode</strong> no cookie is set and nothing is logged; only the fact that the visitor closed the banner is remembered in <code>localStorage</code> (<code>cmp_light_dismissed</code>), in their browser.</li>
+<li><strong>The consent log</strong>, a table in your database. For each choice it stores: the consent ID, the decision, the categories, the services allowed or withdrawn, the language, the page address, the policy version, the date and time. The visitor's IP address and user agent are never stored in clear, only as a salted SHA-256 hash. The salt is unique to your site. An identical repeated choice is not stored again.</li>
+<li><strong>Retention:</strong> rows older than 13 months are deleted automatically, every day. You can change the period in the settings.</li>
+<li><strong>Rate limit:</strong> for each IP address a temporary entry is kept for one hour, under a key made from a truncated, salted hash of the IP, to stop abuse.</li>
+<li><strong>WP Consent API:</strong> if the WP Consent API plugin is present, the plugin also sets its <code>wp_consent_*</code> cookies, through <code>wp_set_consent</code>.</li>
+<li><strong>Other data:</strong> the settings, categories, services, scan results, localized fonts and YouTube thumbnails (in the uploads folder).</li>
+<li><strong>On uninstall:</strong> temporary data (scan results, thumbnails, localized fonts, caches) is always deleted. The consent log, settings, categories and configured services are kept, because the log is the legal evidence of the choices. They are deleted only if you ticked “Delete all data on uninstall” in the settings. Generated legal pages are never deleted.</li>
+</ul>
+
+<h2 id="standalone">5. The standalone version (sites without WordPress)</h2>
+<p>For static sites there is a version without WordPress: <code>cmp.js</code> and <code>cmp.css</code>.</p>
+<ul>
+<li>If you include them from <code>rt.md/cmp/</code>, each visitor's browser downloads them from our server. So our server sees the IP addresses of the visitors of those sites, in its access log, kept only for the usual rotation.</li>
+<li>The files send nothing to us: they do not report choices and make no requests of their own. After consent they only start the scripts and embeds you marked on your site. The choice is stored in the <code>cmp_consent</code> cookie (and <code>cmp_svc</code> for “Always load”), on your site. In Light mode, closing the banner is remembered in <code>localStorage</code>.</li>
+<li><strong>Our recommendation:</strong> host <code>cmp.js</code> and <code>cmp.css</code> on your own server. Copy the two files and include them with your own path, as in <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone/README.md</a>. Then our server sees nothing.</li>
+</ul>
+
+<h2 id="contact">6. Contact</h2>
+<p>Have a privacy question? Write to <a href="mailto:security@rt.md">security@rt.md</a>, the project's contact address.</p>
+</main>
+<footer class="site">
+<div class="wrap">
+<p>Consent Manager Pro is free and open-source software, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Source code: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+</div>
+</footer>
+</body>
+</html>

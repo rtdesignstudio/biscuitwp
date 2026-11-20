@@ -20,6 +20,14 @@
 #   ("chore(release): ..."); the files to upload are the committed release/
 #   manifest-*.json + .json.sig. CMP_RELEASE_PREFLIGHT_ONLY=1 stops right after
 #   the key preflight (tests; only then is CMP_TEST_RESCUE_KEY honoured).
+# Public pages (B8b): after the state is saved, bin/build-site.sh builds the
+#   static pages of consent.rt.md: release/site on the real path (committed with
+#   the state, uploaded with scp -r), dist/site in --dry-run (never uploaded). A
+#   release (X.Y.Z) also writes the CycloneDX SBOM dist/consent-manager-pro-X.Y.Z.cdx.json
+#   and attaches it to the GitHub release.
+#   Before the tag/push/gh step a preflight site build (dist/site-preflight, not
+#   uploaded) runs with this run's stable manifest, so a broken site build stops
+#   the script while nothing is published yet.
 # Secret keys are never printed and never written outside their key files.
 #
 # Recovery: if `gh release create` failed after the tag was pushed, fix the
@@ -32,6 +40,10 @@
 #   do not rerun the release: the new state is already in release/, so commit
 #   and push it by hand, then upload as printed (scp of release/manifest-*):
 #     git add release && git commit -m "chore(release): vX.Y.Z (beta)" && git push
+#   If the site build fails after `gh release create` succeeded (the preflight
+#   build makes this unlikely), do not rerun the release: fix the cause, then run
+#   `CMP_STABLE_MANIFEST=release/manifest-stable.json bin/build-site.sh --out release/site`
+#   after committing the state by hand as above.
 set -euo pipefail
 
 REPO="rtdesignstudio/consent-manager-pro"
@@ -266,6 +278,43 @@ if ( "pubkey" === $op ) { // pubkey <secret key file>: the matching public key.
 	echo base64_encode( sodium_crypto_sign_publickey_from_secretkey( secret_key( $a[2] ) ) ), "\n";
 	exit( 0 );
 }
+if ( "sbom" === $op ) { // sbom <version> <zip> <standalone cmp.js> <services.json> <out>
+	$b    = random_bytes( 16 );
+	$b[6] = chr( ( ord( $b[6] ) & 0x0f ) | 0x40 );
+	$b[8] = chr( ( ord( $b[8] ) & 0x3f ) | 0x80 );
+	$h    = bin2hex( $b );
+	$uuid = substr( $h, 0, 8 ) . "-" . substr( $h, 8, 4 ) . "-" . substr( $h, 12, 4 ) . "-" . substr( $h, 16, 4 ) . "-" . substr( $h, 20 );
+	$hash = function ( $f ) {
+		$x = hash_file( "sha256", $f );
+		if ( false === $x ) { fail( "cannot hash " . $f ); }
+		return array( array( "alg" => "SHA-256", "content" => $x ) );
+	};
+	$bom  = array(
+		"bomFormat"    => "CycloneDX",
+		"specVersion"  => "1.5",
+		"serialNumber" => "urn:uuid:" . $uuid,
+		"version"      => 1,
+		"metadata"     => array(
+			"timestamp" => gmdate( "Y-m-d\TH:i:s\Z" ),
+			"component" => array(
+				"type"     => "application",
+				"name"     => "consent-manager-pro",
+				"version"  => $a[2],
+				"licenses" => array( array( "license" => array( "id" => "GPL-2.0-or-later" ) ) ),
+				"purl"     => "pkg:github/rtdesignstudio/consent-manager-pro@v" . $a[2],
+				"hashes"   => $hash( $a[3] ),
+			),
+		),
+		"components"   => array(
+			array( "type" => "file", "name" => "standalone/cmp.js", "version" => $a[2], "hashes" => $hash( $a[4] ) ),
+			array( "type" => "data", "name" => "data/services.json", "version" => $a[2], "hashes" => $hash( $a[5] ) ),
+		),
+	);
+	$json = json_encode( $bom, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT );
+	if ( false === $json || false === file_put_contents( $a[6], $json . "\n" ) ) { fail( "could not write the SBOM " . $a[6] ); }
+	echo "Wrote " . $a[6] . "\n";
+	exit( 0 );
+}
 if ( "notes" === $op ) { // notes <changelog> <version> <strict>
 	notes( $a[2], $a[3], "1" === $a[4] );
 	exit( 0 );
@@ -381,6 +430,8 @@ if [ "$CMD" = "release" ]; then
 		HEADER_VERSION="$(grep -m1 '^ \* Version:' "$SLUG.php" | awk '{print $3}')"
 		[ "$HEADER_VERSION" = "$VERSION" ] || die "plugin header Version is '$HEADER_VERSION', expected '$VERSION'. Bump it (and CMP_VERSION) first."
 		grep -q "define( 'CMP_VERSION', '$VERSION' )" "$SLUG.php" || die "CMP_VERSION constant does not match '$VERSION'."
+		STABLE_TAG="$(grep -m1 '^Stable tag:' readme.txt | sed 's/^Stable tag:[[:space:]]*//' | tr -d '[:space:]')"
+		[ "$STABLE_TAG" = "$VERSION" ] || die "readme.txt Stable tag is '$STABLE_TAG', expected '$VERSION'. Update it first."
 	fi
 
 	# Fail early (before tests and the build) when the CHANGELOG section is missing.
@@ -416,6 +467,10 @@ if [ "$CMD" = "release" ]; then
 		if ( false === file_put_contents( $argv[2] . ".sig", base64_encode( sodium_crypto_sign_detached( $zip, $sk ) ) . "\n" ) ) { fwrite( STDERR, "ERROR: could not write the zip signature\n" ); exit( 1 ); }
 	' "$SIGNING_KEY" "dist/$SLUG.zip"
 	echo "Signed dist/$SLUG.zip.sig"
+
+	# CycloneDX SBOM (hashes of the zip, standalone/cmp.js and the services library).
+	SBOM="dist/$SLUG-$VERSION.cdx.json"
+	mtool sbom "$VERSION" "dist/$SLUG.zip" standalone/cmp.js data/services.json "$SBOM"
 fi
 
 # ---- Manifests -> dist/upload, then verify with the plugin's own code -------
@@ -458,16 +513,35 @@ print_upload() {
 	echo
 	echo "Rulează pe Mac:"
 	echo "  scp$FILES $SERVER_HOST:$SERVER_DIR/"
+	echo "  scp -r release/site/. $SERVER_HOST:$SERVER_DIR/"
+}
+
+# Public pages. Real path: release/site from the committed state (CHANGELOG.md).
+# Dry run: dist/site from the dry-run state and changelog; the path is not shown.
+build_site() {
+	if [ "$DRY" = 1 ]; then
+		CMP_CHANGELOG="$CHANGELOG" CMP_STABLE_MANIFEST="$STATE/manifest-stable.json" bin/build-site.sh --out dist/site >/dev/null
+		echo "Built the public pages (dry run, not for upload)."
+	else
+		CMP_STABLE_MANIFEST=release/manifest-stable.json bin/build-site.sh --out release/site
+	fi
 }
 
 if [ "$DRY" = 1 ]; then
 	save_state
+	build_site
 	echo "Dry run: nothing tagged, pushed, committed or published. State in $STATE/, output in $UPLOAD/."
 	echo "DRY RUN — nu urca aceste fișiere pe server (sunt doar pentru verificare)."
 	exit 0
 fi
 
-# ---- Real path: GitHub, state commit -----------------------------------------
+# ---- Real path: preflight site build, then GitHub, state commit --------------
+# Build the public pages once before anything irreversible (tag, push, gh), so a
+# broken site build cannot leave a published release without its commit.
+PREFLIGHT_MANIFEST="release/manifest-stable.json"
+[ ! -f "$UPLOAD/manifest-stable.json" ] || PREFLIGHT_MANIFEST="$UPLOAD/manifest-stable.json"
+CMP_STABLE_MANIFEST="$PREFLIGHT_MANIFEST" bin/build-site.sh --out dist/site-preflight >/dev/null || die "site build failed — nothing was published"
+
 case "$CMD" in
 	release)
 		if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
@@ -477,7 +551,7 @@ case "$CMD" in
 			git tag "v$VERSION"
 		fi
 		git push -q origin main --tags
-		gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" --repo "$REPO" \
+		gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" "dist/$SLUG-$VERSION.cdx.json" --repo "$REPO" \
 			--title "v$VERSION" --generate-notes --prerelease
 		MSG="chore(release): v$VERSION (beta)" ;;
 	promote)
@@ -490,6 +564,7 @@ case "$CMD" in
 esac
 
 save_state
+build_site
 git add "$STATE"
 git commit -q -m "$MSG"
 git push -q origin main

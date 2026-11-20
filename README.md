@@ -1,36 +1,50 @@
 # Consent Manager Pro
 
-WordPress plugin for GDPR cookie consent, legal page generation and a consent audit log. Theme-agnostic, no jQuery, no external dependencies.
+Free and open-source GDPR cookie consent for WordPress: a consent banner that blocks scripts and embeds until the visitor decides, Google Consent Mode v2, a legal pages generator and a consent audit log. Theme-agnostic, no jQuery, no external dependencies. Available in Romanian, Russian and English.
 
-- **Author:** [RT.md](https://rt.md)
-- **License:** GPL-2.0-or-later
-- **Requires:** WordPress ~6.x, PHP 7.4+
+- **Made by:** [RT](https://rt.md)
+- **License:** GPL-2.0-or-later (see [LICENSE](LICENSE))
+- **Requires:** WordPress 6.0+, PHP 7.4+
+
+Consent Manager Pro is free, and it stays free. "Pro" means professional, not paid: there is no paid version, no license key and no upsell.
 
 ## What it does
 
-- **Consent banner** — centered modal with a full-page blurred overlay, scroll locked until the visitor decides. Configurable position/preset, texts editable from the admin.
-- **Google Consent Mode v2** (native) — emits `gtag('consent', 'default'/'update', …)` from the category → signals mapping, before Site Kit/GTM fire their tags.
-- **Dynamic categories** — N categories (Necessary/Statistics/Marketing by default), each with cookies (name/provider/duration/purpose) and Consent Mode signals.
-- **Consent audit log (GDPR)** — logging with 24h dedup, SHA-256 IP hash + salt, cron-based retention, CSV (BOM) / JSON export, purge.
-- **Legal pages wizard** — generates Privacy Policy / Terms & Conditions / Cookie Policy as WP pages; integrates with the native WordPress privacy policy page and the Privacy Policy Guide.
-- **GPC** — honors Global Privacy Control (`navigator.globalPrivacyControl`, read in the browser so it works with page caching): automatically rejects optional cookies without showing the banner. Do-Not-Track is ignored (abandoned standard).
-- **Multilingual** — WPML / Polylang (string translation + legal page duplication) plus native i18n (`.pot`).
+- **Consent banner**: centered modal with a full-page blurred overlay, scroll locked until the visitor decides. Configurable position/preset, texts editable from the admin.
+- **Google Consent Mode v2** (native): emits `gtag('consent', 'default'/'update', ...)` from the category to signals mapping, before Site Kit/GTM fire their tags.
+- **Dynamic categories**: N categories (Necessary/Statistics/Marketing by default), each with cookies (name/provider/duration/purpose) and Consent Mode signals.
+- **Consent audit log (GDPR)**: logging (an identical repeated choice is not logged again), SHA-256 IP hash + salt, cron-based retention, CSV (BOM) / JSON export, purge.
+- **Legal pages wizard**: generates Privacy Policy / Terms & Conditions / Cookie Policy as WP pages; integrates with the native WordPress privacy policy page and the Privacy Policy Guide.
+- **GPC**: honors Global Privacy Control (`navigator.globalPrivacyControl`, read in the browser so it works with page caching) and automatically rejects optional cookies without showing the banner. Do-Not-Track is ignored (abandoned standard).
+- **Multilingual**: WPML / Polylang (string translation + legal page duplication) plus native i18n (`.pot`, RO/RU/EN).
 
 ## Installation
 
-Copy the `consent-manager-pro/` folder into `wp-content/plugins/` and activate it from **Plugins**. The audit table and the default categories are created on activation.
+1. Download `consent-manager-pro.zip` from [GitHub Releases](https://github.com/rtdesignstudio/consent-manager-pro/releases).
+2. In WordPress, go to **Plugins > Add New > Upload Plugin**, or unzip it into `wp-content/plugins/`.
+3. Activate it. The audit table and the default categories are created on activation.
 
-Configure under **WP Admin → Consent Manager** (a "Settings" link is also shown directly in the plugins list).
+Configure under **WP Admin > Consent Manager** (a "Settings" link is also shown directly in the plugins list).
 
 ## Configuration
 
-- **Settings** — banner position, preset, policy version, log retention, legal page mapping, **banner texts**.
-- **Categories** — CRUD for categories + cookies + Consent Mode signals.
-- **Consent log** — filterable list, summary, export, purge.
-- **Services** — the services library: category overrides, disabling, custom services.
-- **Legal pages** — generation wizard.
+- **Settings**: banner position, preset, policy version, log retention, legal page mapping, **banner texts**.
+- **Categories**: CRUD for categories + cookies + Consent Mode signals.
+- **Consent log**: filterable list, summary, export, purge.
+- **Services**: the services library: category overrides, disabling, custom services.
+- **Legal pages**: generation wizard.
 
-> **Policy version:** bump it whenever you change which cookies/purposes you use — older consent cookies become stale and the banner reappears for re-confirmation (a GDPR requirement when the purpose changes).
+> **Policy version:** bump it whenever you change which cookies/purposes you use. Older consent cookies become stale and the banner reappears for re-confirmation (a GDPR requirement when the purpose changes).
+
+## Updates and security
+
+- Updates are **signed (Ed25519)** and delivered from <https://consent.rt.md/> as a signed manifest, with the zip hosted on GitHub Releases. Updates show up natively under **Plugins / Dashboard > Updates**.
+- **No telemetry.** The update check is a plain request for a static file and sends no site data.
+- Sites follow the `stable` channel; `define( 'CMP_UPDATE_CHANNEL', 'beta' );` in `wp-config.php` switches a site to beta.
+- Keys and how to verify a download by hand: [Security](https://consent.rt.md/en/security/) ([RO](https://consent.rt.md/securitate/)).
+- What the plugin does and does not send: [Privacy](https://consent.rt.md/en/privacy/).
+- Release history: [Changelog](https://consent.rt.md/changelog/) (also in [CHANGELOG.md](CHANGELOG.md)).
+- Reporting a vulnerability: see [SECURITY.md](SECURITY.md).
 
 ## Developer API
 
@@ -76,16 +90,16 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 
 ### Custom services and `data-cmp-category`
 
-- A custom service has a name, hosts, category and cookies; it can also carry a script, printed in the footer and blocked until consent. Saving a script requires the `unfiltered_html` capability. Its hosts match `<script src>` and `<iframe src>` alike: a matching iframe gets the standard placeholder named after the service, with "Încarcă mereu" (library embeds keep priority). The site's own domain is refused as a custom host.
+- A custom service has a name, hosts, category and cookies; it can also carry a script, printed in the footer and blocked until consent. Saving a script requires the `unfiltered_html` capability. Its hosts match `<script src>` and `<iframe src>` alike: a matching iframe gets the standard placeholder named after the service, with "Always load" (library embeds keep priority). The site's own domain is refused as a custom host.
 - `data-cmp-category="<slug>"` works on any `<script>` or `<iframe>` and forces its category. The value is trimmed and lowercased (`Marketing` = `marketing`); `necessary` leaves the tag unchanged and an empty value counts as absent. Any other invalid value fails closed: the library rule applies if one matches, otherwise the tag is blocked as `marketing`. A valid slug that matches no configured category is blocked on purpose (fail-safe). On an `<iframe>` the attribute turns it into a consent placeholder, named after the iframe's host. `data-cmp-keep` always wins.
 
 ### Cookie table
 
 `[cmp_cookie_table]` renders a table built from the detected and custom services (plus cookies entered by hand per category). The generated Cookie Policy page uses it.
 
-### "Încarcă mereu" (Always load)
+### "Always load" (Always load)
 
-Embed placeholders get a second button next to "Încarcă conținutul". The choice is stored in its own `cmp_svc` cookie, separate from the category consent (it does not close the banner and does not count as a refusal), and can be withdrawn from the preferences panel ("Încărcate mereu: YouTube ×") or all at once with "Reject all". Each grant/withdrawal is logged as `service_allow` / `service_withdraw`, with a `services` column in the register. Not available in Light mode.
+Embed placeholders get a second button next to "Load content". The choice is stored in its own `cmp_svc` cookie, separate from the category consent (it does not close the banner and does not count as a refusal), and can be withdrawn from the preferences panel ("Always loaded: YouTube ×") or all at once with "Reject all". Each grant/withdrawal is logged as `service_allow` / `service_withdraw`, with a `services` column in the register. Not available in Light mode.
 
 ### YouTube thumbnail
 
@@ -101,59 +115,14 @@ Only what is in the page HTML is blocked. Anything that GTM or other JavaScript 
 
 ### Standalone
 
-`standalone/cmp.js` does not load the library: on landing pages markers are added by hand (see `standalone/marker-generator.html`; services in `necessary`, like reCAPTCHA, are not marked at all). It supports "Încarcă mereu" for embeds that carry `data-cmp-service`; it keeps no consent log. See `standalone/README.md`.
+`standalone/cmp.js` does not load the library: on landing pages markers are added by hand (see `standalone/marker-generator.html`; services in `necessary`, like reCAPTCHA, are not marked at all). It supports "Always load" for embeds that carry `data-cmp-service`; it keeps no consent log. See `standalone/README.md`.
 
-## Release notes (batch B)
+See [docs/api.md](docs/api.md) for the complete reference.
 
-- Cookie pages generated earlier keep their old static table until regenerated from **Legal pages**.
-- The release version must be ≥ 0.5.0, otherwise the post-update notice is not shown (it appears only when updating from a version below 0.5.0).
-- "Reject all" / "Necessary only" also clears every "Încarcă mereu" choice (one `service_withdraw` row lists them). Saving a partial selection and the GPC auto-reject keep it; embeds already loaded stay until the page is reloaded.
-- The DB schema has its own revision (`cmp_db_schema`), so the `services` column is added even when the version string did not change; a consent record is never lost to a missing column.
-- On update, services that used to run freely (Clarity, Hotjar, chat widgets, etc.) start waiting for consent.
+## Contributing
 
-## Updates & releases
-
-Sites check a static, Ed25519-signed manifest on `https://consent.rt.md/` (`manifest-stable.json` / `manifest-beta.json` + `.json.sig`): no wordpress.org, no application server, no token, and the request carries nothing that identifies the site. The manifest holds the version, the package URL on GitHub Releases (`rtdesignstudio/consent-manager-pro`), the zip's sha256 and its signature, requirements, revoked versions and the changelog; it expires 60 days after it is signed. Nothing unsigned is offered or installed: manifests must verify against `CMP_Updater::MANIFEST_PUBLIC_KEY`, packages against `SIGN_PUBLIC_KEY` (an offline `RESCUE_PUBLIC_KEY` can sign either). Updates show up natively under **Plugins / Dashboard → Updates**. Sites follow `stable`; `define( 'CMP_UPDATE_CHANNEL', 'beta' );` in `wp-config.php` switches a site to beta.
-
-Releases (`bin/release.sh`, keys in `~/.config/cmp-release/`, state in `release/`, notes from `CHANGELOG.md`):
-
-- `bin/release.sh X.Y.Z`: tests + e2e, build and sign the zip, GitHub prerelease, signed `manifest-beta.json`.
-- `bin/release.sh --promote X.Y.Z`: the beta version becomes stable (`manifest-stable.json`, GitHub "latest").
-- `bin/release.sh --revoke X.Y.Z`: never offer X.Y.Z again (both manifests).
-- `bin/release.sh --resign`: re-sign both manifests (monthly; they expire after 60 days).
-- `--dry-run` on any of them writes only to `dist/` (no gh, push or commit). The files to upload end up in `dist/upload/`.
-
-New manifest/rescue keys: `bin/keygen.sh manifest|rescue [--out <path>]` (prints only the public key).
-
-The old relay in `proxy/cmp-update.php` stays only for sites still on 0.4.x (it reads GitHub's latest non-prerelease release and needs the `.zip.sig` asset); 1.0.0 sites never contact it. The `proxy/` folder is excluded from the plugin zip.
-
-## Development
-
-The pure logic (consent evaluation, signals, sanitization, audit, i18n, legal) has standalone PHP tests, with no PHPUnit/Composer:
-
-```bash
-php tests/run.php
-```
-
-### Rulare teste în browser (e2e)
-
-`bin/e2e.sh` verifică într-un Chromium real că **niciun tracker nu face cereri înainte de acord**, pentru fiecare serviciu din `data/services.json`: WordPress (Pro Strict și Advanced: vizitator nou, „Acceptă tot”, „Doar necesare”) și standalone. Pornește un WordPress Playground de unică folosință (pluginul ca în zip + mu-plugin-ul din `tests/e2e/fixture/`) și un server static pentru `tests/e2e/standalone.html`. Toate cererile spre alte origini sunt înregistrate și oprite: nu pleacă trafic spre terți. `bin/release.sh` refuză release-ul dacă testul pică.
-
-```bash
-PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install   # o singură dată; playwright 1.59.1, fără browsere
-bash bin/e2e.sh                                  # ~45 s; cod 0 = verde
-node tests/e2e/match.test.js                     # testele pure (potrivire cerere → serviciu, fixture)
-```
-
-- Cere Chromium pentru Playwright 1.59.1 în cache-ul local (`~/Library/Caches/ms-playwright`, revizia 1217), `python3` și `npx` (Playground CLI din cache-ul npm). Scriptul nu descarcă browsere; dacă lipsesc, iese cu mesaj și cod 1.
-- Raportul: `serviciu | scenariu | ok/LEAK/MISSING | url`. LEAK = cerere înainte de acord (sau după „Doar necesare”); MISSING = un serviciu permis înainte de acord nu s-a încărcat, sau nu s-a încărcat după „Acceptă tot”. Scenariul `control:unblocked` rulează cu blocarea oprită și dovedește că testul vede fiecare fragment (NOFIRE = testul e orb).
-- Ce are voie înainte de acord vine din plugin (`/?cmp_e2e_expect=1`, doar în fixture): `necessary` sau `exempt`; în Advanced și GA4/GTM.
-- Un serviciu nou în `data/services.json` intră automat în fixture și în verificare.
-- Înainte de decizie și după „Doar necesare”, orice cerere externă pe care testul nu o poate atribui unui serviciu din bibliotecă e tot LEAK (`(unattributed)`).
-- Plasă fixă, independentă de plugin: Meta Pixel, TikTok, LinkedIn, Clarity, Hotjar, YouTube, Vimeo, Google Maps, HubSpot, Tawk.to și Crisp nu au voie niciodată înainte de acord (Strict, Advanced, standalone); Advanced poate adăuga doar GA4/GTM; categoriile din plugin trebuie să fie cele din `data/services.json`.
-- Fixture-ul acoperă `<script src>`, scripturi inline (gtag, GTM, fbq, pixel `<img>` creat din JS, `navigator.sendBeacon`, `fetch`), `<noscript><img>` și `<iframe>`. Nu vede: preconnect/dns-prefetch (nu sunt cereri), WebSocket, service workers.
-- Variabile: `CMP_E2E_READY_TIMEOUT` (implicit 180 s), `CMP_E2E_RUN_TIMEOUT` (implicit 300 s, toată rularea în browser), `CMP_E2E_PG_PORT`, `CMP_E2E_PLAYGROUND_CLI` (implicit `@wp-playground/cli@3.1.65`), `CMP_E2E_SETTLE_MS` (implicit 1500).
+Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the tests and build the assets, and [docs/api.md](docs/api.md) for the full developer API.
 
 ## License
 
-GPL-2.0-or-later.
+GPL-2.0-or-later. See [LICENSE](LICENSE).

@@ -165,6 +165,36 @@ if ( true === $cmp_rel_zip->open( $cmp_rel_root . '/dist/consent-manager-pro.zip
 	cmp_assert( false, 'zip: opens' );
 }
 
+// B8b: the dry run also builds the public pages into dist/site (never uploaded) and the SBOM.
+cmp_assert( is_file( $cmp_rel_root . '/dist/site/.well-known/security.txt' ), 'release --dry-run: dist/site/.well-known/security.txt built' );
+cmp_assert( false === strpos( $out, 'release/site' ) && false === strpos( $out, 'dist/site/' ), 'release --dry-run: does not print release/site or dist/site as upload' );
+$cmp_rel_sbom_f = $cmp_rel_root . '/dist/consent-manager-pro-9.9.9.cdx.json';
+cmp_assert( is_file( $cmp_rel_sbom_f ), 'SBOM: dist/consent-manager-pro-9.9.9.cdx.json written' );
+$cmp_rel_sbom_mtime = filemtime( $cmp_rel_sbom_f );
+$cmp_rel_sbom = json_decode( (string) @file_get_contents( $cmp_rel_sbom_f ), true );
+cmp_assert( is_array( $cmp_rel_sbom ), 'SBOM: valid JSON' );
+if ( is_array( $cmp_rel_sbom ) ) {
+	cmp_assert_eq( isset( $cmp_rel_sbom['bomFormat'] ) ? $cmp_rel_sbom['bomFormat'] : null, 'CycloneDX', 'SBOM: bomFormat CycloneDX' );
+	cmp_assert_eq( isset( $cmp_rel_sbom['specVersion'] ) ? $cmp_rel_sbom['specVersion'] : null, '1.5', 'SBOM: specVersion 1.5' );
+	cmp_assert( isset( $cmp_rel_sbom['serialNumber'] ) && 1 === preg_match( '/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $cmp_rel_sbom['serialNumber'] ), 'SBOM: serialNumber urn:uuid' );
+	cmp_assert_eq( isset( $cmp_rel_sbom['version'] ) ? $cmp_rel_sbom['version'] : null, 1, 'SBOM: version 1' );
+	$cmp_rel_mc = isset( $cmp_rel_sbom['metadata']['component'] ) ? $cmp_rel_sbom['metadata']['component'] : array();
+	cmp_assert( ! empty( $cmp_rel_sbom['metadata']['timestamp'] ), 'SBOM: metadata.timestamp' );
+	cmp_assert_eq( array( isset( $cmp_rel_mc['type'] ) ? $cmp_rel_mc['type'] : null, isset( $cmp_rel_mc['name'] ) ? $cmp_rel_mc['name'] : null, isset( $cmp_rel_mc['version'] ) ? $cmp_rel_mc['version'] : null ), array( 'application', 'consent-manager-pro', '9.9.9' ), 'SBOM: plugin component type, name, version' );
+	cmp_assert_eq( isset( $cmp_rel_mc['licenses'][0]['license']['id'] ) ? $cmp_rel_mc['licenses'][0]['license']['id'] : null, 'GPL-2.0-or-later', 'SBOM: plugin license' );
+	$cmp_rel_h = function ( $c ) {
+		return isset( $c['hashes'][0]['alg'], $c['hashes'][0]['content'] ) && 'SHA-256' === $c['hashes'][0]['alg'] ? $c['hashes'][0]['content'] : null;
+	};
+	cmp_assert_eq( $cmp_rel_h( $cmp_rel_mc ), hash_file( 'sha256', $cmp_rel_root . '/dist/consent-manager-pro.zip' ), 'SBOM: plugin hash = SHA-256 of the zip' );
+	$cmp_rel_by = array();
+	foreach ( isset( $cmp_rel_sbom['components'] ) ? $cmp_rel_sbom['components'] : array() as $cmp_rel_c ) {
+		$cmp_rel_by[ $cmp_rel_c['name'] ] = $cmp_rel_c;
+	}
+	cmp_assert( isset( $cmp_rel_by['standalone/cmp.js'] ) && isset( $cmp_rel_by['data/services.json'] ), 'SBOM: standalone and services library components' );
+	cmp_assert_eq( isset( $cmp_rel_by['standalone/cmp.js'] ) ? $cmp_rel_h( $cmp_rel_by['standalone/cmp.js'] ) : null, hash_file( 'sha256', $cmp_rel_root . '/standalone/cmp.js' ), 'SBOM: standalone hash = SHA-256 of cmp.js' );
+	cmp_assert_eq( isset( $cmp_rel_by['data/services.json'] ) ? $cmp_rel_h( $cmp_rel_by['data/services.json'] ) : null, hash_file( 'sha256', $cmp_rel_root . '/data/services.json' ), 'SBOM: services hash = SHA-256 of services.json' );
+}
+
 // Missing CHANGELOG section -> non-zero exit, manifest not rewritten.
 $cmp_rel_beta_bytes = file_get_contents( $cmp_rel_tmp . '/state/manifest-beta.json' );
 list( $rc, $out )   = cmp_rel_run( 'bash bin/release.sh 9.9.11 --dry-run --skip-checks', $cmp_rel_env );
@@ -175,6 +205,8 @@ cmp_assert_eq( file_get_contents( $cmp_rel_tmp . '/state/manifest-beta.json' ), 
 // --revoke of the only (stable) version with no newer beta -> refused.
 list( $rc, $out ) = cmp_rel_run( 'bash bin/release.sh --promote 9.9.9 --dry-run', $cmp_rel_env );
 cmp_assert_eq( $rc, 0, '--promote 9.9.9 --dry-run exits 0' . ( 0 !== $rc ? ': ' . substr( $out, -600 ) : '' ) );
+cmp_assert( is_file( $cmp_rel_root . '/dist/site/.well-known/security.txt' ) && false === strpos( $out, 'release/site' ), '--promote --dry-run: dist/site built, not offered for upload' );
+cmp_assert( ! file_exists( $cmp_rel_root . '/dist/consent-manager-pro-9.9.9.cdx.json' ) || filemtime( $cmp_rel_root . '/dist/consent-manager-pro-9.9.9.cdx.json' ) <= $cmp_rel_sbom_mtime, '--promote: no new SBOM' );
 cmp_assert( is_file( $cmp_rel_up . '/manifest-stable.json' ), '--promote: manifest-stable.json written' );
 $cmp_rel_st = cmp_rel_eval( $cmp_rel_up, 'stable', $cmp_rel_mpk );
 cmp_assert_eq( $cmp_rel_st['status'], 'ok', '--promote: stable manifest verifies' );
@@ -199,6 +231,7 @@ $cmp_rel_issued_b = $cmp_rel_b2['issued'];
 $cmp_rel_issued_s = $cmp_rel_st['issued'];
 list( $rc, $out ) = cmp_rel_run( 'bash bin/release.sh --revoke 9.9.9 --dry-run', $cmp_rel_env );
 cmp_assert_eq( $rc, 0, '--revoke 9.9.9 after a newer beta exits 0' . ( 0 !== $rc ? ': ' . substr( $out, -600 ) : '' ) );
+cmp_assert( is_file( $cmp_rel_root . '/dist/site/.well-known/security.txt' ) && false === strpos( $out, 'release/site' ), '--revoke --dry-run: dist/site built, not offered for upload' );
 $cmp_rel_rb = cmp_rel_eval( $cmp_rel_up, 'beta', $cmp_rel_mpk );
 $cmp_rel_rs = cmp_rel_eval( $cmp_rel_up, 'stable', $cmp_rel_mpk );
 cmp_assert( 'ok' === $cmp_rel_rb['status'] && 'ok' === $cmp_rel_rs['status'], '--revoke: both manifests re-signed and valid' );
@@ -214,8 +247,10 @@ list( $rc, $out ) = cmp_rel_run( 'bash bin/release.sh --promote 9.9.9 --dry-run'
 cmp_assert( 0 !== $rc, '--promote: a revoked version is refused' );
 
 // --resign: new issued/expires, exactly 60 days apart.
+cmp_rel_rmdir( $cmp_rel_root . '/dist/site' );
 list( $rc, $out ) = cmp_rel_run( 'bash bin/release.sh --resign --dry-run', $cmp_rel_env );
 cmp_assert_eq( $rc, 0, '--resign --dry-run exits 0' . ( 0 !== $rc ? ': ' . substr( $out, -600 ) : '' ) );
+cmp_assert( is_file( $cmp_rel_root . '/dist/site/.well-known/security.txt' ) && false === strpos( $out, 'release/site' ), '--resign --dry-run: dist/site built, not offered for upload' );
 foreach ( array( 'beta' => $cmp_rel_rb, 'stable' => $cmp_rel_rs ) as $cmp_rel_ch => $cmp_rel_prev ) {
 	$cmp_rel_r = cmp_rel_eval( $cmp_rel_up, $cmp_rel_ch, $cmp_rel_mpk );
 	cmp_assert_eq( $cmp_rel_r['status'], 'ok', "--resign: {$cmp_rel_ch} manifest valid" );
@@ -256,6 +291,20 @@ cmp_assert( false !== strpos( $cmp_rel_src, 'SERVER_HOST="${CMP_SERVER_HOST:-<HO
 cmp_assert( false !== strpos( $cmp_rel_src, 'SERVER_DIR="${CMP_SERVER_DIR:-<DIRECTOR-CONSENT.RT.MD>}"' ), 'release.sh: SERVER_DIR from CMP_SERVER_DIR, placeholder kept' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'scp$FILES $SERVER_HOST:$SERVER_DIR/' ), 'release.sh: scp uses $SERVER_HOST:$SERVER_DIR' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'git add release && git commit -m "chore(release): vX.Y.Z (beta)" && git push' ), 'release.sh: recovery note for a failed chore(release) commit/push' );
+
+// B8b: real path builds release/site after save_state and uploads it; SBOM attached to the release.
+cmp_assert( 1 === preg_match( '#CMP_STABLE_MANIFEST=release/manifest-stable\.json bin/build-site\.sh --out release/site#', $cmp_rel_src ), 'release.sh: real path builds release/site with the committed stable manifest' );
+cmp_assert( false !== strpos( $cmp_rel_src, 'scp -r release/site/. $SERVER_HOST:$SERVER_DIR/' ), 'release.sh: upload command includes release/site/' );
+cmp_assert( 1 === preg_match( '#gh release create .*dist/\$SLUG\.zip\.sig" "dist/\$SLUG-\$VERSION\.cdx\.json"#', $cmp_rel_src ), 'release.sh: SBOM attached to gh release create' );
+cmp_assert( 1 === preg_match( '#\nsave_state\nbuild_site\ngit add "\$STATE"#', $cmp_rel_src ), 'release.sh: site built right after save_state, before git add' );
+// Preflight: the site is built (into dist/site-preflight) before the first irreversible step.
+$cmp_rel_pre = strpos( $cmp_rel_src, 'bin/build-site.sh --out dist/site-preflight' );
+$cmp_rel_tag = strpos( $cmp_rel_src, "\t\t\tgit tag \"v\$VERSION\"" );
+$cmp_rel_gh  = strpos( $cmp_rel_src, 'gh release create "v$VERSION"' );
+cmp_assert( false !== $cmp_rel_pre && false !== $cmp_rel_tag && $cmp_rel_pre < $cmp_rel_tag && $cmp_rel_pre < strpos( $cmp_rel_src, 'git push -q origin main --tags' ) && $cmp_rel_pre < $cmp_rel_gh, 'release.sh: preflight site build runs before tag, push and gh release' );
+cmp_assert( false !== strpos( $cmp_rel_src, '|| die "site build failed — nothing was published"' ), 'release.sh: a failed preflight site build stops with a clear message' );
+cmp_assert( 1 === preg_match( '#CMP_STABLE_MANIFEST="\$PREFLIGHT_MANIFEST" bin/build-site\.sh --out dist/site-preflight#', $cmp_rel_src ) && false !== strpos( $cmp_rel_src, 'PREFLIGHT_MANIFEST="$UPLOAD/manifest-stable.json"' ), 'release.sh: preflight uses this run\'s stable manifest, else release/manifest-stable.json' );
+cmp_assert( false !== strpos( $cmp_rel_src, 'If the site build fails after `gh release create` succeeded' ), 'release.sh: recovery note for a site build failing after gh' );
 
 // Default dry-run state (no CMP_RELEASE_STATE): dist/state is reseeded from release/ on every run.
 @mkdir( $cmp_rel_root . '/dist/state', 0755, true );

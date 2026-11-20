@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Confidențialitate · Consent Manager Pro</title>
+<meta name="description" content="Ce date trimite Consent Manager Pro, cui, și ce păstrează pe site-ul tău.">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Sari la conținut</a>
+<header class="site">
+<div class="wrap">
+<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<nav aria-label="Pagini">
+<ul>
+<li><a href="../">Acasă</a></li>
+<li><a href="../changelog/">Changelog</a></li>
+<li><a href="../securitate/">Securitate</a></li>
+<li><a href="./" aria-current="page">Confidențialitate</a></li>
+</ul>
+</nav>
+<p class="lang"><a href="../en/privacy/" hreflang="en" lang="en">English</a></p>
+</div>
+</header>
+<main id="main" class="wrap">
+<h1>Confidențialitate</h1>
+<p class="lead">Ce trimite Consent Manager Pro, cui, și ce păstrează pe site-ul tău. Pe scurt: pluginul nu are telemetrie și nu ne trimite nicio dată despre vizitatorii tăi.</p>
+
+<h2 id="spre-rt">1. Ce trimite pluginul spre noi (RT)</h2>
+<p>Un singur lucru: verificarea de update.</p>
+<ul>
+<li>Site-ul tău cere de la <code>consent.rt.md</code> manifestul canalului ales (<code>manifest-stable.json</code> sau <code>manifest-beta.json</code>) și semnătura lui (<code>.sig</code>).</li>
+<li>Asta se întâmplă când WordPress caută actualizări (automat, de două ori pe zi) sau când apeși „Caută actualizări”. Răspunsul e păstrat 6 ore (o oră după o eroare), deci cererea pleacă cel mult o dată la 6 ore, în afară de verificarea manuală.</li>
+<li>Cererea nu conține adresa site-ului, parametri, cookie-uri sau antete în plus. User-agent-ul e doar <code>Consent-Manager-Pro/&lt;versiune&gt;</code>, fără adresa site-ului pe care WordPress o pune de obicei.</li>
+<li>Ca orice server web, al nostru vede IP-ul serverului tău, nu al vizitatorilor tăi, și ora cererii.</li>
+<li>Jurnalele de acces le păstrăm doar cât durează rotația lor obișnuită. Le folosim ca să estimăm câte instalări active sunt și pentru securitatea serverului, nimic altceva.</li>
+</ul>
+
+<h2 id="spre-terti">2. Ce trimite spre alții, doar din cauza acțiunilor sau setărilor tale</h2>
+<ul>
+<li><strong>GitHub</strong> (<code>github.com</code> și serverele lui de fișiere): când instalezi un update, serverul tău descarcă zip-ul din GitHub Releases, cu același user-agent anonim. GitHub vede IP-ul serverului tău.</li>
+<li><strong>Google Fonts</strong> (<code>fonts.googleapis.com</code> și <code>fonts.gstatic.com</code>): doar când apeși „Localizează fonturile” (în Setări) sau „Localizează” (în Verificare). Pluginul citește pagina principală a site-ului tău ca să găsească fonturile. Apoi serverul tău descarcă o dată CSS-ul și fișierele de font de la Google și le salvează local. De atunci, vizitatorii tăi nu mai contactează Google pentru fonturi. Cererea pleacă de pe server, cu un user-agent de browser obișnuit, ca Google să trimită fonturi woff2.</li>
+<li><strong>Miniaturi YouTube</strong> (<code>i.ytimg.com</code>): când o pagină are un video YouTube blocat până la consimțământ, serverul tău descarcă o dată miniatura videoclipului și o salvează local. Cererea conține doar ID-ul videoclipului. Vizitatorul vede copia locală și nu contactează YouTube până nu acceptă.</li>
+<li><strong>După consimțământ</strong>, nu înainte: dacă vizitatorul acceptă, browserul lui încarcă embed-urile YouTube de pe <code>www.youtube-nocookie.com</code> (varianta YouTube cu mai puține cookie-uri) și serviciile pe care le-ai pus pe site de la furnizorii lor. Asta face browserul vizitatorului, nu pluginul.</li>
+</ul>
+
+<h2 id="ce-nu-trimite">3. Ce nu trimite</h2>
+<ul>
+<li>Fără telemetrie și fără statistici de utilizare.</li>
+<li>Nicio dată despre vizitatori: nici IP-uri, nici alegerile lor, nici registrul. Registrul rămâne în baza ta de date.</li>
+<li>Nici lista de pluginuri, tema, versiunea WordPress sau adresa site-ului. (WordPress însuși trimite lista pluginurilor la wordpress.org; asta nu ține de plugin.)</li>
+<li>Scanerul din ecranul „Verificare” (și scanarea zilnică) pornește doar de la paginile site-ului tău, de pe același domeniu, inclusiv sitemap-ul WordPress. Nu trimite cookie-uri.</li>
+<li>Verificarea din browser, din același ecran, îți deschide paginile în browserul tău și apasă „Acceptă tot”, deci serviciile de pe site se încarcă în browserul tău, ca la orice vizitator care acceptă.</li>
+</ul>
+
+<h2 id="pe-site">4. Ce păstrează pluginul pe site-ul tău</h2>
+<p>Datele astea sunt ale tale, ca operator al site-ului. Noi nu le vedem.</p>
+<ul>
+<li><strong>Cookie-ul <code>cmp_consent</code></strong>, în browserul vizitatorului: alegerea lui (decizia, categoriile acceptate, serviciile active la momentul alegerii, versiunea politicii, data) și un ID aleatoriu al consimțământului. Implicit durează 180 de zile. Poți schimba durata, până la cel mult 13 luni. Atribute: <code>SameSite=Lax</code>, <code>path=/</code>.</li>
+<li><strong>Cookie-ul <code>cmp_svc</code></strong>, doar dacă vizitatorul alege „Încarcă mereu” la un embed: ține minte serviciile permise, cu aceeași durată.</li>
+<li><strong>În modul Light</strong> nu se pune niciun cookie și nu se scrie în registru; doar faptul că vizitatorul a închis bannerul se ține minte în <code>localStorage</code> (<code>cmp_light_dismissed</code>), în browserul lui.</li>
+<li><strong>Registrul de consimțăminte</strong>, un tabel în baza ta de date. Pentru fiecare alegere se salvează: ID-ul consimțământului, decizia, categoriile, serviciile permise sau retrase, limba, adresa paginii, versiunea politicii, data și ora. IP-ul și user-agent-ul vizitatorului nu se salvează în clar, ci doar ca amprentă SHA-256 cu sare. Sarea e unică pentru site-ul tău. O alegere repetată identic nu se salvează din nou.</li>
+<li><strong>Păstrare:</strong> rândurile mai vechi de 13 luni se șterg automat, zilnic. Poți schimba durata în Setări.</li>
+<li><strong>Limitare de rată:</strong> ca să oprim abuzul, păstrăm o oră o intrare temporară pentru fiecare vizitator. Cheia ei e o amprentă scurtată a IP-ului, cu sare, nu IP-ul.</li>
+<li><strong>WP Consent API:</strong> dacă pluginul WP Consent API e prezent, pluginul setează și cookie-urile lui <code>wp_consent_*</code>, prin <code>wp_set_consent</code>.</li>
+<li><strong>Altele:</strong> setările, categoriile, serviciile, rezultatele scanării, fonturile localizate și miniaturile YouTube (în folderul de uploads).</li>
+<li><strong>La dezinstalare:</strong> datele temporare (rezultatele scanării, miniaturile, fonturile localizate, cache-ul) se șterg mereu. Registrul, setările, categoriile și serviciile configurate rămân, pentru că registrul e dovada legală a alegerilor. Se șterg doar dacă ai bifat „Șterge toate datele la dezinstalare” în Setări. Paginile legale generate nu se șterg niciodată.</li>
+</ul>
+
+<h2 id="standalone">5. Versiunea standalone (site-uri fără WordPress)</h2>
+<p>Pentru site-urile statice există o versiune fără WordPress: <code>cmp.js</code> și <code>cmp.css</code>.</p>
+<ul>
+<li>Dacă le incluzi de la <code>rt.md/cmp/</code>, browserul fiecărui vizitator le descarcă de pe serverul nostru. Deci serverul nostru vede IP-ul vizitatorilor acelor site-uri, în jurnalul de acces, păstrat doar cât durează rotația obișnuită.</li>
+<li>Fișierele nu ne trimit nimic: nu ne raportează alegerile și nu fac cereri proprii. După consimțământ, doar pornesc scripturile și embed-urile pe care le-ai marcat pe site. Alegerea stă în cookie-ul <code>cmp_consent</code> (și în <code>cmp_svc</code> pentru „Încarcă mereu”), pe site-ul tău. În modul Light, închiderea bannerului se ține minte în <code>localStorage</code>.</li>
+<li><strong>Recomandarea noastră:</strong> găzduiește <code>cmp.js</code> și <code>cmp.css</code> pe serverul tău. Copiezi cele două fișiere și le incluzi cu calea ta, ca în <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone/README.md</a>. Atunci serverul nostru nu mai vede nimic.</li>
+</ul>
+
+<h2 id="contact">6. Contact</h2>
+<p>Ai o întrebare despre confidențialitate? Scrie-ne la <a href="mailto:security@rt.md">security@rt.md</a>, adresa de contact a proiectului.</p>
+</main>
+<footer class="site">
+<div class="wrap">
+<p>Consent Manager Pro e gratuit și open-source, sub licența <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Cod sursă: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+</div>
+</footer>
+</body>
+</html>

@@ -338,7 +338,7 @@ cmp_consent={"v":"1","categories":["necessary","statistics"],"decision":"partial
 ### Performance
 - The `defer` attribute on `<script src="cmp.js">` ensures the bundle loads after DOM parsing.
 - Marked tracker scripts (`type="text/plain"`) are not executed by the browser; CMP injects them on consent.
-- Minified builds ship next to the readable source: `cmp.min.js` and `cmp.min.css` (each starts with a `/*! cmp-src-sha256:… */` header). Use them in production. CDN packaging is deferred to a later phase.
+- Minified builds ship next to the readable source: `cmp.min.js` and `cmp.min.css` (each starts with a `/*! cmp-src-sha256:… */` header). Use them in production.
 
 ### Browser Support
 Modern browsers (Chrome, Firefox, Safari, Edge) with ES6 support. Requires `localStorage` and `fetch` for full functionality.
@@ -390,16 +390,12 @@ standalone bundle blocks only what you mark.
 
 ---
 
-## Future: Phase 2
+## Where to load the files from
 
-Phase 2 will add **central audit logging** on rt.md, enabling:
-- Consent event tracking across all sites using the bundle
-- Historical audit trail of consent changes
-- Compliance reporting for GDPR/CCPA audits
-- Cross-site analytics (with user consent)
+The files can be loaded from RT's copy at https://rt.md/cmp/. Then RT's server sees your visitors' IP addresses, like any CDN does. The recommended way is to self-host: copy `cmp.min.js` and `cmp.min.css` to your own server and load them from there. What the plugin and the bundle do with data is described at https://consent.rt.md/en/privacy/.
 
 ---
 
 ## License
 
-Proprietary — Consent Manager Pro. All rights reserved.
+GPL-2.0-or-later. See [../LICENSE](../LICENSE).
