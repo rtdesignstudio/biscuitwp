@@ -46,6 +46,8 @@ class CMP_Admin {
 
 		add_action( 'admin_post_cmp_check_updates', array( $this, 'check_updates' ) );
 		add_action( 'admin_notices', array( $this, 'update_check_notice' ) );
+		add_action( 'admin_notices', array( $this, 'update_state_notices' ) );
+		add_action( 'network_admin_notices', array( $this, 'update_state_notices' ) );
 
 		add_filter( 'plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'action_links' ) );
 	}
@@ -105,14 +107,14 @@ class CMP_Admin {
 		if ( ! current_user_can( 'update_plugins' ) || ! check_admin_referer( 'cmp_check_updates' ) ) {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
 		}
-		delete_transient( CMP_Updater::CACHE_KEY );
+		delete_site_transient( CMP_Updater::CACHE_KEY );
 		delete_site_transient( 'update_plugins' );
 		wp_update_plugins();
 
-		$updates   = get_site_transient( 'update_plugins' );
-		$available = isset( $updates->response[ CMP_Updater::file() ] ) ? $updates->response[ CMP_Updater::file() ]->new_version : '';
+		// The manifest was just fetched (and cached) by wp_update_plugins(): no extra request.
+		$result = CMP_Updater::check_result( CMP_Updater::fetch_manifest() );
 
-		wp_safe_redirect( add_query_arg( array( 'cmp_up' => $available ? $available : 'latest' ), admin_url( 'plugins.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'cmp_up' => rawurlencode( $result ) ), admin_url( 'plugins.php' ) ) );
 		exit;
 	}
 
@@ -136,12 +138,28 @@ class CMP_Admin {
 			. ' <a href="' . esc_url( admin_url( 'admin.php?page=' . CMP_Services_Page::SLUG ) ) . '">' . esc_html__( 'Detalii în „Servicii”', 'consent-manager-pro' ) . '</a></p></div>';
 	}
 
+	/**
+	 * Update safety notices (update_plugins only): installed version revoked,
+	 * manifest expired, no sodium. Which screen shows what: CMP_Updater::notices().
+	 */
+	public function update_state_notices() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+		$hook = isset( $GLOBALS['hook_suffix'] ) ? (string) $GLOBALS['hook_suffix'] : '';
+		foreach ( CMP_Updater::notices( CMP_Updater::state(), $hook, self_admin_url( 'update-core.php' ) ) as $html ) {
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in CMP_Updater::notices().
+		}
+	}
+
 	public function update_check_notice() {
 		if ( empty( $_GET['cmp_up'] ) || ! current_user_can( 'update_plugins' ) ) {
 			return;
 		}
 		$v = sanitize_text_field( wp_unslash( $_GET['cmp_up'] ) );
-		if ( 'latest' === $v ) {
+		if ( 'unavailable' === $v ) {
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.', 'consent-manager-pro' ) . '</p></div>';
+		} elseif ( 'latest' === $v ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf(
 				/* translators: %s — current plugin version */
 				__( 'Consent Manager Pro: ai ultima versiune (%s).', 'consent-manager-pro' ),

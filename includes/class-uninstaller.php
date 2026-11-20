@@ -40,7 +40,7 @@ class CMP_Uninstaller {
 		delete_transient( 'cmp_db_schema_retry' );
 		delete_transient( 'cmp_tracker_scan' );
 		delete_transient( 'cmp_tracker_scan_fail' );
-		delete_transient( 'cmp_latest_release' );
+		delete_transient( 'cmp_latest_release' ); // Pre-1.0 per-site release cache (now a site transient, see cleanup_network()).
 
 		// All plugin transients (thumbnail locks, rate limits, release check, admin messages).
 		$wpdb->query(
@@ -88,6 +88,21 @@ class CMP_Uninstaller {
 		delete_post_meta_by_key( '_cmp_legal_mode' );
 	}
 
+	/**
+	 * Network-wide updater data (site options / site transient; plain options on
+	 * single site): the manifest cache always goes, the anti-rollback counter and
+	 * the notice state only with full removal. Runs once per uninstall.
+	 *
+	 * @param bool $full Remove the options too (the main site's flag on multisite).
+	 */
+	public static function cleanup_network( $full ) {
+		delete_site_transient( 'cmp_latest_release' ); // CMP_Updater::CACHE_KEY.
+		if ( $full ) {
+			delete_site_option( 'cmp_manifest_issued' ); // CMP_Updater::ISSUED_OPTION.
+			delete_site_option( 'cmp_update_state' );    // CMP_Updater::STATE_OPTION.
+		}
+	}
+
 	/** Whether the current site asked for full removal. */
 	public static function wants_full() {
 		$settings = get_option( 'cmp_settings', array() );
@@ -116,14 +131,23 @@ class CMP_Uninstaller {
 	public static function run() {
 		global $wpdb;
 		if ( function_exists( 'is_multisite' ) && is_multisite() ) {
-			$ids = get_sites( array( 'fields' => 'ids', 'number' => 0 ) );
-			foreach ( (array) $ids as $id ) {
-				switch_to_blog( (int) $id );
-				self::cleanup_site( $wpdb, self::wants_full() );
+			$ids          = array_map( 'intval', (array) get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) );
+			$main         = function_exists( 'get_main_site_id' ) ? (int) get_main_site_id() : ( $ids ? $ids[0] : 0 );
+			$network_full = false;
+			foreach ( $ids as $id ) {
+				switch_to_blog( $id );
+				$full = self::wants_full();
+				self::cleanup_site( $wpdb, $full );
+				if ( $id === $main ) {
+					$network_full = $full;
+				}
 				restore_current_blog();
 			}
+			self::cleanup_network( $network_full );
 			return;
 		}
-		self::cleanup_site( $wpdb, self::wants_full() );
+		$full = self::wants_full();
+		self::cleanup_site( $wpdb, $full );
+		self::cleanup_network( $full );
 	}
 }

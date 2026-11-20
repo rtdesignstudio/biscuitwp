@@ -193,6 +193,54 @@ cmp_assert( ! isset( $o['_transient_cmp_rl_abc'] ) && ! isset( $o['_transient_ti
 cmp_assert( isset( $o['_transient_cmpx_other'] ), 'off: foreign transient kept' );
 cmp_assert_eq( in_array( 'cmp_prune_consent_log', $GLOBALS['cmp_un']['cron'], true ), true, 'off: prune cron cleared' );
 
+// --- B8a: updater counter/state are network-wide (site options), the manifest cache a site transient.
+if ( ! function_exists( 'get_site_option' ) ) {
+	function get_site_option( $k, $d = false ) { return isset( $GLOBALS['cmp_un']['site'] ) && array_key_exists( $k, $GLOBALS['cmp_un']['site'] ) ? $GLOBALS['cmp_un']['site'][ $k ] : $d; }
+}
+if ( ! function_exists( 'update_site_option' ) ) {
+	function update_site_option( $k, $v ) { $GLOBALS['cmp_un']['site'][ $k ] = $v; return true; }
+}
+if ( ! function_exists( 'delete_site_option' ) ) {
+	function delete_site_option( $k ) { unset( $GLOBALS['cmp_un']['site'][ $k ] ); return true; }
+}
+if ( ! function_exists( 'get_site_transient' ) ) {
+	function get_site_transient( $k ) { return isset( $GLOBALS['cmp_un']['site'] ) && array_key_exists( '_site_transient_' . $k, $GLOBALS['cmp_un']['site'] ) ? $GLOBALS['cmp_un']['site'][ '_site_transient_' . $k ] : false; }
+}
+if ( ! function_exists( 'set_site_transient' ) ) {
+	function set_site_transient( $k, $v, $ttl = 0 ) {
+		$GLOBALS['cmp_un']['site'][ '_site_transient_' . $k ]         = $v;
+		$GLOBALS['cmp_un']['site'][ '_site_transient_timeout_' . $k ] = $ttl;
+		return true;
+	}
+}
+if ( ! function_exists( 'delete_site_transient' ) ) {
+	function delete_site_transient( $k ) { unset( $GLOBALS['cmp_un']['site'][ '_site_transient_' . $k ], $GLOBALS['cmp_un']['site'][ '_site_transient_timeout_' . $k ] ); return true; }
+}
+function cmp_un_site_store() {
+	return array(
+		'cmp_manifest_issued'                    => array( 'beta' => 1, 'stable' => 2 ),
+		'cmp_update_state'                       => array( 'expired' => true, 'revoked_installed' => false, 'no_sodium' => false ),
+		'_site_transient_cmp_latest_release'     => array( 'channel' => 'stable' ),
+		'_site_transient_timeout_cmp_latest_release' => 1,
+		'other_network_option'                   => 'keep',
+	);
+}
+foreach ( array( false, true ) as $t_full ) {
+	$t_tmp                     = cmp_un_reset( $t_full );
+	$GLOBALS['cmp_un']['site'] = cmp_un_site_store();
+	$GLOBALS['wpdb']           = new CMP_Un_Wpdb();
+	CMP_Uninstaller::run();
+	$t_site = $GLOBALS['cmp_un']['site'];
+	$label  = $t_full ? 'on' : 'off';
+	cmp_assert_eq( isset( $t_site['cmp_manifest_issued'] ), ! $t_full, "single site {$label}: cmp_manifest_issued (site option) " . ( $t_full ? 'deleted' : 'kept' ) );
+	cmp_assert_eq( isset( $t_site['cmp_update_state'] ), ! $t_full, "single site {$label}: cmp_update_state (site option) " . ( $t_full ? 'deleted' : 'kept' ) );
+	cmp_assert( ! isset( $t_site['_site_transient_cmp_latest_release'] ), "single site {$label}: manifest cache (site transient) deleted" );
+	cmp_assert( isset( $t_site['other_network_option'] ), "single site {$label}: foreign network option untouched" );
+	@rmdir( $t_tmp );
+}
+$t_un_src = file_get_contents( __DIR__ . '/../includes/class-uninstaller.php' );
+cmp_assert( false !== strpos( $t_un_src, "delete_site_option( 'cmp_manifest_issued' )" ) && false !== strpos( $t_un_src, "delete_site_option( 'cmp_update_state' )" ) && false !== strpos( $t_un_src, "delete_site_transient( 'cmp_latest_release' )" ), 'uninstaller: network-level cleanup uses delete_site_option / delete_site_transient' );
+
 // --- Multisite run(): two sites, different flags.
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite() { return ! empty( $GLOBALS['cmp_ms']['on'] ); }
@@ -233,12 +281,25 @@ $GLOBALS['cmp_ms'] = array(
 		2 => array( 'cmp_settings' => array( 'delete_data_on_uninstall' => false ), 'cmp_future_option' => 'y' ),
 	),
 );
+$GLOBALS['cmp_un']['site'] = cmp_un_site_store();
 CMP_Uninstaller::run();
 $drops = array_values( array_filter( $GLOBALS['wpdb']->queries, function ( $q ) { return false !== strpos( $q, 'DROP TABLE' ); } ) );
 cmp_assert_eq( $drops, array( 'DROP TABLE IF EXISTS wp_1_cmp_consent_log' ), 'multisite: only the flagged site drops its log table' );
 cmp_assert( ! isset( $GLOBALS['cmp_ms']['sites'][1]['cmp_settings'] ) && ! isset( $GLOBALS['cmp_ms']['sites'][1]['cmp_future_option'] ), 'multisite: site 1 fully removed' );
 cmp_assert( isset( $GLOBALS['cmp_ms']['sites'][2]['cmp_settings'] ) && isset( $GLOBALS['cmp_ms']['sites'][2]['cmp_future_option'] ), 'multisite: site 2 data kept' );
 cmp_assert_eq( $GLOBALS['cmp_ms']['log'], array( 'switch:1', 'restore', 'switch:2', 'restore' ), 'multisite: switch and restore balanced' );
+cmp_assert( ! isset( $GLOBALS['cmp_un']['site']['cmp_manifest_issued'] ) && ! isset( $GLOBALS['cmp_un']['site']['cmp_update_state'] ), 'multisite: main site (1) flagged -> network updater options deleted once' );
+cmp_assert( ! isset( $GLOBALS['cmp_un']['site']['_site_transient_cmp_latest_release'] ), 'multisite: manifest cache (site transient) deleted' );
+// Main site not flagged -> network options kept, cache still deleted.
+$GLOBALS['cmp_ms']['sites'] = array(
+	1 => array( 'cmp_settings' => array( 'delete_data_on_uninstall' => false ) ),
+	2 => array( 'cmp_settings' => array( 'delete_data_on_uninstall' => true ) ),
+);
+$GLOBALS['cmp_ms']['log'] = array();
+$GLOBALS['cmp_un']['site'] = cmp_un_site_store();
+CMP_Uninstaller::run();
+cmp_assert( isset( $GLOBALS['cmp_un']['site']['cmp_manifest_issued'], $GLOBALS['cmp_un']['site']['cmp_update_state'] ), 'multisite: main site not flagged -> network updater options kept' );
+cmp_assert( ! isset( $GLOBALS['cmp_un']['site']['_site_transient_cmp_latest_release'] ), 'multisite: main site not flagged -> manifest cache still deleted' );
 unset( $GLOBALS['cmp_un']['options'] );
 $GLOBALS['cmp_ms']['on'] = false;
 @rmdir( $tmp . '/cmp-thumbs' ); @rmdir( $tmp . '/cmp-fonts' ); @rmdir( $tmp );

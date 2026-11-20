@@ -113,15 +113,19 @@ Only what is in the page HTML is blocked. Anything that GTM or other JavaScript 
 
 ## Updates & releases
 
-Sites update through the RT relay at `rt.md/cmp-update` (no wordpress.org, no GitHub token on any site). Updates show up natively under **Plugins / Dashboard → Updates**; the plugin row also has a **Check for updates** link. Every package must carry a valid Ed25519 signature (`CMP_Updater::SIGN_PUBLIC_KEY`), otherwise it is not installed.
+Sites check a static, Ed25519-signed manifest on `https://consent.rt.md/` (`manifest-stable.json` / `manifest-beta.json` + `.json.sig`): no wordpress.org, no application server, no token, and the request carries nothing that identifies the site. The manifest holds the version, the package URL on GitHub Releases (`rtdesignstudio/consent-manager-pro`), the zip's sha256 and its signature, requirements, revoked versions and the changelog; it expires 60 days after it is signed. Nothing unsigned is offered or installed: manifests must verify against `CMP_Updater::MANIFEST_PUBLIC_KEY`, packages against `SIGN_PUBLIC_KEY` (an offline `RESCUE_PUBLIC_KEY` can sign either). Updates show up natively under **Plugins / Dashboard → Updates**. Sites follow `stable`; `define( 'CMP_UPDATE_CHANNEL', 'beta' );` in `wp-config.php` switches a site to beta.
 
-To publish a new version: bump `Version:` and `CMP_VERSION` in `consent-manager-pro.php`, commit, then run `./bin/release.sh X.Y.Z` (requires the `gh` CLI and the signing key in `~/.config/cmp-release/signing.key`). The script signs the zip, verifies the signature and uploads `consent-manager-pro.zip.sig` next to it.
+Releases (`bin/release.sh`, keys in `~/.config/cmp-release/`, state in `release/`, notes from `CHANGELOG.md`):
 
-### Update relay
+- `bin/release.sh X.Y.Z`: tests + e2e, build and sign the zip, GitHub prerelease, signed `manifest-beta.json`.
+- `bin/release.sh --promote X.Y.Z`: the beta version becomes stable (`manifest-stable.json`, GitHub "latest").
+- `bin/release.sh --revoke X.Y.Z`: never offer X.Y.Z again (both manifests).
+- `bin/release.sh --resign`: re-sign both manifests (monthly; they expire after 60 days).
+- `--dry-run` on any of them writes only to `dist/` (no gh, push or commit). The files to upload end up in `dist/upload/`.
 
-The relay in `proxy/cmp-update.php` holds the single read-only GitHub token for the private repo and redirects downloads to GitHub's signed asset URLs (see `proxy/README.md`). Sites only know the relay URL and a shared key (`CMP_Updater::PROXY_URL` / `PROXY_KEY`, overridable per site with `CMP_UPDATE_PROXY` / `CMP_UPDATE_KEY`); the key is not a secret, package integrity comes from the signature.
+New manifest/rescue keys: `bin/keygen.sh manifest|rescue [--out <path>]` (prints only the public key).
 
-The `proxy/` folder is excluded from the plugin zip, so it never ships to sites.
+The old relay in `proxy/cmp-update.php` stays only for sites still on 0.4.x (it reads GitHub's latest non-prerelease release and needs the `.zip.sig` asset); 1.0.0 sites never contact it. The `proxy/` folder is excluded from the plugin zip.
 
 ## Development
 

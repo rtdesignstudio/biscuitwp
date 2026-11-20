@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T15:55:15+00:00\n"
+"POT-Creation-Date: 2026-11-20T07:46:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: consent-manager-pro\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: consent-manager-pro.php
-msgid "https://github.com/rtgit003/consent-manager-pro"
+msgid "https://consent.rt.md/"
 msgstr ""
 
 #. Description of the plugin
@@ -39,59 +39,59 @@ msgstr ""
 msgid "https://rt.md"
 msgstr ""
 
-#: includes/admin/class-admin.php:60
-#: includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:62
+#: includes/admin/class-admin.php:79
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr ""
 
-#: includes/admin/class-admin.php:62
+#: includes/admin/class-admin.php:64
 msgid "Caută actualizări"
 msgstr ""
 
-#: includes/admin/class-admin.php:69
-#: includes/admin/class-admin.php:70
+#: includes/admin/class-admin.php:71
+#: includes/admin/class-admin.php:72
 msgid "Consent Manager"
 msgstr ""
 
-#: includes/admin/class-admin.php:78
+#: includes/admin/class-admin.php:80
 #: includes/admin/class-settings-page.php:120
 msgid "Aspect"
 msgstr ""
 
-#: includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:81
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr ""
 
-#: includes/admin/class-admin.php:80
+#: includes/admin/class-admin.php:82
 #: includes/admin/class-audit-list-table.php:17
 #: includes/admin/class-guide.php:23
 msgid "Servicii"
 msgstr ""
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:83
 msgid "Verificare"
 msgstr ""
 
-#: includes/admin/class-admin.php:82
+#: includes/admin/class-admin.php:84
 #: includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr ""
 
-#: includes/admin/class-admin.php:83
+#: includes/admin/class-admin.php:85
 #: includes/admin/class-guide.php:26
 #: includes/admin/class-settings-page.php:198
 #: includes/admin/class-settings-page.php:325
 msgid "Pagini legale"
 msgstr ""
 
-#: includes/admin/class-admin.php:84
+#: includes/admin/class-admin.php:86
 #: includes/admin/class-guide.php:71
 msgid "Ghid"
 msgstr ""
 
-#: includes/admin/class-admin.php:106
+#: includes/admin/class-admin.php:108
 #: includes/admin/class-appearance-page.php:507
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
@@ -110,31 +110,36 @@ msgstr ""
 msgid "Acțiune neautorizată."
 msgstr ""
 
-#: includes/admin/class-admin.php:132
+#: includes/admin/class-admin.php:134
 msgid "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul)."
 msgstr ""
 
-#: includes/admin/class-admin.php:133
+#: includes/admin/class-admin.php:135
 msgid "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect."
 msgstr ""
 
-#: includes/admin/class-admin.php:134
+#: includes/admin/class-admin.php:136
 #: includes/admin/class-services-page.php:426
+#: includes/modules/class-updater.php:621
 msgid "Consent Manager Pro:"
 msgstr ""
 
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:138
 msgid "Detalii în „Servicii”"
 msgstr ""
 
+#: includes/admin/class-admin.php:161
+msgid "Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din nou mai târziu."
+msgstr ""
+
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:147
+#: includes/admin/class-admin.php:165
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr ""
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:153
+#: includes/admin/class-admin.php:171
 #, php-format
 msgid "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" din lista de mai jos."
 msgstr ""
@@ -1940,16 +1945,45 @@ msgstr ""
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr ""
 
-#: includes/modules/class-updater.php:213
-#: includes/modules/class-updater.php:238
+#: includes/modules/class-updater.php:563
+msgid "Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu."
+msgstr ""
+
+#: includes/modules/class-updater.php:620
+msgid "Despre siguranța actualizărilor"
+msgstr ""
+
+#. translators: %s — installed plugin version
+#: includes/modules/class-updater.php:628
+#, php-format
+msgid "Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată."
+msgstr ""
+
+#: includes/modules/class-updater.php:631
+msgid "Actualizează acum"
+msgstr ""
+
+#: includes/modules/class-updater.php:635
+msgid "Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne."
+msgstr ""
+
+#: includes/modules/class-updater.php:640
+msgid "Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP sodium."
+msgstr ""
+
+#: includes/modules/class-updater.php:662
+msgid "Pachetul de update nu corespunde manifestului semnat și a fost refuzat. Apasă din nou „Caută actualizări” și reîncearcă."
+msgstr ""
+
+#: includes/modules/class-updater.php:673
+msgid "Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost șters."
+msgstr ""
+
+#: includes/modules/class-updater.php:690
 msgid "Nu am putut descărca pachetul de update."
 msgstr ""
 
-#: includes/modules/class-updater.php:218
-msgid "Pachetul de update nu are o semnătură validă și nu a fost instalat."
-msgstr ""
-
-#: includes/modules/class-updater.php:242
+#: includes/modules/class-updater.php:694
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
 msgstr ""
 

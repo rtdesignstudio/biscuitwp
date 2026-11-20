@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Consent Manager Pro\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro\n"
-"POT-Creation-Date: 2026-11-19T15:55:03+00:00\n"
+"POT-Creation-Date: 2026-11-20T07:45:47+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: Consent Manager Pro\n"
 "Language-Team: en_US\n"
@@ -21,8 +21,8 @@ msgstr "Consent Manager Pro"
 
 #. Plugin URI of the plugin
 #: consent-manager-pro.php
-msgid "https://github.com/rtgit003/consent-manager-pro"
-msgstr "https://github.com/rtgit003/consent-manager-pro"
+msgid "https://consent.rt.md/"
+msgstr "https://consent.rt.md/"
 
 #. Description of the plugin
 #: consent-manager-pro.php
@@ -45,53 +45,53 @@ msgstr "RT.md"
 msgid "https://rt.md"
 msgstr "https://rt.md"
 
-#: includes/admin/class-admin.php:60 includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:62 includes/admin/class-admin.php:79
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr "Settings"
 
-#: includes/admin/class-admin.php:62
+#: includes/admin/class-admin.php:64
 msgid "Caută actualizări"
 msgstr "Check for updates"
 
-#: includes/admin/class-admin.php:69 includes/admin/class-admin.php:70
+#: includes/admin/class-admin.php:71 includes/admin/class-admin.php:72
 msgid "Consent Manager"
 msgstr "Consent Manager"
 
-#: includes/admin/class-admin.php:78 includes/admin/class-settings-page.php:120
+#: includes/admin/class-admin.php:80 includes/admin/class-settings-page.php:120
 msgid "Aspect"
 msgstr "Appearance"
 
-#: includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:81
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr "Categories"
 
-#: includes/admin/class-admin.php:80
+#: includes/admin/class-admin.php:82
 #: includes/admin/class-audit-list-table.php:17
 #: includes/admin/class-guide.php:23
 msgid "Servicii"
 msgstr "Services"
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:83
 msgid "Verificare"
 msgstr "Check"
 
-#: includes/admin/class-admin.php:82 includes/admin/class-audit-page.php:43
+#: includes/admin/class-admin.php:84 includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr "Consent register"
 
-#: includes/admin/class-admin.php:83 includes/admin/class-guide.php:26
+#: includes/admin/class-admin.php:85 includes/admin/class-guide.php:26
 #: includes/admin/class-settings-page.php:198
 #: includes/admin/class-settings-page.php:325
 msgid "Pagini legale"
 msgstr "Legal pages"
 
-#: includes/admin/class-admin.php:84 includes/admin/class-guide.php:71
+#: includes/admin/class-admin.php:86 includes/admin/class-guide.php:71
 msgid "Ghid"
 msgstr "Guide"
 
-#: includes/admin/class-admin.php:106
+#: includes/admin/class-admin.php:108
 #: includes/admin/class-appearance-page.php:507
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
@@ -109,7 +109,7 @@ msgstr "Guide"
 msgid "Acțiune neautorizată."
 msgstr "Unauthorized action."
 
-#: includes/admin/class-admin.php:132
+#: includes/admin/class-admin.php:134
 msgid ""
 "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm "
 "doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google "
@@ -119,7 +119,7 @@ msgstr ""
 "Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo and Google Maps "
 "are blocked until you fix it (reinstall the plugin)."
 
-#: includes/admin/class-admin.php:133
+#: includes/admin/class-admin.php:135
 msgid ""
 "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să "
 "nu fie blocate corect."
@@ -127,23 +127,32 @@ msgstr ""
 "The services library (data/services.json) has errors. Some services may not "
 "be blocked correctly."
 
-#: includes/admin/class-admin.php:134
+#: includes/admin/class-admin.php:136
 #: includes/admin/class-services-page.php:426
+#: includes/modules/class-updater.php:621
 msgid "Consent Manager Pro:"
 msgstr "Consent Manager Pro:"
 
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:138
 msgid "Detalii în „Servicii”"
 msgstr "Details in “Services”"
 
+#: includes/admin/class-admin.php:161
+msgid ""
+"Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din "
+"nou mai târziu."
+msgstr ""
+"Consent Manager Pro: we could not check for updates right now. Please try "
+"again later."
+
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:147
+#: includes/admin/class-admin.php:165
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr "Consent Manager Pro: you have the latest version (%s)."
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:153
+#: includes/admin/class-admin.php:171
 #, php-format
 msgid ""
 "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" "
@@ -2380,17 +2389,63 @@ msgstr ""
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr "Scan in progress (%1$d/%2$d)"
 
-#: includes/modules/class-updater.php:213
-#: includes/modules/class-updater.php:238
+#: includes/modules/class-updater.php:563
+msgid ""
+"Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu."
+msgstr "Update details are not available right now. Please try again later."
+
+#: includes/modules/class-updater.php:620
+msgid "Despre siguranța actualizărilor"
+msgstr "About update security"
+
+#. translators: %s — installed plugin version
+#: includes/modules/class-updater.php:628
+#, php-format
+msgid ""
+"Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată."
+msgstr ""
+"Version %s has been withdrawn for security reasons and must be updated."
+
+#: includes/modules/class-updater.php:631
+msgid "Actualizează acum"
+msgstr "Update now"
+
+#: includes/modules/class-updater.php:635
+msgid ""
+"Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, "
+"scrie-ne."
+msgstr ""
+"Updates cannot be verified right now. If this message persists for a few "
+"days, please contact us."
+
+#: includes/modules/class-updater.php:640
+msgid ""
+"Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP "
+"sodium."
+msgstr ""
+"Updates cannot be verified on this server: the PHP sodium extension is "
+"missing."
+
+#: includes/modules/class-updater.php:662
+msgid ""
+"Pachetul de update nu corespunde manifestului semnat și a fost refuzat. "
+"Apasă din nou „Caută actualizări” și reîncearcă."
+msgstr ""
+"The update package does not match the signed manifest and was refused. Click "
+"“Check for updates” again and retry."
+
+#: includes/modules/class-updater.php:673
+msgid ""
+"Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost "
+"șters."
+msgstr ""
+"The update package failed verification (sha256 or signature) and was deleted."
+
+#: includes/modules/class-updater.php:690
 msgid "Nu am putut descărca pachetul de update."
 msgstr "Could not download the update package."
 
-#: includes/modules/class-updater.php:218
-msgid "Pachetul de update nu are o semnătură validă și nu a fost instalat."
-msgstr ""
-"The update package does not have a valid signature and was not installed."
-
-#: includes/modules/class-updater.php:242
+#: includes/modules/class-updater.php:694
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
 msgstr "The update package exceeds the maximum allowed size."
 
@@ -2641,7 +2696,14 @@ msgid ""
 "aspectul. Fără WPML sau Polylang, textele vechi ale bannerului devin textele "
 "limbii curente a site-ului, iar celelalte limbi folosesc textele implicite "
 "până le completezi."
-msgstr "How the banner looks is chosen in %1$sAppearance%2$s: style, colours, theme, format and position, backdrop, details, buttons, texts, animation, reopen button, excluded pages and custom CSS. Sites that had the plugin before look the same; saving the screen does not change the look. Without WPML or Polylang, the banner's old texts become the texts of the site's current language, and the other languages use the default texts until you fill them in."
+msgstr ""
+"How the banner looks is chosen in %1$sAppearance%2$s: style, colours, theme, "
+"format and position, backdrop, details, buttons, texts, animation, reopen "
+"button, excluded pages and custom CSS. Sites that had the plugin before look "
+"the same; saving the screen does not change the look. Without WPML or "
+"Polylang, the banner's old texts become the texts of the site's current "
+"language, and the other languages use the default texts until you fill them "
+"in."
 
 #: templates/admin/guide.php:85
 msgid ""
@@ -3836,6 +3898,9 @@ msgstr ""
 "In Light mode there is no decision: allowCategory and denyCategory do "
 "nothing, and onConsent and whenAllowed don’t call the function for optional "
 "categories."
+
+#~ msgid "https://github.com/rtgit003/consent-manager-pro"
+#~ msgstr "https://github.com/rtgit003/consent-manager-pro"
 
 #~ msgid "Preset design"
 #~ msgstr "Design preset"

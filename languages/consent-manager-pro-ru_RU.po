@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Consent Manager Pro\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro\n"
-"POT-Creation-Date: 2026-11-19T15:55:03+00:00\n"
+"POT-Creation-Date: 2026-11-20T07:45:47+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: Consent Manager Pro\n"
 "Language-Team: ru_RU\n"
@@ -22,8 +22,8 @@ msgstr "Consent Manager Pro"
 
 #. Plugin URI of the plugin
 #: consent-manager-pro.php
-msgid "https://github.com/rtgit003/consent-manager-pro"
-msgstr "https://github.com/rtgit003/consent-manager-pro"
+msgid "https://consent.rt.md/"
+msgstr "https://consent.rt.md/"
 
 #. Description of the plugin
 #: consent-manager-pro.php
@@ -47,53 +47,53 @@ msgstr "RT.md"
 msgid "https://rt.md"
 msgstr "https://rt.md"
 
-#: includes/admin/class-admin.php:60 includes/admin/class-admin.php:77
+#: includes/admin/class-admin.php:62 includes/admin/class-admin.php:79
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr "Настройки"
 
-#: includes/admin/class-admin.php:62
+#: includes/admin/class-admin.php:64
 msgid "Caută actualizări"
 msgstr "Проверить обновления"
 
-#: includes/admin/class-admin.php:69 includes/admin/class-admin.php:70
+#: includes/admin/class-admin.php:71 includes/admin/class-admin.php:72
 msgid "Consent Manager"
 msgstr "Consent Manager"
 
-#: includes/admin/class-admin.php:78 includes/admin/class-settings-page.php:120
+#: includes/admin/class-admin.php:80 includes/admin/class-settings-page.php:120
 msgid "Aspect"
 msgstr "Оформление"
 
-#: includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:81
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr "Категории"
 
-#: includes/admin/class-admin.php:80
+#: includes/admin/class-admin.php:82
 #: includes/admin/class-audit-list-table.php:17
 #: includes/admin/class-guide.php:23
 msgid "Servicii"
 msgstr "Сервисы"
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:83
 msgid "Verificare"
 msgstr "Проверка"
 
-#: includes/admin/class-admin.php:82 includes/admin/class-audit-page.php:43
+#: includes/admin/class-admin.php:84 includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr "Реестр согласий"
 
-#: includes/admin/class-admin.php:83 includes/admin/class-guide.php:26
+#: includes/admin/class-admin.php:85 includes/admin/class-guide.php:26
 #: includes/admin/class-settings-page.php:198
 #: includes/admin/class-settings-page.php:325
 msgid "Pagini legale"
 msgstr "Юридические страницы"
 
-#: includes/admin/class-admin.php:84 includes/admin/class-guide.php:71
+#: includes/admin/class-admin.php:86 includes/admin/class-guide.php:71
 msgid "Ghid"
 msgstr "Руководство"
 
-#: includes/admin/class-admin.php:106
+#: includes/admin/class-admin.php:108
 #: includes/admin/class-appearance-page.php:507
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
@@ -111,7 +111,7 @@ msgstr "Руководство"
 msgid "Acțiune neautorizată."
 msgstr "Действие не разрешено."
 
-#: includes/admin/class-admin.php:132
+#: includes/admin/class-admin.php:134
 msgid ""
 "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm "
 "doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google "
@@ -121,7 +121,7 @@ msgstr ""
 "её не восстановите, блокируются только Google Analytics, Tag Manager, Meta "
 "Pixel, YouTube, Vimeo и Google Maps (переустановите плагин)."
 
-#: includes/admin/class-admin.php:133
+#: includes/admin/class-admin.php:135
 msgid ""
 "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să "
 "nu fie blocate corect."
@@ -129,23 +129,32 @@ msgstr ""
 "В библиотеке сервисов (data/services.json) есть ошибки. Некоторые сервисы "
 "могут блокироваться неправильно."
 
-#: includes/admin/class-admin.php:134
+#: includes/admin/class-admin.php:136
 #: includes/admin/class-services-page.php:426
+#: includes/modules/class-updater.php:621
 msgid "Consent Manager Pro:"
 msgstr "Consent Manager Pro:"
 
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:138
 msgid "Detalii în „Servicii”"
 msgstr "Подробности в разделе «Сервисы»"
 
+#: includes/admin/class-admin.php:161
+msgid ""
+"Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din "
+"nou mai târziu."
+msgstr ""
+"Consent Manager Pro: сейчас не удалось проверить обновления. Повторите "
+"попытку позже."
+
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:147
+#: includes/admin/class-admin.php:165
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr "Consent Manager Pro: у вас последняя версия (%s)."
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:153
+#: includes/admin/class-admin.php:171
 #, php-format
 msgid ""
 "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" "
@@ -2392,17 +2401,62 @@ msgstr ""
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr "Идёт сканирование (%1$d/%2$d)"
 
-#: includes/modules/class-updater.php:213
-#: includes/modules/class-updater.php:238
+#: includes/modules/class-updater.php:563
+msgid ""
+"Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu."
+msgstr "Сведения об обновлении сейчас недоступны. Повторите попытку позже."
+
+#: includes/modules/class-updater.php:620
+msgid "Despre siguranța actualizărilor"
+msgstr "О безопасности обновлений"
+
+#. translators: %s — installed plugin version
+#: includes/modules/class-updater.php:628
+#, php-format
+msgid ""
+"Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată."
+msgstr ""
+"Версия %s отозвана по соображениям безопасности, её необходимо обновить."
+
+#: includes/modules/class-updater.php:631
+msgid "Actualizează acum"
+msgstr "Обновить сейчас"
+
+#: includes/modules/class-updater.php:635
+msgid ""
+"Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, "
+"scrie-ne."
+msgstr ""
+"Сейчас невозможно проверить обновления. Если сообщение не исчезнет в течение "
+"нескольких дней, напишите нам."
+
+#: includes/modules/class-updater.php:640
+msgid ""
+"Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP "
+"sodium."
+msgstr ""
+"На этом сервере невозможно проверить обновления: отсутствует расширение PHP "
+"sodium."
+
+#: includes/modules/class-updater.php:662
+msgid ""
+"Pachetul de update nu corespunde manifestului semnat și a fost refuzat. "
+"Apasă din nou „Caută actualizări” și reîncearcă."
+msgstr ""
+"Пакет обновления не соответствует подписанному манифесту и был отклонён. "
+"Снова нажмите «Проверить обновления» и повторите попытку."
+
+#: includes/modules/class-updater.php:673
+msgid ""
+"Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost "
+"șters."
+msgstr "Пакет обновления не прошёл проверку (sha256 или подпись) и был удалён."
+
+#: includes/modules/class-updater.php:690
 msgid "Nu am putut descărca pachetul de update."
 msgstr "Не удалось скачать пакет обновления."
 
-#: includes/modules/class-updater.php:218
-msgid "Pachetul de update nu are o semnătură validă și nu a fost instalat."
-msgstr ""
-"У пакета обновления нет действительной подписи, и он не был установлен."
-
-#: includes/modules/class-updater.php:242
+#: includes/modules/class-updater.php:694
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
 msgstr "Пакет обновления превышает максимально допустимый размер."
 
@@ -2657,7 +2711,13 @@ msgid ""
 "aspectul. Fără WPML sau Polylang, textele vechi ale bannerului devin textele "
 "limbii curente a site-ului, iar celelalte limbi folosesc textele implicite "
 "până le completezi."
-msgstr "Вид баннера выбирается в %1$sОформлении%2$s: стиль, цвета, тема, формат и положение, фон, детали, кнопки, тексты, анимация, кнопка повторного открытия, исключённые страницы и свой CSS. Сайты, где плагин уже стоял, выглядят как раньше; сохранение экрана не меняет вид. Без WPML или Polylang старые тексты баннера становятся текстами текущего языка сайта, а остальные языки используют тексты по умолчанию, пока вы их не заполните."
+msgstr ""
+"Вид баннера выбирается в %1$sОформлении%2$s: стиль, цвета, тема, формат и "
+"положение, фон, детали, кнопки, тексты, анимация, кнопка повторного "
+"открытия, исключённые страницы и свой CSS. Сайты, где плагин уже стоял, "
+"выглядят как раньше; сохранение экрана не меняет вид. Без WPML или Polylang "
+"старые тексты баннера становятся текстами текущего языка сайта, а остальные "
+"языки используют тексты по умолчанию, пока вы их не заполните."
 
 #: templates/admin/guide.php:85
 msgid ""
@@ -3861,6 +3921,9 @@ msgid ""
 msgstr ""
 "В режиме Light решения нет: allowCategory и denyCategory ничего не делают, а "
 "onConsent и whenAllowed не вызывают функцию для необязательных категорий."
+
+#~ msgid "https://github.com/rtgit003/consent-manager-pro"
+#~ msgstr "https://github.com/rtgit003/consent-manager-pro"
 
 #~ msgid "Preset design"
 #~ msgstr "Стиль оформления"
