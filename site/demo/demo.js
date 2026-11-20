@@ -24,7 +24,7 @@
 		categories: ['necessary', 'statistics', 'marketing'],
 		privacyUrl: en ? '/en/privacy/' : '/confidentialitate/',
 		cookieDays: 1,
-		appearance: { style: style, theme: 'auto', format: 'modal', position: 'center' }
+		appearance: { style: style, theme: 'light', format: 'modal', position: 'center' }
 	};
 	// Without a way to move the cookie, the demo runs in Light mode, which sets no
 	// cookie at all: nothing may ever land on path=/.

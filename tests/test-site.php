@@ -266,7 +266,9 @@ foreach ( $cmp_site_frame as $page => $fr ) {
 	cmp_assert_eq( substr_count( $head, 'aria-current="page"' ), 1, "{$page}: exactly one current item" );
 	cmp_assert( false !== strpos( $foot, 'href="https://rt.md/"' ) && false !== strpos( $foot, 'RT Design Studio' ), "{$page}: footer links RT Design Studio" );
 	cmp_assert( false !== strpos( $foot, 'GPL-2.0-or-later' ), "{$page}: footer states the licence" );
-	cmp_assert( 1 === preg_match( '#<link rel="stylesheet" href="[^"]*tokens\.css"#', $html ) && 1 === preg_match( '#<link rel="stylesheet" href="[^"]*typography\.css"#', $html ), "{$page}: links tokens.css and typography.css" );
+	preg_match_all( '#<link rel="stylesheet" href="([^"]+)"#', $html, $css_links );
+	cmp_assert_eq( array_map( 'basename', $css_links[1] ), array( 'style.css' ), "{$page}: one stylesheet, style.css (rt.md v2 tokens live there)" );
+	cmp_assert( false !== strpos( $html, '<meta name="color-scheme" content="light">' ), "{$page}: light only, like rt.md" );
 	if ( 'ro' === $lang ) {
 		cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$page}: no em dash in Romanian text" );
 	}
@@ -278,7 +280,10 @@ foreach ( array( 'partials/header.ro.html', 'partials/footer.ro.html', 'demo/ind
 	cmp_assert( false === strpos( (string) @file_get_contents( $cmp_site_root . '/site/' . $f ), "\xe2\x80\x94" ), "site/{$f}: no em dash" );
 }
 cmp_assert( ! is_dir( $cmp_site_out1 . '/partials' ), 'build-site: partials are not copied to the output' );
-foreach ( array( 'assets/tokens.css', 'assets/typography.css', 'fonts/inter-tight/OFL.txt', 'fonts/inter-tight/inter-tight-normal-latin.woff2', 'fonts/inter-tight/inter-tight-normal-latin-ext.woff2' ) as $f ) {
+foreach ( array( 'assets/tokens.css', 'assets/typography.css' ) as $f ) {
+	cmp_assert( ! is_file( $cmp_site_root . '/site/' . $f ) && ! is_file( $cmp_site_out1 . '/' . $f ), "build-site: no old design-system file {$f}" );
+}
+foreach ( array( 'fonts/inter-tight/OFL.txt', 'fonts/inter-tight/inter-tight-normal-latin.woff2', 'fonts/inter-tight/inter-tight-normal-latin-ext.woff2' ) as $f ) {
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ), "build-site: writes {$f}" );
 }
 $cmp_site_ofl = $cmp_site_read( 'fonts/inter-tight/OFL.txt' );
@@ -290,7 +295,13 @@ foreach ( array( $cmp_site_out1 => 'out', $cmp_site_root . '/site' => 'site' ) a
 	foreach ( $ffs[0] as $ff ) {
 		cmp_assert( 1 === preg_match( '/url\(\s*["\']?(?![a-z][a-z0-9+.-]*:|\/\/)[^)]*\.woff2/i', $ff ), "{$label}/style.css: @font-face loads a local woff2" );
 	}
-	cmp_assert( false !== strpos( $css, 'prefers-color-scheme: dark' ), "{$label}/style.css: dark mode" );
+	cmp_assert( false === strpos( $css, 'prefers-color-scheme' ), "{$label}/style.css: no dark mode (rt.md is always light)" );
+	cmp_assert( 1 === preg_match( '/color-scheme:\s*light\s*;/', $css ), "{$label}/style.css: color-scheme: light" );
+	foreach ( array( '--ink: #0a0a0a', '--mute: #8a8a8a', '--line: #e6e6e6', '--bg: #fff', '--pad: clamp(16px, 4vw, 56px)' ) as $tok ) {
+		cmp_assert( false !== strpos( $css, $tok ), "{$label}/style.css: rt.md v2 token {$tok}" );
+	}
+	cmp_assert( 0 === preg_match( '/oklch|--rt-|--p:/', $css ), "{$label}/style.css: no old design-system tokens or accent" );
+	cmp_assert( 1 === preg_match( '/\[hidden\]\s*\{\s*display:\s*none\s*!important/', $css ), "{$label}/style.css: [hidden] wins over .btn display (the Cancel button stays hidden)" );
 	cmp_assert( false !== strpos( $css, ':focus-visible' ), "{$label}/style.css: visible focus" );
 }
 
@@ -388,6 +399,7 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $la
 	cmp_assert( 1 === preg_match( '#<div\b[^>]*\bid="verifica-rezultat"[^>]*>#', $sec, $rm ) && false !== strpos( $rm[0], 'aria-live="polite"' ), "{$page}: result region with aria-live=polite" );
 	cmp_assert( false !== strpos( $html, '<script src="/assets/verifica.js" defer></script>' ), "{$page}: loads /assets/verifica.js" );
 	cmp_assert( false !== strpos( $sec, 'id="cum-verifici"' ), "{$page}: how to check it yourself (#cum-verifici)" );
+	cmp_assert( 1 === preg_match( '#<button\b[^>]*\bid="verifica-anuleaza"[^>]*>#', $sec, $cbm ) && 1 === preg_match( '#\shidden[\s>]#', $cbm[0] ), "{$page}: the Cancel button is hidden until a check runs" );
 	// The demo, in an iframe of /demo/, with three styles.
 	$demo_base = 'ro' === $lang ? '/demo/embed/' : '/demo/en/embed/';
 	cmp_assert( 1 === preg_match( '#<iframe\b[^>]*\bsrc="' . preg_quote( $demo_base, '#' ) . '\?style=(minimal|brand|friendly)"[^>]*\bname="cmp-demo"[^>]*\btitle="[^"]+"#', $html ), "{$page}: demo iframe of {$demo_base}" );
@@ -444,6 +456,7 @@ cmp_assert( false === strpos( $cmp_site_js, "\xe2\x80\x94" ), 'verifica.js: no e
 cmp_assert( false === strpos( $cmp_site_js, "out.setAttribute('aria-busy'" ), 'verifica.js: no aria-busy on the live region' );
 cmp_assert( false !== strpos( $cmp_site_js, "querySelector('canvas.confetti')" ), 'verifica.js: confetti is not started twice' );
 cmp_assert( false !== strpos( $cmp_site_js, 'form.hidden = false' ), 'verifica.js: shows the form only when it can run' );
+cmp_assert( false !== strpos( $cmp_site_js, 'cancel.hidden = !on' ), 'verifica.js: shows Cancel only while a check runs' );
 cmp_assert( false !== strpos( $cmp_site_js, "'cmp:consent-manager-pro'" ), 'verifica.js: our own CMP finding is not shown twice' );
 cmp_assert( 1 === preg_match( '#<canvas|createElement\(\s*\'canvas\'\s*\)#', $cmp_site_js ), 'verifica.js: confetti on its own canvas' );
 cmp_assert( 1 === preg_match( '#/\* confetti \*/(.*?)/\* /confetti \*/#s', $cmp_site_js, $cf ) && strlen( preg_replace( '#\s+#', ' ', preg_replace( '#//[^\n]*|/\*.*?\*/#s', '', $cf[1] ) ) ) < 2048, 'verifica.js: confetti under 2 KB (without comments and whitespace runs)' );

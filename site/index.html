@@ -3,11 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>Consent Manager Pro · Cookie-uri conforme pentru site-urile din Moldova</title>
 <meta name="description" content="Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri, făcut pentru Legea 195/2024. Verifică-ți site-ul în câteva secunde.">
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/typography.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="landing">
@@ -18,11 +16,13 @@
 <div class="wrap">
 <p class="eyebrow">Plugin WordPress pentru cookie-uri · Legea 195/2024</p>
 <h1 id="titlu">Cookie-uri cu acord, nu cu noroc.</h1>
+<div class="hero-foot">
 <p class="lead">Consent Manager Pro oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Gratuit, open-source, fără date trimise nouă.</p>
 <p class="actions">
 <a class="btn" data-download href="<!-- DOWNLOAD_URL -->">Descarcă</a>
 <a class="btn btn-ghost" href="#verifica">Verifică-ți site-ul</a>
 </p>
+</div>
 <ul class="facts">
 <li>Gratuit, fără versiune plătită</li>
 <li>Licență GPL</li>
@@ -32,10 +32,10 @@
 </div>
 </section>
 
-<section id="verifica" class="band" aria-labelledby="verifica-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">01 · Verificare</p>
-<h2 id="verifica-titlu">Verifică-ți site-ul</h2>
+<section id="verifica" aria-labelledby="verifica-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">01 · Verificare</p>
+<h2 id="verifica-titlu">Verifică-ți site-ul</h2></div>
 <p>Scrie adresa site-ului. Citim pagina principală ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord.</p>
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Adresa site-ului</label>
@@ -78,9 +78,9 @@
 </section>
 
 <section id="legea" aria-labelledby="legea-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">02 · Legea</p>
-<h2 id="legea-titlu">Ce cere legea</h2>
+<div class="wrap">
+<div class="sh"><p class="n">02 · Legea</p>
+<h2 id="legea-titlu">Ce cere legea</h2></div>
 <p>În Moldova, regula despre cookie-uri vine din două legi. <strong>Legea nr. 72/2025 a comunicațiilor electronice</strong>, art. 116, în vigoare din 1 ianuarie 2026, spune când ai voie să scrii sau să citești ceva pe dispozitivul vizitatorului. <strong>Legea nr. 195/2024 privind protecția datelor cu caracter personal</strong>, în vigoare din 23 august 2026, spune cum trebuie să arate acordul și ce trebuie să poți dovedi. Pe scurt:</p>
 <ol class="rules">
 <li><strong>Acord înainte, nu după.</strong> Analiza și marketingul pornesc doar după ce vizitatorul spune „Da”. Art. 116 cere în text informarea; acordul vine din Legea 195/2024, de îndată ce cookie-ul identifică vizitatorul. <span class="law">Legea 195/2024 art. 6-7, Legea 72/2025 art. 116</span></li>
@@ -96,11 +96,11 @@
 </div>
 </section>
 
-<section id="functii" class="band" aria-labelledby="functii-titlu">
+<section id="functii" aria-labelledby="functii-titlu">
 <div class="wrap">
-<p class="eyebrow">03 · Pluginul</p>
-<h2 id="functii-titlu">Ce face pluginul</h2>
-<ul class="cards">
+<div class="sh"><p class="n">03 · Pluginul</p>
+<h2 id="functii-titlu">Ce face pluginul</h2></div>
+<ul class="feat">
 <li><h3>Blochează până la acord</h3><p>Scripturile și embed-urile (YouTube, Vimeo, Google Maps) stau oprite până alege vizitatorul. Cu Google Consent Mode v2 și un mod de măsurare Strict sau Advanced.</p></li>
 <li><h3>Știe serviciile</h3><p>O bibliotecă de 18 servicii, de la Google Analytics și Meta Pixel la Hotjar și Tawk.to, blocate din prima zi. Adaugi singur ce lipsește.</p></li>
 <li><h3>Scanează și verifică</h3><p>Scanează până la 20 de pagini ale site-ului, zilnic, și testează în browser ce se încarcă înainte și după acord. Arată și resursele care trimit IP-ul vizitatorului.</p></li>
@@ -116,8 +116,8 @@
 
 <section id="demo" aria-labelledby="demo-titlu">
 <div class="wrap">
-<p class="eyebrow">04 · Demo</p>
-<h2 id="demo-titlu">Încearcă bannerul</h2>
+<div class="sh"><p class="n">04 · Demo</p>
+<h2 id="demo-titlu">Încearcă bannerul</h2></div>
 <p>E bannerul real, în versiunea fără WordPress. Alege un stil. Demo-ul nu încarcă niciun tracker.</p>
 <p class="switch" role="group" aria-label="Stilul bannerului">
 <a href="/demo/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
@@ -128,10 +128,10 @@
 </div>
 </section>
 
-<section id="comparatie" class="band" aria-labelledby="comparatie-titlu">
+<section id="comparatie" aria-labelledby="comparatie-titlu">
 <div class="wrap">
-<p class="eyebrow">05 · Comparație</p>
-<h2 id="comparatie-titlu">Cum se compară</h2>
+<div class="sh"><p class="n">05 · Comparație</p>
+<h2 id="comparatie-titlu">Cum se compară</h2></div>
 <p>Am citit paginile oficiale ale celorlalte trei pluginuri pe 20 noiembrie 2026. Fiecare afirmație are sursa în note. Unde n-am găsit informații, scrie asta.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
 <table class="compare">
@@ -221,9 +221,9 @@
 </section>
 
 <section id="resurse" aria-labelledby="resurse-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">06 · Resurse externe</p>
-<h2 id="resurse-titlu">Google Fonts și alte resurse care trimit IP-ul</h2>
+<div class="wrap">
+<div class="sh"><p class="n">06 · Resurse externe</p>
+<h2 id="resurse-titlu">Google Fonts și alte resurse care trimit IP-ul</h2></div>
 <p>Când o pagină încarcă un font de la Google, browserul vizitatorului se conectează la serverele Google și le trimite adresa IP. Fără să-l fi întrebat cineva. IP-ul e o dată personală.</p>
 <p>În ianuarie 2022, un tribunal din München (Landgericht München I, dosarul 3 O 17493/20) a decis că un site care încărca Google Fonts de pe serverele Google a încălcat GDPR, pentru că fonturile se pot folosi și local, fără să plece IP-ul vizitatorului. Site-ul a fost obligat să plătească 100 € despăgubire vizitatorului care a reclamat. Decizia e a unui tribunal german, nu face lege în Moldova, dar arată cum e citit GDPR-ul în UE.</p>
 <p>Același lucru se întâmplă cu Adobe Fonts, Font Awesome, CDN-urile publice, avatarele Gravatar și emoji-urile WordPress.</p>
@@ -237,10 +237,10 @@
 </div>
 </section>
 
-<section id="incredere" class="band" aria-labelledby="incredere-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">07 · Încredere</p>
-<h2 id="incredere-titlu">Poți verifica tot</h2>
+<section id="incredere" aria-labelledby="incredere-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">07 · Încredere</p>
+<h2 id="incredere-titlu">Poți verifica tot</h2></div>
 <ul class="checks">
 <li><strong>Open-source.</strong> Tot codul e pe <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, sub licența GPL-2.0-or-later.</li>
 <li><strong>Update-uri semnate.</strong> Cheile publice și comenzile cu care verifici un pachet de mână sunt pe pagina <a href="/securitate/">Securitate</a>.</li>
@@ -251,9 +251,9 @@
 </section>
 
 <section id="instalare" aria-labelledby="instalare-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">08 · Instalare</p>
-<h2 id="instalare-titlu">Pornit în 5 minute</h2>
+<div class="wrap">
+<div class="sh"><p class="n">08 · Instalare</p>
+<h2 id="instalare-titlu">Pornit în 5 minute</h2></div>
 <ol class="steps">
 <li><a data-download href="<!-- DOWNLOAD_URL -->">Descarcă</a> <code>consent-manager-pro.zip</code>. În WordPress, la Module, încarcă fișierul zip și activează pluginul.</li>
 <li><strong>Setări:</strong> lasă modul Pro (bannerul cu consimțământ pe categorii). Lasă bifat „Blochează scripturile de tracking până la consimțământ” și modul de măsurare pe Strict.</li>
@@ -266,10 +266,10 @@
 </div>
 </section>
 
-<section id="intrebari" class="band" aria-labelledby="intrebari-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">09 · Întrebări</p>
-<h2 id="intrebari-titlu">Întrebări frecvente</h2>
+<section id="intrebari" aria-labelledby="intrebari-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">09 · Întrebări</p>
+<h2 id="intrebari-titlu">Întrebări frecvente</h2></div>
 <details><summary>De ce e gratuit?</summary><p>Pentru că vrem ca orice site din Moldova să poată cere acordul corect, fără să plătească pentru asta. Codul e public, sub licența GPL. Nu există cheie de licență, abonament sau funcții ascunse.</p></details>
 <details><summary>„Pro” înseamnă că există o versiune plătită?</summary><p>Nu. „Pro” înseamnă profesional. Nu există versiune plătită și nici serviciu plătit.</p></details>
 <details><summary>Merge fără WordPress?</summary><p>Da. Pentru site-urile statice există <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">versiunea standalone</a>: două fișiere, <code>cmp.js</code> și <code>cmp.css</code>. Marchezi singur scripturile care așteaptă acordul. Nu are registru de consimțăminte.</p></details>

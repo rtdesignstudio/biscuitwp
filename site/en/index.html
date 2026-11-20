@@ -3,11 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>Consent Manager Pro · Compliant cookies for sites in Moldova</title>
 <meta name="description" content="A free and open-source WordPress cookie consent plugin, built for Moldova's Law 195/2024. Check your site in a few seconds.">
-<link rel="stylesheet" href="../assets/tokens.css">
-<link rel="stylesheet" href="../assets/typography.css">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body class="landing">
@@ -18,11 +16,13 @@
 <div class="wrap">
 <p class="eyebrow">WordPress cookie plugin · Law 195/2024</p>
 <h1 id="titlu">Cookies by consent, not by luck.</h1>
+<div class="hero-foot">
 <p class="lead">Consent Manager Pro keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Free, open-source, no data sent to us.</p>
 <p class="actions">
 <a class="btn" data-download href="<!-- DOWNLOAD_URL -->">Download</a>
 <a class="btn btn-ghost" href="#verifica">Check your site</a>
 </p>
+</div>
 <ul class="facts">
 <li>Free, no paid version</li>
 <li>GPL licence</li>
@@ -32,10 +32,10 @@
 </div>
 </section>
 
-<section id="verifica" class="band" aria-labelledby="verifica-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">01 · Check</p>
-<h2 id="verifica-titlu">Check your site</h2>
+<section id="verifica" aria-labelledby="verifica-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">01 · Check</p>
+<h2 id="verifica-titlu">Check your site</h2></div>
 <p>Enter your site's address. We read the homepage as a new visitor would, without cookies, and tell you what starts before consent.</p>
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Site address</label>
@@ -78,9 +78,9 @@
 </section>
 
 <section id="legea" aria-labelledby="legea-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">02 · The law</p>
-<h2 id="legea-titlu">What the law asks</h2>
+<div class="wrap">
+<div class="sh"><p class="n">02 · The law</p>
+<h2 id="legea-titlu">What the law asks</h2></div>
 <p>In Moldova, the cookie rule comes from two laws. <strong>Law No. 72/2025 on electronic communications</strong>, art. 116, in force since 1 January 2026, says when you may store or read anything on a visitor's device. <strong>Law No. 195/2024 on personal data protection</strong>, in force since 23 August 2026, says what consent must look like and what you must be able to prove. In short:</p>
 <ol class="rules">
 <li><strong>Consent first, not after.</strong> Analytics and marketing start only after the visitor says yes. Art. 116 itself asks for information; consent comes from Law 195/2024 as soon as the cookie identifies the visitor. <span class="law">Law 195/2024 art. 6-7, Law 72/2025 art. 116</span></li>
@@ -96,11 +96,11 @@
 </div>
 </section>
 
-<section id="functii" class="band" aria-labelledby="functii-titlu">
+<section id="functii" aria-labelledby="functii-titlu">
 <div class="wrap">
-<p class="eyebrow">03 · The plugin</p>
-<h2 id="functii-titlu">What the plugin does</h2>
-<ul class="cards">
+<div class="sh"><p class="n">03 · The plugin</p>
+<h2 id="functii-titlu">What the plugin does</h2></div>
+<ul class="feat">
 <li><h3>Blocks until consent</h3><p>Scripts and embeds (YouTube, Vimeo, Google Maps) stay off until the visitor chooses. With Google Consent Mode v2 and a Strict or Advanced measurement mode.</p></li>
 <li><h3>Knows the services</h3><p>A library of 18 services, from Google Analytics and Meta Pixel to Hotjar and Tawk.to, blocked from day one. You add what is missing.</p></li>
 <li><h3>Scans and checks</h3><p>Scans up to 20 pages of your site daily and tests in the browser what loads before and after consent. It also shows resources that send the visitor's IP address.</p></li>
@@ -116,8 +116,8 @@
 
 <section id="demo" aria-labelledby="demo-titlu">
 <div class="wrap">
-<p class="eyebrow">04 · Demo</p>
-<h2 id="demo-titlu">Try the banner</h2>
+<div class="sh"><p class="n">04 · Demo</p>
+<h2 id="demo-titlu">Try the banner</h2></div>
 <p>This is the real banner, in its version without WordPress. Pick a style. The demo loads no trackers.</p>
 <p class="switch" role="group" aria-label="Banner style">
 <a href="/demo/en/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
@@ -128,10 +128,10 @@
 </div>
 </section>
 
-<section id="comparatie" class="band" aria-labelledby="comparatie-titlu">
+<section id="comparatie" aria-labelledby="comparatie-titlu">
 <div class="wrap">
-<p class="eyebrow">05 · Comparison</p>
-<h2 id="comparatie-titlu">How it compares</h2>
+<div class="sh"><p class="n">05 · Comparison</p>
+<h2 id="comparatie-titlu">How it compares</h2></div>
 <p>We read the official pages of the other three plugins on 20 November 2026. Every claim has its source in the notes. Where we found no information, we say so.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
 <table class="compare">
@@ -221,9 +221,9 @@
 </section>
 
 <section id="resurse" aria-labelledby="resurse-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">06 · External resources</p>
-<h2 id="resurse-titlu">Google Fonts and other resources that send the IP address</h2>
+<div class="wrap">
+<div class="sh"><p class="n">06 · External resources</p>
+<h2 id="resurse-titlu">Google Fonts and other resources that send the IP address</h2></div>
 <p>When a page loads a font from Google, the visitor's browser connects to Google's servers and sends them its IP address. Nobody asked the visitor. The IP address is personal data.</p>
 <p>In January 2022 a court in Munich (Landgericht München I, case 3 O 17493/20) ruled that a site loading Google Fonts from Google's servers breached the GDPR, because the fonts can also be used locally without the visitor's IP address leaving. The site had to pay €100 in damages to the visitor who complained. It is a German court's decision and is not law in Moldova, but it shows how the GDPR is read in the EU.</p>
 <p>The same happens with Adobe Fonts, Font Awesome, public CDNs, Gravatar avatars and WordPress emoji.</p>
@@ -237,10 +237,10 @@
 </div>
 </section>
 
-<section id="incredere" class="band" aria-labelledby="incredere-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">07 · Trust</p>
-<h2 id="incredere-titlu">You can check everything</h2>
+<section id="incredere" aria-labelledby="incredere-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">07 · Trust</p>
+<h2 id="incredere-titlu">You can check everything</h2></div>
 <ul class="checks">
 <li><strong>Open-source.</strong> All the code is on <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, under GPL-2.0-or-later.</li>
 <li><strong>Signed updates.</strong> The public keys and the commands to verify a package by hand are on the <a href="/en/security/">Security</a> page.</li>
@@ -251,9 +251,9 @@
 </section>
 
 <section id="instalare" aria-labelledby="instalare-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">08 · Install</p>
-<h2 id="instalare-titlu">Running in 5 minutes</h2>
+<div class="wrap">
+<div class="sh"><p class="n">08 · Install</p>
+<h2 id="instalare-titlu">Running in 5 minutes</h2></div>
 <ol class="steps">
 <li><a data-download href="<!-- DOWNLOAD_URL -->">Download</a> <code>consent-manager-pro.zip</code>. In WordPress, under Plugins, upload the zip file and activate the plugin.</li>
 <li><strong>Settings:</strong> keep Pro mode (the banner with consent per category). Keep "Block tracking scripts until consent" ticked and the measurement mode on Strict.</li>
@@ -266,10 +266,10 @@
 </div>
 </section>
 
-<section id="intrebari" class="band" aria-labelledby="intrebari-titlu">
-<div class="wrap narrow">
-<p class="eyebrow">09 · Questions</p>
-<h2 id="intrebari-titlu">Frequently asked questions</h2>
+<section id="intrebari" aria-labelledby="intrebari-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">09 · Questions</p>
+<h2 id="intrebari-titlu">Frequently asked questions</h2></div>
 <details><summary>Why is it free?</summary><p>Because we want every site in Moldova to be able to ask for consent properly without paying for it. The code is public, under the GPL. There is no licence key, no subscription and no hidden features.</p></details>
 <details><summary>Does "Pro" mean there is a paid version?</summary><p>No. "Pro" means professional. There is no paid version and no paid service.</p></details>
 <details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>
