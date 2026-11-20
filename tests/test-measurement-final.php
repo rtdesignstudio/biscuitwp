@@ -188,8 +188,13 @@ cmp_assert( false === strpos( CMP_Legal::cookie_table_html( $mf_cats, array( $mf
 $mf_lt = CMP_Legal::table_for_mode( $mf_cats, array( array_merge( $mf_fathom, array( 'exempt' => true ) ), $mf_mk ), 'light' );
 cmp_assert_eq( $mf_ids( $mf_lt['services'] ), array( 'fathom' ), 'I3: Light lists the exempt cookieless service' );
 // Lawyer pack item.
-$mf_lp = $mf_src( 'docs/product/2026-11-18-texte-juridice-pentru-revizie.md' );
-cmp_assert( 1 === preg_match( '/D19\b.*fără cookie/su', $mf_lp ), 'I3: lawyer pack has D19 on cookieless services in the table' );
+// Internal review document: present only in the internal repo (skipped in the public one).
+if ( is_readable( $mf_root . '/docs/product/2026-11-18-texte-juridice-pentru-revizie.md' ) ) {
+	$mf_lp = $mf_src( 'docs/product/2026-11-18-texte-juridice-pentru-revizie.md' );
+	cmp_assert( 1 === preg_match( '/D19\b.*fără cookie/su', $mf_lp ), 'I3: lawyer pack has D19 on cookieless services in the table' );
+} else {
+	echo "SKIP: internal lawyer pack not present\n";
+}
 
 // ---------------------------------------------------------------- I4
 $mf_a = array( 'mode' => 'pro', 'block_scripts' => true, 'measurement' => 'advanced' );

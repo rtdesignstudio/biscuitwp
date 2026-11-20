@@ -196,9 +196,14 @@ foreach ( $fx_txt as $fx_l => $fx_e ) {
 	cmp_assert( false !== strpos( $fx_c, $fx_e['gpc'] ), "M6 $fx_l/cookie: GPC also covers an invalid (expired / policy-changed) choice" );
 	cmp_assert( false !== strpos( $fx_c, $fx_e['legacy'] ), "I3 $fx_l/cookie: re-consent baseline for earlier choices stated" );
 }
-$fx_pack = $fx_src( 'docs/product/2026-11-18-texte-juridice-pentru-revizie.md' );
-foreach ( $fx_txt as $fx_l => $fx_e ) {
-	cmp_assert( false !== strpos( $fx_pack, $fx_e['gpc'] ) && false !== strpos( $fx_pack, $fx_e['legacy'] ), "M6/I3: lawyer pack carries the $fx_l wording" );
+// Internal review document: present only in the internal repo (skipped in the public one).
+if ( is_readable( dirname( __DIR__ ) . '/docs/product/2026-11-18-texte-juridice-pentru-revizie.md' ) ) {
+	$fx_pack = $fx_src( 'docs/product/2026-11-18-texte-juridice-pentru-revizie.md' );
+	foreach ( $fx_txt as $fx_l => $fx_e ) {
+		cmp_assert( false !== strpos( $fx_pack, $fx_e['gpc'] ) && false !== strpos( $fx_pack, $fx_e['legacy'] ), "M6/I3: lawyer pack carries the $fx_l wording" );
+	}
+	cmp_assert( false === strpos( $fx_pack, 'nu sunt re-întrebate până la următoarea decizie' ), 'I3: lawyer pack no longer says 0.4.x consents are never re-asked' );
+} else {
+	echo "SKIP: internal lawyer pack not present\n";
 }
-cmp_assert( false === strpos( $fx_pack, 'nu sunt re-întrebate până la următoarea decizie' ), 'I3: lawyer pack no longer says 0.4.x consents are never re-asked' );
 cmp_assert( false === strpos( $fx_lp, 'art. 30' ), 'M7: operator note cites no unverified article number' );
