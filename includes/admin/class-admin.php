@@ -46,10 +46,12 @@ class CMP_Admin {
 
 		add_action( 'admin_post_cmp_check_updates', array( $this, 'check_updates' ) );
 		add_action( 'admin_notices', array( $this, 'update_check_notice' ) );
+		add_action( 'network_admin_notices', array( $this, 'update_check_notice' ) );
 		add_action( 'admin_notices', array( $this, 'update_state_notices' ) );
 		add_action( 'network_admin_notices', array( $this, 'update_state_notices' ) );
 
 		add_filter( 'plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'action_links' ) );
+		add_filter( 'network_admin_plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'network_action_links' ) );
 	}
 
 	/**
@@ -63,6 +65,19 @@ class CMP_Admin {
 		array_unshift( $links, $settings );
 		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'consent-manager-pro' ) . '</a>';
 		array_splice( $links, 1, 0, array( $check ) );
+		return $links;
+	}
+
+	/**
+	 * Network Plugins screen (multisite): only the update check. Updates apply
+	 * to the whole network; the settings live on each site.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public function network_action_links( $links ) {
+		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'consent-manager-pro' ) . '</a>';
+		array_unshift( $links, $check );
 		return $links;
 	}
 
@@ -114,7 +129,10 @@ class CMP_Admin {
 		// The manifest was just fetched (and cached) by wp_update_plugins(): no extra request.
 		$result = CMP_Updater::check_result( CMP_Updater::fetch_manifest() );
 
-		wp_safe_redirect( add_query_arg( array( 'cmp_up' => rawurlencode( $result ) ), admin_url( 'plugins.php' ) ) );
+		// Back to the screen the check was started from (network or site Plugins).
+		$referer = (string) wp_get_referer();
+		$back    = ( is_multisite() && false !== strpos( $referer, '/wp-admin/network/' ) ) ? network_admin_url( 'plugins.php' ) : admin_url( 'plugins.php' );
+		wp_safe_redirect( add_query_arg( array( 'cmp_up' => rawurlencode( $result ) ), $back ) );
 		exit;
 	}
 

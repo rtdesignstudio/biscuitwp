@@ -747,3 +747,10 @@ cmp_assert_eq( $t_base->invoke( null, 'http://staging.example/' ), 'https://cons
 cmp_assert_eq( $t_base->invoke( null, '' ), 'https://consent.rt.md/', 'base: empty override ignored' );
 cmp_assert_eq( $t_base->invoke( null, array( 'https://x/' ) ), 'https://consent.rt.md/', 'base: non-string override ignored' );
 cmp_assert_eq( $t_base->invoke( null, 'https://staging.example/a/' ), 'https://staging.example/a/', 'base: https override kept (one trailing slash)' );
+
+// Multisite: "Caută actualizări" on the network Plugins screen, and back to it.
+$t_admin = file_get_contents( __DIR__ . '/../includes/admin/class-admin.php' );
+cmp_assert( false !== strpos( $t_admin, "add_filter( 'network_admin_plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( \$this, 'network_action_links' ) )" ), 'admin: check-updates link on the network Plugins screen' );
+cmp_assert( 1 === preg_match( '/function network_action_links\( \$links \) \{.*cmp_check_updates.*\}/sU', $t_admin ), 'admin: network_action_links adds the check link' );
+cmp_assert( false !== strpos( $t_admin, "network_admin_url( 'plugins.php' )" ) && false !== strpos( $t_admin, "'/wp-admin/network/'" ), 'admin: check_updates returns to the network Plugins screen when started there' );
+cmp_assert( false !== strpos( $t_admin, "add_action( 'network_admin_notices', array( \$this, 'update_check_notice' ) )" ), 'admin: update_check_notice also on network_admin_notices' );
