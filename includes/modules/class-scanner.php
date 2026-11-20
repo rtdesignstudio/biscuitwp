@@ -170,7 +170,13 @@ class CMP_Scanner {
 		}
 		$item = 'index' === $key ? 'sitemap' : 'url';
 		$locs = array();
-		foreach ( $doc->getElementsByTagNameNS( '*', $item ) as $node ) {
+		// PHP < 8 does not match namespace-less elements with the '*' wildcard:
+		// fall back to the plain name lookup for a sitemap without xmlns.
+		$nodes = $doc->getElementsByTagNameNS( '*', $item );
+		if ( 0 === $nodes->length ) {
+			$nodes = $doc->getElementsByTagName( $item );
+		}
+		foreach ( $nodes as $node ) {
 			foreach ( $node->childNodes as $c ) {
 				if ( XML_ELEMENT_NODE === $c->nodeType && 'loc' === strtolower( (string) $c->localName ) ) {
 					$locs[] = (string) $c->textContent;

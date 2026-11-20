@@ -105,6 +105,9 @@ for ( $i = 0; $i < 1500; $i++ ) {
 }
 $many .= '</urlset>';
 cmp_assert_eq( count( CMP_Scanner::parse_sitemap( $many )['urls'] ), 1000, 'parse_sitemap: capped at 1000 urls' );
+// A sitemap index without xmlns (any PHP version; PHP 7.4 needs the plain-name fallback).
+$idx = CMP_Scanner::parse_sitemap( '<sitemapindex><sitemap><loc>https://example.md/a.xml</loc></sitemap></sitemapindex>' );
+cmp_assert_eq( $idx['index'], array( 'https://example.md/a.xml' ), 'parse_sitemap: sitemap index without xmlns' );
 cmp_assert_eq( count( CMP_Scanner::parse_sitemap_regex( $many )['urls'] ), 1000, 'sitemap regex: capped at 1000 urls' );
 cmp_assert_eq( CMP_Scanner::parse_sitemap( str_repeat( ' ', 6 * 1024 * 1024 ) . $us ), array( 'index' => array(), 'urls' => array() ), 'parse_sitemap: input over 5 MB is cut' );
 
