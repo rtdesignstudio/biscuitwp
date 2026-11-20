@@ -136,12 +136,14 @@ function cmp_check_merge_extra( array $services, string $lang ): array {
  * Small helpers.
  * ------------------------------------------------------------------ */
 
-/** Plain, single-line text: no tags, no angle brackets, no control characters, at most $max characters. */
+/** Plain, single-line text: no tags, no angle brackets, no control, bidi or zero-width characters, at most $max characters. */
 function cmp_check_plain( $s, int $max = 400 ): string {
 	$s = (string) $s;
 	if ( 1 !== preg_match( '//u', $s ) ) {
 		$s = (string) preg_replace( '/[^\x20-\x7E]/', '', $s );
 	}
+	// Unicode format characters (bidi overrides, zero-width, BOM) and C1 controls: dropped.
+	$s = (string) preg_replace( '/[\p{Cf}\x{80}-\x{9F}]+/u', '', $s );
 	$s = strip_tags( $s );
 	$s = str_replace( array( '<', '>' ), '', $s );
 	$s = (string) preg_replace( '/[\x00-\x1F\x7F]+/', ' ', $s );
@@ -150,6 +152,35 @@ function cmp_check_plain( $s, int $max = 400 ): string {
 		return mb_strlen( $s, 'UTF-8' ) > $max ? rtrim( mb_substr( $s, 0, $max - 3, 'UTF-8' ) ) . '...' : $s;
 	}
 	return strlen( $s ) > $max ? rtrim( substr( $s, 0, $max - 3 ) ) . '...' : $s;
+}
+
+/**
+ * Evidence for a URL the page loads: host + path, no scheme, query or fragment,
+ * reduced to URL-safe characters and capped at 120. A relative URL gives its
+ * path; any other scheme (data:, javascript:...) gives ''.
+ */
+function cmp_check_evidence_url( string $url ): string {
+	// Browsers ignore C0 controls and spaces around (and tabs / newlines inside) a URL.
+	$url = (string) preg_replace( '/[\x00-\x20]+/', '', substr( $url, 0, 2048 ) );
+	if ( 0 === strpos( $url, '//' ) ) {
+		$url = 'https:' . $url;
+	}
+	$host = '';
+	if ( 1 === preg_match( '#^https?://#i', $url ) ) {
+		$host = @parse_url( $url, PHP_URL_HOST ); // phpcs:ignore
+		$path = @parse_url( $url, PHP_URL_PATH ); // phpcs:ignore
+		$host = is_string( $host ) ? strtolower( $host ) : '';
+		if ( 1 !== preg_match( '/^[a-z0-9.-]{1,253}$/', $host ) ) {
+			return '';
+		}
+		$path = is_string( $path ) ? $path : '';
+	} elseif ( 1 === preg_match( '#^[a-z][a-z0-9+.-]*:#i', $url ) ) {
+		return '';
+	} else {
+		$path = substr( $url, 0, strcspn( $url, '?#' ) );
+	}
+	$path = (string) preg_replace( '#[^A-Za-z0-9._~%/+@:-]#', '', $path );
+	return cmp_check_plain( $host . $path, 120 );
 }
 
 /** Lowercase (UTF-8 aware when mbstring is there). */
@@ -1028,6 +1059,11 @@ function cmp_check_text( string $key, string $lang, array $vars = array() ): arr
 			'ro' => array( 'Nu am putut citi toată pagina', 'Pagina are prea multe elemente ca s-o citim până la capăt. Ce e spre final nu am verificat.' ),
 			'en' => array( 'We could not read the whole page', 'The page has too many elements to read to the end. We did not check what comes last.' ),
 		),
+		// No law: the legal doc (docs/product/2026-11-18-cadru-legal-moldova.md) says nothing about HTTPS or transport security.
+		'transport'        => array(
+			'ro' => array( 'Site-ul nu folosește HTTPS', 'Pagina s-a deschis prin http, fără criptare, așa că tot ce trimite vizitatorul, inclusiv formularele și cookie-urile, circulă necriptat. Sursele noastre legale nu numesc HTTPS, așa că nu dăm aici un articol de lege, dar e o măsură de bază de securitate.' ),
+			'en' => array( 'The site does not use HTTPS', 'The page opened over http, without encryption, so everything the visitor sends, forms and cookies included, travels unencrypted. Our legal sources do not name HTTPS, so we cite no article of law here, but it is a basic security measure.' ),
+		),
 	);
 	$pair = isset( $t[ $key ][ $lang ] ) ? $t[ $key ][ $lang ] : array( '', '' );
 	$map  = array();
@@ -1038,6 +1074,208 @@ function cmp_check_text( string $key, string $lang, array $vars = array() ): arr
 		'title'   => strtr( $pair[0], $map ),
 		'explain' => strtr( $pair[1], $map ),
 	);
+}
+
+/**
+ * How to fix a finding: 'fix' (the generic action) and 'cmp_fix' (what
+ * Consent Manager Pro does for it, only features the plugin has: README.md,
+ * CHANGELOG.md 1.0.0). {placeholders} as in cmp_check_text().
+ */
+function cmp_check_fix( string $key, string $lang, array $vars = array() ): array {
+	$check = array(
+		'ro' => 'Ecranul Verificare din Consent Manager Pro testează în browserul tău ce se încarcă înainte și după acord.',
+		'en' => 'The Check screen in Consent Manager Pro tests in your browser what loads before and after consent.',
+	);
+	$t     = array(
+		'tracker'         => array(
+			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro recunoaște {name} și îl blochează până la acord, fără cod în plus.' ),
+			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Consent Manager Pro recognises {name} and blocks it until consent, with no extra code.' ),
+		),
+		'tracker-custom'  => array(
+			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Adaugă {name} în Consent Manager Pro ca serviciu personalizat, cu domeniile lui, și pluginul îl blochează până la acord.' ),
+			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Add {name} to Consent Manager Pro as a custom service, with its hosts, and the plugin blocks it until consent.' ),
+		),
+		'tracker-pixel'   => array(
+			'ro' => array( 'Pornește pixelul {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro nu blochează pixelii puși ca imagine. Mută pixelul în fragmentul JavaScript al serviciului, pe care pluginul îl blochează până la acord, sau afișează-l doar când cmp_is_allowed(\'{category}\') e adevărat.' ),
+			'en' => array( 'Fire the {name} pixel only after the visitor accepts in the banner.', 'Consent Manager Pro does not block pixels added as images. Move the pixel into the service\'s JavaScript snippet, which the plugin blocks until consent, or output it only when cmp_is_allowed(\'{category}\') is true.' ),
+		),
+		'embed'           => array(
+			'ro' => array( 'Înlocuiește {name} cu o previzualizare statică și încarcă playerul sau harta abia după ce vizitatorul acceptă.', 'Consent Manager Pro afișează în locul lui {name} un înlocuitor, care îl încarcă doar după acord.' ),
+			'en' => array( 'Replace {name} with a static preview and load the player or map only once the visitor accepts.', 'Consent Manager Pro shows a placeholder instead of {name} and loads it only after consent.' ),
+		),
+		'cookieless'      => array(
+			'ro' => array( 'Pomenește {name} în politica de confidențialitate.', 'Consent Manager Pro îl scutește implicit de acord, ca instrument fără cookie-uri, și îți generează politica de confidențialitate.' ),
+			'en' => array( 'Mention {name} in your privacy policy.', 'Consent Manager Pro exempts it from consent by default, as a cookieless tool, and generates your privacy policy.' ),
+		),
+		'loader-gtm'      => array(
+			'ro' => array( 'În Google Tag Manager, pornește fiecare tag doar cu acord, prin Consent Mode.', 'Consent Manager Pro trimite semnalele Google Consent Mode v2 înainte ca GTM să pornească tagurile. Ce încarcă GTM controlezi din GTM.' ),
+			'en' => array( 'In Google Tag Manager, fire each tag only with consent, through Consent Mode.', 'Consent Manager Pro sends the Google Consent Mode v2 signals before GTM fires its tags. What GTM loads, you control in GTM.' ),
+		),
+		'loader'          => array(
+			'ro' => array( 'Află ce scripturi aduce {name} și pornește-le doar după acord.', $check['ro'] ),
+			'en' => array( 'Find out which scripts {name} brings and start them only after consent.', $check['en'] ),
+		),
+		'resource-google-fonts' => array(
+			'ro' => array( 'Găzduiește fonturile pe serverul tău.', 'În modul Pro, Consent Manager Pro are o opțiune care descarcă o dată fonturile încărcate printr-un tag link și le servește de pe serverul tău. Fonturile aduse prin @import sau prin JavaScript trebuie mutate de mână.' ),
+			'en' => array( 'Host the fonts on your own server.', 'In Pro mode, Consent Manager Pro has an option that downloads, once, the fonts loaded through a link tag and serves them from your own server. Fonts brought in by @import or by JavaScript have to be moved by hand.' ),
+		),
+		'resource-emoji'  => array(
+			'ro' => array( 'Oprește emoji-urile WordPress sau servește-le de pe serverul tău.', 'Consent Manager Pro are un comutator care oprește emoji-urile WordPress.' ),
+			'en' => array( 'Turn off WordPress emoji or serve them from your own server.', 'Consent Manager Pro has a switch that turns off WordPress emoji.' ),
+		),
+		'resource-gravatar' => array(
+			'ro' => array( 'Folosește avatare locale în locul Gravatar.', 'Consent Manager Pro are un comutator care înlocuiește Gravatar cu un avatar local.' ),
+			'en' => array( 'Use local avatars instead of Gravatar.', 'Consent Manager Pro has a switch that replaces Gravatar with a local avatar.' ),
+		),
+		'resource'        => array(
+			'ro' => array( 'Găzduiește fișierele pe serverul tău sau renunță la ele.', 'Scanarea din Consent Manager Pro îți arată pe ce pagini se încarcă {what}, ca să știi ce muți pe serverul tău.' ),
+			'en' => array( 'Host the files on your own server or drop them.', 'The Consent Manager Pro scan shows you which pages load {what}, so you know what to move to your own server.' ),
+		),
+		'held-attribute'  => array(
+			'ro' => array( 'Fă scriptul inert până la acord (type="text/plain") sau pornește blocarea automată a bannerului.', 'Consent Manager Pro rescrie pe server scripturile cunoscute ca inerte până la acord, fără să depindă de un mod de blocare automată.' ),
+			'en' => array( 'Make the script inert until consent (type="text/plain") or turn on the banner\'s automatic blocking.', 'Consent Manager Pro rewrites known scripts on the server as inert until consent, without relying on an automatic blocking mode.' ),
+		),
+		'held-unknown'    => array(
+			'ro' => array( 'Verifică în DevTools ce se încarcă înainte de acord și ține trackerele oprite până atunci.', $check['ro'] ),
+			'en' => array( 'Check in DevTools what loads before consent and keep trackers off until then.', $check['en'] ),
+		),
+		'consent-mode'    => array(
+			'ro' => array( 'Pentru siguranță deplină, încarcă {name} doar după acord.', 'Consent Manager Pro are două moduri de măsurare: Strict încarcă Google Analytics doar după acord, Advanced îl pornește în Consent Mode.' ),
+			'en' => array( 'To be fully safe, load {name} only after consent.', 'Consent Manager Pro has two measurement modes: Strict loads Google Analytics only after consent, Advanced starts it in Consent Mode.' ),
+		),
+		'cookie'          => array(
+			'ro' => array( 'Pune cookie-ul {cookie} doar după acord: pornește {name} abia după ce vizitatorul acceptă.', 'Consent Manager Pro blochează serviciile cunoscute până la acord. Dacă serverul tău pune cookie-ul, întreabă întâi pluginul, cu cmp_is_allowed().' ),
+			'en' => array( 'Set the {cookie} cookie only after consent: start {name} only once the visitor accepts.', 'Consent Manager Pro blocks known services until consent. If your server sets the cookie, ask the plugin first, with cmp_is_allowed().' ),
+		),
+		'cookies-other'   => array(
+			'ro' => array( 'Află ce face fiecare cookie. Cele care urmăresc vizitatorul se pun doar după acord.', 'În Consent Manager Pro le poți trece în categorii, cu furnizor, durată și scop, iar ele apar în tabelul de cookie-uri.' ),
+			'en' => array( 'Find out what each cookie does. The ones that track the visitor are set only after consent.', 'In Consent Manager Pro you can list them under categories, with provider, duration and purpose, and they show up in the cookie table.' ),
+		),
+		'policy'          => array(
+			'ro' => array( 'Pune pe fiecare pagină, de obicei în subsol, un link spre politica de confidențialitate și de cookie-uri.', 'Consent Manager Pro generează politica de confidențialitate și pe cea de cookie-uri (RO, RU, EN), iar shortcode-ul [cmp_privacy_link] pune linkul.' ),
+			'en' => array( 'Put a link to your privacy and cookie policy on every page, usually in the footer.', 'Consent Manager Pro generates the privacy and cookie policies (RO, RU, EN), and the [cmp_privacy_link] shortcode adds the link.' ),
+		),
+		'cmp'             => array(
+			'ro' => array( 'Verifică dacă bannerul ține trackerele oprite până la acord.', 'Consent Manager Pro blochează scripturile și embed-urile cunoscute până la acord și e gratuit.' ),
+			'en' => array( 'Check that the banner keeps trackers off until consent.', 'Consent Manager Pro blocks known scripts and embeds until consent, and it is free.' ),
+		),
+		'ours'            => array(
+			'ro' => array( 'Ține pluginul la ultima versiune.', $check['ro'] ),
+			'en' => array( 'Keep the plugin on the latest version.', $check['en'] ),
+		),
+		'ours-attention'  => array(
+			'ro' => array( 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul.', $check['ro'] ),
+			'en' => array( 'Check script blocking and the service list in the settings, then update the plugin.', $check['en'] ),
+		),
+		'empty'           => array(
+			'ro' => array( 'Verifică dacă adresa e corectă și dacă pagina se deschide în browser.', $check['ro'] ),
+			'en' => array( 'Check that the address is right and that the page opens in a browser.', $check['en'] ),
+		),
+		'challenge'       => array(
+			'ro' => array( 'Verifică singur, din browser, cu DevTools.', $check['ro'] ),
+			'en' => array( 'Check it yourself in your browser, with DevTools.', $check['en'] ),
+		),
+		'truncated'       => array(
+			'ro' => array( 'Verifică restul paginii din browser, cu DevTools.', $check['ro'] ),
+			'en' => array( 'Check the rest of the page in your browser, with DevTools.', $check['en'] ),
+		),
+		'partial'         => array(
+			'ro' => array( 'Verifică restul paginii din browser, cu DevTools.', $check['ro'] ),
+			'en' => array( 'Check the rest of the page in your browser, with DevTools.', $check['en'] ),
+		),
+		'unread'          => array(
+			'ro' => array( 'Deschide paginile care nu au putut fi citite și verifică-le singur, din browser.', $check['ro'] ),
+			'en' => array( 'Open the pages that could not be read and check them yourself in your browser.', $check['en'] ),
+		),
+		'transport'       => array(
+			'ro' => array( 'Instalează un certificat TLS (de exemplu Let\'s Encrypt) și trimite tot traficul pe https.', 'Consent Manager Pro nu configurează HTTPS: asta se face la găzduire.' ),
+			'en' => array( 'Install a TLS certificate (for example Let\'s Encrypt) and send all traffic to https.', 'Consent Manager Pro does not set up HTTPS: that is done at your hosting.' ),
+		),
+	);
+	$pair  = isset( $t[ $key ][ $lang ] ) ? $t[ $key ][ $lang ] : array( '', '' );
+	$map   = array();
+	foreach ( $vars as $k => $v ) {
+		$map[ '{' . $k . '}' ] = cmp_check_plain( $v, 200 );
+	}
+	return array(
+		'fix'     => strtr( $pair[0], $map ),
+		'cmp_fix' => strtr( $pair[1], $map ),
+	);
+}
+
+/** The six checks of the "passed" list, in display order: id => array( ro, en ). */
+function cmp_check_passed_titles(): array {
+	return array(
+		'no-trackers'        => array( 'Niciun tracker activ înainte de acord', 'No tracker active before consent' ),
+		'no-tracker-cookies' => array( 'Niciun cookie de tracker trimis de server', 'No tracker cookie sent by the server' ),
+		'no-ip-resources'    => array( 'Nicio resursă care trimite IP-ul vizitatorilor', 'No resource that sends visitors\' IP address' ),
+		'banner'             => array( 'Bannerul de cookie-uri e pe pagină', 'The cookie banner is on the page' ),
+		'policy'             => array( 'Linkul spre politica de confidențialitate e pe pagină', 'The privacy policy link is on the page' ),
+		'https'              => array( 'HTTPS', 'HTTPS' ),
+	);
+}
+
+/** Passed ids as a list of array( id, title ), in display order. */
+function cmp_check_passed_list( array $ids, string $lang ): array {
+	$out = array();
+	foreach ( cmp_check_passed_titles() as $id => $titles ) {
+		if ( in_array( $id, $ids, true ) ) {
+			$out[] = array(
+				'id'    => $id,
+				'title' => $titles[ 'en' === $lang ? 1 : 0 ],
+			);
+		}
+	}
+	return $out;
+}
+
+/**
+ * Ids of the checks a page passes, from its findings (id => severity) and what
+ * was found on it. A page read only in part ($complete false) never passes the
+ * tracker and resource checks; an info finding (a cookieless tool) does not
+ * fail the tracker check.
+ */
+function cmp_check_passed_ids( array $severity_by_id, bool $complete, bool $banner, bool $policy, bool $https ): array {
+	$pass = array(
+		'no-trackers'        => $complete,
+		'no-tracker-cookies' => true,
+		'no-ip-resources'    => $complete,
+		'banner'             => $banner,
+		'policy'             => $policy && ! isset( $severity_by_id['policy:missing'] ),
+		'https'              => $https,
+	);
+	foreach ( $severity_by_id as $id => $sev ) {
+		$id = (string) $id;
+		if ( 'info' !== $sev && 1 === preg_match( '/^(?:tracker|loader|held):/', $id ) ) {
+			$pass['no-trackers'] = false;
+		}
+		if ( 0 === strpos( $id, 'cookie:' ) ) {
+			$pass['no-tracker-cookies'] = false;
+		}
+		if ( 0 === strpos( $id, 'resource:' ) ) {
+			$pass['no-ip-resources'] = false;
+		}
+	}
+	return array_keys( array_filter( $pass ) );
+}
+
+/**
+ * Up to 3 'issue' ids, by the design's fixed order: marketing tracker (1),
+ * analytics tracker (2), tracker cookie (3), IP-sending resource (4), missing
+ * policy (5), anything else (6). Ties keep the findings' order.
+ *
+ * @param array $findings List of findings (id, severity...).
+ * @param array $rank     id => rank, for the issues the analysis ranked.
+ */
+function cmp_check_top( array $findings, array $rank ): array {
+	$list = array();
+	foreach ( array_values( $findings ) as $i => $f ) {
+		if ( 'issue' === $f['severity'] ) {
+			$list[] = array( isset( $rank[ $f['id'] ] ) ? (int) $rank[ $f['id'] ] : 6, $i, $f['id'] );
+		}
+	}
+	sort( $list );
+	return array_slice( array_column( $list, 2 ), 0, 3 );
 }
 
 /** Name of a resource type: 'title' (start of a sentence) or 'what' (inside one). */
@@ -1083,41 +1321,91 @@ function cmp_check_status( array $findings ): string {
  * @param string $url      The checked URL (own-site resources are not third-party).
  * @param array  $services The service library (cmp_check_load_services()).
  * @param string $lang     'ro' (default) or 'en'.
- * @return array array( 'status' => clean|issues|unsure|error, 'findings' => list of
- *               array( id, severity => issue|unsure|info, title, explain, law ), 'cmp' => string|null ).
+ * @return array array(
+ *               'status'   => clean|issues|unsure|error,
+ *               'findings' => list of array( id, severity => issue|unsure|info, title, explain, law,
+ *                             evidence => list of at most 3 plain strings (120 chars), fix, cmp_fix ),
+ *               'cmp'      => string|null,
+ *               'passed'   => list of array( id, title ) (cmp_check_passed_titles),
+ *               'top'      => up to 3 issue ids (cmp_check_top),
+ *               'rank'     => id => rank of each issue. Internal: only cmp_check_aggregate()
+ *                             reads it and its output drops it; never send it to the client ).
+ *               The first three keys and the first five finding keys are the v1 shape.
  */
 function cmp_check_analyze( string $html, array $headers, string $url, array $services, string $lang = 'ro' ): array {
 	$lang     = 'en' === $lang ? 'en' : 'ro';
+	$lib_ids  = array_flip( array_column( cmp_check_norm_services( $services ), 'id' ) );
 	$services = cmp_check_merge_extra( cmp_check_norm_services( $services ), $lang );
 	$findings = array();
-	$add      = function ( $id, $severity, $text_key, array $vars, $law_kind ) use ( &$findings, $lang ) {
+	$evidence = array();
+	$rank     = array();
+	$ctx      = array(
+		'complete' => true,
+		'banner'   => false,
+		'policy'   => false,
+		'https'    => 1 === preg_match( '#^https://#i', trim( $url ) ),
+	);
+	$add      = function ( $id, $severity, $text_key, array $vars, $law_kind, $fix_key = '' ) use ( &$findings, $lang ) {
 		if ( isset( $findings[ $id ] ) ) {
 			return;
 		}
 		$text            = cmp_check_text( $text_key, $lang, $vars );
+		$fix             = cmp_check_fix( '' === $fix_key ? $text_key : $fix_key, $lang, $vars );
 		$findings[ $id ] = array(
 			'id'       => $id,
 			'severity' => $severity,
 			'title'    => $text['title'],
 			'explain'  => $text['explain'],
 			'law'      => '' === $law_kind ? '' : cmp_check_law( $law_kind, $lang ),
+			'fix'      => $fix['fix'],
+			'cmp_fix'  => $fix['cmp_fix'],
 		);
 	};
-	$finish = function ( $status, $cmp ) use ( &$findings ) {
+	// Evidence for a finding id: plain strings, distinct, at most 3.
+	$ev     = function ( $id, $s ) use ( &$evidence ) {
+		$s = cmp_check_plain( (string) $s, 120 );
+		if ( '' === $s ) {
+			return;
+		}
+		if ( ! isset( $evidence[ $id ] ) ) {
+			$evidence[ $id ] = array();
+		}
+		if ( count( $evidence[ $id ] ) < 3 && ! in_array( $s, $evidence[ $id ], true ) ) {
+			$evidence[ $id ][] = $s;
+		}
+	};
+	$inline = 'en' === $lang ? 'inline script in the page' : 'script inline în pagină';
+	$finish = function ( $status, $cmp ) use ( &$findings, &$evidence, &$rank, &$ctx, $lang ) {
 		$list = array();
+		$sev  = array();
 		foreach ( $findings as $f ) {
+			$id     = cmp_check_plain( $f['id'], 100 );
 			$list[] = array(
-				'id'       => cmp_check_plain( $f['id'], 100 ),
+				'id'       => $id,
 				'severity' => $f['severity'],
 				'title'    => cmp_check_plain( $f['title'] ),
 				'explain'  => cmp_check_plain( $f['explain'], 600 ),
 				'law'      => cmp_check_plain( $f['law'] ),
+				'evidence' => isset( $evidence[ $f['id'] ] ) ? $evidence[ $f['id'] ] : array(),
+				'fix'      => cmp_check_plain( $f['fix'] ),
+				'cmp_fix'  => cmp_check_plain( $f['cmp_fix'] ),
 			);
+			$sev[ $id ] = $f['severity'];
 		}
+		$ranks = array();
+		foreach ( $rank as $id => $r ) {
+			if ( isset( $sev[ $id ] ) && 'issue' === $sev[ $id ] ) {
+				$ranks[ $id ] = $r;
+			}
+		}
+		$status = null === $status ? cmp_check_status( $list ) : $status;
 		return array(
-			'status'   => null === $status ? cmp_check_status( $list ) : $status,
+			'status'   => $status,
 			'findings' => $list,
 			'cmp'      => null === $cmp ? null : cmp_check_plain( $cmp, 100 ),
+			'passed'   => 'error' === $status ? array() : cmp_check_passed_list( cmp_check_passed_ids( $sev, $ctx['complete'], $ctx['banner'], $ctx['policy'], $ctx['https'] ), $lang ),
+			'top'      => cmp_check_top( $list, $ranks ),
+			'rank'     => $ranks,
 		);
 	};
 
@@ -1128,6 +1416,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 	if ( strlen( $html ) > CMP_CHECK_MAX_BYTES ) {
 		$html = substr( $html, 0, CMP_CHECK_MAX_BYTES );
 		$add( 'page:truncated', 'unsure', 'truncated', array(), '' );
+		$ctx['complete'] = false;
 	}
 	if ( cmp_check_is_challenge( $html ) ) {
 		$findings = array();
@@ -1142,25 +1431,43 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 	$denied     = false; // A Consent Mode default with "denied" seen before (Advanced mode).
 	$held_attr  = array(); // Names of trackers held only by a CMP attribute on a live script.
 	$held_type  = array(); // Names of trackers in a script of an unknown type.
-	$service_finding = function ( array $s, $embed ) use ( $add, &$trackers, &$denied ) {
+	$service_finding = function ( array $s, $embed, $evid, $pixel = false ) use ( $add, $ev, &$trackers, &$denied, &$rank, $lib_ids ) {
 		if ( 'necessary' === $s['category'] ) {
 			return;
 		}
 		if ( $s['gtm'] ) {
-			$add( 'loader:gtm', 'unsure', 'loader', array( 'name' => 'Google Tag Manager' ), 'consent' );
+			$add( 'loader:gtm', 'unsure', 'loader', array( 'name' => 'Google Tag Manager' ), 'consent', 'loader-gtm' );
+			$ev( 'loader:gtm', $evid );
 			return;
 		}
 		$id = 'tracker:' . cmp_check_service_slug( $s['id'] );
 		if ( $s['exempt_default'] ) {
 			$add( $id, 'info', 'cookieless', array( 'name' => $s['name'] ), '' );
+			$ev( $id, $evid );
 			return;
 		}
 		$trackers = true;
 		if ( $denied && 'google-analytics' === $s['id'] ) {
 			$add( $id . '-consent-mode', CMP_CHECK_CONSENT_MODE_SEVERITY, 'consent-mode', array( 'name' => $s['name'] ), 'consent' );
+			$ev( $id . '-consent-mode', $evid );
+			$rank[ $id . '-consent-mode' ] = 'marketing' === $s['category'] ? 1 : 2;
 			return;
 		}
-		$add( $id, 'issue', $embed ? 'embed' : 'tracker', array( 'name' => $s['name'] ), 'consent' );
+		// The blocker rewrites <script> and <iframe> only: a pixel <img> is never blocked by the plugin.
+		$fix_key = $embed ? 'embed' : ( $pixel ? 'tracker-pixel' : ( isset( $lib_ids[ $s['id'] ] ) ? 'tracker' : 'tracker-custom' ) );
+		$add(
+			$id,
+			'issue',
+			$embed ? 'embed' : 'tracker',
+			array(
+				'name'     => $s['name'],
+				'category' => 'statistics' === $s['category'] ? 'statistics' : 'marketing',
+			),
+			'consent',
+			$fix_key
+		);
+		$ev( $id, $evid );
+		$rank[ $id ] = 'marketing' === $s['category'] ? 1 : 2;
 	};
 	// What a script loads or runs: loaders and services, as findings to make.
 	$hits_of = function ( $src, $body ) use ( $services ) {
@@ -1195,6 +1502,16 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 		$s = $hit['service'];
 		return 'necessary' === $s['category'] || $s['exempt_default'] ? '' : $s['name'];
 	};
+	// Report a live hit (a loader or a service) with its evidence.
+	$apply_hit = function ( array $hit, $where ) use ( $add, $ev, $service_finding ) {
+		if ( isset( $hit['loader'] ) ) {
+			$id = 'loader:' . $hit['loader']['slug'];
+			$add( $id, 'unsure', 'loader', array( 'name' => $hit['loader']['name'] ), 'consent', 'gtm' === $hit['loader']['slug'] ? 'loader-gtm' : 'loader' );
+			$ev( $id, $where );
+		} else {
+			$service_finding( $hit['service'], false, $where );
+		}
+	};
 
 	// Cookiebot in automatic blocking mode holds every marked script itself.
 	$auto_blocking = false;
@@ -1220,7 +1537,8 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 				$denied = true;
 			}
 		}
-		$hits = $hits_of( $src, $body );
+		$hits  = $hits_of( $src, $body );
+		$where = '' !== $src ? cmp_check_evidence_url( $src ) : $inline;
 		if ( 'unknown' === $kind || $marked ) {
 			if ( 'live' === $kind && $auto_blocking ) {
 				continue;
@@ -1230,19 +1548,17 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 				if ( '' !== $name ) {
 					if ( 'unknown' === $kind ) {
 						$held_type[ $name ] = true;
+						$ev( 'held:unknown-type', $where );
 					} else {
 						$held_attr[ $name ] = true;
+						$ev( 'held:attribute', $where );
 					}
 				}
 			}
 			continue;
 		}
 		foreach ( $hits as $hit ) {
-			if ( isset( $hit['loader'] ) ) {
-				$add( 'loader:' . $hit['loader']['slug'], 'unsure', 'loader', array( 'name' => $hit['loader']['name'] ), 'consent' );
-			} else {
-				$service_finding( $hit['service'], false );
-			}
+			$apply_hit( $hit, $where );
 		}
 		if ( ! cmp_check_scan_resources( '' !== $src ? $src : $body, $url, $resources ) ) {
 			$partial = true;
@@ -1260,11 +1576,12 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			// A marker does not stop a src that is already there, unless Cookiebot blocks automatically.
 			if ( null !== $s && ! $auto_blocking && '' !== $hit_name( array( 'service' => $s ) ) ) {
 				$held_attr[ $s['name'] ] = true;
+				$ev( 'held:attribute', cmp_check_evidence_url( $src ) );
 			}
 			continue;
 		}
 		if ( null !== $s ) {
-			$service_finding( $s, 'embed' === $s['type'] );
+			$service_finding( $s, 'embed' === $s['type'], cmp_check_evidence_url( $src ) );
 		}
 		cmp_check_scan_resources( $src, $url, $resources );
 	}
@@ -1277,18 +1594,14 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			continue;
 		}
 		foreach ( $hits_of( $href, '' ) as $hit ) {
-			if ( isset( $hit['loader'] ) ) {
-				$add( 'loader:' . $hit['loader']['slug'], 'unsure', 'loader', array( 'name' => $hit['loader']['name'] ), 'consent' );
-			} else {
-				$service_finding( $hit['service'], false );
-			}
+			$apply_hit( $hit, cmp_check_evidence_url( $href ) );
 		}
 	}
 	// Tracking pixels (<noscript> ones are skipped: they only fire without JavaScript).
 	foreach ( array_keys( $parsed['imgs'] ) as $src ) {
 		$s = cmp_check_service_for_url( (string) $src, $services, array( 'script' ) );
 		if ( null !== $s ) {
-			$service_finding( $s, false );
+			$service_finding( $s, false, cmp_check_evidence_url( (string) $src ), true );
 		}
 	}
 	// Resources fetched by other elements and by <style>.
@@ -1307,8 +1620,13 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 				'what'  => cmp_check_resource_label( $type, $lang, 'what' ),
 				'hosts' => implode( ', ', array_slice( $hosts, 0, 3 ) ),
 			),
-			'transfer'
+			'transfer',
+			in_array( $type, array( 'google-fonts', 'emoji', 'gravatar' ), true ) ? 'resource-' . $type : 'resource'
 		);
+		foreach ( array_slice( $hosts, 0, 3 ) as $h ) {
+			$ev( 'resource:' . $type, $h );
+		}
+		$rank[ 'resource:' . $type ] = 4;
 	}
 	$names = function ( array $set ) {
 		$list = array_keys( $set );
@@ -1322,6 +1640,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 	}
 	if ( $partial ) {
 		$add( 'page:partial', 'unsure', 'partial', array(), '' );
+		$ctx['complete'] = false;
 	}
 
 	// Cookies set by the server on the first visit.
@@ -1350,18 +1669,26 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 				),
 				'consent'
 			);
+			$ev( 'cookie:' . $name, $name );
+			$rank[ 'cookie:' . $name ] = 3;
 		}
 	}
 	if ( array() !== $other ) {
 		$add( 'cookies:other', 'info', 'cookies-other', array( 'list' => implode( ', ', array_slice( $other, 0, 5 ) ) . ( count( $other ) > 5 ? '...' : '' ) ), '' );
+		foreach ( array_slice( $other, 0, 3 ) as $name ) {
+			$ev( 'cookies:other', $name );
+		}
 	}
 
-	if ( $trackers && ! cmp_check_has_policy_link( $parsed ) ) {
+	$ctx['policy'] = cmp_check_has_policy_link( $parsed );
+	if ( $trackers && ! $ctx['policy'] ) {
 		$add( 'policy:missing', 'issue', 'policy', array(), 'inform' );
+		$rank['policy:missing'] = 5;
 	}
 
 	$cmp = cmp_check_detect_cmp( $html, $parsed, $url );
 	if ( null !== $cmp ) {
+		$ctx['banner'] = true;
 		if ( 'consent-manager-pro' === $cmp['slug'] ) {
 			$attention = 'clean' !== cmp_check_status( array_values( $findings ) );
 			$add( 'cmp:consent-manager-pro', 'info', $attention ? 'ours-attention' : 'ours', array(), '' );
@@ -1369,5 +1696,191 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			$add( 'cmp:' . $cmp['slug'], 'info', 'cmp', array( 'name' => $cmp['name'] ), '' );
 		}
 	}
+	// After the CMP finding: plain http alone does not mean something starts before consent.
+	if ( 1 === preg_match( '#^http://#i', trim( $url ) ) ) {
+		$add( 'transport:http', 'unsure', 'transport', array(), '' );
+		$host = @parse_url( trim( $url ), PHP_URL_HOST ); // phpcs:ignore
+		$host = is_string( $host ) ? strtolower( $host ) : '';
+		if ( 1 === preg_match( '/^[a-z0-9.-]{1,253}$/', $host ) ) {
+			$ev( 'transport:http', 'http://' . $host );
+		}
+	}
 	return $finish( null, null === $cmp ? null : $cmp['name'] );
+}
+
+/* ------------------------------------------------------------------
+ * Several pages: one report.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Merge the results of several pages of one site into one report.
+ *
+ * @param array  $page_results List of cmp_check_analyze() results, each with
+ *                             'url' (the page). The first one is the homepage.
+ * @param string $lang         'ro' (default) or 'en', as the page results.
+ * @param int    $unread       Pages that could not be fetched at all (not in $page_results).
+ * @return array array(
+ *               'status'   => the cmp_check_status() rules over every finding of
+ *                             every page, never better than the worst page status;
+ *                             'error' when no page could be checked. A page in error
+ *                             or $unread > 0 adds an unsure 'pages:unread' finding,
+ *                             so the status is never 'clean' then,
+ *               'findings' => one per id: array( id, severity, title, explain, law,
+ *                             evidence (union, at most 3), pages (urls where seen,
+ *                             homepage first), fix, cmp_fix ); the highest severity
+ *                             seen wins, with that page's texts,
+ *               'cmp'      => the homepage's CMP, else the first one found,
+ *               'passed'   => checks passed on every checked page; 'banner' and
+ *                             'policy' as found on the homepage (and no
+ *                             policy:missing anywhere),
+ *               'top'      => cmp_check_top() over the merged findings,
+ *               'engine'   => 'html-v2' ).
+ */
+function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0 ): array {
+	$lang      = 'en' === $lang ? 'en' : 'ro';
+	$level     = array(
+		'info'   => 0,
+		'unsure' => 1,
+		'issue'  => 2,
+	);
+	$known     = array_keys( cmp_check_passed_titles() );
+	$merged    = array();
+	$rank      = array();
+	$cmp       = null;
+	$checked   = 0;
+	$every     = null; // Passed ids common to every checked page.
+	$home_pass = array();
+	$errors    = 0;
+	$worst     = 'clean'; // Worst page status among the checked pages.
+	foreach ( array_values( $page_results ) as $i => $p ) {
+		if ( ! is_array( $p ) ) {
+			$errors++;
+			continue;
+		}
+		$url    = isset( $p['url'] ) && is_string( $p['url'] ) ? cmp_check_plain( $p['url'], 2048 ) : '';
+		$status = isset( $p['status'] ) && is_string( $p['status'] ) ? $p['status'] : 'error';
+		if ( null === $cmp && isset( $p['cmp'] ) && is_string( $p['cmp'] ) && '' !== $p['cmp'] ) {
+			$cmp = cmp_check_plain( $p['cmp'], 100 ); // Index 0 first: the homepage wins.
+		}
+		$ids = array();
+		foreach ( isset( $p['passed'] ) && is_array( $p['passed'] ) ? $p['passed'] : array() as $x ) {
+			if ( is_array( $x ) && isset( $x['id'] ) && in_array( $x['id'], $known, true ) ) {
+				$ids[] = $x['id'];
+			}
+		}
+		if ( ! in_array( $status, array( 'clean', 'issues', 'unsure' ), true ) ) {
+			$errors++;
+		} elseif ( 'issues' === $status || ( 'unsure' === $status && 'clean' === $worst ) ) {
+			$worst = $status;
+		}
+		if ( in_array( $status, array( 'clean', 'issues', 'unsure' ), true ) ) {
+			$checked++;
+			$every = null === $every ? $ids : array_values( array_intersect( $every, $ids ) );
+			if ( 0 === $i ) {
+				$home_pass = $ids;
+			}
+		}
+		foreach ( isset( $p['findings'] ) && is_array( $p['findings'] ) ? $p['findings'] : array() as $f ) {
+			if ( ! is_array( $f ) || ! isset( $f['id'], $f['severity'] ) || ! is_string( $f['id'] ) || ! isset( $level[ $f['severity'] ] ) ) {
+				continue;
+			}
+			$id   = cmp_check_plain( $f['id'], 100 );
+			$text = array();
+			foreach ( array( 'title', 'explain', 'law', 'fix', 'cmp_fix' ) as $k ) {
+				$text[ $k ] = isset( $f[ $k ] ) && is_string( $f[ $k ] ) ? cmp_check_plain( $f[ $k ], 'explain' === $k ? 600 : 400 ) : '';
+			}
+			if ( ! isset( $merged[ $id ] ) ) {
+				$merged[ $id ] = array(
+					'id'       => $id,
+					'severity' => $f['severity'],
+					'title'    => $text['title'],
+					'explain'  => $text['explain'],
+					'law'      => $text['law'],
+					'evidence' => array(),
+					'pages'    => array(),
+					'fix'      => $text['fix'],
+					'cmp_fix'  => $text['cmp_fix'],
+				);
+			} elseif ( $level[ $f['severity'] ] > $level[ $merged[ $id ]['severity'] ] ) {
+				$merged[ $id ] = array_merge( $merged[ $id ], $text, array( 'severity' => $f['severity'] ) );
+			}
+			if ( '' !== $url && ! in_array( $url, $merged[ $id ]['pages'], true ) ) {
+				$merged[ $id ]['pages'][] = $url;
+			}
+			foreach ( isset( $f['evidence'] ) && is_array( $f['evidence'] ) ? $f['evidence'] : array() as $e ) {
+				$e = is_string( $e ) ? cmp_check_plain( $e, 120 ) : '';
+				if ( '' !== $e && count( $merged[ $id ]['evidence'] ) < 3 && ! in_array( $e, $merged[ $id ]['evidence'], true ) ) {
+					$merged[ $id ]['evidence'][] = $e;
+				}
+			}
+		}
+		foreach ( isset( $p['rank'] ) && is_array( $p['rank'] ) ? $p['rank'] : array() as $id => $r ) {
+			$id          = (string) $id;
+			$rank[ $id ] = isset( $rank[ $id ] ) ? min( $rank[ $id ], (int) $r ) : (int) $r;
+		}
+	}
+	$missed = $errors + max( 0, $unread );
+	if ( $checked > 0 && $missed > 0 ) {
+		$one              = 1 === $missed;
+		$title            = 'en' === $lang
+			? $missed . ( $one ? ' page could not be read, so we cannot say everything is fine' : ' pages could not be read, so we cannot say everything is fine' )
+			: $missed . ( $one ? ' pagină nu a putut fi citită, așa că nu putem spune că totul e în regulă' : ' pagini nu au putut fi citite, așa că nu putem spune că totul e în regulă' );
+		$fix              = cmp_check_fix( 'unread', $lang );
+		$merged['pages:unread'] = array(
+			'id'       => 'pages:unread',
+			'severity' => 'unsure',
+			'title'    => $title,
+			'explain'  => 'en' === $lang
+				? 'We checked the other pages, but whatever is on the pages we could not read is not in this report.'
+				: 'Am verificat celelalte pagini, dar ce e pe paginile pe care nu le-am putut citi nu apare în raport.',
+			'law'      => '',
+			'evidence' => array(),
+			'pages'    => array(),
+			'fix'      => $fix['fix'],
+			'cmp_fix'  => $fix['cmp_fix'],
+		);
+	}
+	$list = array_values( $merged );
+
+	// Our plugin: the attention text when anything but plain http or unread pages is wrong on any page.
+	if ( isset( $merged['cmp:consent-manager-pro'] ) ) {
+		$rest = array_filter(
+			$list,
+			function ( $f ) {
+				return 'transport:http' !== $f['id'] && 'pages:unread' !== $f['id'];
+			}
+		);
+		if ( 'clean' !== cmp_check_status( $rest ) ) {
+			$text = cmp_check_text( 'ours-attention', $lang );
+			$fix  = cmp_check_fix( 'ours-attention', $lang );
+			foreach ( $list as $i => $f ) {
+				if ( 'cmp:consent-manager-pro' === $f['id'] ) {
+					$list[ $i ] = array_merge( $f, $text, $fix );
+				}
+			}
+		}
+	}
+
+	$passed = array();
+	if ( $checked > 0 ) {
+		$passed = array_values( array_intersect( (array) $every, array( 'no-trackers', 'no-tracker-cookies', 'no-ip-resources', 'https' ) ) );
+		if ( in_array( 'banner', $home_pass, true ) ) {
+			$passed[] = 'banner';
+		}
+		if ( in_array( 'policy', $home_pass, true ) && ! isset( $merged['policy:missing'] ) ) {
+			$passed[] = 'policy';
+		}
+	}
+	$status = cmp_check_status( $list );
+	if ( 'issues' === $worst || ( 'unsure' === $worst && 'clean' === $status ) ) {
+		$status = $worst; // Floor: findings dropped as malformed never make a page better.
+	}
+	return array(
+		'status'   => 0 === $checked ? 'error' : $status,
+		'findings' => $list,
+		'cmp'      => $cmp,
+		'passed'   => cmp_check_passed_list( $passed, $lang ),
+		'top'      => cmp_check_top( $list, $rank ),
+		'engine'   => 'html-v2',
+	);
 }

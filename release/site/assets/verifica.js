@@ -9,17 +9,55 @@
 	var en = doc.documentElement.lang === 'en';
 	var T = en ? {
 		empty: 'Enter your site\'s address, for example example.com.',
-		checking: 'Checking the homepage. It can take up to 15 seconds.',
+		owner: "Tick that you own the site or have the owner's permission.",
+		checking: 'Checking the site, up to 10 pages. It can take up to 45 seconds.',
+		steps: [
+			'Opening the homepage as a new visitor',
+			'Looking for the pages of the site (sitemap)',
+			'Checking up to 10 pages',
+			'Looking for trackers: Google Analytics, Meta Pixel, Yandex, Clarity and others',
+			'Checking cookies set before consent',
+			'Looking for resources that send the IP address: Google Fonts, CDNs, Gravatar',
+			'Looking for the cookie banner and the policy link'
+		],
 		cancelled: 'You cancelled the check.',
-		checked: 'Checked page: ',
-		law: 'Law: ',
-		cleanTitle: 'No problems found on the homepage',
-		cleanText: 'On the homepage we found no trackers, no resources that send the IP address and no script loaders that start before consent.',
-		cleanLimits: 'What we cannot see from here: the other pages, what the site does with the data and what its policy says.',
+		law: 'Legal basis: ',
+		cleanVerdict: 'No problems found on the pages we checked.',
+		cleanLimits: 'What we cannot see from here: what scripts load after the page starts, what the site does with the data and what its policy says.',
 		issuesTitle: function (n) { return n === 1 ? 'We found one problem' : 'We found ' + n + ' problems'; },
 		unsureTitle: 'We cannot be sure',
-		unsureText: 'The page has something that can load trackers we cannot see from here. Check it yourself, it takes 5 minutes, with DevTools.',
+		unsureText: 'The site has something that can load trackers we cannot see from here. Check it yourself, it takes 5 minutes, with DevTools.',
+		facts: [function (n) { return n === 1 ? 'problem' : 'problems'; }, function () { return 'to check'; }, function () { return 'all good'; }],
+		stopped: {
+			requests: function (n) { return 'We stopped after ' + n + (n === 1 ? ' page' : ' pages') + ': the site has many redirects or files, and a check has a request limit.'; },
+			time: function (n) { return 'We stopped after ' + n + (n === 1 ? ' page' : ' pages') + ' so the check does not take too long.'; }
+		},
+		pagesChecked: function (n) { return n === 1 ? 'We checked 1 page.' : 'We checked ' + n + ' pages.'; },
+		more: {
+			sitemap: function (n, c) { return 'The site has ' + n + ' pages; we checked the first ' + c + '. A full check is not available right now.'; },
+			links: function (n, c) { return 'The site has at least ' + n + ' pages; we checked the first ' + c + '. A full check is not available right now.'; }
+		},
+		failed: 'We could not read: ',
+		failCodes: {
+			timeout: 'did not answer in time',
+			too_large: 'the page is too big',
+			other_host: 'leads to another site',
+			limit: 'request limit reached',
+			fetch_failed: 'could not be read',
+			http_status: 'could not be read',
+			not_html: 'could not be read'
+		},
+		failOther: 'could not be read',
+		badAddress: 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.',
+		first: 'What to do first',
+		issuesList: 'Problems',
 		unsureList: 'To check',
+		found: 'What we found',
+		onPages: 'On which pages',
+		why: 'Why it matters',
+		howFix: 'How to fix it',
+		withCmp: 'With Consent Manager Pro: ',
+		passed: 'All good',
 		info: 'Good to know',
 		howto: 'How to check it yourself',
 		fixTitle: 'Consent Manager Pro fixes this',
@@ -32,7 +70,8 @@
 		errorTitle: 'We could not check the site',
 		errors: {
 			bad_request: 'Enter your site\'s address, for example example.com.',
-			bad_url: 'This address is not valid. Use a public address such as example.com, without a port, user name or password.',
+			owner_required: "Tick that you own the site or have the owner's permission.",
+			bad_url: 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.',
 			blocked_address: 'This address leads to a private or reserved network. We can only check public sites.',
 			fetch_failed: 'We could not open the site. Check the address or try again later.',
 			timeout: 'The site answered too slowly. Try again later.',
@@ -50,17 +89,55 @@
 		}
 	} : {
 		empty: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-		checking: 'Verificăm pagina principală. Poate dura până la 15 secunde.',
+		owner: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
+		checking: 'Verificăm site-ul, până la 10 pagini. Poate dura până la 45 de secunde.',
+		steps: [
+			'Deschidem pagina principală, ca un vizitator nou',
+			'Căutăm paginile site-ului (sitemap)',
+			'Verificăm până la 10 pagini',
+			'Căutăm trackere: Google Analytics, Meta Pixel, Yandex, Clarity și altele',
+			'Verificăm cookie-urile puse înainte de acord',
+			'Căutăm resurse care trimit IP-ul: Google Fonts, CDN-uri, Gravatar',
+			'Căutăm bannerul de cookie-uri și linkul spre politică'
+		],
 		cancelled: 'Ai anulat verificarea.',
-		checked: 'Pagina verificată: ',
-		law: 'Legea: ',
-		cleanTitle: 'N-am găsit probleme pe pagina principală',
-		cleanText: 'Pe pagina principală n-am găsit trackere, resurse care trimit IP-ul sau încărcătoare de scripturi care pornesc înainte de acord.',
-		cleanLimits: 'Ce nu vedem de aici: celelalte pagini, ce face site-ul cu datele și ce scrie în politica lui.',
-		issuesTitle: function (n) { var r = n % 100; return n === 1 ? 'Am găsit o problemă' : 'Am găsit ' + n + ( r >= 1 && r <= 19 ? ' probleme' : ' de probleme' ); },
+		law: 'Baza legală: ',
+		cleanVerdict: 'N-am găsit probleme pe paginile verificate.',
+		cleanLimits: 'Ce nu vedem de aici: ce încarcă scripturile după ce pornește pagina, ce face site-ul cu datele și ce scrie în politica lui.',
+		issuesTitle: function (n) { return n === 1 ? 'Am găsit o problemă' : 'Am găsit ' + n + de(n, 'probleme'); },
 		unsureTitle: 'Nu putem fi siguri',
-		unsureText: 'Pe pagină e ceva care poate încărca trackere pe care nu le vedem de aici. Verifică singur, în 5 minute, cu DevTools.',
+		unsureText: 'Pe site e ceva care poate încărca trackere pe care nu le vedem de aici. Verifică singur, în 5 minute, cu DevTools.',
+		facts: [function (n) { return n === 1 ? 'problemă' : 'probleme'; }, function () { return 'de verificat'; }, function () { return 'în regulă'; }],
+		stopped: {
+			requests: function (n) { return 'Ne-am oprit după ' + n + de(n, 'pagini') + ': site-ul are multe redirecționări sau fișiere, iar o verificare are o limită de cereri.'; },
+			time: function (n) { return 'Ne-am oprit după ' + n + de(n, 'pagini') + ', ca verificarea să nu dureze prea mult.'; }
+		},
+		pagesChecked: function (n) { return n === 1 ? 'Am verificat o pagină.' : 'Am verificat ' + n + de(n, 'pagini') + '.'; },
+		more: {
+			sitemap: function (n, c) { return 'Site-ul are ' + n + de(n, 'pagini') + '; am verificat primele ' + c + '. Verificarea completă nu e disponibilă acum.'; },
+			links: function (n, c) { return 'Site-ul are cel puțin ' + n + de(n, 'pagini') + '; am verificat primele ' + c + '. Verificarea completă nu e disponibilă acum.'; }
+		},
+		failed: 'Nu am putut citi: ',
+		failCodes: {
+			timeout: 'nu a răspuns la timp',
+			too_large: 'pagina e prea mare',
+			other_host: 'duce spre alt site',
+			limit: 'limita de cereri atinsă',
+			fetch_failed: 'nu a putut fi citită',
+			http_status: 'nu a putut fi citită',
+			not_html: 'nu a putut fi citită'
+		},
+		failOther: 'nu a putut fi citită',
+		badAddress: 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.',
+		first: 'Ce faci întâi',
+		issuesList: 'Probleme',
 		unsureList: 'De verificat',
+		found: 'Ce am găsit',
+		onPages: 'Pe ce pagini',
+		why: 'De ce contează',
+		howFix: 'Cum rezolvi',
+		withCmp: 'Cu Consent Manager Pro: ',
+		passed: 'În regulă',
 		info: 'De știut',
 		howto: 'Cum verifici singur',
 		fixTitle: 'Consent Manager Pro rezolvă asta',
@@ -73,7 +150,8 @@
 		errorTitle: 'Nu am putut verifica site-ul',
 		errors: {
 			bad_request: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-			bad_url: 'Adresa nu e validă. Folosește o adresă publică, de exemplu exemplu.md, fără port, utilizator sau parolă.',
+			owner_required: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
+			bad_url: 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.',
 			blocked_address: 'Adresa duce spre o rețea privată sau rezervată. Putem verifica doar site-uri publice.',
 			fetch_failed: 'Nu am putut deschide site-ul. Verifică adresa sau încearcă din nou mai târziu.',
 			timeout: 'Site-ul a răspuns prea încet. Încearcă din nou mai târziu.',
@@ -90,6 +168,34 @@
 			slow: 'Verificarea a durat prea mult. Încearcă din nou mai târziu.'
 		}
 	};
+	// Romanian numerals: „20 de pagini”, but „5 pagini” and „101 pagini” (n % 100 from 1 to 19).
+	function de(n, word) { var r = n % 100; return (r >= 1 && r <= 19 ? ' ' : ' de ') + word; }
+
+	/* The visitor's field, checked like the server does (site/api/lib/fetch.php,
+	   cmp_check_normalize_input): a bare domain only. Returns the host (punycode
+	   for an IDN) or '' when the input must be refused. */
+	var LOCAL_TLDS = ['localhost', 'local', 'localdomain', 'internal', 'intranet', 'lan', 'home', 'corp', 'private', 'arpa', 'onion'];
+	function siteAddress(raw) {
+		var s = String(raw === undefined || raw === null ? '' : raw).replace(/^[ \t\n\r]+|[ \t\n\r]+$/g, '');
+		if (s === '' || s.length > 300 || /[\x00-\x20\x7F]/.test(s)) { return ''; }
+		s = s.replace(/^https?:[/][/]/i, '');
+		if (s.charAt(s.length - 1) === '/') { s = s.slice(0, -1); }
+		if (s === '' || /[\/?#:@\\\[\]%]/.test(s)) { return ''; }
+		var h = s.toLowerCase(), labels, tld, i;
+		if (/[^\x00-\x7F]/.test(h)) {
+			try { h = new URL('https://' + h + '/').hostname; } catch (e) { return ''; }
+		}
+		if (h === '' || h.length > 253) { return ''; }
+		labels = h.split('.');
+		if (labels.length < 2) { return ''; }
+		for (i = 0; i < labels.length; i++) {
+			if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(labels[i])) { return ''; }
+		}
+		tld = labels[labels.length - 1];
+		if (!/^(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/.test(tld) || LOCAL_TLDS.indexOf(tld) !== -1) { return ''; }
+		return h;
+	}
+	window.cmpSiteAddress = siteAddress;
 
 	/* Small DOM helpers: text only. */
 	function el(tag, cls, text) {
@@ -149,12 +255,29 @@
 
 	var form = doc.getElementById('verifica-form');
 	var out = doc.getElementById('verifica-rezultat');
-	if (!form || !out || !window.fetch || !window.AbortController) { return; }
+	if (!form || !out || !window.fetch || !window.AbortController || !doc.getElementById('verifica-owner')) { return; }
 	form.hidden = false; // Without JS (or fetch) the form stays hidden; the <noscript> text explains.
 	var input = doc.getElementById('verifica-url');
 	var submit = doc.getElementById('verifica-buton');
 	var cancel = doc.getElementById('verifica-anuleaza');
+	var owner = doc.getElementById('verifica-owner');
+	var ownerErr = doc.getElementById('verifica-owner-eroare');
+	var urlErr = doc.getElementById('verifica-eroare');
 	var ctrl = null, timer = null, slow = false;
+
+	// The owner box: required. Unticked, the message sits right under it.
+	function ownerError() {
+		if (!owner) { return; }
+		owner.setAttribute('aria-invalid', 'true');
+		if (ownerErr) { ownerErr.textContent = T.owner; ownerErr.hidden = false; }
+		owner.focus();
+	}
+	function ownerOk() {
+		if (!owner) { return; }
+		owner.removeAttribute('aria-invalid');
+		if (ownerErr) { ownerErr.textContent = ''; ownerErr.hidden = true; }
+	}
+	if (owner) { owner.addEventListener('change', function () { if (owner.checked) { ownerOk(); } }); }
 
 	function clear() {
 		while (out.firstChild) { out.removeChild(out.firstChild); }
@@ -198,16 +321,143 @@
 		});
 		parent.appendChild(ul);
 	}
-	function checkedLine(parent, data) {
-		if (str(data.checked_url)) { parent.appendChild(el('p', 'muted small checked', T.checked + str(data.checked_url))); }
-	}
 	function actions(parent, items) {
 		var p = el('p', 'actions');
 		items.forEach(function (it) { p.appendChild(link(it[0], it[1], it[2])); });
 		parent.appendChild(p);
 	}
+	function arr(v) { return Array.isArray(v) ? v : []; }
+	function strs(v) { return arr(v).map(str).filter(function (x) { return x !== ''; }); }
+	function num(v) { return typeof v === 'number' && isFinite(v) && v >= 0 ? Math.floor(v) : 0; }
 	function bySeverity(findings, sev) {
 		return findings.filter(function (f) { return f && typeof f === 'object' && f.severity === sev; });
+	}
+	// The checked host, for the summary (text only).
+	function host(u) {
+		try { return new URL(u).hostname || u; } catch (e) { return u; }
+	}
+	// A page of the checked site, shown as its path (text only, never a link).
+	function rel(u) {
+		try { var x = new URL(u); return (x.pathname || '/') + x.search; } catch (e) { return u; }
+	}
+
+	// Summary: the checked host, a one-line verdict, three counters (rt.md .facts),
+	// how many pages were checked and, over 10, how many the site has.
+	function summary(kind, data, verdict, counts) {
+		var r = box(kind, '');
+		r.head.appendChild(el('span', 'r-host', host(str(data.checked_url))));
+		r.head.appendChild(doc.createTextNode(' ')); // read as two words, not "exemplu.mdAm"
+		r.head.appendChild(el('span', 'r-verdict', verdict));
+		var ul = el('ul', 'facts r-facts');
+		counts.forEach(function (n, i) {
+			var li = el('li');
+			li.appendChild(el('b', null, String(n)));
+			li.appendChild(el('span', null, T.facts[i](n)));
+			ul.appendChild(li);
+		});
+		r.box.appendChild(ul);
+		var pages = data.pages && typeof data.pages === 'object' ? data.pages : {};
+		var checked = strs(pages.checked).length || (str(data.checked_url) ? 1 : 0);
+		var p = el('p', 'r-pages', checked ? T.pagesChecked(checked) : '');
+		var total = num(pages.total), src = str(pages.total_source);
+		var stopped = pages.stopped === 'requests' || pages.stopped === 'time' ? pages.stopped : '';
+		// When we stopped early, the stopped note explains it: a sitemap total also counts files, so "N pages" would mislead.
+		if (!stopped && total > checked && checked >= 10 && (src === 'sitemap' || src === 'links')) {
+			p.appendChild(doc.createTextNode(' ' + T.more[src](total, checked)));
+		}
+		if (p.textContent) { r.box.appendChild(p); }
+		if (stopped && checked) { r.box.appendChild(el('p', 'muted small r-stopped', T.stopped[stopped](checked))); }
+		var failed = arr(pages.failed).filter(function (f) { return f && typeof f === 'object' && str(f.url); });
+		if (failed.length) {
+			r.box.appendChild(el('p', 'muted small r-failed', T.failed + failed.map(function (f) {
+				var c = f.code;
+				return rel(str(f.url)) + ' (' + (Object.prototype.hasOwnProperty.call(T.failCodes, c) ? T.failCodes[c] : (/^\d{3}$/.test(String(c)) ? 'HTTP ' + c : T.failOther)) + ')';
+			}).join(', ') + '.'));
+		}
+		return r;
+	}
+
+	// "Ce faci întâi": the findings named in data.top, in that order, at most 3.
+	function first(parent, findings, top) {
+		var items = strs(top).slice(0, 3).map(function (id) {
+			return findings.filter(function (f) { return str(f.id) === id; })[0];
+		}).filter(Boolean);
+		if (!items.length) { return; }
+		parent.appendChild(el('h4', null, T.first));
+		var ol = el('ol', 'r-first');
+		items.forEach(function (f) {
+			var li = el('li');
+			li.appendChild(el('strong', null, str(f.title)));
+			if (str(f.fix)) { li.appendChild(el('span', null, str(f.fix))); }
+			ol.appendChild(li);
+		});
+		parent.appendChild(ol);
+	}
+
+	// Every finding: what we found, on which pages, why it matters, how to fix it.
+	function detailed(parent, items, title) {
+		if (!items.length) { return; }
+		parent.appendChild(el('h4', null, title));
+		var ul = el('ul', 'findings r-findings');
+		items.forEach(function (f) {
+			var li = el('li');
+			li.appendChild(el('strong', null, str(f.title)));
+			var dl = el('dl');
+			var ev = strs(f.evidence).slice(0, 3);
+			if (ev.length) {
+				dl.appendChild(el('dt', null, T.found));
+				var dd = el('dd'), eu = el('ul', 'r-evidence');
+				ev.forEach(function (e) { eu.appendChild(el('li', null, e)); });
+				dd.appendChild(eu);
+				dl.appendChild(dd);
+			}
+			var pg = strs(f.pages).map(rel);
+			if (pg.length) {
+				var pu = el('ul', 'r-paths');
+				pg.forEach(function (x) { pu.appendChild(el('li', null, x)); });
+				if (pg.length > 3) {
+					// Many pages: folded, the count on the summary.
+					dl.appendChild(el('dt', 'r-dt-fold', T.onPages));
+					var dd2 = el('dd'), det = el('details');
+					det.appendChild(el('summary', null, T.onPages + ' (' + pg.length + ')'));
+					det.appendChild(pu);
+					dd2.appendChild(det);
+					dl.appendChild(dd2);
+				} else {
+					dl.appendChild(el('dt', null, T.onPages));
+					var dd3 = el('dd');
+					dd3.appendChild(pu);
+					dl.appendChild(dd3);
+				}
+			}
+			if (str(f.explain) || str(f.law)) {
+				dl.appendChild(el('dt', null, T.why));
+				var dd4 = el('dd');
+				if (str(f.explain)) { dd4.appendChild(el('p', null, str(f.explain))); }
+				if (str(f.law)) { dd4.appendChild(el('p', 'law', T.law + str(f.law))); }
+				dl.appendChild(dd4);
+			}
+			if (str(f.fix) || str(f.cmp_fix)) {
+				dl.appendChild(el('dt', null, T.howFix));
+				var dd5 = el('dd');
+				if (str(f.fix)) { dd5.appendChild(el('p', null, str(f.fix))); }
+				if (str(f.cmp_fix)) { dd5.appendChild(el('p', 'r-cmp', T.withCmp + str(f.cmp_fix))); }
+				dl.appendChild(dd5);
+			}
+			if (dl.childNodes.length) { li.appendChild(dl); }
+			ul.appendChild(li);
+		});
+		parent.appendChild(ul);
+	}
+
+	// "În regulă": the checks with nothing found, with a check mark (CSS).
+	function passed(parent, items) {
+		var ok = items.filter(function (p) { return p && typeof p === 'object' && str(p.title); });
+		if (!ok.length) { return; }
+		parent.appendChild(el('h4', null, T.passed));
+		var ul = el('ul', 'passed');
+		ok.forEach(function (p) { ul.appendChild(el('li', null, str(p.title))); });
+		parent.appendChild(ul);
 	}
 
 	function renderError(code, serverMessage) {
@@ -215,7 +465,8 @@
 		var msg = T.errors[code] || str(serverMessage) || T.errors.unavailable;
 		if (code === 'http_status' && str(serverMessage)) { msg = str(serverMessage); }
 		r.box.appendChild(el('p', null, msg));
-		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request') {
+		if (code === 'owner_required') { ownerError(); }
+		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request' && code !== 'owner_required') {
 			actions(r.box, [['#cum-verifici', T.howto, 'btn btn-ghost']]);
 		}
 		show(r);
@@ -223,27 +474,30 @@
 
 	function render(data) {
 		if (!data || typeof data !== 'object') { renderError('unavailable'); return; }
-		var findings = Array.isArray(data.findings) ? data.findings : [];
+		var findings = arr(data.findings).filter(function (f) { return f && typeof f === 'object'; });
 		var issues = bySeverity(findings, 'issue'), unsure = bySeverity(findings, 'unsure'), info = bySeverity(findings, 'info');
+		var ok = arr(data.passed);
 		var ours = data.cmp === 'Consent Manager Pro';
+		var counts = [issues.length, unsure.length, ok.filter(function (p) { return p && typeof p === 'object' && str(p.title); }).length];
 		var r;
 		if (ours && data.status === 'issues') {
 			// The "already using it" block below says the same as our own CMP finding.
 			info = info.filter(function (f) { return str(f.id).indexOf('cmp:consent-manager-pro') !== 0; });
 		}
 		if (data.status === 'clean') {
-			r = box('clean', T.cleanTitle);
-			r.box.appendChild(el('p', null, T.cleanText));
-			checkedLine(r.box, data);
+			r = summary('clean', data, T.cleanVerdict, counts);
+			detailed(r.box, unsure, T.unsureList);
+			passed(r.box, ok);
 			r.box.appendChild(el('p', 'muted', T.cleanLimits));
 			list(r.box, info, T.info, 'muted-list');
 			show(r);
 			confetti();
 		} else if (data.status === 'issues') {
-			r = box('issues', T.issuesTitle(issues.length));
-			checkedLine(r.box, data);
-			list(r.box, issues);
-			list(r.box, unsure, T.unsureList);
+			r = summary('issues', data, T.issuesTitle(issues.length), counts);
+			first(r.box, issues, data.top);
+			detailed(r.box, issues, T.issuesList);
+			detailed(r.box, unsure, T.unsureList);
+			passed(r.box, ok);
 			list(r.box, info, T.info, 'muted-list');
 			var fix = el('div', 'fix');
 			fix.appendChild(el('h4', null, ours ? T.oursTitle : T.fixTitle));
@@ -254,17 +508,17 @@
 				[[downloadHref(), T.download, 'btn'], ['#functii', T.features, 'btn btn-ghost']]);
 			show(r);
 		} else if (data.status === 'unsure') {
-			r = box('unsure', T.unsureTitle);
+			r = summary('unsure', data, T.unsureTitle, counts);
 			r.box.appendChild(el('p', null, T.unsureText));
-			checkedLine(r.box, data);
-			list(r.box, unsure);
+			detailed(r.box, unsure, T.unsureList);
+			passed(r.box, ok);
 			list(r.box, info, T.info, 'muted-list');
 			actions(r.box, [['#cum-verifici', T.howto, 'btn btn-ghost']]);
 			show(r);
 		} else if (data.status === 'error' && !str(data.code) && findings.length) {
 			// The page was fetched, but there was nothing to analyse (an empty page).
 			r = box('error', T.errorTitle);
-			checkedLine(r.box, data);
+			if (str(data.checked_url)) { r.box.appendChild(el('p', 'muted small checked', host(str(data.checked_url)))); }
 			list(r.box, findings);
 			show(r);
 		} else {
@@ -272,7 +526,65 @@
 		}
 	}
 
+	/* What is being checked, step by step, while the request runs. Visual only:
+	   the list is aria-hidden; screen readers hear the status line, then the result. */
+	var run = null;
+	function reduced() {
+		return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+	}
+	function setStep(li, state) {
+		li.className = 'run-step is-' + state;
+	}
+	function stepsStart() {
+		stepsStop();
+		var ol = el('ol', 'run-steps');
+		ol.setAttribute('aria-hidden', 'true');
+		var items = T.steps.map(function (text, i) {
+			var li = el('li');
+			li.appendChild(el('span', 'run-num', String(i + 1)));
+			li.appendChild(el('span', 'run-text', text));
+			setStep(li, i === 0 ? 'active' : 'todo');
+			ol.appendChild(li);
+			return li;
+		});
+		out.appendChild(ol);
+		run = { items: items, at: 0, tick: null, cascade: null };
+		var mine = run;
+		mine.tick = window.setInterval(function () {
+			if (run !== mine || mine.at >= items.length - 1) { return; } // The last step stays active until the answer.
+			setStep(items[mine.at], 'done');
+			mine.at++;
+			setStep(items[mine.at], 'active');
+		}, 1200);
+	}
+	function stepsStop() {
+		if (!run) { return; }
+		window.clearInterval(run.tick);
+		window.clearTimeout(run.cascade);
+		run = null;
+	}
+	// Mark every step done (a short cascade, or at once under reduced motion), then go on.
+	function stepsFinish(then) {
+		if (!run) { then(); return; }
+		var mine = run;
+		window.clearInterval(mine.tick);
+		if (reduced()) {
+			mine.items.forEach(function (li) { setStep(li, 'done'); });
+			stepsStop();
+			then();
+			return;
+		}
+		(function next() {
+			if (run !== mine) { return; }
+			if (mine.at >= mine.items.length) { stepsStop(); then(); return; }
+			setStep(mine.items[mine.at], 'done');
+			mine.at++;
+			mine.cascade = window.setTimeout(next, mine.at >= mine.items.length ? 250 : 150);
+		}());
+	}
+
 	function stop() {
+		stepsStop();
 		if (timer) { window.clearTimeout(timer); timer = null; }
 		ctrl = null;
 		busy(false);
@@ -286,6 +598,16 @@
 		ev.preventDefault();
 		if (ctrl) { return; }
 		var url = (input.value || '').trim();
+		if (urlErr) { urlErr.textContent = ''; urlErr.hidden = true; }
+		input.removeAttribute('aria-invalid');
+		if (url && !siteAddress(url)) {
+			// Not a bare domain: say so next to the field, send nothing.
+			clear();
+			input.setAttribute('aria-invalid', 'true');
+			if (urlErr) { urlErr.textContent = T.badAddress; urlErr.hidden = false; } else { clear(); out.appendChild(el('p', 'r-loading', T.badAddress)); }
+			input.focus();
+			return;
+		}
 		if (!url) {
 			var r0 = box('error', T.errorTitle);
 			r0.box.appendChild(el('p', null, T.empty));
@@ -293,24 +615,33 @@
 			input.focus();
 			return;
 		}
+		if (!owner.checked) {
+			clear();
+			ownerError();
+			return;
+		}
+		ownerOk();
 		status(T.checking);
+		stepsStart();
 		busy(true);
 		ctrl = new window.AbortController();
 		slow = false;
 		var mine = ctrl;
-		timer = window.setTimeout(function () { slow = true; mine.abort(); }, 30000);
+		timer = window.setTimeout(function () { slow = true; mine.abort(); }, 45000);
 		window.fetch('/api/verifica.php', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-			body: JSON.stringify({ url: url, lang: en ? 'en' : 'ro' }),
+			body: JSON.stringify({ url: url, lang: en ? 'en' : 'ro', owner: 1 }),
 			credentials: 'same-origin',
 			cache: 'no-store',
 			signal: mine.signal
 		}).then(function (res) {
 			return res.json().catch(function () { return { status: 'error', code: res.status === 429 ? 'rate_limited' : 'unavailable' }; });
 		}).then(function (data) {
-			stop();
-			render(data);
+			if (timer) { window.clearTimeout(timer); timer = null; }
+			var done = function () { stop(); render(data); };
+			// An error answer skips the cascade: nothing was checked.
+			if (data && typeof data === 'object' && data.status !== 'error') { stepsFinish(done); } else { done(); }
 		}).catch(function (err) {
 			stop();
 			if (err && err.name === 'AbortError') {

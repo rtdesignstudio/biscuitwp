@@ -20,6 +20,13 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * - 2 MB body cap, no compression (Accept-Encoding: identity; an encoded
  *   answer is refused), 10 seconds in all, no cookies, no proxy, TLS
  *   verification on.
+ * - A multi-page check (cmp_check_fetch_many, curl_multi, 3 at a time) uses
+ *   the same handle setup and the same per-hop rules for every page: one
+ *   resolution per host for the whole check (shared cache, addresses checked
+ *   again on every use), each handle pinned with CURLOPT_RESOLVE and its
+ *   PRIMARY_IP compared, and redirects kept on the site's own hosts (another
+ *   host: 'other_host', not followed). robots.txt and sitemaps go through
+ *   cmp_check_fetch() with the same options and a 1 MB cap.
  *
  * The allowed ports, the resolver and the loopback exception can be changed
  * only through function parameters, for the tests; the endpoint passes none.
@@ -426,6 +433,56 @@ function cmp_check_normalize_url( string $in, ?array $ports = null ) {
 	return strlen( $out ) > $limits['max_url'] ? false : $out;
 }
 
+/**
+ * The visitor's field: a bare site address only, as 'https://<host>/', or false.
+ *
+ * Accepts "exemplu.md", "www.exemplu.md", "http(s)://exemplu.md" and the same
+ * with one trailing "/"; an IDN becomes punycode. Refuses any IP literal (in
+ * any form, public ones too), any path beyond "/", query, fragment, port,
+ * user:password@, single-label and local names, labels that are not
+ * letters / digits / hyphens, a top-level label that is not alphabetic (2+
+ * letters) or punycode ("xn--"), and names over 253 characters. The check
+ * always starts on https (the scheme the visitor typed is not kept); the
+ * pages found later go through cmp_check_normalize_url() instead.
+ *
+ * @return string|false
+ */
+function cmp_check_normalize_input( string $in ) {
+	$s = trim( $in, " \t\n\r" );
+	if ( '' === $s || strlen( $s ) > 300 || 1 === preg_match( '/[\x00-\x20\x7F]/', $s ) ) {
+		return false;
+	}
+	if ( 1 === preg_match( '#^https?://#i', $s ) ) {
+		$s = (string) preg_replace( '#^https?://#i', '', $s );
+	}
+	if ( '/' === substr( $s, -1 ) ) {
+		$s = substr( $s, 0, -1 );
+	}
+	// Only the host is left: no "/", "?", "#", ":", "@", "\", "[", "%" anywhere.
+	if ( '' === $s || 1 === preg_match( '#[/?\#:@\\\\\[\]%]#', $s ) ) {
+		return false;
+	}
+	$host = cmp_check_idn_host( $s );
+	if ( false === $host || '' === $host || strlen( $host ) > 253 ) {
+		return false;
+	}
+	$labels = explode( '.', $host );
+	if ( count( $labels ) < 2 ) {
+		return false;
+	}
+	foreach ( $labels as $l ) {
+		if ( 1 !== preg_match( '/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/', $l ) ) {
+			return false;
+		}
+	}
+	$tld = end( $labels );
+	if ( 1 !== preg_match( '/^(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/', $tld ) || cmp_check_local_name( $host ) ) {
+		return false;
+	}
+	$out = cmp_check_normalize_url( 'https://' . $host . '/' );
+	return false === $out || 'https://' . $host . '/' !== $out ? false : $out;
+}
+
 /** An absolute URL for a Location header seen at $base, or false (scheme other than http/https). */
 function cmp_check_resolve_location( string $base, string $loc ) {
 	$loc = trim( $loc, " \t" );
@@ -481,14 +538,110 @@ function cmp_check_same_ip( string $a, string $b ): bool {
 }
 
 /**
+ * The options of a fetch, with the limits that can only be lowered.
+ *
+ * - max_bytes: body cap (at most 2 MB; robots.txt and sitemaps use 1 MB);
+ * - hosts:     null, or the only hosts the fetch may visit: a redirect to any
+ *              other host stops it with 'other_host' (pages and sitemaps of
+ *              a multi-page check);
+ * - cache:     an object shared by the fetches of one check, so each host is
+ *              resolved once (->ips: host => what the resolver returned); with
+ *              ->requests_left set, every HTTP request (redirect hops too) takes
+ *              one from it, and none is made at 0 ('limit');
+ * - max_redirects: redirects followed (at most 3);
+ * - html_only: a 2xx answer whose Content-Type is set and is not HTML is cut
+ *              right after its headers, before any body byte is kept
+ *              ('not_page'): images, PDFs, archives listed as pages;
+ * - accept:    the Accept header;
+ * - deadline:  absolute microtime() the fetch must end by.
+ */
+function cmp_check_fetch_opts( array $opts ): array {
+	$limits = cmp_check_fetch_limits();
+	$max    = isset( $opts['max_bytes'] ) ? (int) $opts['max_bytes'] : $limits['max_bytes'];
+	$hosts  = null;
+	if ( isset( $opts['hosts'] ) && is_array( $opts['hosts'] ) ) {
+		$hosts = array_values( array_filter( $opts['hosts'], 'is_string' ) );
+	}
+	$cache = isset( $opts['cache'] ) && is_object( $opts['cache'] ) ? $opts['cache'] : null;
+	if ( null !== $cache && ( ! isset( $cache->ips ) || ! is_array( $cache->ips ) ) ) {
+		$cache->ips = array();
+	}
+	$redir = isset( $opts['max_redirects'] ) ? (int) $opts['max_redirects'] : $limits['max_redirects'];
+	return array(
+		'html_only'     => ! empty( $opts['html_only'] ),
+		'max_redirects' => max( 0, min( $redir, $limits['max_redirects'] ) ),
+		'max_bytes' => max( 1, min( $max, $limits['max_bytes'] ) ),
+		'hosts'     => $hosts,
+		'cache'     => $cache,
+		'accept'    => isset( $opts['accept'] ) && is_string( $opts['accept'] ) && 1 === preg_match( '#^[a-z0-9/+*.;=, -]{1,200}$#i', $opts['accept'] ) ? $opts['accept'] : 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
+		'deadline'  => isset( $opts['deadline'] ) ? (float) $opts['deadline'] : null,
+	);
+}
+
+/** File extensions that are never pages. */
+function cmp_check_file_extensions(): array {
+	return array(
+		'pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg', 'ico', 'bmp', 'tif', 'tiff', 'heic',
+		'zip', 'rar', '7z', 'gz', 'tgz', 'tar', 'bz2', 'xz',
+		'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf', 'txt', 'csv', 'epub',
+		'xml', 'json', 'rss', 'atom', 'xsl',
+		'mp3', 'mp4', 'm4a', 'm4v', 'wav', 'ogg', 'oga', 'webm', 'mov', 'avi', 'mkv', 'flac',
+		'exe', 'dmg', 'apk', 'msi', 'iso', 'bin',
+		'css', 'js', 'mjs', 'map', 'woff', 'woff2', 'ttf', 'otf', 'eot',
+	);
+}
+
+/**
+ * Is a URL path a file rather than a page: a file extension of
+ * cmp_check_file_extensions(), or anything under /wp-content/uploads/?
+ */
+function cmp_check_is_file_path( string $path ): bool {
+	$path = strtolower( (string) preg_replace( '#[?\#].*$#s', '', $path ) );
+	if ( false !== strpos( $path, '/wp-content/uploads/' ) ) {
+		return true;
+	}
+	$last = (string) substr( $path, (int) strrpos( $path, '/' ) + 1 );
+	$dot  = strrpos( $last, '.' );
+	return false !== $dot && in_array( substr( $last, $dot + 1 ), cmp_check_file_extensions(), true );
+}
+
+/** Is a Content-Type an HTML page (or missing, as browsers would sniff it)? */
+function cmp_check_type_is_page( string $ct ): bool {
+	$ct = strtolower( trim( $ct ) );
+	return '' === $ct || 0 === strpos( $ct, 'text/html' ) || 0 === strpos( $ct, 'application/xhtml+xml' );
+}
+
+/** Take one HTTP request from the check's shared budget (when it has one): false when none is left. */
+function cmp_check_fetch_take( $cache ): bool {
+	if ( ! is_object( $cache ) || ! isset( $cache->requests_left ) ) {
+		return true;
+	}
+	if ( (int) $cache->requests_left <= 0 ) {
+		return false;
+	}
+	$cache->requests_left = (int) $cache->requests_left - 1;
+	return true;
+}
+
+/** Is the normalised URL on one of the allowed hosts (or are all hosts allowed)? */
+function cmp_check_fetch_host_ok( string $url, ?array $hosts ): bool {
+	if ( null === $hosts ) {
+		return true;
+	}
+	$h = 1 === preg_match( '#^https?://(\[[0-9a-f:.]+\]|[a-z0-9_.-]+)(?::\d+)?(?:[/?]|$)#', $url, $m ) ? $m[1] : '';
+	return '' !== $h && in_array( $h, $hosts, true );
+}
+
+/**
  * Fetch a page as a new visitor would (GET, no cookies, no compression), safely.
  *
- * Time: the whole fetch has $budget seconds (10 at most). Before each name
- * resolution (one per hop) at least 1 s must be left, else the fetch stops
- * with "timeout". A resolution already started cannot be interrupted from PHP
- * (the system resolver has its own timeouts): the real bound on what slow DNS
- * can cost the account is the 3-slot concurrency limit of the endpoint
- * (cmp_check_slot_acquire()).
+ * Time: the whole fetch has $budget seconds (10 at most), and never runs past
+ * $opts['deadline']. Before each name resolution (one per hop, unless the
+ * host is already in $opts['cache']) at least 1 s must be left, else the fetch
+ * stops with "timeout". A resolution already started cannot be interrupted from
+ * PHP (the system resolver has its own timeouts): the real bound on what slow
+ * DNS can cost the account is the 3-slot concurrency limit of the endpoint
+ * (cmp_check_slot_acquire()) and the one-resolution-per-host cache.
  *
  * @param string        $url            The address (normalised here first).
  * @param callable|null $resolver       host => list of IPs (tests); default cmp_check_resolve().
@@ -496,26 +649,34 @@ function cmp_check_same_ip( string $a, string $b ): bool {
  * @param bool          $allow_loopback Tests only: also allow exactly 127.0.0.1 (the local
  *                                      fixture server). Never passed by the endpoint.
  * @param int           $budget         Seconds for the whole fetch; can only lower the 10 s limit.
+ * @param array         $opts           cmp_check_fetch_opts(): max_bytes, hosts, cache, accept, deadline.
  * @return array array( ok, status, headers (lowercase name => string, set-cookie => list),
  *               body, final_url, error: ''|unavailable|bad_url|blocked_address|fetch_failed|
- *               timeout|too_large|too_many_redirects, detail: internal reason ).
+ *               timeout|too_large|too_many_redirects|other_host|limit|not_page, detail: internal reason ).
  *               blocked_address is only for IP literals; a host name that resolves to
  *               a refused address is fetch_failed (detail private_address), like a
  *               name that does not resolve (detail dns).
  */
-function cmp_check_fetch( string $url, ?callable $resolver = null, ?array $ports = null, bool $allow_loopback = false, int $budget = 10 ): array {
+function cmp_check_fetch( string $url, ?callable $resolver = null, ?array $ports = null, bool $allow_loopback = false, int $budget = 10, array $opts = array() ): array {
 	$limits = cmp_check_fetch_limits();
 	if ( ! function_exists( 'curl_init' ) || ! defined( 'CURLOPT_RESOLVE' ) ) {
 		return cmp_check_fetch_result( false, 'unavailable', '' );
 	}
+	$o        = cmp_check_fetch_opts( $opts );
 	$budget   = max( 1, min( $budget, $limits['total_seconds'] ) );
 	$deadline = microtime( true ) + $budget;
-	$current  = cmp_check_normalize_url( $url, $ports );
+	if ( null !== $o['deadline'] ) {
+		$deadline = min( $deadline, $o['deadline'] );
+	}
+	$current = cmp_check_normalize_url( $url, $ports );
 	if ( false === $current ) {
 		return cmp_check_fetch_result( false, 'bad_url', '' );
 	}
+	if ( ! cmp_check_fetch_host_ok( $current, $o['hosts'] ) ) {
+		return cmp_check_fetch_result( false, 'other_host', $current );
+	}
 	for ( $hop = 0; ; $hop++ ) {
-		$pin = cmp_check_pick_address( $current, $resolver, $allow_loopback, $deadline );
+		$pin = cmp_check_pick_address( $current, $resolver, $allow_loopback, $deadline, $o['cache'] );
 		if ( ! isset( $pin['ip'] ) ) {
 			return cmp_check_fetch_result( false, $pin[0], $current, 0, array(), '', $pin[1] );
 		}
@@ -523,42 +684,70 @@ function cmp_check_fetch( string $url, ?callable $resolver = null, ?array $ports
 		if ( $left < 0.05 ) {
 			return cmp_check_fetch_result( false, 'timeout', $current );
 		}
-		$r = cmp_check_curl_get( $current, $pin, $left );
+		if ( ! cmp_check_fetch_take( $o['cache'] ) ) {
+			return cmp_check_fetch_result( false, 'limit', $current, 0, array(), '', 'requests' );
+		}
+		$r = cmp_check_curl_get( $current, $pin, $left, $o );
 		if ( '' !== $r['error'] ) {
 			return cmp_check_fetch_result( false, $r['error'], $current, 0, array(), '', $r['detail'] );
 		}
-		$status = $r['status'];
-		$loc    = isset( $r['headers']['location'] ) ? (string) $r['headers']['location'] : '';
-		if ( in_array( $status, array( 301, 302, 303, 307, 308 ), true ) && '' !== $loc ) {
-			if ( $hop >= $limits['max_redirects'] ) {
-				return cmp_check_fetch_result( false, 'too_many_redirects', $current );
-			}
-			$next = cmp_check_resolve_location( $current, $loc );
-			$next = false === $next ? false : cmp_check_normalize_url( $next, $ports );
-			if ( false === $next ) {
-				return cmp_check_fetch_result( false, 'bad_url', $current, 0, array(), '', 'redirect' );
-			}
-			$current = $next;
+		$step = cmp_check_fetch_step( $current, $r, $hop, $ports, $o['hosts'], $o['max_redirects'], $o['html_only'] );
+		if ( isset( $step['next'] ) ) {
+			$current = $step['next'];
 			continue;
 		}
-		// We asked for identity: compressed bytes are never analysed.
-		$enc = isset( $r['headers']['content-encoding'] ) ? strtolower( trim( (string) $r['headers']['content-encoding'] ) ) : '';
-		if ( '' !== $enc && 'identity' !== $enc ) {
-			return cmp_check_fetch_result( false, 'fetch_failed', $current, 0, array(), '', 'encoded' );
-		}
-		// Compressed bytes sent without saying so (gzip or zstd magic): never analysed either.
-		if ( 0 === strpos( $r['body'], "\x1f\x8b" ) || 0 === strpos( $r['body'], "\x28\xb5\x2f\xfd" ) ) {
-			return cmp_check_fetch_result( false, 'fetch_failed', $current, 0, array(), '', 'compressed_body' );
-		}
-		return cmp_check_fetch_result( true, '', $current, $status, $r['headers'], $r['body'] );
+		return $step['result'];
 	}
+}
+
+/**
+ * What to do with one answer: array( 'next' => the next URL ) for a redirect
+ * that may be followed (validated from scratch, at most 3, on the allowed
+ * hosts), else array( 'result' => the cmp_check_fetch() result ).
+ */
+function cmp_check_fetch_step( string $current, array $r, int $hop, ?array $ports, ?array $hosts, ?int $max_redirects = null, bool $pages_only = false ): array {
+	$limits = cmp_check_fetch_limits();
+	$max    = null === $max_redirects ? $limits['max_redirects'] : max( 0, min( $max_redirects, $limits['max_redirects'] ) );
+	$status = $r['status'];
+	$loc    = isset( $r['headers']['location'] ) ? (string) $r['headers']['location'] : '';
+	if ( in_array( $status, array( 301, 302, 303, 307, 308 ), true ) && '' !== $loc ) {
+		if ( $hop >= $max ) {
+			return array( 'result' => cmp_check_fetch_result( false, 'too_many_redirects', $current ) );
+		}
+		$next = cmp_check_resolve_location( $current, $loc );
+		$next = false === $next ? false : cmp_check_normalize_url( $next, $ports );
+		if ( false === $next ) {
+			return array( 'result' => cmp_check_fetch_result( false, 'bad_url', $current, 0, array(), '', 'redirect' ) );
+		}
+		if ( ! cmp_check_fetch_host_ok( $next, $hosts ) ) {
+			// Never followed: a sub-page or a sitemap may not lead anywhere else.
+			return array( 'result' => cmp_check_fetch_result( false, 'other_host', $current, 0, array(), '', 'redirect' ) );
+		}
+		if ( $pages_only && 1 === preg_match( '#^https?://[^/?]+([^?]*)#', $next, $pm ) && cmp_check_is_file_path( $pm[1] ) ) {
+			// A page that redirects to a file (an image under /wp-content/uploads/...): not a page, not followed.
+			return array( 'result' => cmp_check_fetch_result( false, 'not_page', $current, 0, array(), '', 'file_redirect' ) );
+		}
+		return array( 'next' => $next );
+	}
+	// We asked for identity: compressed bytes are never analysed.
+	$enc = isset( $r['headers']['content-encoding'] ) ? strtolower( trim( (string) $r['headers']['content-encoding'] ) ) : '';
+	if ( '' !== $enc && 'identity' !== $enc ) {
+		return array( 'result' => cmp_check_fetch_result( false, 'fetch_failed', $current, 0, array(), '', 'encoded' ) );
+	}
+	// Compressed bytes sent without saying so (gzip or zstd magic): never analysed either.
+	if ( 0 === strpos( $r['body'], "\x1f\x8b" ) || 0 === strpos( $r['body'], "\x28\xb5\x2f\xfd" ) ) {
+		return array( 'result' => cmp_check_fetch_result( false, 'fetch_failed', $current, 0, array(), '', 'compressed_body' ) );
+	}
+	return array( 'result' => cmp_check_fetch_result( true, '', $current, $status, $r['headers'], $r['body'] ) );
 }
 
 /**
  * The checked address to connect to for a normalised URL:
  * array( host, port, ip, literal ), or array( error code, detail ).
+ * With $cache, a host name is resolved at most once per check; the addresses
+ * are checked again on every call all the same.
  */
-function cmp_check_pick_address( string $url, ?callable $resolver, bool $allow_loopback, float $deadline ): array {
+function cmp_check_pick_address( string $url, ?callable $resolver, bool $allow_loopback, float $deadline, $cache = null ): array {
 	$limits = cmp_check_fetch_limits();
 	if ( 1 !== preg_match( '#^(https?)://(\[[0-9a-f:.]+\]|[a-z0-9_.-]+)(?::(\d+))?(?:[/?]|$)#', $url, $m ) ) {
 		return array( 'bad_url', '' );
@@ -572,11 +761,18 @@ function cmp_check_pick_address( string $url, ?callable $resolver, bool $allow_l
 		$ips = array( $host );
 	} else {
 		$literal = false;
-		// Never start a resolution with less than 1 s of the budget left.
-		if ( $deadline - microtime( true ) < 1.0 ) {
-			return array( 'timeout', 'dns_budget' );
+		if ( is_object( $cache ) && isset( $cache->ips ) && is_array( $cache->ips ) && array_key_exists( $host, $cache->ips ) ) {
+			$ips = $cache->ips[ $host ];
+		} else {
+			// Never start a resolution with less than 1 s of the budget left.
+			if ( $deadline - microtime( true ) < 1.0 ) {
+				return array( 'timeout', 'dns_budget' );
+			}
+			$ips = null === $resolver ? cmp_check_resolve( $host ) : call_user_func( $resolver, $host );
+			if ( is_object( $cache ) && isset( $cache->ips ) && is_array( $cache->ips ) ) {
+				$cache->ips[ $host ] = $ips;
+			}
 		}
-		$ips = null === $resolver ? cmp_check_resolve( $host ) : call_user_func( $resolver, $host );
 		if ( ! is_array( $ips ) || ! $ips ) {
 			return array( 'fetch_failed', 'dns' );
 		}
@@ -596,23 +792,36 @@ function cmp_check_pick_address( string $url, ?callable $resolver, bool $allow_l
 			return $refuse;
 		}
 	}
+	$first = reset( $ips );
 	return array(
 		'host'    => $host,
 		'port'    => $port,
-		'ip'      => (string) $ips[0],
+		'ip'      => (string) $first,
 		'literal' => $literal,
 	);
 }
 
-/** One GET with curl, pinned to $pin['ip']. Returns array( error, detail, status, headers, body ). */
-function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
-	$limits    = cmp_check_fetch_limits();
-	$body      = '';
-	$too_big   = false;
-	$headers   = array();
-	$hbytes    = 0;
-	$h_too_big = false;
-	$ch        = curl_init();
+/**
+ * A curl handle for one GET pinned to $pin['ip'], not started:
+ * array( ch, st (body / headers collected by the callbacks), pin ), or
+ * array( error, detail, status, headers, body ) when curl cannot be set up.
+ */
+function cmp_check_curl_prepare( string $url, array $pin, float $seconds, array $o = array() ): array {
+	$limits = cmp_check_fetch_limits();
+	$o      = isset( $o['max_bytes'], $o['accept'] ) ? $o : cmp_check_fetch_opts( $o );
+	$max    = $o['max_bytes'];
+	$st     = (object) array(
+		'body'      => '',
+		'too_big'   => false,
+		'headers'   => array(),
+		'hbytes'    => 0,
+		'h_too_big' => false,
+		'code'      => 0,
+		'not_page'  => false,
+		'received'  => 0,
+	);
+	$html_only = ! empty( $o['html_only'] );
+	$ch     = curl_init();
 	if ( false === $ch ) {
 		return array( 'error' => 'unavailable', 'detail' => '', 'status' => 0, 'headers' => array(), 'body' => '' );
 	}
@@ -631,7 +840,7 @@ function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
 		CURLOPT_TIMEOUT_MS        => $ms,
 		CURLOPT_LOW_SPEED_LIMIT   => 512,
 		CURLOPT_LOW_SPEED_TIME    => 5,
-		CURLOPT_MAXFILESIZE       => $limits['max_bytes'],
+		CURLOPT_MAXFILESIZE       => $max,
 		CURLOPT_PROXY             => '',
 		CURLOPT_NOPROXY           => '*',
 		CURLOPT_FRESH_CONNECT     => true,
@@ -640,21 +849,40 @@ function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
 		CURLOPT_SSL_VERIFYPEER    => true,
 		CURLOPT_SSL_VERIFYHOST    => 2,
 		CURLOPT_USERAGENT         => cmp_check_user_agent(),
-		// No automatic decompression: the 2 MB cap counts the bytes on the wire.
+		// No automatic decompression: the cap counts the bytes on the wire.
 		CURLOPT_HTTPHEADER        => array(
-			'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
+			'Accept: ' . $o['accept'],
 			'Accept-Language: ro,en;q=0.8',
 			'Accept-Encoding: identity',
 		),
-		CURLOPT_HEADERFUNCTION    => function ( $ch, $line ) use ( &$headers, &$hbytes, &$h_too_big, $limits ) {
-			$len     = strlen( $line );
-			$hbytes += $len;
-			if ( $hbytes > $limits['max_header'] ) {
-				$h_too_big = true;
+		CURLOPT_HEADERFUNCTION    => function ( $ch, $line ) use ( $st, $limits, $html_only, $max ) {
+			$len         = strlen( $line );
+			$st->hbytes += $len;
+			if ( $st->hbytes > $limits['max_header'] ) {
+				$st->h_too_big = true;
 				return 0;
 			}
-			if ( 1 === preg_match( '#^HTTP/\S+\s+\d{3}#', $line ) ) {
-				$headers = array(); // A new response (after 100 Continue): start over.
+			if ( 1 === preg_match( '#^HTTP/\S+\s+(\d{3})#', $line, $hm ) ) {
+				$st->headers = array(); // A new response (after 100 Continue): start over.
+				$st->code    = (int) $hm[1];
+				return $len;
+			}
+			if ( '' === trim( $line ) ) {
+				// End of this response's headers: a 2xx that is not an HTML page is cut here, no body read.
+				$ct = isset( $st->headers['content-type'] ) ? (string) $st->headers['content-type'] : '';
+				if ( $html_only && $st->code >= 200 && $st->code <= 299 ) {
+					if ( ! cmp_check_type_is_page( $ct ) ) {
+						$st->not_page = true;
+						return 0;
+					}
+					// The Content-Length cap, checked here after the type (CURLOPT_MAXFILESIZE is off
+					// for pages: some curl versions apply it before the type is known).
+					$cl = isset( $st->headers['content-length'] ) ? trim( (string) $st->headers['content-length'] ) : '';
+					if ( 1 === preg_match( '/^\d{1,18}$/', $cl ) && (int) $cl > $max ) {
+						$st->too_big = true;
+						return 0;
+					}
+				}
 				return $len;
 			}
 			$p = strpos( $line, ':' );
@@ -667,24 +895,31 @@ function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
 				return $len;
 			}
 			if ( 'set-cookie' === $name ) {
-				$headers['set-cookie'][] = $value;
-			} elseif ( isset( $headers[ $name ] ) ) {
-				$headers[ $name ] .= ', ' . $value;
+				$st->headers['set-cookie'][] = $value;
+			} elseif ( isset( $st->headers[ $name ] ) ) {
+				$st->headers[ $name ] .= ', ' . $value;
 			} else {
-				$headers[ $name ] = $value;
+				$st->headers[ $name ] = $value;
 			}
 			return $len;
 		},
-		CURLOPT_WRITEFUNCTION     => function ( $ch, $chunk ) use ( &$body, &$too_big, $limits ) {
-			$len = strlen( $chunk );
-			if ( strlen( $body ) + $len > $limits['max_bytes'] ) {
-				$too_big = true;
+		CURLOPT_WRITEFUNCTION     => function ( $ch, $chunk ) use ( $st, $max ) {
+			$len           = strlen( $chunk );
+			$st->received += $len;
+			if ( $st->not_page ) {
+				return 0;
+			}
+			if ( strlen( $st->body ) + $len > $max ) {
+				$st->too_big = true;
 				return 0; // Short count: curl stops reading.
 			}
-			$body .= $chunk;
+			$st->body .= $chunk;
 			return $len;
 		},
 	);
+	if ( $html_only ) {
+		unset( $opts[ CURLOPT_MAXFILESIZE ] ); // The header callback applies the cap after the type check.
+	}
 	if ( ! $pin['literal'] ) {
 		// Pin the name to the address checked above: curl does no DNS of its own.
 		$opts[ CURLOPT_RESOLVE ] = array( $pin['host'] . ':' . $pin['port'] . ':' . ( $is6 ? '[' . $pin['ip'] . ']' : $pin['ip'] ) );
@@ -693,8 +928,21 @@ function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
 		curl_close( $ch );
 		return array( 'error' => 'unavailable', 'detail' => '', 'status' => 0, 'headers' => array(), 'body' => '' );
 	}
-	curl_exec( $ch );
-	$errno  = curl_errno( $ch );
+	return array(
+		'ch'  => $ch,
+		'st'  => $st,
+		'pin' => $pin,
+	);
+}
+
+/**
+ * The outcome of a finished handle (closed here): array( error, detail,
+ * status, headers, body ). $errno: the curl result code of the transfer.
+ */
+function cmp_check_curl_finish( array $h, int $errno ): array {
+	$ch     = $h['ch'];
+	$st     = $h['st'];
+	$pin    = $h['pin'];
 	$status = (int) curl_getinfo( $ch, CURLINFO_RESPONSE_CODE );
 	$used   = (string) curl_getinfo( $ch, CURLINFO_PRIMARY_IP );
 	curl_close( $ch );
@@ -702,18 +950,178 @@ function cmp_check_curl_get( string $url, array $pin, float $seconds ): array {
 	$fail = function ( $code, $detail = '' ) {
 		return array( 'error' => $code, 'detail' => $detail, 'status' => 0, 'headers' => array(), 'body' => '' );
 	};
-	if ( $too_big || 63 === $errno ) { // 63: CURLE_FILESIZE_EXCEEDED (Content-Length over the cap).
+	if ( $st->not_page ) {
+		return $fail( 'not_page', 'type' ); // Not an HTML page: cut after the headers.
+	}
+	if ( $st->too_big || 63 === $errno ) { // 63: CURLE_FILESIZE_EXCEEDED (Content-Length over the cap).
 		return $fail( 'too_large' );
 	}
 	if ( 28 === $errno ) { // CURLE_OPERATION_TIMEDOUT.
 		return $fail( 'timeout' );
 	}
-	if ( 0 !== $errno || $h_too_big || $status < 100 ) {
+	if ( 0 !== $errno || $st->h_too_big || $status < 100 ) {
 		return $fail( 'fetch_failed' );
 	}
 	// Belt and braces: the connection really went to the checked address.
 	if ( '' === $used || ! cmp_check_same_ip( $used, $pin['ip'] ) ) {
 		return $fail( $pin['literal'] ? 'blocked_address' : 'fetch_failed', 'pin_mismatch' );
 	}
-	return array( 'error' => '', 'detail' => '', 'status' => $status, 'headers' => $headers, 'body' => $body );
+	return array( 'error' => '', 'detail' => '', 'status' => $status, 'headers' => $st->headers, 'body' => $st->body );
+}
+
+/** One GET with curl, pinned to $pin['ip']. Returns array( error, detail, status, headers, body ). */
+function cmp_check_curl_get( string $url, array $pin, float $seconds, array $o = array() ): array {
+	$h = cmp_check_curl_prepare( $url, $pin, $seconds, $o );
+	if ( ! isset( $h['ch'] ) ) {
+		return $h;
+	}
+	curl_exec( $h['ch'] );
+	return cmp_check_curl_finish( $h, curl_errno( $h['ch'] ) );
+}
+
+/**
+ * Fetch several pages of one site, at most $o['concurrency'] (3) at a time
+ * with curl_multi, each exactly as cmp_check_fetch() would: normalised,
+ * pinned to its checked address (resolved once per host through the shared
+ * cache), redirects followed by hand (at most 3, each re-validated and kept on
+ * $o['hosts']), the body cap, identity encoding, compressed bodies refused.
+ *
+ * Time: each page has at most $o['per_page'] seconds (10), from the moment it
+ * starts, and nothing runs past $o['deadline']; a page not started or not
+ * finished by then is 'timeout'.
+ *
+ * @param array $urls key => URL.
+ * @param array $o    resolver, ports, loopback (tests only), deadline (required),
+ *                    per_page, concurrency, and cmp_check_fetch_opts() keys.
+ * @return array key => cmp_check_fetch() result, in the order of $urls.
+ */
+function cmp_check_fetch_many( array $urls, array $o ): array {
+	$limits   = cmp_check_fetch_limits();
+	$resolver = isset( $o['resolver'] ) && is_callable( $o['resolver'] ) ? $o['resolver'] : null;
+	$ports    = isset( $o['ports'] ) && is_array( $o['ports'] ) ? $o['ports'] : null;
+	$loop     = ! empty( $o['loopback'] );
+	$per      = isset( $o['per_page'] ) ? max( 0.1, min( (float) $o['per_page'], $limits['total_seconds'] ) ) : $limits['total_seconds'];
+	$conc     = isset( $o['concurrency'] ) ? max( 1, min( 3, (int) $o['concurrency'] ) ) : 3;
+	$fo       = cmp_check_fetch_opts( $o );
+	$deadline = null === $fo['deadline'] ? microtime( true ) + $per : $fo['deadline'];
+	$results  = array();
+	$queue    = array();
+	foreach ( $urls as $k => $u ) {
+		$n = is_string( $u ) ? cmp_check_normalize_url( $u, $ports ) : false;
+		if ( false === $n ) {
+			$results[ $k ] = cmp_check_fetch_result( false, 'bad_url', '' );
+		} elseif ( ! cmp_check_fetch_host_ok( $n, $fo['hosts'] ) ) {
+			$results[ $k ] = cmp_check_fetch_result( false, 'other_host', $n );
+		} else {
+			$queue[] = array(
+				'k'     => $k,
+				'url'   => $n,
+				'hop'   => 0,
+				'until' => null,
+			);
+		}
+	}
+	if ( $queue && ( ! function_exists( 'curl_multi_init' ) || ! defined( 'CURLOPT_RESOLVE' ) ) ) {
+		foreach ( $queue as $job ) {
+			$results[ $job['k'] ] = cmp_check_fetch_result( false, 'unavailable', '' );
+		}
+		$queue = array();
+	}
+	$mh     = $queue ? curl_multi_init() : null;
+	$active = array();
+	while ( $queue || $active ) {
+		// Start pages while there is room.
+		while ( count( $active ) < $conc && $queue ) {
+			$job = array_shift( $queue );
+			$now = microtime( true );
+			if ( null === $job['until'] ) {
+				$job['until'] = min( $deadline, $now + $per );
+			}
+			if ( $job['until'] - $now < 0.05 ) {
+				$results[ $job['k'] ] = cmp_check_fetch_result( false, 'timeout', $job['url'], 0, array(), '', 0 === $job['hop'] ? 'not_started' : '' );
+				continue;
+			}
+			$pin = cmp_check_pick_address( $job['url'], $resolver, $loop, $job['until'], $fo['cache'] );
+			if ( ! isset( $pin['ip'] ) ) {
+				$results[ $job['k'] ] = cmp_check_fetch_result( false, $pin[0], $job['url'], 0, array(), '', $pin[1] );
+				continue;
+			}
+			$left = $job['until'] - microtime( true );
+			if ( $left < 0.05 ) {
+				$results[ $job['k'] ] = cmp_check_fetch_result( false, 'timeout', $job['url'], 0, array(), '', 0 === $job['hop'] ? 'not_started' : '' );
+				continue;
+			}
+			if ( ! cmp_check_fetch_take( $fo['cache'] ) ) {
+				$results[ $job['k'] ] = cmp_check_fetch_result( false, 'limit', $job['url'], 0, array(), '', 'requests' );
+				continue;
+			}
+			$h = cmp_check_curl_prepare( $job['url'], $pin, $left, $fo );
+			if ( ! isset( $h['ch'] ) ) {
+				$results[ $job['k'] ] = cmp_check_fetch_result( false, $h['error'], $job['url'] );
+				continue;
+			}
+			curl_multi_add_handle( $mh, $h['ch'] );
+			$active[] = array(
+				'job' => $job,
+				'h'   => $h,
+			);
+		}
+		if ( ! $active ) {
+			continue;
+		}
+		do {
+			$mrc = curl_multi_exec( $mh, $running );
+		} while ( CURLM_CALL_MULTI_PERFORM === $mrc );
+		while ( false !== ( $info = curl_multi_info_read( $mh ) ) ) { // phpcs:ignore
+			if ( ! is_array( $info ) || CURLMSG_DONE !== $info['msg'] ) {
+				continue;
+			}
+			foreach ( $active as $i => $a ) {
+				if ( $a['h']['ch'] !== $info['handle'] ) {
+					continue;
+				}
+				unset( $active[ $i ] );
+				curl_multi_remove_handle( $mh, $a['h']['ch'] );
+				$job = $a['job'];
+				$r   = cmp_check_curl_finish( $a['h'], (int) $info['result'] );
+				if ( '' !== $r['error'] ) {
+					$results[ $job['k'] ] = cmp_check_fetch_result( false, $r['error'], $job['url'], 0, array(), '', $r['detail'] );
+					break;
+				}
+				$step = cmp_check_fetch_step( $job['url'], $r, $job['hop'], $ports, $fo['hosts'], $fo['max_redirects'], $fo['html_only'] );
+				if ( isset( $step['next'] ) ) {
+					$job['url'] = $step['next'];
+					$job['hop']++;
+					array_unshift( $queue, $job ); // Same page, same time budget.
+				} else {
+					$results[ $job['k'] ] = $step['result'];
+				}
+				break;
+			}
+		}
+		$active = array_values( $active );
+		if ( $active ) {
+			// Curl enforces each handle's timeout; this is only a safety net.
+			if ( microtime( true ) > $deadline + 2 ) {
+				foreach ( $active as $a ) {
+					curl_multi_remove_handle( $mh, $a['h']['ch'] );
+					curl_close( $a['h']['ch'] );
+					$results[ $a['job']['k'] ] = cmp_check_fetch_result( false, 'timeout', $a['job']['url'] );
+				}
+				$active = array();
+				continue;
+			}
+			if ( -1 === curl_multi_select( $mh, 0.1 ) ) {
+				usleep( 10000 );
+			}
+		}
+	}
+	if ( null !== $mh ) {
+		curl_multi_close( $mh );
+	}
+	$out = array();
+	foreach ( array_keys( $urls ) as $k ) {
+		$out[ $k ] = isset( $results[ $k ] ) ? $results[ $k ] : cmp_check_fetch_result( false, 'timeout', '' );
+	}
+	return $out;
 }
