@@ -4,4 +4,9 @@ vendor/
 *.log
 .superpowers/
 dist/
-proxy/config.php
+
+# Internal (kept in the private consent-manager-pro-internal repo; symlinked locally)
+/proxy
+/docs/product
+/docs/superpowers
+/docs/security-audit-*.md

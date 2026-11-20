@@ -8,7 +8,13 @@ cmp_assert_eq( CMP_Updater::is_newer( 'v0.1.0', '0.1.0' ), false, 'equal version
 cmp_assert_eq( CMP_Updater::is_newer( 'v0.0.9', '0.1.0' ), false, 'older tag => not newer' );
 
 // file(): without WordPress loaded, falls back to the slug default.
-cmp_assert_eq( CMP_Updater::file(), 'consent-manager-pro/consent-manager-pro.php', 'file() falls back to slug default without WP' );
+// Without WordPress: the slug default. With the plugin_basename stub some earlier
+// test defines: the checkout's own folder name (a clone may be named anything).
+cmp_assert_eq(
+	CMP_Updater::file(),
+	( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) ? basename( rtrim( CMP_PATH, '/' ) ) : 'consent-manager-pro' ) . '/consent-manager-pro.php',
+	'file(): slug default without WP, real folder name with plugin_basename'
+);
 
 // 0.4.1: the direct GitHub path (token on the site) is gone.
 cmp_assert( ! method_exists( 'CMP_Updater', 'pick_assets' ), 'pick_assets removed with the token path' );
