@@ -1,0 +1,6 @@
+Contact: mailto:security@rt.md
+Contact: https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new
+Expires: 2027-05-19T10:06:14Z
+Preferred-Languages: ro, en, ru
+Canonical: https://consent.rt.md/.well-known/security.txt
+Policy: https://consent.rt.md/en/security/

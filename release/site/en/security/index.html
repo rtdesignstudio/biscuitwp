@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Security · Consent Manager Pro</title>
+<meta name="description" content="How to report a vulnerability in Consent Manager Pro and how its updates are protected.">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+<div class="wrap">
+<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<nav aria-label="Pages">
+<ul>
+<li><a href="../">Home</a></li>
+<li><a href="../../changelog/" hreflang="ro">Changelog</a></li>
+<li><a href="./" aria-current="page">Security</a></li>
+<li><a href="../privacy/">Privacy</a></li>
+</ul>
+</nav>
+<p class="lang"><a href="../../securitate/" hreflang="ro" lang="ro">Română</a></p>
+</div>
+</header>
+<main id="main" class="wrap">
+<h1>Security</h1>
+<p class="lead">How to report a vulnerability to us and how the plugin's updates are protected.</p>
+
+<h2 id="reporting">Report a vulnerability</h2>
+<p>Please do not open a public issue. Use one of two private channels:</p>
+<ol>
+<li><strong>GitHub private reporting</strong> (preferred): <a href="https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new">open a report</a>.</li>
+<li><strong>Email:</strong> <a href="mailto:security@rt.md">security@rt.md</a>.</li>
+</ol>
+
+<h2 id="report">What to include</h2>
+<ul>
+<li>the plugin, WordPress and PHP versions;</li>
+<li>what you found and where (file, function or URL);</li>
+<li>steps to reproduce, ideally a proof of concept;</li>
+<li>the impact you expect.</li>
+</ul>
+<p>Only test on sites you own. Do not access data that is not yours.</p>
+
+<h2 id="timelines">Timelines</h2>
+<ul>
+<li>We acknowledge your report within <strong>72 hours</strong>.</li>
+<li>For a confirmed vulnerability we release a fix within <strong>30 days</strong>. If it takes longer, we tell you why and agree a date with you.</li>
+<li>Disclosure is coordinated: we publish the details after the fix, or after <strong>90 days</strong> at the latest, unless we agree otherwise. We are happy to credit you if you wish.</li>
+</ul>
+
+<h2 id="versions">Supported versions</h2>
+<p>Security fixes ship in the <strong>newest release</strong>, which sites receive as an automatic update. For the previous minor version (for example 1.0.x when the latest is 1.1.x) we publish the fix only on GitHub Releases, as a signed zip, without an automatic update. Please update to the newest release before reporting.</p>
+
+<h2 id="updates">How updates are protected</h2>
+<p>The plugin does not get updates from wordpress.org. It gets them like this:</p>
+<ul>
+<li><strong>Signed manifest.</strong> consent.rt.md serves one manifest per channel (stable and beta), with a detached Ed25519 signature. The manifest says which version is available, where to download it and the SHA-256 hash of the package. The plugin uses it only if the signature is valid.</li>
+<li><strong>Signed package.</strong> The zip comes from GitHub Releases. Before installing, the plugin checks the zip's SHA-256 hash and its Ed25519 signature. It accepts only the exact URL from the verified manifest. If anything does not match, the package is deleted and the update is refused.</li>
+<li><strong>Anti-rollback.</strong> The plugin remembers the newest manifest it has seen on each channel and refuses an older one. Nobody can serve you an old but validly signed manifest to keep you on a vulnerable version.</li>
+<li><strong>Expiry.</strong> A manifest is valid for at most 60 days. We re-sign it every month. An expired manifest offers no updates, and a notice appears in the admin.</li>
+<li><strong>Revoked versions.</strong> The signed manifest lists revoked versions. A revoked version is never offered. If you have one installed, a notice appears in the admin.</li>
+<li><strong>Without the PHP sodium extension</strong> signatures cannot be checked. The plugin then installs no updates and tells you why.</li>
+</ul>
+
+<h2 id="keys">Public keys</h2>
+<p>The plugin ships three Ed25519 public keys. The fingerprint is the SHA-256 (hex) of the key's 32 raw bytes.</p>
+<div class="key">
+<h3>Release key</h3>
+<p>Signs the zip packages.</p>
+<dl>
+<dt>Public key (base64)</dt><dd><code>YeJZw3HBsttEaUxHNqbxC+13IewsPPbOyUOU08hkE8o=</code></dd>
+<dt>SHA-256 fingerprint</dt><dd><code>6408a5908c653bd102d1ab9d2d892b5fa7f2812a434e817091b2db77f5634faa</code></dd>
+</dl>
+</div>
+<div class="key">
+<h3>Manifest key</h3>
+<p>Signs the update manifests.</p>
+<dl>
+<dt>Public key (base64)</dt><dd><code>9XrkCKvjusbXCC6fQjKNy7A6DsPNiUcbybEZVdyBssA=</code></dd>
+<dt>SHA-256 fingerprint</dt><dd><code>ffae263becdb62523948149e872d14e121ad600eca50551abeb351db06e9d5ee</code></dd>
+</dl>
+</div>
+<div class="key">
+<h3>Rescue key</h3>
+<p>Kept offline. It can sign both packages and manifests if one of the other keys has to be replaced.</p>
+<dl>
+<dt>Public key (base64)</dt><dd><code>684HoPUDxOrnCrm+ORFYLCZTmJVpF81unp8j9VKmT8E=</code></dd>
+<dt>SHA-256 fingerprint</dt><dd><code>e49fba06874eeac73da2549224207f795556943d01958a29950c551e6829bce6</code></dd>
+</dl>
+</div>
+
+<h2 id="verify">Verify a zip by hand</h2>
+<ol>
+<li>From <a href="https://github.com/rtdesignstudio/consent-manager-pro/releases">GitHub Releases</a>, download <code>consent-manager-pro.zip</code> and <code>consent-manager-pro.zip.sig</code> of the same version.</li>
+<li>Compute the zip's hash and compare it with the <code>sha256</code> field in <a href="../../manifest-stable.json">manifest-stable.json</a> (for the version in the manifest):
+<pre><code>shasum -a 256 consent-manager-pro.zip</code></pre></li>
+<li>Check the signature with the release key. The command must print <code>OK</code>:
+<pre><code>php -r '$k = base64_decode("YeJZw3HBsttEaUxHNqbxC+13IewsPPbOyUOU08hkE8o="); $s = base64_decode(trim(file_get_contents("consent-manager-pro.zip.sig"))); $z = file_get_contents("consent-manager-pro.zip"); echo sodium_crypto_sign_verify_detached($s, $z, $k) ? "OK\n" : "INVALID\n";'</code></pre></li>
+</ol>
+<p>If you see an error, the .sig file is missing or wrong.</p>
+<p>If a release was signed with the rescue key, put the rescue key in the command. If the check fails, do not install the zip, and write to us.</p>
+
+<h2 id="revoked-versions">Revoked versions</h2>
+<p>Versions revoked on the stable channel, from the signed manifest:</p>
+<p id="revoked">Currently none.</p>
+
+<h2 id="contact">Contact</h2>
+<p>For researchers and any security question: <a href="mailto:security@rt.md">security@rt.md</a>. The contact details are also in <a href="../../.well-known/security.txt">security.txt</a>.</p>
+</main>
+<footer class="site">
+<div class="wrap">
+<p>Consent Manager Pro is free and open-source software, licensed under <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Source code: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+</div>
+</footer>
+</body>
+</html>

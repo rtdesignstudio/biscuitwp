@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Changelog · Consent Manager Pro</title>
+<meta name="description" content="Ce s-a schimbat în fiecare versiune a Consent Manager Pro.">
+<link rel="stylesheet" href="../style.css">
+<link rel="alternate" type="application/rss+xml" title="Consent Manager Pro: changelog" href="feed.xml">
+</head>
+<body>
+<a class="skip" href="#main">Sari la conținut</a>
+<header class="site">
+<div class="wrap">
+<p class="brand"><a href="../">Consent Manager Pro</a></p>
+<nav aria-label="Pagini">
+<ul>
+<li><a href="../">Acasă</a></li>
+<li><a href="./" aria-current="page">Changelog</a></li>
+<li><a href="../securitate/">Securitate</a></li>
+<li><a href="../confidentialitate/">Confidențialitate</a></li>
+</ul>
+</nav>
+<p class="lang"><a href="../en/" hreflang="en" lang="en">English</a></p>
+</div>
+</header>
+<main id="main" class="wrap">
+<h1>Changelog</h1>
+<p class="lead">Ce s-a schimbat în fiecare versiune. Urmărește noutățile prin <a href="feed.xml">RSS</a>. <span lang="en">The changelog is in Romanian.</span></p>
+<section class="version" id="v1-0-0">
+<h2><a href="#v1-0-0">1.0.0</a> <span class="date"><time datetime="2026-11-20">20 noiembrie 2026</time></span></h2>
+<ul>
+<li>Biblioteca de servicii: blocare automată pentru analytics, reclame, chat-uri și embed-uri (YouTube, Vimeo, Google Maps), servicii personalizate, excepții și „Încarcă mereu” per embed.</li>
+<li>Tabelul de cookie-uri se generează din serviciile detectate și cele personalizate (<code>[cmp_cookie_table]</code>), cu date verificate la furnizori.</li>
+<li>Integrare opțională cu WP Consent API.</li>
+<li>Moduri de măsurare Strict și Advanced (GA4/GTM cu Consent Mode implicit „denied”); instrumentele de analytics fără cookie-uri sunt scutite implicit.</li>
+<li>Re-consimțământ țintit: vizitatorul e întrebat din nou doar pentru serviciile noi.</li>
+<li>Texte legale RO/RU/EN pentru Moldova (Legea 195/2024, Legea 72/2025, GDPR), cu blocuri condiționale și adresa operatorului.</li>
+<li>Scanare pe mai multe pagini, cu sursele și resursele care trimit IP-ul vizitatorului; ecranul Verificare testează în browser ce se încarcă înainte și după consimțământ.</li>
+<li>Comutatoare pentru emoji-urile WordPress și Gravatar.</li>
+<li>Accesibilitate WCAG 2.2 AA: contrast, focus vizibil, tasta Escape, ținte de 24 px, mișcare redusă.</li>
+<li>Banda de cookie-uri pe telefon pe două rânduri, cu detalii la cerere; resurse minificate sub 12 KB, fără deplasări de layout.</li>
+<li>Test e2e în browser real: niciun tracker nu se încarcă înainte de consimțământ, pentru fiecare serviciu din bibliotecă.</li>
+<li>Ștergerea completă a datelor la dezinstalare (opțională) și suport multisite.</li>
+<li>API JavaScript public: <code>onConsent</code>, <code>whenAllowed</code>, <code>allowCategory</code>, <code>denyCategory</code>, <code>version</code>; în PHP, <code>cmp_is_allowed()</code>.</li>
+<li>Administrarea tradusă în engleză și rusă.</li>
+<li>Ecran Ghid în admin, cu linkuri contextuale.</li>
+<li>Ecran Aspect: stil și culori separate, previzualizare pe site, garanții de conformitate.</li>
+<li>Update-uri noi: manifest semnat pe consent.rt.md, pachete pe GitHub Releases, canale stable și beta, versiuni retrase; site-ul nu mai trimite date despre el.</li>
+<li>Pe multisite, „Caută actualizări” apare și în panoul rețelei.</li>
+<li>Scanarea citește corect sitemap-urile fără namespace pe PHP 7.4.</li>
+<li>Plugin gratuit și open-source (GPL-2.0-or-later); pagini publice pentru securitate, confidențialitate și changelog pe consent.rt.md.</li>
+</ul>
+</section>
+</main>
+<footer class="site">
+<div class="wrap">
+<p>Consent Manager Pro e gratuit și open-source, sub licența <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/LICENSE">GPL-2.0-or-later</a>. Cod sursă: <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>.</p>
+</div>
+</footer>
+</body>
+</html>
