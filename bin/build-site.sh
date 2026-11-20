@@ -25,6 +25,8 @@
 #                   repeats the language switch ({{ALT}}).
 #                   A page with <!-- BARE --> instead (the demo embedded in the
 #                   landing's iframe) gets neither; it must not carry the other two.
+#   assets/         site.js (phone menu, motion), verifica.js and favicon/rt-favicon-512.png
+#                   are copied as they are (every page links the favicon).
 #   junk            .DS_Store, ._*, *.swp and *~ files are left out of the output.
 # The output is deterministic: the same inputs give the same files, except
 # Expires (pin it with CMP_BUILD_NOW).
@@ -84,6 +86,9 @@ NOW="${CMP_BUILD_NOW:-$(date +%s)}"
 command -v php >/dev/null 2>&1 || die "php not found"
 echo "$NOW" | grep -Eq '^[0-9]+$' || die "CMP_BUILD_NOW must be a Unix timestamp"
 [ -d "$ROOT/site" ] || die "site/ not found"
+for f in assets/site.js assets/verifica.js assets/favicon/rt-favicon-512.png; do
+	[ -r "$ROOT/site/$f" ] || die "site/$f not found"
+done
 [ -r "$CHANGELOG" ] || die "changelog not found at $CHANGELOG"
 [ -r "$ROOT/includes/modules/class-updater.php" ] || die "includes/modules/class-updater.php not found"
 [ -r "$ROOT/data/services.json" ] || die "data/services.json not found"

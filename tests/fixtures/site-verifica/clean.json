@@ -1,0 +1,27 @@
+{
+ "status": "clean",
+ "cmp": null,
+ "checked_url": "https://exemplu.md/",
+ "engine": "html-v2",
+ "pages": {
+  "checked": [
+   "https://exemplu.md/"
+  ],
+  "failed": [],
+  "total": 1,
+  "total_source": "none",
+  "capped": false
+ },
+ "findings": [],
+ "passed": [
+  {
+   "id": "https",
+   "title": "HTTPS"
+  },
+  {
+   "id": "banner",
+   "title": "Bannerul de cookie-uri găsit"
+  }
+ ],
+ "top": []
+}

@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Consent Manager Pro · Compliant cookies for sites in Moldova</title>
+<title>Consent Manager Pro · Cookies with consent, for sites in Moldova</title>
 <meta name="description" content="A free and open-source WordPress cookie consent plugin, built for Moldova's Law 195/2024. Check your site in a few seconds.">
 <link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
 </head>
 <body class="landing">
 <!-- HEADER page=home alt=/ -->
@@ -15,7 +18,7 @@
 <section class="hero" aria-labelledby="titlu">
 <div class="wrap">
 <p class="eyebrow">WordPress cookie plugin · Law 195/2024</p>
-<h1 id="titlu">Cookies by consent, not by luck.</h1>
+<h1 id="titlu" class="big" aria-label="Cookies by consent, not by luck."><span class="row" aria-hidden="true"><span>Cookies by consent,</span></span> <span class="row" aria-hidden="true"><span>not by luck.</span></span></h1>
 <div class="hero-foot">
 <p class="lead">Consent Manager Pro keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Free, open-source, no data sent to us.</p>
 <p class="actions">
@@ -36,14 +39,18 @@
 <div class="wrap">
 <div class="sh"><p class="n">01 · Check</p>
 <h2 id="verifica-titlu">Check your site</h2></div>
-<p>Enter your site's address. We read the homepage as a new visitor would, without cookies, and tell you what starts before consent.</p>
+<p>Enter your site's address. We read up to 10 public pages as a new visitor would, without cookies, and tell you what starts before consent.</p>
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Site address</label>
 <div class="tool-row">
-<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="example.com" required maxlength="2048" aria-describedby="verifica-nota">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="example.com" required maxlength="300" aria-describedby="verifica-ajutor verifica-eroare verifica-nota">
 <button type="submit" class="btn" id="verifica-buton">Check</button>
 <button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button>
 </div>
+<p id="verifica-ajutor" class="muted small">Domain only, no paths or parameters.</p>
+<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
+<p class="tool-owner"><input id="verifica-owner" name="owner" type="checkbox" value="1" required aria-describedby="verifica-owner-eroare"> <label for="verifica-owner">I confirm I own this site or have the owner's permission to check it.</label></p>
+<p id="verifica-owner-eroare" class="field-error" hidden></p>
 <p id="verifica-nota" class="muted small">We keep neither the address nor the result. Details in <a href="/en/privacy/#instrument">Privacy</a>.</p>
 </form>
 <noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or check it yourself with the steps below.</p></noscript>
@@ -51,16 +58,16 @@
 
 <details class="limits">
 <summary>What we cannot see from here</summary>
-<p>The check only reads the code of the homepage. It does not see:</p>
+<p>The check reads the code of the homepage and of other pages, up to 10 pages in all. It does not see:</p>
 <ul>
-<li>the site's other pages;</li>
+<li>the pages after the first 10;</li>
 <li>what Tag Manager or other scripts load after the page starts;</li>
 <li>cookies set from JavaScript;</li>
 <li>trackers in event attributes (<code>onload</code>, <code>onclick</code>), in <code>iframe srcdoc</code> or in <code>&lt;noscript&gt;</code>;</li>
 <li>addresses built from pieces of text or encoded;</li>
 <li>what the site does with the data and what its policy says.</li>
 </ul>
-<p>"No problems found" only means we found nothing on the homepage. It is not a guarantee that the site is compliant.</p>
+<p>"No problems found" only means we found nothing on the pages we checked. It is not a guarantee that the site follows the law.</p>
 </details>
 
 <div id="cum-verifici" class="howto">
@@ -274,7 +281,7 @@
 <details><summary>Does "Pro" mean there is a paid version?</summary><p>No. "Pro" means professional. There is no paid version and no paid service.</p></details>
 <details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>
 <details><summary>What data reaches RT?</summary><p>From the plugin, only the update check: your site downloads a static manifest from <code>consent.rt.md</code>, without the site's address and without visitor data. From the check on this page: the address you type, used only for the check and not kept. It is all in <a href="/en/privacy/">Privacy</a>.</p></details>
-<details><summary>Is the plugin enough to make my site compliant?</summary><p>Not on its own. The plugin does the banner, the blocking, the consent log and starting texts. Still up to you: the record of processing activities, a data protection officer where required, data transfers abroad and the final wording of the legal texts. Ask a lawyer about those.</p></details>
+<details><summary>Is the plugin enough to make my site follow the law?</summary><p>Not on its own. The plugin does the banner, the blocking, the consent log and starting texts. Still up to you: the record of processing activities, a data protection officer where required, data transfers abroad and the final wording of the legal texts. Ask a lawyer about those.</p></details>
 <details><summary>What about Google Tag Manager?</summary><p>The plugin blocks what is in the page code. In Strict mode, Tag Manager starts only after consent. What Tag Manager loads after it starts is controlled from Tag Manager, through Google Consent Mode, which the plugin sends.</p></details>
 <details><summary>Which versions does it support?</summary><p>WordPress 6.0 or later and PHP 7.4 or later. It also works on multisite.</p></details>
 <details><summary>How do I report a security issue?</summary><p>Write to <a href="mailto:security@rt.md">security@rt.md</a>. Details on the <a href="/en/security/">Security</a> page.</p></details>

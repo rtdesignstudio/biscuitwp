@@ -1,0 +1,43 @@
+{
+ "status": "unsure",
+ "cmp": null,
+ "checked_url": "https://www.exemplu.md/",
+ "engine": "html-v2",
+ "pages": {
+  "checked": [
+   "https://www.exemplu.md/",
+   "https://www.exemplu.md/a/",
+   "https://www.exemplu.md/b/"
+  ],
+  "failed": [],
+  "total": 3,
+  "total_source": "sitemap",
+  "capped": false
+ },
+ "findings": [
+  {
+   "id": "loader:gtm",
+   "severity": "unsure",
+   "title": "Google Tag Manager",
+   "explain": "Poate încărca alte trackere.",
+   "law": "",
+   "evidence": [
+    "www.googletagmanager.com/gtm.js"
+   ],
+   "pages": [
+    "https://www.exemplu.md/",
+    "https://www.exemplu.md/a/",
+    "https://www.exemplu.md/b/"
+   ],
+   "fix": "Verifică în DevTools.",
+   "cmp_fix": ""
+  }
+ ],
+ "passed": [
+  {
+   "id": "https",
+   "title": "HTTPS"
+  }
+ ],
+ "top": []
+}

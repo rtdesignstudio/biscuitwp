@@ -8,15 +8,16 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * Consent Manager Pro, "Verifică-ți site-ul": limits that protect the hosting
  * account the check runs on.
  *
- * - Per visitor: at most 10 checks in any 60 seconds and 100 in any 24 hours
- *   per IPv4 or IPv6 /64, and 30 / 300 per IPv6 /48 (both must allow). The IP
+ * - Per visitor: at most 5 checks in any 60 seconds and 50 in any 24 hours
+ *   per IPv4 or IPv6 /64, and 15 / 150 per IPv6 /48 (both must allow). One
+ *   check reads up to 10 pages, hence the low numbers. The IP
  *   is never stored: each bucket is a file named after HMAC-SHA256(key, salt),
  *   where the salt is a random secret created once in the counter folder
  *   (".salt", 0600). A counter file holds only the times of allowed checks.
- * - For everybody together: at most 60 checks a minute and 2000 a day
+ * - For everybody together: at most 30 checks a minute and 1000 a day
  *   (global.cnt).
  * - At most 3 checks running at once on the account (slot-N.lock files, held
- *   with a non-blocking flock for the duration of a check).
+ *   with a non-blocking flock for the duration of a whole multi-page check).
  * - Counter files untouched for a day are deleted, at most once an hour and a
  *   bounded number of directory entries per run.
  *
@@ -28,24 +29,24 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 /** Per-visitor limits: window in seconds => checks. */
 function cmp_check_rate_limits(): array {
 	return array(
-		60    => 10,
-		86400 => 100,
+		60    => 5,
+		86400 => 50,
 	);
 }
 
 /** Limits of an IPv6 /48 (several /64s of one network). */
 function cmp_check_rate_limits_48(): array {
 	return array(
-		60    => 30,
-		86400 => 300,
+		60    => 15,
+		86400 => 150,
 	);
 }
 
 /** Limits for all visitors together. */
 function cmp_check_rate_limits_global(): array {
 	return array(
-		60    => 60,
-		86400 => 2000,
+		60    => 30,
+		86400 => 1000,
 	);
 }
 
@@ -108,11 +109,18 @@ function cmp_check_dir_inside( string $dir, string $docroot ): bool {
 	return $d === $r || 0 === strpos( $d, $r . '/' );
 }
 
-/** The buckets of a visitor: key => limits. IPv4: the address; IPv6: its /64 and its /48. */
+/**
+ * The buckets of a visitor: key => limits. IPv4: the address; IPv6: its /64
+ * and its /48. An IPv4-mapped IPv6 address (::ffff:a.b.c.d, as some servers
+ * report IPv4 clients on a dual-stack socket) is the IPv4 address.
+ */
 function cmp_check_rate_keys( string $ip ): array {
 	$bin = @inet_pton( $ip ); // phpcs:ignore
 	if ( false === $bin ) {
 		return array( 'raw:' . $ip => cmp_check_rate_limits() );
+	}
+	if ( 16 === strlen( $bin ) && str_repeat( "\0", 10 ) . "\xff\xff" === substr( $bin, 0, 12 ) ) {
+		$bin = substr( $bin, 12 );
 	}
 	if ( 16 === strlen( $bin ) ) {
 		return array(

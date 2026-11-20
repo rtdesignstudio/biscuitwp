@@ -15,6 +15,7 @@ Consent Manager Pro is free, and it stays free. "Pro" means professional, not pa
 - **Dynamic categories**: N categories (Necessary/Statistics/Marketing by default), each with cookies (name/provider/duration/purpose) and Consent Mode signals.
 - **Consent audit log (GDPR)**: logging (an identical repeated choice is not logged again), SHA-256 IP hash + salt, cron-based retention, CSV (BOM) / JSON export, purge.
 - **Legal pages wizard**: generates Privacy Policy / Terms & Conditions / Cookie Policy as WP pages; integrates with the native WordPress privacy policy page and the Privacy Policy Guide.
+- **Google Fonts localisation** (Pro mode, opt-in option): one admin button downloads the fonts once, and the Google Fonts `<link>` tags are then rewritten to the local copy, so visitors do not contact Google. `@import` rules and JavaScript font loaders are not covered.
 - **GPC**: honors Global Privacy Control (`navigator.globalPrivacyControl`, read in the browser so it works with page caching) and automatically rejects optional cookies without showing the banner. Do-Not-Track is ignored (abandoned standard).
 - **Multilingual**: WPML / Polylang (string translation + legal page duplication) plus native i18n (`.pot`, RO/RU/EN).
 

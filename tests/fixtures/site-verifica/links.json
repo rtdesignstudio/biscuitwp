@@ -1,0 +1,32 @@
+{
+ "status": "clean",
+ "cmp": null,
+ "checked_url": "https://exemplu.md/",
+ "engine": "html-v2",
+ "pages": {
+  "checked": [
+   "https://exemplu.md/",
+   "https://exemplu.md/despre/",
+   "https://exemplu.md/contacte/",
+   "https://exemplu.md/servicii/",
+   "https://exemplu.md/blog/",
+   "https://exemplu.md/blog/a/",
+   "https://exemplu.md/blog/b/",
+   "https://exemplu.md/preturi/",
+   "https://exemplu.md/echipa/",
+   "https://exemplu.md/termeni/"
+  ],
+  "failed": [],
+  "total": 14,
+  "total_source": "links",
+  "capped": true
+ },
+ "findings": [],
+ "passed": [
+  {
+   "id": "https",
+   "title": "HTTPS"
+  }
+ ],
+ "top": []
+}

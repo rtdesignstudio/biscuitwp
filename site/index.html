@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Consent Manager Pro · Cookie-uri conforme pentru site-urile din Moldova</title>
+<title>Consent Manager Pro · Cookie-uri cu acord, pentru site-urile din Moldova</title>
 <meta name="description" content="Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri, făcut pentru Legea 195/2024. Verifică-ți site-ul în câteva secunde.">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
 </head>
 <body class="landing">
 <!-- HEADER page=home alt=/en/ -->
@@ -15,7 +18,7 @@
 <section class="hero" aria-labelledby="titlu">
 <div class="wrap">
 <p class="eyebrow">Plugin WordPress pentru cookie-uri · Legea 195/2024</p>
-<h1 id="titlu">Cookie-uri cu acord, nu cu noroc.</h1>
+<h1 id="titlu" class="big" aria-label="Cookie-uri cu acord, nu cu noroc."><span class="row" aria-hidden="true"><span>Cookie-uri cu acord,</span></span> <span class="row" aria-hidden="true"><span>nu cu noroc.</span></span></h1>
 <div class="hero-foot">
 <p class="lead">Consent Manager Pro oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Gratuit, open-source, fără date trimise nouă.</p>
 <p class="actions">
@@ -36,14 +39,18 @@
 <div class="wrap">
 <div class="sh"><p class="n">01 · Verificare</p>
 <h2 id="verifica-titlu">Verifică-ți site-ul</h2></div>
-<p>Scrie adresa site-ului. Citim pagina principală ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord.</p>
+<p>Scrie adresa site-ului. Citim până la 10 pagini publice ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord.</p>
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Adresa site-ului</label>
 <div class="tool-row">
-<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="exemplu.md" required maxlength="2048" aria-describedby="verifica-nota">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="exemplu.md" required maxlength="300" aria-describedby="verifica-ajutor verifica-eroare verifica-nota">
 <button type="submit" class="btn" id="verifica-buton">Verifică</button>
 <button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Anulează</button>
 </div>
+<p id="verifica-ajutor" class="muted small">Doar domeniul, fără căi sau parametri.</p>
+<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
+<p class="tool-owner"><input id="verifica-owner" name="owner" type="checkbox" value="1" required aria-describedby="verifica-owner-eroare"> <label for="verifica-owner">Confirm că dețin site-ul sau am permisiunea proprietarului să-l verific.</label></p>
+<p id="verifica-owner-eroare" class="field-error" hidden></p>
 <p id="verifica-nota" class="muted small">Nu păstrăm adresa și nici rezultatul. Detalii în <a href="/confidentialitate/#instrument">Confidențialitate</a>.</p>
 </form>
 <noscript><p class="notice">Verificarea are nevoie de JavaScript. Pornește-l în browser și reîncarcă pagina, sau verifică singur, cu pașii de mai jos.</p></noscript>
@@ -51,16 +58,16 @@
 
 <details class="limits">
 <summary>Ce nu vedem de aici</summary>
-<p>Verificarea citește doar codul paginii principale. Nu vede:</p>
+<p>Verificarea citește codul paginii principale și al altor pagini, până la 10 pagini în total. Nu vede:</p>
 <ul>
-<li>alte pagini ale site-ului;</li>
+<li>paginile de după primele 10;</li>
 <li>ce încarcă Tag Manager-ul sau alte scripturi după ce pornește pagina;</li>
 <li>cookie-urile puse din JavaScript;</li>
 <li>trackerele puse în atribute de eveniment (<code>onload</code>, <code>onclick</code>), în <code>iframe srcdoc</code> sau în <code>&lt;noscript&gt;</code>;</li>
 <li>adresele construite din bucăți de text sau codificate;</li>
 <li>ce face site-ul cu datele și ce scrie în politica lui.</li>
 </ul>
-<p>„N-am găsit probleme” înseamnă doar că pe pagina principală nu am găsit nimic. Nu e o garanție că site-ul e conform.</p>
+<p>„N-am găsit probleme” înseamnă doar că pe paginile verificate nu am găsit nimic. Nu e o garanție că site-ul respectă legea.</p>
 </details>
 
 <div id="cum-verifici" class="howto">
@@ -274,7 +281,7 @@
 <details><summary>„Pro” înseamnă că există o versiune plătită?</summary><p>Nu. „Pro” înseamnă profesional. Nu există versiune plătită și nici serviciu plătit.</p></details>
 <details><summary>Merge fără WordPress?</summary><p>Da. Pentru site-urile statice există <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">versiunea standalone</a>: două fișiere, <code>cmp.js</code> și <code>cmp.css</code>. Marchezi singur scripturile care așteaptă acordul. Nu are registru de consimțăminte.</p></details>
 <details><summary>Ce date ajung la RT?</summary><p>De la plugin, doar cererea de update: site-ul tău descarcă un manifest static de pe <code>consent.rt.md</code>, fără adresa site-ului și fără date despre vizitatori. De la verificarea de pe pagina asta: adresa pe care o scrii, folosită doar pentru verificare și nepăstrată. Totul e în <a href="/confidentialitate/">Confidențialitate</a>.</p></details>
-<details><summary>E suficient pluginul ca site-ul să fie conform?</summary><p>Nu singur. Pluginul face bannerul, blocarea, registrul și textele de pornire. Rămân la tine: registrul activităților de prelucrare, responsabilul cu protecția datelor, unde e cazul, transferurile de date în afara țării și forma finală a textelor juridice. Pentru ele, cere sfatul unui jurist.</p></details>
+<details><summary>E suficient pluginul ca site-ul să respecte legea?</summary><p>Nu singur. Pluginul face bannerul, blocarea, registrul și textele de pornire. Rămân la tine: registrul activităților de prelucrare, responsabilul cu protecția datelor, unde e cazul, transferurile de date în afara țării și forma finală a textelor juridice. Pentru ele, cere sfatul unui jurist.</p></details>
 <details><summary>Ce se întâmplă cu Google Tag Manager?</summary><p>Pluginul blochează ce e în codul paginii. În modul Strict, Tag Manager-ul pornește doar după acord. Ce încarcă Tag Manager-ul după pornire se controlează din Tag Manager, prin Google Consent Mode, pe care pluginul îl trimite.</p></details>
 <details><summary>Pe ce versiuni merge?</summary><p>WordPress 6.0 sau mai nou și PHP 7.4 sau mai nou. Merge și pe multisite.</p></details>
 <details><summary>Cum raportez o problemă de securitate?</summary><p>Scrie la <a href="mailto:security@rt.md">security@rt.md</a>. Detalii pe pagina <a href="/securitate/">Securitate</a>.</p></details>

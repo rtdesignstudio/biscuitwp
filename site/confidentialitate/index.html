@@ -7,6 +7,9 @@
 <title>Confidențialitate · Consent Manager Pro</title>
 <meta name="description" content="Ce date trimite Consent Manager Pro, cui, și ce păstrează pe site-ul tău.">
 <link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
 </head>
 <body>
 <!-- HEADER page=privacy alt=/en/privacy/ -->
@@ -66,9 +69,10 @@
 <h2 id="instrument">6. Instrumentul „Verifică-ți site-ul”</h2>
 <p>Pe <a href="/#verifica">prima pagină</a> poți verifica un site. Așa funcționează:</p>
 <ul>
-<li><strong>Ce citim:</strong> doar pagina principală a adresei pe care o scrii, o singură dată, ca un vizitator nou: fără cookie-uri, fără parolă, urmând cel mult 3 redirecționări. Serverul nostru se prezintă cu user-agent-ul <code>ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)</code>. Citim doar site-uri publice: adresele din rețele private sau rezervate sunt refuzate.</li>
-<li><strong>Ce păstrăm:</strong> nimic din verificare. Nu păstrăm adresa verificată și nici rezultatul și nu le scriem în jurnale. Adresa ajunge la <code>/api/verifica.php</code> în corpul cererii, așa că jurnalul de acces al serverului vede, ca la orice pagină, IP-ul tău, browserul și faptul că s-a făcut o verificare, dar nu ce site ai verificat.</li>
-<li><strong>Limita de utilizare:</strong> ca să nu fie folosit abuziv, instrumentul permite cel mult 10 verificări pe minut și 100 pe zi de la aceeași adresă IP. Pentru IPv6 limita se aplică pe rețeaua /64, plus o limită pentru întreaga rețea /48 (30 pe minut și 300 pe zi).
+<li><strong>Ce citim:</strong> până la 10 pagini publice ale adresei pe care o scrii: pagina principală și până la 9 altele. Ca să le găsim, citim fișierul <code>robots.txt</code> și harta site-ului (sitemap), din care luăm cel mult primele 200 de intrări; fără hartă, luăm linkurile din pagina principală. Fiecare pagină o citim o singură dată, ca un vizitator nou: fără cookie-uri, fără parolă, urmând cel mult 3 redirecționări, pe același site. O verificare face cel mult 25 de cereri în total și durează cel mult 30 de secunde, cu cel mult 3 pagini citite în același timp. Serverul nostru se prezintă cu user-agent-ul <code>ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)</code>. Citim doar site-uri publice: adresele din rețele private sau rezervate sunt refuzate.</li>
+<li><strong>Bifa de proprietar:</strong> verificarea pornește doar dacă bifezi că deții site-ul sau ai permisiunea proprietarului. Fără bifă, serverul refuză cererea.</li>
+<li><strong>Ce păstrăm:</strong> nimic din verificare, în afară de contoarele de mai jos. Nu păstrăm adresa verificată și nici rezultatul și nu le scriem în jurnale. Adresa ajunge la <code>/api/verifica.php</code> în corpul cererii, așa că jurnalul de acces al serverului vede, ca la orice pagină, IP-ul tău, browserul și faptul că s-a făcut o verificare, dar nu ce site ai verificat.</li>
+<li><strong>Limita de utilizare:</strong> ca să nu fie folosit abuziv, instrumentul permite cel mult 5 verificări pe minut și 50 pe zi de la aceeași adresă IPv4 (o adresă IPv4 raportată în format IPv6, ::ffff:a.b.c.d, se numără tot ca IPv4). Pentru IPv6 limita se aplică pe rețeaua /64, plus o limită pentru întreaga rețea /48 (15 pe minut și 150 pe zi). Pe tot serverul, instrumentul face cel mult 30 de verificări pe minut și 1000 pe zi, cel mult 3 în același timp.
 <ul>
 <li>Numărăm verificările în fișiere temporare, pe server, în afara folderului public. Numele fiecărui fișier e o amprentă HMAC-SHA-256 a IP-ului (sau a rețelei), cu o sare secretă păstrată într-un fișier pe server. IP-ul nu se scrie nicăieri. În fișier sunt doar orele verificărilor.</li>
 <li>Un contor comun păstrează doar orele tuturor verificărilor, fără IP, ca să limităm volumul total.</li>

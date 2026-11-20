@@ -1,0 +1,133 @@
+{
+ "status": "issues",
+ "cmp": null,
+ "checked_url": "https://exemplu.md/",
+ "engine": "html-v2",
+ "pages": {
+  "checked": [
+   "https://exemplu.md/",
+   "https://exemplu.md/despre/",
+   "https://exemplu.md/contacte/",
+   "https://exemplu.md/servicii/",
+   "https://exemplu.md/blog/",
+   "https://exemplu.md/blog/a/",
+   "https://exemplu.md/blog/b/",
+   "https://exemplu.md/preturi/",
+   "https://exemplu.md/echipa/",
+   "https://exemplu.md/termeni/"
+  ],
+  "failed": [
+   {
+    "url": "https://exemplu.md/lent/",
+    "code": "timeout"
+   }
+  ],
+  "total": 84,
+  "total_source": "sitemap",
+  "capped": true
+ },
+ "findings": [
+  {
+   "id": "tracker:google-analytics",
+   "severity": "issue",
+   "title": "Google Analytics pornește înainte de acord",
+   "explain": "Scriptul trimite date despre vizită <b>x</b> înainte ca vizitatorul să aleagă.",
+   "law": "Legea 195/2024",
+   "evidence": [
+    "www.googletagmanager.com/gtag/js",
+    "_ga"
+   ],
+   "pages": [
+    "https://exemplu.md/",
+    "https://exemplu.md/despre/",
+    "https://exemplu.md/contacte/",
+    "https://exemplu.md/servicii/",
+    "https://exemplu.md/blog/",
+    "https://exemplu.md/blog/a/",
+    "https://exemplu.md/blog/b/"
+   ],
+   "fix": "Mută scriptul după acord.",
+   "cmp_fix": "Blochează scriptul până la acord, din lista de servicii."
+  },
+  {
+   "id": "cookie:_fbp",
+   "severity": "issue",
+   "title": "Cookie de tracker trimis de server",
+   "explain": "Serverul pune cookie-ul _fbp fără acord.",
+   "law": "Legea 195/2024",
+   "evidence": [
+    "_fbp"
+   ],
+   "pages": [
+    "https://exemplu.md/"
+   ],
+   "fix": "Nu pune cookie-ul din server înainte de acord.",
+   "cmp_fix": "Îl ține oprit până la acord."
+  },
+  {
+   "id": "resource:google-fonts",
+   "severity": "issue",
+   "title": "Google Fonts trimite IP-ul",
+   "explain": "Fonturile se încarcă de pe serverele Google.",
+   "law": "Legea 133/2011",
+   "evidence": [
+    "fonts.googleapis.com/css2"
+   ],
+   "pages": [
+    "https://exemplu.md/",
+    "https://exemplu.md/blog/"
+   ],
+   "fix": "Pune fonturile pe serverul tău.",
+   "cmp_fix": "Le mută pe serverul tău, cu un clic."
+  },
+  {
+   "id": "loader:gtm",
+   "severity": "unsure",
+   "title": "Google Tag Manager",
+   "explain": "Poate încărca alte trackere.",
+   "law": "",
+   "evidence": [
+    "www.googletagmanager.com/gtm.js"
+   ],
+   "pages": [
+    "https://exemplu.md/"
+   ],
+   "fix": "Verifică în DevTools.",
+   "cmp_fix": ""
+  },
+  {
+   "id": "cmp:none",
+   "severity": "info",
+   "title": "N-am găsit un banner de cookie-uri cunoscut",
+   "explain": "",
+   "law": "",
+   "evidence": [],
+   "pages": [],
+   "fix": "",
+   "cmp_fix": ""
+  }
+ ],
+ "passed": [
+  {
+   "id": "https",
+   "title": "HTTPS"
+  },
+  {
+   "id": "policy",
+   "title": "Linkul spre politică găsit"
+  },
+  {
+   "id": "a",
+   "title": "A"
+  },
+  {
+   "id": "b",
+   "title": "B"
+  }
+ ],
+ "top": [
+  "tracker:google-analytics",
+  "cookie:_fbp",
+  "resource:google-fonts"
+ ]
+}

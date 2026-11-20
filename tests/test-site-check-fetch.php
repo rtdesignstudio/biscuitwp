@@ -14,7 +14,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 	define( 'CMP_CHECK', true );
 }
 $cmp_cf_api = __DIR__ . '/../site/api';
-foreach ( array( 'lib/check.php', 'lib/fetch.php', 'lib/ratelimit.php', 'lib/endpoint.php', 'verifica.php' ) as $f ) {
+foreach ( array( 'lib/check.php', 'lib/fetch.php', 'lib/discover.php', 'lib/ratelimit.php', 'lib/endpoint.php', 'verifica.php' ) as $f ) {
 	cmp_assert( is_file( $cmp_cf_api . '/' . $f ), "site check api: site/api/{$f} exists" );
 }
 if ( ! is_file( $cmp_cf_api . '/lib/fetch.php' ) || ! is_file( $cmp_cf_api . '/lib/ratelimit.php' ) || ! is_file( $cmp_cf_api . '/lib/endpoint.php' ) ) {
@@ -22,6 +22,7 @@ if ( ! is_file( $cmp_cf_api . '/lib/fetch.php' ) || ! is_file( $cmp_cf_api . '/l
 }
 require_once $cmp_cf_api . '/lib/check.php';
 require_once $cmp_cf_api . '/lib/fetch.php';
+require_once $cmp_cf_api . '/lib/discover.php';
 require_once $cmp_cf_api . '/lib/ratelimit.php';
 require_once $cmp_cf_api . '/lib/endpoint.php';
 
@@ -136,7 +137,7 @@ register_shutdown_function(
 /* ------------------------------------------------------------------
  * Web access to the libraries is harmless (guard).
  * ------------------------------------------------------------------ */
-foreach ( array( 'check.php', 'signatures.php', 'fetch.php', 'ratelimit.php', 'endpoint.php' ) as $f ) {
+foreach ( array( 'check.php', 'signatures.php', 'fetch.php', 'discover.php', 'ratelimit.php', 'endpoint.php' ) as $f ) {
 	$src = (string) file_get_contents( $cmp_cf_api . '/lib/' . $f );
 	cmp_assert( 1 === preg_match( "#^<\?php\s*(?:/\*\*.*?\*/\s*)?if \( ! defined\( 'CMP_CHECK' \) \) \{\s*http_response_code\( 404 \);\s*exit;\s*\}#s", $src ), "lib/{$f}: starts with the CMP_CHECK guard" );
 }
@@ -146,7 +147,7 @@ cmp_assert( 1 === preg_match( '#^\s*RewriteRule\s+\^lib/\s+-\s+\[F#m', $cmp_cf_h
 cmp_assert( 1 === preg_match( "#ini_set\\( 'display_errors', '0' \\);#", (string) file_get_contents( $cmp_cf_api . '/verifica.php' ) ), 'verifica.php: display_errors off' );
 cmp_assert( false === strpos( (string) file_get_contents( $cmp_cf_api . '/lib/fetch.php' ), 'CURLOPT_ENCODING' ), 'fetch.php: no CURLOPT_ENCODING (no decompression)' );
 // Nothing logs or prints the URL.
-foreach ( array( 'lib/fetch.php', 'lib/ratelimit.php', 'lib/endpoint.php', 'verifica.php' ) as $f ) {
+foreach ( array( 'lib/fetch.php', 'lib/discover.php', 'lib/ratelimit.php', 'lib/endpoint.php', 'verifica.php' ) as $f ) {
 	$src = (string) file_get_contents( $cmp_cf_api . '/' . $f );
 	foreach ( array( 'error_log', 'syslog', 'var_dump', 'print_r', 'eval(', 'file_put_contents', 'include $', 'require $', 'CURLOPT_FOLLOWLOCATION, true', 'CURLOPT_SSL_VERIFYPEER, false', 'getenv', '$_GET', '$_REQUEST', '$_COOKIE', 'HTTP_X_FORWARDED_FOR', 'Access-Control' ) as $bad ) {
 		cmp_assert( false === strpos( $src, $bad ), "{$f}: does not use {$bad}" );
@@ -418,11 +419,11 @@ if ( $cmp_cf_port > 0 ) {
 $cmp_cf_rd = $cmp_cf_tmp . '/counters';
 $cmp_cf_t0 = 1700000000;
 $cmp_cf_ok = 0;
-for ( $i = 0; $i < 10; $i++ ) {
+for ( $i = 0; $i < 5; $i++ ) {
 	$cmp_cf_ok += cmp_check_rate_allow( '203.0.113.50', $cmp_cf_rd, $cmp_cf_t0 + $i ) ? 1 : 0;
 }
-cmp_assert_eq( $cmp_cf_ok, 10, 'rate: 10 checks in a minute allowed' );
-cmp_assert( false === cmp_check_rate_allow( '203.0.113.50', $cmp_cf_rd, $cmp_cf_t0 + 30 ), 'rate: the 11th in the same minute refused' );
+cmp_assert_eq( $cmp_cf_ok, 5, 'rate: 5 checks in a minute allowed' );
+cmp_assert( false === cmp_check_rate_allow( '203.0.113.50', $cmp_cf_rd, $cmp_cf_t0 + 30 ), 'rate: the 6th in the same minute refused' );
 cmp_assert( true === cmp_check_rate_allow( '198.51.100.1', $cmp_cf_rd, $cmp_cf_t0 + 30 ), 'rate: another IP is counted apart' );
 cmp_assert( true === cmp_check_rate_allow( '203.0.113.50', $cmp_cf_rd, $cmp_cf_t0 + 61 ), 'rate: allowed again after a minute' );
 cmp_assert( is_dir( $cmp_cf_rd ) && 0700 === ( fileperms( $cmp_cf_rd ) & 0777 ), 'rate: counter folder created with 0700' );
@@ -442,31 +443,31 @@ foreach ( array( '203.0.113.50', '198.51.100.1', '203.0.113', bin2hex( inet_pton
 }
 cmp_assert( false === strpos( $cmp_cf_all, hash( 'sha256', '203.0.113.50' ) ), 'rate: not an unsalted hash of the IP' );
 
-// Day limit: 100 per IP, spread one a minute.
+// Day limit: 50 per IP, spread one a minute.
 $cmp_cf_d  = $cmp_cf_tmp . '/counters-day';
 $cmp_cf_ok = 0;
-for ( $i = 0; $i < 100; $i++ ) {
+for ( $i = 0; $i < 50; $i++ ) {
 	$cmp_cf_ok += cmp_check_rate_allow( '192.0.2.77', $cmp_cf_d, $cmp_cf_t0 + $i * 61 ) ? 1 : 0;
 }
-cmp_assert_eq( $cmp_cf_ok, 100, 'rate: 100 a day allowed' );
-cmp_assert( false === cmp_check_rate_allow( '192.0.2.77', $cmp_cf_d, $cmp_cf_t0 + 100 * 61 ), 'rate: the 101st in the same day refused' );
+cmp_assert_eq( $cmp_cf_ok, 50, 'rate: 50 a day allowed' );
+cmp_assert( false === cmp_check_rate_allow( '192.0.2.77', $cmp_cf_d, $cmp_cf_t0 + 50 * 61 ), 'rate: the 51st in the same day refused' );
 cmp_assert( true === cmp_check_rate_allow( '192.0.2.77', $cmp_cf_d, $cmp_cf_t0 + 86400 + 120 ), 'rate: allowed again a day later' );
 
 // IPv6: one /64 is one visitor.
 $cmp_cf_6 = $cmp_cf_tmp . '/counters-v6';
-for ( $i = 0; $i < 10; $i++ ) {
+for ( $i = 0; $i < 5; $i++ ) {
 	cmp_check_rate_allow( '2a00:1450:4001:81c::' . dechex( $i + 1 ), $cmp_cf_6, $cmp_cf_t0 );
 }
 cmp_assert( false === cmp_check_rate_allow( '2a00:1450:4001:81c:ffff::1', $cmp_cf_6, $cmp_cf_t0 ), 'rate: IPv6 counted per /64' );
-// ... and per /48 (30 a minute, 300 a day): many /64s of one /48 share it.
+// ... and per /48 (15 a minute, 150 a day): many /64s of one /48 share it.
 $cmp_cf_48 = $cmp_cf_tmp . '/counters-v6-48';
 $cmp_cf_ok = 0;
 for ( $n = 1; $n <= 3; $n++ ) {
-	for ( $i = 0; $i < 10; $i++ ) {
+	for ( $i = 0; $i < 5; $i++ ) {
 		$cmp_cf_ok += cmp_check_rate_allow( '2a00:1450:4001:' . $n . '::' . dechex( $i + 1 ), $cmp_cf_48, $cmp_cf_t0 ) ? 1 : 0;
 	}
 }
-cmp_assert_eq( $cmp_cf_ok, 30, 'rate: three /64s of one /48 get 10 each' );
+cmp_assert_eq( $cmp_cf_ok, 15, 'rate: three /64s of one /48 get 5 each' );
 cmp_assert( false === cmp_check_rate_allow( '2a00:1450:4001:4::1', $cmp_cf_48, $cmp_cf_t0 ), 'rate: a fourth /64 of the same /48 is refused (the /48 bucket is full)' );
 cmp_assert( true === cmp_check_rate_allow( '2a00:1450:4002:4::1', $cmp_cf_48, $cmp_cf_t0 ), 'rate: another /48 is counted apart' );
 cmp_assert_eq( count( preg_grep( '/^[0-9a-f]{64}\.cnt$/', scandir( $cmp_cf_48 ) ) ), 6, 'rate: one file per allowed /64 (four) plus one per /48 (two); the refused /64 got none' );
@@ -478,22 +479,22 @@ for ( $i = 0; $i < 50; $i++ ) {
 cmp_assert_eq( $cmp_cf_ok, 0, 'rate: 50 new /64s inside a full /48 are refused' );
 cmp_assert_eq( count( preg_grep( '/^[0-9a-f]{64}\.cnt$/', scandir( $cmp_cf_48 ) ) ), $cmp_cf_before, 'rate: ... and create no new counter files' );
 
-// Global volume: 60 a minute, 2000 a day, for everybody together.
+// Global volume: 30 a minute, 1000 a day, for everybody together.
 $cmp_cf_g  = $cmp_cf_tmp . '/counters-global';
 $cmp_cf_ok = 0;
-for ( $i = 0; $i < 60; $i++ ) {
+for ( $i = 0; $i < 30; $i++ ) {
 	$cmp_cf_ok += 'ok' === cmp_check_rate_global( $cmp_cf_g, $cmp_cf_t0 ) ? 1 : 0;
 }
-cmp_assert_eq( $cmp_cf_ok, 60, 'global: 60 a minute' );
-cmp_assert_eq( cmp_check_rate_global( $cmp_cf_g, $cmp_cf_t0 + 1 ), 'limited', 'global: the 61st in a minute is refused' );
+cmp_assert_eq( $cmp_cf_ok, 30, 'global: 30 a minute' );
+cmp_assert_eq( cmp_check_rate_global( $cmp_cf_g, $cmp_cf_t0 + 1 ), 'limited', 'global: the 31st in a minute is refused' );
 cmp_assert( is_file( $cmp_cf_g . '/global.cnt' ) && 0600 === ( fileperms( $cmp_cf_g . '/global.cnt' ) & 0777 ), 'global: global.cnt, 0600' );
 $cmp_cf_g2 = $cmp_cf_tmp . '/counters-global-day';
 $cmp_cf_ok = 0;
-for ( $i = 0; $i < 2000; $i++ ) {
-	$cmp_cf_ok += 'ok' === cmp_check_rate_global( $cmp_cf_g2, $cmp_cf_t0 + $i * 2 ) ? 1 : 0;
+for ( $i = 0; $i < 1000; $i++ ) {
+	$cmp_cf_ok += 'ok' === cmp_check_rate_global( $cmp_cf_g2, $cmp_cf_t0 + $i * 3 ) ? 1 : 0;
 }
-cmp_assert_eq( $cmp_cf_ok, 2000, 'global: 2000 a day' );
-cmp_assert_eq( cmp_check_rate_global( $cmp_cf_g2, $cmp_cf_t0 + 4000 + 120 ), 'limited', 'global: the 2001st in a day is refused' );
+cmp_assert_eq( $cmp_cf_ok, 1000, 'global: 1000 a day' );
+cmp_assert_eq( cmp_check_rate_global( $cmp_cf_g2, $cmp_cf_t0 + 3000 + 120 ), 'limited', 'global: the 1001st in a day is refused' );
 
 // Concurrency: 3 slots for the whole account.
 $cmp_cf_sd = $cmp_cf_tmp . '/counters-slots';
@@ -555,6 +556,9 @@ $cmp_cf_hn  = 0;
 $cmp_cf_h   = function ( array $req, $fetcher = null, $svc = null ) use ( $cmp_cf_tmp, $cmp_cf_svc, &$cmp_cf_hn ) {
 	$cmp_cf_hn++;
 	$req = array_merge( array( 'method' => 'POST', 'content_type' => 'application/x-www-form-urlencoded', 'body' => '', 'post' => array(), 'ip' => '192.0.2.' . $cmp_cf_hn ), $req );
+	if ( is_array( $req['post'] ) && isset( $req['post']['url'] ) && ! isset( $req['post']['owner'] ) ) {
+		$req['post']['owner'] = '1'; // The owner box is ticked unless a test says otherwise.
+	}
 	return cmp_check_handle( $req, $cmp_cf_tmp . '/handle-counters', null === $svc ? $cmp_cf_svc : $svc, 1700000000 + 2 * $cmp_cf_hn, $fetcher );
 };
 $cmp_cf_page = function ( $html, $headers = array( 'content-type' => 'text/html; charset=utf-8' ), $status = 200, $final = 'https://exemplu.md/' ) {
@@ -578,15 +582,15 @@ $r = $cmp_cf_h( array( 'content_type' => 'application/json', 'body' => str_repea
 cmp_assert( 400 === $r['code'] && 'bad_request' === $r['body']['code'], 'handle: oversized JSON body -> 400' );
 $cmp_cf_seen = array();
 $r = $cmp_cf_h(
-	array( 'content_type' => 'application/json; charset=utf-8', 'body' => '{"url":"exemplu.md","lang":"en"}' ),
+	array( 'content_type' => 'application/json; charset=utf-8', 'body' => '{"url":"exemplu.md","lang":"en","owner":1}' ),
 	function ( $url ) use ( &$cmp_cf_seen, $cmp_cf_page ) {
 		$cmp_cf_seen[] = $url;
 		$f = $cmp_cf_page( '<!doctype html><html><head><title>x</title></head><body><p>Hello</p><a href="/privacy">Privacy policy</a></body></html>' );
 		return $f( $url );
 	}
 );
-cmp_assert( 200 === $r['code'] && 'clean' === $r['body']['status'] && 'html-v1' === $r['body']['engine'] && 'https://exemplu.md/' === $r['body']['checked_url'], 'handle: JSON request, clean page -> clean, html-v1, checked_url' );
-cmp_assert_eq( $cmp_cf_seen, array( 'https://exemplu.md/' ), 'handle: the fetcher gets the normalised URL' );
+cmp_assert( 200 === $r['code'] && 'clean' === $r['body']['status'] && 'html-v2' === $r['body']['engine'] && 'https://exemplu.md/' === $r['body']['checked_url'], 'handle: JSON request, clean page -> clean, html-v2, checked_url' );
+cmp_assert( isset( $cmp_cf_seen[0] ) && 'https://exemplu.md/' === $cmp_cf_seen[0], 'handle: the fetcher gets the normalised URL first' );
 cmp_assert( array_key_exists( 'findings', $r['body'] ) && array_key_exists( 'cmp', $r['body'] ), 'handle: findings and cmp present' );
 $r = $cmp_cf_h( array( 'post' => array( 'url' => 'exemplu.md' ) ), $cmp_cf_page( '<html><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-1"></script></head><body>x</body></html>' ) );
 cmp_assert( 200 === $r['code'] && 'issues' === $r['body']['status'] && count( $r['body']['findings'] ) > 0, 'handle: form request, tracker -> issues' );
@@ -623,17 +627,29 @@ foreach ( array( 'bad_request', 'bad_url', 'blocked_address', 'fetch_failed', 't
 		cmp_assert( '' !== $msg && false === strpos( $msg, "\xe2\x80\x94" ), "message {$code}/{$lang}" );
 	}
 }
-// Rate limit inside handle: the 11th from one IP in a minute.
+// Rate limit inside handle: the 6th from one IP in a minute.
 $cmp_cf_last = null;
-for ( $i = 0; $i < 11; $i++ ) {
-	$cmp_cf_last = cmp_check_handle( array( 'method' => 'POST', 'content_type' => '', 'body' => '', 'post' => array( 'url' => 'http://127.0.0.1/' ), 'ip' => '198.51.100.200' ), $cmp_cf_tmp . '/handle-counters-ip', $cmp_cf_svc, 1700000000, null );
+for ( $i = 0; $i < 6; $i++ ) {
+	$cmp_cf_last = cmp_check_handle(
+		array( 'method' => 'POST', 'content_type' => '', 'body' => '', 'post' => array( 'url' => 'exemplu.md', 'owner' => '1' ), 'ip' => '198.51.100.200' ),
+		$cmp_cf_tmp . '/handle-counters-ip',
+		$cmp_cf_svc,
+		1700000000,
+		function ( $url ) {
+			return array( 'ok' => false, 'error' => 'fetch_failed' );
+		}
+	);
 }
-cmp_assert( 429 === $cmp_cf_last['code'] && 'rate_limited' === $cmp_cf_last['body']['code'] && isset( $cmp_cf_last['headers']['Retry-After'] ), 'handle: 11th in a minute -> 429 with Retry-After' );
+cmp_assert( 429 === $cmp_cf_last['code'] && 'rate_limited' === $cmp_cf_last['body']['code'] && isset( $cmp_cf_last['headers']['Retry-After'] ), 'handle: 6th in a minute -> 429 with Retry-After' );
 
 // Order: origin checks first, invalid input creates no per-IP file.
 $cmp_cf_hd   = $cmp_cf_tmp . '/handle-order';
 $cmp_cf_hreq = function ( array $over ) {
-	return array_merge( array( 'method' => 'POST', 'content_type' => '', 'body' => '', 'post' => array( 'url' => 'exemplu.md' ), 'ip' => '192.0.2.250' ), $over );
+	$req = array_merge( array( 'method' => 'POST', 'content_type' => '', 'body' => '', 'post' => array( 'url' => 'exemplu.md' ), 'ip' => '192.0.2.250' ), $over );
+	if ( ! isset( $req['post']['owner'] ) ) {
+		$req['post']['owner'] = '1';
+	}
+	return $req;
 };
 $cmp_cf_ok_fetch = $cmp_cf_page( '<html><body><a href="/privacy">Privacy policy</a></body></html>' );
 $cmp_cf_hexcnt   = function ( $dir ) {
@@ -667,24 +683,24 @@ $cmp_cf_gcount = function ( $dir ) {
 	return is_file( $dir . '/global.cnt' ) ? count( array_filter( explode( "\n", (string) file_get_contents( $dir . '/global.cnt' ) ) ) ) : 0;
 };
 $cmp_cf_gd = $cmp_cf_tmp . '/handle-global';
-for ( $i = 0; $i < 61; $i++ ) {
+for ( $i = 0; $i < 31; $i++ ) {
 	$r = cmp_check_handle( $cmp_cf_hreq( array( 'ip' => '203.0.113.7', 'post' => array( 'url' => 'not a url' ) ) ), $cmp_cf_gd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
 }
-cmp_assert( 400 === $r['code'] && 'bad_url' === $r['body']['code'], 'handle: 61 invalid URLs from one IP -> still bad_url' );
-cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 0, 'handle: 61 invalid URLs from one IP do not consume the global budget' );
+cmp_assert( 400 === $r['code'] && 'bad_url' === $r['body']['code'], 'handle: 31 invalid URLs from one IP -> still bad_url' );
+cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 0, 'handle: 31 invalid URLs from one IP do not consume the global budget' );
 $r = cmp_check_handle( $cmp_cf_hreq( array( 'ip' => '203.0.113.8' ) ), $cmp_cf_gd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
 cmp_assert( 200 === $r['code'], 'handle: after the junk, another visitor is served' );
-for ( $i = 0; $i < 11; $i++ ) {
+for ( $i = 0; $i < 6; $i++ ) {
 	$r = cmp_check_handle( $cmp_cf_hreq( array( 'ip' => '203.0.113.9' ) ), $cmp_cf_gd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
 }
-cmp_assert( 429 === $r['code'] && 'rate_limited' === $r['body']['code'], 'handle: the 11th valid request from one IP is stopped by the per-IP limit' );
-cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 11, 'handle: only requests that passed the per-IP limit count globally (1 + 10)' );
-for ( $i = 0; $i < 49; $i++ ) {
+cmp_assert( 429 === $r['code'] && 'rate_limited' === $r['body']['code'], 'handle: the 6th valid request from one IP is stopped by the per-IP limit' );
+cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 6, 'handle: only requests that passed the per-IP limit count globally (1 + 5)' );
+for ( $i = 0; $i < 24; $i++ ) {
 	cmp_check_handle( $cmp_cf_hreq( array( 'ip' => '198.51.100.' . ( $i + 1 ) ) ), $cmp_cf_gd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
 }
-cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 60, 'handle: 60 counted globally' );
+cmp_assert_eq( $cmp_cf_gcount( $cmp_cf_gd ), 30, 'handle: 30 counted globally' );
 $r = cmp_check_handle( $cmp_cf_hreq( array( 'ip' => '203.0.113.99' ) ), $cmp_cf_gd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
-cmp_assert( 503 === $r['code'] && 'busy' === $r['body']['code'] && isset( $r['headers']['Retry-After'] ) && '' !== $r['body']['message'], 'handle: global volume over 60 a minute -> 503 busy' );
+cmp_assert( 503 === $r['code'] && 'busy' === $r['body']['code'] && isset( $r['headers']['Retry-After'] ) && '' !== $r['body']['message'], 'handle: global volume over 30 a minute -> 503 busy' );
 
 // Concurrency through handle: all slots busy -> 503 unavailable, Retry-After 10, no fetch.
 $cmp_cf_cd = $cmp_cf_tmp . '/handle-slots';
@@ -743,12 +759,11 @@ if ( $cmp_cf_eport > 0 ) {
 	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=' . rawurlencode( '"><script>alert(1)</script>' ), 'application/x-www-form-urlencoded' );
 	cmp_assert( 400 === $st && false === stripos( $b, '<script' ), 'endpoint: hostile input not echoed' );
 
-	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', json_encode( array( 'url' => 'http://[::ffff:127.0.0.1]/' ) ), 'application/json' );
-	$j = json_decode( $b, true );
-	cmp_assert( 400 === $st && is_array( $j ) && 'blocked_address' === $j['code'], 'endpoint: [::ffff:127.0.0.1] -> blocked_address' );
-	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=2130706433', 'application/x-www-form-urlencoded' );
-	$j = json_decode( $b, true );
-	cmp_assert( 400 === $st && is_array( $j ) && 'bad_url' === $j['code'], 'endpoint: decimal IP -> bad_url' );
+	foreach ( array( 'http://[::ffff:127.0.0.1]/', '2130706433', '8.8.8.8', 'exemplu.md/pagina', 'exemplu.md:443' ) as $cmp_cf_in ) {
+		list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', json_encode( array( 'url' => $cmp_cf_in, 'owner' => 1 ) ), 'application/json' );
+		$j = json_decode( $b, true );
+		cmp_assert( 400 === $st && is_array( $j ) && 'bad_url' === $j['code'] && 0 === strpos( $j['message'], 'Scrie doar adresa site-ului' ), "endpoint: {$cmp_cf_in} -> bad_url (bare domain only)" );
+	}
 
 	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=exemplu.md', 'application/x-www-form-urlencoded', array( 'Origin' => 'https://evil.example' ) );
 	cmp_assert( 403 === $st && false !== strpos( $b, '"forbidden"' ), 'endpoint: foreign Origin -> 403' );
@@ -756,19 +771,27 @@ if ( $cmp_cf_eport > 0 ) {
 	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=exemplu.md', 'application/x-www-form-urlencoded', array( 'Sec-Fetch-Site' => 'cross-site' ) );
 	cmp_assert( 403 === $st, 'endpoint: Sec-Fetch-Site cross-site -> 403' );
 
-	// Only the [::ffff:127.0.0.1] request counted for 127.0.0.1 so far (bad URLs do not); 9 more, then 429.
-	for ( $i = 0; $i < 9; $i++ ) {
-		cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=' . rawurlencode( 'http://169.254.169.254/' ), 'application/x-www-form-urlencoded' );
-	}
-	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=' . rawurlencode( 'http://169.254.169.254/' ), 'application/x-www-form-urlencoded' );
-	cmp_assert_eq( $st, 429, 'endpoint: over the limit -> 429' );
+	// Without the owner box: 400 owner_required, nothing counted.
+	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', json_encode( array( 'url' => 'exemplu.md', 'lang' => 'en' ) ), 'application/json' );
+	$j = json_decode( $b, true );
+	cmp_assert( 400 === $st && is_array( $j ) && 'owner_required' === $j['code'] && "Tick that you own the site or have the owner's permission." === $j['message'] && 'html-v2' === $j['engine'], 'endpoint: no owner -> 400 owner_required (EN message)' );
+	cmp_assert( ! file_exists( $cmp_cf_erd ), 'endpoint: refused requests (owner, bad URLs, origin) wrote nothing' );
+	// The 429 path over HTTP without any network: 127.0.0.1's per-IP counter is filled in advance
+	// (5 checks this minute, keyed like cmp_check_rate_check does), so the next valid request is refused.
+	mkdir( $cmp_cf_erd, 0700, true );
+	$cmp_cf_salt = bin2hex( random_bytes( 32 ) );
+	file_put_contents( $cmp_cf_erd . '/.salt', $cmp_cf_salt );
+	chmod( $cmp_cf_erd . '/.salt', 0600 );
+	file_put_contents( $cmp_cf_erd . '/' . hash_hmac( 'sha256', 'v4:' . inet_pton( '127.0.0.1' ), $cmp_cf_salt ) . '.cnt', str_repeat( time() . "\n", 5 ) );
+	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'owner=1&url=exemplu.md', 'application/x-www-form-urlencoded' );
+	cmp_assert_eq( $st, 429, 'endpoint: over the limit (5 a minute) -> 429' );
 	$cmp_cf_hdrs( $h, 'endpoint 429' );
 	$j = json_decode( $b, true );
 	cmp_assert( is_array( $j ) && 'rate_limited' === $j['code'] && '' !== $j['message'], 'endpoint: 429 body is JSON rate_limited' );
-	cmp_assert( is_dir( $cmp_cf_erd ) && 1 === count( preg_grep( '/^[0-9a-f]{64}\.cnt$/', scandir( $cmp_cf_erd ) ) ) && is_file( $cmp_cf_erd . '/global.cnt' ), 'endpoint: counters written to the injected folder' );
+	cmp_assert( 1 === count( preg_grep( '/^[0-9a-f]{64}\.cnt$/', scandir( $cmp_cf_erd ) ) ) && ! file_exists( $cmp_cf_erd . '/global.cnt' ), 'endpoint: the injected folder is used; a refused request is not counted globally' );
 
 	// The libraries requested directly: 404, nothing runs, nothing printed.
-	foreach ( array( 'check.php', 'signatures.php', 'fetch.php', 'ratelimit.php', 'endpoint.php' ) as $f ) {
+	foreach ( array( 'check.php', 'signatures.php', 'fetch.php', 'discover.php', 'ratelimit.php', 'endpoint.php' ) as $f ) {
 		list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'GET', '/lib/' . $f );
 		cmp_assert( 404 === $st && '' === trim( $b ), "endpoint: /lib/{$f} requested directly -> 404, empty" );
 	}

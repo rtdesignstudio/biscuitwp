@@ -62,7 +62,8 @@ function cmp_sc_sev( array $r, $sev ) {
 
 /** The result has the documented shape. */
 function cmp_sc_valid( $r ) {
-	if ( ! is_array( $r ) || array_keys( $r ) !== array( 'status', 'findings', 'cmp' ) ) {
+	// v1 keys first, v2 additions after (test-site-check-agg.php covers those).
+	if ( ! is_array( $r ) || array_keys( $r ) !== array( 'status', 'findings', 'cmp', 'passed', 'top', 'rank' ) ) {
 		return false;
 	}
 	if ( ! in_array( $r['status'], array( 'clean', 'issues', 'unsure', 'error' ), true ) || ! is_array( $r['findings'] ) ) {
@@ -72,14 +73,14 @@ function cmp_sc_valid( $r ) {
 		return false;
 	}
 	foreach ( $r['findings'] as $f ) {
-		if ( ! is_array( $f ) || array_keys( $f ) !== array( 'id', 'severity', 'title', 'explain', 'law' ) ) {
+		if ( ! is_array( $f ) || array_keys( $f ) !== array( 'id', 'severity', 'title', 'explain', 'law', 'evidence', 'fix', 'cmp_fix' ) ) {
 			return false;
 		}
 		if ( ! in_array( $f['severity'], array( 'issue', 'unsure', 'info' ), true ) ) {
 			return false;
 		}
-		foreach ( $f as $v ) {
-			if ( ! is_string( $v ) ) {
+		foreach ( $f as $k => $v ) {
+			if ( 'evidence' === $k ? ! is_array( $v ) || count( $v ) > 3 || count( array_filter( $v, 'is_string' ) ) !== count( $v ) : ! is_string( $v ) ) {
 				return false;
 			}
 		}

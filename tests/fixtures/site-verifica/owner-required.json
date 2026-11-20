@@ -1,0 +1,9 @@
+{
+ "status": "error",
+ "code": "owner_required",
+ "message": "x",
+ "findings": [],
+ "cmp": null,
+ "checked_url": "",
+ "engine": "html-v2"
+}

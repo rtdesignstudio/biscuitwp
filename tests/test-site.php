@@ -461,6 +461,168 @@ cmp_assert( false !== strpos( $cmp_site_js, "'cmp:consent-manager-pro'" ), 'veri
 cmp_assert( 1 === preg_match( '#<canvas|createElement\(\s*\'canvas\'\s*\)#', $cmp_site_js ), 'verifica.js: confetti on its own canvas' );
 cmp_assert( 1 === preg_match( '#/\* confetti \*/(.*?)/\* /confetti \*/#s', $cmp_site_js, $cf ) && strlen( preg_replace( '#\s+#', ' ', preg_replace( '#//[^\n]*|/\*.*?\*/#s', '', $cf[1] ) ) ) < 2048, 'verifica.js: confetti under 2 KB (without comments and whitespace runs)' );
 
+// While a check runs: an ordered list of what is being checked (both languages),
+// hidden from screen readers (the status line and the final result are announced).
+foreach ( array(
+	'Deschidem pagina principală, ca un vizitator nou',
+	'Căutăm paginile site-ului (sitemap)',
+	'Verificăm până la 10 pagini',
+	'Căutăm trackere: Google Analytics, Meta Pixel, Yandex, Clarity și altele',
+	'Verificăm cookie-urile puse înainte de acord',
+	'Căutăm resurse care trimit IP-ul: Google Fonts, CDN-uri, Gravatar',
+	'Căutăm bannerul de cookie-uri și linkul spre politică',
+	'Opening the homepage as a new visitor',
+	'Looking for the pages of the site (sitemap)',
+	'Checking up to 10 pages',
+	'Looking for trackers: Google Analytics, Meta Pixel, Yandex, Clarity and others',
+	'Checking cookies set before consent',
+	'Looking for resources that send the IP address: Google Fonts, CDNs, Gravatar',
+	'Looking for the cookie banner and the policy link',
+) as $step ) {
+	cmp_assert( false !== strpos( $cmp_site_js, "'" . $step . "'" ), "verifica.js: check step „{$step}”" );
+}
+$cmp_site_js_nocf = preg_replace( '#/\* confetti \*/.*?/\* /confetti \*/#s', '', $cmp_site_js );
+cmp_assert( false !== strpos( $cmp_site_js_nocf, "createElement('ol')" ) || false !== strpos( $cmp_site_js_nocf, "el('ol'" ), 'verifica.js: the steps are an ordered list' );
+cmp_assert( false !== strpos( $cmp_site_js_nocf, "setAttribute('aria-hidden', 'true')" ), 'verifica.js: the step list is hidden from screen readers' );
+cmp_assert( false !== strpos( $cmp_site_js_nocf, 'prefers-reduced-motion' ), 'verifica.js: the steps respect prefers-reduced-motion' );
+cmp_assert( 1 === preg_match( '#@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\.run-steps#s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: no step animation under reduced motion' );
+
+// ---- V2 (landing v2 design): owner checkbox, detailed report, up to 10 pages, hero ----
+// The owner checkbox: required, labelled, exact text, with a place for the inline error.
+foreach ( array(
+	'index.html'    => 'Confirm că dețin site-ul sau am permisiunea proprietarului să-l verific.',
+	'en/index.html' => "I confirm I own this site or have the owner's permission to check it.",
+) as $page => $owner_text ) {
+	$html = $cmp_site_read( $page );
+	$sec  = 1 === preg_match( '#<form\b[^>]*\bid="verifica-form".*?</form>#s', $html, $fm2 ) ? $fm2[0] : '';
+	cmp_assert( 1 === preg_match( '#<input\b[^>]*\bid="verifica-owner"[^>]*>#', $sec, $om ), "{$page}: the owner checkbox is in the form" );
+	$tag = isset( $om[0] ) ? $om[0] : '';
+	cmp_assert( false !== strpos( $tag, 'type="checkbox"' ) && false !== strpos( $tag, 'name="owner"' ) && false !== strpos( $tag, 'value="1"' ), "{$page}: owner checkbox name=owner value=1" );
+	cmp_assert( 1 === preg_match( '#\srequired[\s>]#', $tag ), "{$page}: the owner checkbox is required" );
+	cmp_assert( false !== strpos( $tag, 'aria-describedby="verifica-owner-eroare"' ), "{$page}: the owner checkbox points to its error message" );
+	cmp_assert( 1 === preg_match( '#<label\b[^>]*\bfor="verifica-owner"[^>]*>' . preg_quote( htmlspecialchars( $owner_text, ENT_NOQUOTES ), '#' ) . '</label>#', $sec ), "{$page}: the owner checkbox is labelled with the exact text" );
+	cmp_assert( 1 === preg_match( '#<p\b[^>]*\bid="verifica-owner-eroare"[^>]*\shidden[^>]*>\s*</p>#', $sec ), "{$page}: an empty, hidden place for the owner error" );
+	// The tool's texts now speak of up to 10 pages; never „conform” in RO.
+	cmp_assert( false !== strpos( $html, 'index.html' === $page ? 'până la 10 pagini' : 'up to 10 pages' ), "{$page}: the tool mentions up to 10 pages" );
+}
+cmp_assert( false === strpos( $cmp_site_read( 'index.html' ), 'site-ul e conform' ), 'index.html: the tool limits do not say „conform”' );
+// verifica.js: owner=1 in the body, blocked client-side when unticked, owner_required handled.
+foreach ( array( 'owner: 1', "getElementById('verifica-owner')", "getElementById('verifica-owner-eroare')", "'aria-invalid'", 'owner_required',
+	'Bifează că deții site-ul sau ai permisiunea proprietarului.', "Tick that you own the site or have the owner's permission." ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_js, $need ), "verifica.js: has {$need}" );
+}
+cmp_assert( 1 === preg_match( '#if \(!owner\.checked\)\s*\{[^}]*ownerError\(#s', $cmp_site_js ), 'verifica.js: an unticked owner box stops the submit with an inline message' );
+cmp_assert( 1 === preg_match( '#if \(!owner\.checked\)\s*\{[^}]*return;#s', $cmp_site_js ), 'verifica.js: no request without the owner box' );
+cmp_assert( false !== strpos( $cmp_site_js, '45000' ) && false === strpos( $cmp_site_js, '30000' ), 'verifica.js: client timeout 45 s' );
+cmp_assert( 1 === preg_match( '#\}, 1200\);#', $cmp_site_js ), 'verifica.js: a step every 1.2 s' );
+// The report: everything from the response through textContent, no numeric score.
+foreach ( array( 'f.evidence', 'f.pages', 'f.fix', 'f.cmp_fix', 'f.explain', 'f.law', 'data.top', 'data.passed', 'pages.failed', 'pages.total_source', 'pages.total', "'sitemap'", "'links'", "el('details'", "el('summary'", "el('dl'", "'facts r-facts'" ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_js, $need ), "verifica.js: the report uses {$need}" );
+}
+foreach ( array( 'Ce faci întâi', 'Ce am găsit', 'Pe ce pagini', 'De ce contează', 'Cum rezolvi', 'În regulă', 'de verificat',
+	'What to do first', 'What we found', 'On which pages', 'Why it matters', 'How to fix it', 'All good', 'to check',
+	'; am verificat primele ', '. Verificarea completă nu e disponibilă acum.', 'Site-ul are cel puțin ', 'Site-ul are ',
+	'; we checked the first ', '. A full check is not available right now.', 'The site has at least ', 'The site has ',
+	'Am verificat ', 'We checked ' ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_js, $need ), "verifica.js: text „{$need}”" );
+}
+cmp_assert( 0 === preg_match( '#score|scor#i', $cmp_site_js ), 'verifica.js: no numeric score' );
+cmp_assert( 1 === preg_match( "#data\.status === 'clean'\)\s*\{[^}]*confetti\(\)#s", $cmp_site_js ) && 1 === substr_count( preg_replace( '#/\* confetti \*/.*?/\* /confetti \*/#s', '', $cmp_site_js ), 'confetti()' ), 'verifica.js: confetti only for clean' );
+// Links in the report: only fixed addresses, never one built from the response.
+preg_match_all( '#link\(([^,]+),#', $cmp_site_js, $lk );
+foreach ( $lk[1] as $href ) {
+	$href = trim( $href );
+	cmp_assert( in_array( $href, array( 'href', "'#cum-verifici'", "'#functii'", 'downloadHref()', 'it[0]' ), true ), "verifica.js: link href {$href} is a fixed address" );
+}
+cmp_assert( false === strpos( $cmp_site_js, "setAttribute('href', data" ) && false === strpos( $cmp_site_js, '.href =' ), 'verifica.js: no href from the response' );
+// The renderer, run in node on a fake DOM (innerHTML and friends throw there) with
+// response fixtures: what the visitor reads, as text.
+$cmp_site_node = trim( (string) shell_exec( 'command -v node 2>/dev/null' ) );
+if ( '' === $cmp_site_node ) {
+	echo "  (skip: node not found, the verifica.js render run is not checked)\n";
+} else {
+	$cmp_site_dom = function ( $lang, $fixture, $owner = true ) use ( $cmp_site_root ) {
+		$cmd = 'node ' . escapeshellarg( $cmp_site_root . '/tests/fixtures/site-verifica/run.js' ) . ' ' . escapeshellarg( $lang ) . ' ' . escapeshellarg( $fixture ) . ' ' . ( $owner ? '1' : '0' );
+		$o   = json_decode( (string) shell_exec( $cmd . ' 2>&1' ), true );
+		return is_array( $o ) ? $o : array( 'text' => '', 'body' => null, 'error' => 'no output', 'fetches' => 0 );
+	};
+	// Issues on 7 of 10 pages, 84 pages in the sitemap.
+	$r = $cmp_site_dom( 'ro', 'issues-sitemap' );
+	cmp_assert( empty( $r['error'] ), 'render issues (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
+	cmp_assert( isset( $r['body']['owner'] ) && 1 === $r['body']['owner'] && 'ro' === $r['body']['lang'], 'render (ro): POST body has owner=1 and the language' );
+	foreach ( array( 'exemplu.md', 'Am găsit 3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'Ce am găsit', 'www.googletagmanager.com/gtag/js', 'Pe ce pagini (7)', '/contacte/', 'De ce contează', 'Baza legală: Legea 195/2024', 'Cum rezolvi', 'Cu Consent Manager Pro: ', 'Am verificat 10 pagini.', 'Site-ul are 84 de pagini; am verificat primele 10. Verificarea completă nu e disponibilă acum.', 'În regulă', 'HTTPS', 'Nu am putut citi: ', '/lent/ (nu a răspuns la timp)', 'De știut', 'Consent Manager Pro rezolvă asta' ) as $need ) {
+		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (ro): shows „{$need}”" );
+	}
+	cmp_assert( false !== strpos( $r['facts'], '3|probleme' ) && false !== strpos( $r['facts'], '1|de verificat' ) && false !== strpos( $r['facts'], '4|în regulă' ), 'render issues (ro): counters 3 problems, 1 to check, 4 passed (' . $r['facts'] . ')' );
+	cmp_assert( false === strpos( $r['text'], 'https://exemplu.md/contacte/' ), 'render issues (ro): page paths are relative' );
+	cmp_assert( false === strpos( $r['text'], '<script' ) && false !== strpos( $r['text'], '<b>x</b>' ), 'render issues (ro): server text is shown as text, never parsed' );
+	cmp_assert( 0 === $r['confetti'], 'render issues: no confetti' );
+	cmp_assert_eq( $r['hrefs'], array( '#instalare', '#functii' ), 'render issues: only fixed links' );
+	$r = $cmp_site_dom( 'en', 'issues-sitemap' );
+	foreach ( array( 'We found 3 problems', 'What to do first', 'We checked 10 pages.', 'The site has 84 pages; we checked the first 10. A full check is not available right now.', 'All good', 'On which pages (7)', 'With Consent Manager Pro: ' ) as $need ) {
+		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
+	}
+	$r = $cmp_site_dom( 'ro', 'links' );
+	cmp_assert( false !== strpos( $r['text'], 'Site-ul are cel puțin 14 pagini; am verificat primele 10. Verificarea completă nu e disponibilă acum.' ), 'render links (ro): „cel puțin” for pages found in links' );
+	$r = $cmp_site_dom( 'en', 'links' );
+	cmp_assert( false !== strpos( $r['text'], 'The site has at least 14 pages; we checked the first 10.' ), 'render links (en): "at least"' );
+	$r = $cmp_site_dom( 'ro', 'clean' );
+	cmp_assert( false !== strpos( $r['text'], 'Am verificat o pagină.' ) && false === strpos( $r['text'], 'Site-ul are' ), 'render clean (ro): one page, no >10 message' );
+	cmp_assert( 1 === $r['confetti'], 'render clean: confetti' );
+	cmp_assert( false === strpos( $r['text'], 'Ce faci întâi' ), 'render clean: no „Ce faci întâi”' );
+	$r = $cmp_site_dom( 'ro', 'unsure' );
+	cmp_assert( false !== strpos( $r['text'], 'Nu putem fi siguri' ) && false !== strpos( $r['text'], 'De verificat' ) && 0 === $r['confetti'], 'render unsure (ro): title and list, no confetti' );
+	cmp_assert( false !== strpos( $r['text'], 'Pe ce pagini' ) && false === strpos( $r['text'], 'Pe ce pagini (' ), 'render unsure (ro): up to 3 pages listed without folding' );
+	$r = $cmp_site_dom( 'ro', 'owner-required' );
+	cmp_assert( false !== strpos( $r['text'], 'Bifează că deții site-ul sau ai permisiunea proprietarului.' ), 'render owner_required (ro): the server error is explained' );
+	$r = $cmp_site_dom( 'en', 'owner-required' );
+	cmp_assert( false !== strpos( $r['text'], "Tick that you own the site or have the owner's permission." ), 'render owner_required (en)' );
+	$r = $cmp_site_dom( 'ro', 'clean', false );
+	cmp_assert( 0 === $r['fetches'] && false !== strpos( $r['ownerError'], 'Bifează că deții site-ul' ) && 'true' === $r['ownerInvalid'], 'render (ro): without the owner box nothing is sent and the box shows its error' );
+}
+// The hero: rt.md /umarul/ rows, with the accessible name on the h1.
+foreach ( array( 'index.html' => array( 'Cookie-uri cu acord, nu cu noroc.', 'Cookie-uri cu acord,', 'nu cu noroc.' ), 'en/index.html' => array( 'Cookies by consent, not by luck.', 'Cookies by consent,', 'not by luck.' ) ) as $page => $h ) {
+	$html = $cmp_site_read( $page );
+	cmp_assert( 1 === preg_match( '#<h1\b[^>]*>(.*?)</h1>#s', $html, $hm2 ), "{$page}: hero h1" );
+	cmp_assert( 1 === preg_match( '#<h1 id="titlu" class="big" aria-label="' . preg_quote( $h[0], '#' ) . '">#', $html ), "{$page}: hero h1.big with aria-label" );
+	$rows = isset( $hm2[1] ) ? $hm2[1] : '';
+	cmp_assert_eq( preg_match_all( '#<span class="row" aria-hidden="true"><span>([^<]+)</span></span>#', $rows, $rm2 ), 2, "{$page}: hero has two aria-hidden rows of spans" );
+	cmp_assert( isset( $rm2[1] ) && array( $h[1], $h[2] ) === $rm2[1], "{$page}: hero rows keep the title text" );
+}
+foreach ( array( "'.big .row > span'", "'measure'", "'ln'", "'wd'", 'animationend', 'fonts.ready' ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_site_js_v2 = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' ), $need ), "site.js: hero rows use {$need}" );
+}
+cmp_assert( strpos( $cmp_site_site_js_v2, "'.big .row > span'" ) > strpos( $cmp_site_site_js_v2, 'if (reduce) { return; }' ), 'site.js: the hero lines are fixed only with motion (reduced motion: static)' );
+$cmp_site_css_v2 = (string) @file_get_contents( $cmp_site_root . '/site/style.css' );
+cmp_assert( 1 === preg_match( '#\.js \.big \.row > span\s*\{[^}]*opacity:\s*0[^}]*animation:\s*cmp-bin#', $cmp_site_css_v2 ), 'style.css: hero rows hidden then animated, only under .js' );
+cmp_assert( 0 === preg_match( '#(^|[{},;]|\*/)\s*\.big \.row > span\s*\{[^}]*opacity:\s*0#', preg_replace( '#/\*.*?\*/#s', '', $cmp_site_css_v2 ) ), 'style.css: without JS the hero rows are visible' );
+cmp_assert( 1 === preg_match( '#@keyframes cmp-bin\s*\{#', $cmp_site_css_v2 ) && 1 === preg_match( '#@keyframes cmp-weight\s*\{#', $cmp_site_css_v2 ), 'style.css: hero keyframes' );
+cmp_assert( 1 === preg_match( '#@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\.js \.big \.row > span\s*\{[^}]*opacity:\s*1[^}]*animation:\s*none#s', $cmp_site_css_v2 ), 'style.css: reduced motion shows the hero rows at once' );
+cmp_assert( 1 === preg_match( '#\.r-facts#', $cmp_site_css_v2 ) && 1 === preg_match( '#\.passed#', $cmp_site_css_v2 ), 'style.css: report counters and the passed list are styled' );
+// Privacy pages: up to 10 pages, robots.txt and sitemap, the owner box, the new limits.
+foreach ( array(
+	'confidentialitate/index.html' => array( 'până la 10 pagini publice', 'robots.txt', 'harta site-ului', 'deții site-ul', '5 verificări pe minut și 50 pe zi', '15 pe minut și 150 pe zi', '30 de verificări pe minut și 1000 pe zi' ),
+	'en/privacy/index.html'        => array( 'up to 10 public pages', 'robots.txt', 'sitemap', 'own the site', '5 checks a minute and 50 a day', '15 a minute and 150 a day', '30 checks a minute and 1000 a day' ),
+) as $page => $needles ) {
+	$html = $cmp_site_read( $page );
+	$sec  = 1 === preg_match( '#id="instrument".*?id="pag(ini|es)"#s', $html, $pm ) ? $pm[0] : '';
+	foreach ( $needles as $needle ) {
+		cmp_assert( false !== strpos( $sec, $needle ), "{$page}: the tool section mentions {$needle}" );
+	}
+	foreach ( array( '10 verificări pe minut', '100 pe zi', '10 checks a minute', '100 a day', 'only the homepage', 'doar pagina principală' ) as $old ) {
+		cmp_assert( false === strpos( $sec, $old ), "{$page}: the tool section no longer says {$old}" );
+	}
+}
+$cmp_site_rev = (string) @file_get_contents( $cmp_site_root . '/docs/product/2026-11-20-landing-pentru-revizie.md' );
+foreach ( array( 'până la 10 pagini publice', '5 verificări pe minut și 50 pe zi', 'Confirm că dețin site-ul sau am permisiunea proprietarului să-l verific.', 'Căutăm paginile site-ului (sitemap)' ) as $needle ) {
+	cmp_assert( false !== strpos( $cmp_site_rev, $needle ), "landing review doc: mirrors „{$needle}”" );
+}
+foreach ( array( 'site/assets/verifica.js', 'site/assets/site.js', 'site/index.html', 'site/confidentialitate/index.html' ) as $f ) {
+	$c = (string) @file_get_contents( $cmp_site_root . '/' . $f );
+	cmp_assert( false === strpos( $c, "\xe2\x80\x94" ), "{$f}: no em dash" );
+	cmp_assert( 0 === preg_match( "#[\xc5\x9f\xc5\xa3\xc5\x9e\xc5\xa2]#u", $c ), "{$f}: ș/ț with comma below, not cedilla" );
+}
+
 // The demo: pages under /demo/, only local files. The embed pages (in the landing's
 // iframe) are bare: no site header or footer and no style switch of their own.
 foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html' => array( 'en', false ), 'demo/embed/index.html' => array( 'ro', true ), 'demo/en/embed/index.html' => array( 'en', true ) ) as $page => $dm ) {
@@ -478,7 +640,7 @@ foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html'
 		cmp_assert( false !== strpos( $html, '<header class="site">' ) && false !== strpos( $html, '<footer class="site">' ), "{$page}: has the site header and footer" );
 	}
 	preg_match_all( '#<script\b[^>]*>#', $html, $sm2 );
-	cmp_assert_eq( $sm2[0], array( '<script src="/demo/demo.js">', '<script src="/demo/cmp.min.js" defer>' ), "{$page}: loads only demo.js and the local cmp.min.js" );
+	cmp_assert_eq( $sm2[0], array_merge( array( '<script src="/demo/demo.js">', '<script src="/demo/cmp.min.js" defer>' ), $bare ? array() : array( '<script src="/assets/site.js" defer>' ) ), "{$page}: loads only demo.js, the local cmp.min.js" . ( $bare ? '' : ' and site.js' ) );
 	preg_match_all( '#<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"#', $html, $lm3 );
 	cmp_assert( in_array( '/demo/cmp.min.css', $lm3[1], true ), "{$page}: loads the local cmp.min.css" );
 	foreach ( $lm3[1] as $href ) {
@@ -524,6 +686,56 @@ foreach ( array( 'confidentialitate/index.html' => array( 'Verifică-ți site-ul
 		cmp_assert( false !== strpos( $html, $needle ), "{$page}: mentions {$needle}" );
 	}
 }
+
+// ---- rt.md elements: favicon, RT symbol (rt.md .sym), phone menu and motion (site.js) ------------
+$cmp_site_fav   = '/assets/favicon/rt-favicon-512.png';
+$cmp_site_sjs   = '<script src="/assets/site.js" defer></script>';
+$cmp_site_badge = '<svg class="sym" viewBox="168.695 162.277 46.734 60.156" aria-hidden="true" focusable="false"><path fill="currentColor" d="M 208.25 177.652344 ';
+foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'demo/index.html', 'demo/en/index.html', 'demo/embed/index.html', 'demo/en/embed/index.html' ) ) as $page ) {
+	$html = $cmp_site_read( $page );
+	$bare = false !== strpos( $page, '/embed/' );
+	cmp_assert( false !== strpos( $html, '<link rel="icon" type="image/png" sizes="512x512" href="' . $cmp_site_fav . '">' ), "{$page}: links the favicon" );
+	cmp_assert( false !== strpos( $html, '<link rel="apple-touch-icon" href="' . $cmp_site_fav . '">' ), "{$page}: links the apple-touch-icon" );
+	if ( $bare ) {
+		cmp_assert( false === strpos( $html, '/assets/site.js' ), "{$page}: a bare page does not load site.js" );
+		continue;
+	}
+	cmp_assert_eq( substr_count( $html, $cmp_site_sjs ), 1, "{$page}: loads /assets/site.js once, deferred" );
+	cmp_assert( 1 === preg_match( '#<header class="site">(.*?)</header>#s', $html, $hm ) && false !== strpos( $hm[1], '<a class="logo" href="https://rt.md/" aria-label="RT Design Studio">' . $cmp_site_badge ), "{$page}: header starts with the RT symbol, linking to rt.md" );
+	cmp_assert( isset( $hm[1] ) && false === strpos( $hm[1], 'class="badge"' ) && false === strpos( $hm[1], 'xmlns' ), "{$page}: header uses the current symbol, not the old framed badge" );
+	cmp_assert( isset( $hm[1] ) && false !== strpos( $hm[1], '>Consent Manager Pro</a>' ) && 1 === preg_match( '#<nav\b#', $hm[1] ), "{$page}: header keeps the product name and the inline nav" );
+	cmp_assert( 1 === preg_match( '#<footer class="site">(.*?)</footer>#s', $html, $fm ) && 1 === preg_match( '#<a href="https://rt\.md/"[^>]*>' . preg_quote( $cmp_site_badge, '#' ) . '.*?</svg>RT Design Studio</a>#s', $fm[1] ), "{$page}: footer shows the RT symbol next to RT Design Studio" );
+}
+foreach ( array( 'site' => $cmp_site_root . '/site', 'out' => $cmp_site_out1 ) as $label => $dir ) {
+	$png = (string) @file_get_contents( $dir . $cmp_site_fav );
+	$sz  = '' === $png ? false : @getimagesizefromstring( $png );
+	cmp_assert( false !== $sz && 512 === $sz[0] && 512 === $sz[1] && IMAGETYPE_PNG === $sz[2], "{$label}{$cmp_site_fav}: a 512x512 PNG" );
+}
+$cmp_site_site_js = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
+cmp_assert( '' !== $cmp_site_site_js && $cmp_site_site_js === $cmp_site_read( 'assets/site.js' ), 'build-site: copies assets/site.js as is' );
+cmp_assert( 0 === preg_match( '#(https?:)?//[a-z0-9]#i', $cmp_site_site_js ), 'site.js: no external URL' );
+foreach ( array( 'prefers-reduced-motion', "'aria-expanded'", "'aria-controls'", "'Escape'", 'IntersectionObserver', "classList.add('js')" ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_site_js, $need ), "site.js: uses {$need}" );
+}
+foreach ( array( 'innerHTML', 'outerHTML', 'document.write', 'eval(', 'umami', 'track(', "\xe2\x80\x94" ) as $bad ) {
+	cmp_assert( false === strpos( $cmp_site_site_js, $bad ), "site.js: does not use {$bad}" );
+}
+cmp_assert( 1 === preg_match( "#'Meniu'#", $cmp_site_site_js ) && 1 === preg_match( "#'Menu'#", $cmp_site_site_js ), 'site.js: the menu button label in RO and EN' );
+// Without JS everything is visible: the hidden-until-revealed states exist only under html.js.
+$cmp_site_css = (string) @file_get_contents( $cmp_site_root . '/site/style.css' );
+cmp_assert( 1 === preg_match( '#\.js \.fd\s*\{[^}]*opacity#', $cmp_site_css ), 'style.css: reveal (.fd) only under .js' );
+cmp_assert( 1 === preg_match( '#\.js \.k\s*\{[^}]*opacity#', $cmp_site_css ), 'style.css: heading weight animation (.k) only under .js' );
+cmp_assert( 0 === preg_match( '#(^|[{},;]|\*/)\s*\.(fd|k|blur)\b#', preg_replace( '#/\*.*?\*/#s', '', $cmp_site_css ) ), 'style.css: no .fd/.k/.blur rule outside .js' );
+cmp_assert( 1 === preg_match( '#@media \(prefers-reduced-motion: reduce\)\s*\{.*?\.js \.fd.*?\.js \.k#s', $cmp_site_css ), 'style.css: reduced motion shows .fd and .k at once' );
+cmp_assert( 1 === preg_match( '#\.menu-btn\s*\{[^}]*display:\s*none#', $cmp_site_css ), 'style.css: the menu button is hidden on desktop' );
+// Fixed header (rt.md .top): only with JS (without it the header stays in the page flow),
+// a background that fades in once scrolled, room for it above the content and the anchors.
+cmp_assert( 1 === preg_match( '#\.js header\.site\s*\{[^}]*position:\s*fixed#', $cmp_site_css ), 'style.css: the header is fixed, under .js' );
+cmp_assert( 1 === preg_match( '#\.js header\.site\s*\{[^}]*pointer-events:\s*none#', $cmp_site_css ) && 1 === preg_match( '#\.js header\.site \.wrap > \*\s*\{[^}]*pointer-events:\s*auto#', $cmp_site_css ), 'style.css: the fixed header lets clicks through except on its links and button' );
+cmp_assert( 1 === preg_match( '#\.js header\.site\.scrolled::before\s*\{[^}]*opacity:\s*1#', $cmp_site_css ), 'style.css: the header background appears when scrolled' );
+cmp_assert( 1 === preg_match( '#\.js body\s*\{[^}]*padding-top:\s*var\(--head\)#', $cmp_site_css ), 'style.css: the content starts under the fixed header' );
+cmp_assert( 1 === preg_match( '#\.js main \[id\]\s*\{[^}]*scroll-margin-top#', $cmp_site_css ), 'style.css: anchor jumps land below the fixed header' );
+cmp_assert( 1 === preg_match( "#classList\.toggle\('scrolled'#", $cmp_site_site_js ), 'site.js: toggles .scrolled on the header' );
 
 // ---- Determinism ------------------------------------------------------------------
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_out2 ), $cmp_site_env );
@@ -577,6 +789,74 @@ $cmp_site_badmf = $cmp_site_tmp . '/bad-manifest.json';
 file_put_contents( $cmp_site_badmf, '{not json' );
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_tmp . '/out6' ), array_merge( $cmp_site_env, array( 'CMP_STABLE_MANIFEST' => $cmp_site_badmf ) ) );
 cmp_assert( 0 !== $rc, 'build-site: an unreadable stable manifest fails' );
+
+// ---- final UI fixes: titles, labels, strict input, failure labels, privacy facts ----------
+$cmp_f_ro = $cmp_site_read( 'index.html' );
+$cmp_f_en = $cmp_site_read( 'en/index.html' );
+cmp_assert( false !== strpos( $cmp_f_ro, '<title>Consent Manager Pro · Cookie-uri cu acord, pentru site-urile din Moldova</title>' ), 'landing RO: the neutral title' );
+cmp_assert( false !== strpos( $cmp_f_en, '<title>Consent Manager Pro · Cookies with consent, for sites in Moldova</title>' ), 'landing EN: the neutral title' );
+cmp_assert( false === stripos( $cmp_f_ro, 'conform' ), 'landing RO: never „conform”' );
+cmp_assert( false === stripos( $cmp_f_en, 'compliant' ) && false === stripos( $cmp_f_en, 'compliance' ), 'landing EN: never "compliant"' );
+cmp_assert( false === stripos( $cmp_f_ro . $cmp_f_en, 'og:title' ) || ( false === stripos( $cmp_f_ro, 'og:title" content="Consent Manager Pro · Cookie-uri conf' ) ), 'landing: no og claim of conformity' );
+$cmp_f_js = (string) file_get_contents( $cmp_site_root . '/site/assets/verifica.js' );
+cmp_assert( false !== strpos( $cmp_f_js, "law: 'Baza legală: '" ) && false !== strpos( $cmp_f_js, "law: 'Legal basis: '" ), 'verifica.js: the label before the law is „Baza legală:” / "Legal basis:"' );
+cmp_assert( false === strpos( $cmp_f_js, "law: 'Legea: '" ) && false === strpos( $cmp_f_js, "law: 'Law: '" ), 'verifica.js: no doubled „Legea: Legea”' );
+foreach ( array( 'timeout' => 'nu a răspuns la timp', 'too_large' => 'pagina e prea mare', 'other_host' => 'duce spre alt site', 'limit' => 'limita de cereri atinsă', 'fetch_failed' => 'nu a putut fi citită' ) as $code => $label ) {
+	cmp_assert( false !== strpos( $cmp_f_js, $code . ": '" . $label . "'" ), "verifica.js: RO page failure label for {$code}" );
+}
+foreach ( array( 'timeout' => 'did not answer in time', 'too_large' => 'the page is too big', 'other_host' => 'leads to another site', 'limit' => 'request limit reached', 'not_html' => 'could not be read' ) as $code => $label ) {
+	cmp_assert( false !== strpos( $cmp_f_js, $code . ": '" . $label . "'" ), "verifica.js: EN page failure label for {$code}" );
+}
+foreach ( array( 'index.html' => 'Doar domeniul, fără căi sau parametri.', 'en/index.html' => 'Domain only, no paths or parameters.' ) as $page => $help ) {
+	$html = $cmp_site_read( $page );
+	cmp_assert( 1 === preg_match( '#<input\b[^>]*\bid="verifica-url"[^>]*>#', $html, $im ), "{$page}: url input" );
+	foreach ( array( 'inputmode="url"', 'autocapitalize="off"', 'spellcheck="false"', 'maxlength="300"', 'aria-describedby="verifica-ajutor verifica-eroare verifica-nota"' ) as $attr ) {
+		cmp_assert( false !== strpos( $im[0], $attr ), "{$page}: url input has {$attr}" );
+	}
+	cmp_assert( false !== strpos( $html, 'id="verifica-ajutor" class="muted small">' . $help . '</p>' ), "{$page}: help text under the field" );
+	cmp_assert( 1 === preg_match( '#<p\b[^>]*\bid="verifica-eroare"[^>]*\shidden[^>]*>\s*</p>#', $html ), "{$page}: an empty, hidden place for the address error" );
+}
+cmp_assert( false !== strpos( $cmp_f_js, 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.' ), 'verifica.js: RO bad-address message' );
+cmp_assert( false !== strpos( $cmp_f_js, 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.' ), 'verifica.js: EN bad-address message' );
+// The validator, run in node (no DOM: the script only exposes window.cmpSiteAddress).
+$cmp_f_node = trim( (string) @shell_exec( 'command -v node' ) );
+if ( '' === $cmp_f_node ) {
+	cmp_assert( true, 'node not found: the validator cases are skipped' );
+} else {
+	$cmp_f_cases = array(
+		'exemplu.md' => 'exemplu.md', 'www.exemplu.md' => 'www.exemplu.md', 'https://exemplu.md' => 'exemplu.md',
+		'http://Exemplu.MD/' => 'exemplu.md', '  exemplu.md  ' => 'exemplu.md', 'bălți.md' => 'xn--blți-' ,
+		'exemplu.md/pagina' => '', 'exemplu.md//' => '', 'exemplu.md?a=1' => '', 'exemplu.md#x' => '', 'exemplu.md:8080' => '',
+		'user@exemplu.md' => '', 'http://user:pw@exemplu.md' => '', '127.0.0.1' => '', '8.8.8.8' => '', '[::1]' => '', '2130706433' => '',
+		'0x7f.1' => '', 'localhost' => '', 'intranet' => '', 'exemplu' => '', 'exem_plu.md' => '', '-exemplu.md' => '', 'exemplu-.md' => '',
+		'exemplu.m1' => '', 'exemplu.123' => '', 'exemplu.md.' => '', 'ftp://exemplu.md' => '', 'exemplu .md' => '', 'a.local' => '', 'a.lan' => '',
+		'xn--80ak6aa92e.com' => 'xn--80ak6aa92e.com', 'exemplu.xn--p1ai' => 'exemplu.xn--p1ai', str_repeat( 'a', 250 ) . '.md' => '', str_repeat( 'a', 64 ) . '.md' => '',
+	);
+	$cmp_f_script = 'global.window={};global.document={documentElement:{lang:"ro"},getElementById:function(){return null;},querySelectorAll:function(){return [];},querySelector:function(){return null;}};'
+		. 'require(process.argv[1]);var c=JSON.parse(process.argv[2]),o={};Object.keys(c).forEach(function(k){o[k]=window.cmpSiteAddress(k);});console.log(JSON.stringify(o));';
+	$cmp_f_out = (string) @shell_exec( escapeshellarg( $cmp_f_node ) . ' -e ' . escapeshellarg( $cmp_f_script ) . ' ' . escapeshellarg( $cmp_site_root . '/site/assets/verifica.js' ) . ' ' . escapeshellarg( json_encode( array_fill_keys( array_keys( $cmp_f_cases ), 1 ) ) ) . ' 2>&1' );
+	$cmp_f_got = json_decode( trim( $cmp_f_out ), true );
+	cmp_assert( is_array( $cmp_f_got ), 'verifica.js: the validator runs in node' );
+	foreach ( $cmp_f_cases as $in => $want ) {
+		$got = is_array( $cmp_f_got ) && array_key_exists( $in, $cmp_f_got ) ? $cmp_f_got[ $in ] : null;
+		$ok  = '' === $want ? '' === $got : ( 'xn--blți-' === $want ? ( is_string( $got ) && 0 === strpos( $got, 'xn--' ) ) : $got === $want );
+		cmp_assert( $ok, 'verifica.js validator: ' . json_encode( $in, JSON_UNESCAPED_UNICODE ) . ( '' === $want ? ' refused' : ' accepted' ) );
+	}
+}
+cmp_assert( false !== strpos( $cmp_f_js, 'Ne-am oprit după ' ) && false !== strpos( $cmp_f_js, 'iar o verificare are o limită de cereri.' ) && false !== strpos( $cmp_f_js, ', ca verificarea să nu dureze prea mult.' ), 'verifica.js: RO stopped notes' );
+cmp_assert( false !== strpos( $cmp_f_js, 'a request limit.' ) && false !== strpos( $cmp_f_js, 'so the check does not take too long.' ) && false !== strpos( $cmp_f_js, 'pages.stopped' ), 'verifica.js: EN stopped notes, reads pages.stopped' );
+cmp_assert( false !== strpos( $cmp_f_js, '!stopped && total > checked && checked >= 10' ), 'verifica.js: the total sentence shows only when we checked 10 pages and did not stop early' );
+// The privacy pages say what the server does.
+foreach ( array( 'confidentialitate/index.html' => array( 'primele 200 de intrări', 'cel mult 25 de cereri', 'cel mult 30 de secunde', '::ffff:a.b.c.d', 'cel mult 3 în același timp', '15 pe minut și 150 pe zi', '30 de verificări pe minut și 1000 pe zi', 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)', 'Bifa de proprietar', 'contoarele' ),
+	'en/privacy/index.html' => array( 'first 200 entries', 'at most 25 requests', 'at most 30 seconds', '::ffff:a.b.c.d', 'at most 3 at the same time', '15 a minute and 150 a day', '30 checks a minute and 1000 a day', 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)', 'The owner box', 'the counters' ) ) as $page => $facts ) {
+	$html = $cmp_site_read( $page );
+	foreach ( $facts as $f ) {
+		cmp_assert( false !== strpos( $html, $f ), "{$page}: tool section says „{$f}”" );
+	}
+}
+$cmp_f_doc = (string) file_get_contents( $cmp_site_root . '/docs/product/2026-11-20-landing-pentru-revizie.md' );
+cmp_assert( false !== strpos( $cmp_f_doc, 'primele 200 de intrări' ) && false !== strpos( $cmp_f_doc, 'cel mult 25 de cereri' ) && false !== strpos( $cmp_f_doc, '::ffff:a.b.c.d' ), 'revision doc mirrors the privacy tool section' );
+cmp_assert( false === stripos( $cmp_f_doc, 'fie conform' ), 'revision doc: no „conform”' );
 
 // ---- release/ untouched -----------------------------------------------------------
 cmp_assert_eq( cmp_site_tree_hash( $cmp_site_root . '/release' ), $cmp_site_release_before, 'build-site tests: release/ unchanged' );
