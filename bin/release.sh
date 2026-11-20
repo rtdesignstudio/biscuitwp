@@ -444,6 +444,10 @@ if [ "$CMD" = "release" ]; then
 			tail -20 "$TEST_LOG"
 			die "tests failed (run bash bin/build-assets.sh if assets are stale)."
 		fi
+		if ! node standalone/tests/run.js >"$TEST_LOG" 2>&1; then
+			tail -20 "$TEST_LOG"
+			die "standalone tests failed."
+		fi
 		echo "Tests passed."
 		# Browser test (B7.1): no tracker may load before consent.
 		bash bin/e2e.sh || die "E2E failed: a tracker loads before consent (see report above)"

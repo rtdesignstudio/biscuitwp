@@ -1,5 +1,6 @@
 'use strict';
 var cmp = require('../cmp.js');
+var CUR_VER = require('fs').readFileSync(require('path').join(__dirname, '../../consent-manager-pro.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/)[1]; // the plugin's version (no hardcoded release number)
 var fails = 0, passes = 0;
 function ok(cond, msg) { if (cond) { passes++; } else { fails++; console.error('FAIL: ' + msg); } }
 function eq(a, b, msg) { ok(JSON.stringify(a) === JSON.stringify(b), msg + ' (got ' + JSON.stringify(a) + ')'); }
@@ -1248,7 +1249,7 @@ var NOW = Math.floor(Date.now() / 1000), CID = '3f2b8c1e-9a4d-4e6b-8c2f-1a2b3c4d
 var BUILDS = [
 	{ n: 'banner.js', file: '../../assets/js/banner.js', ck: 'cmp_consent', v: '3', logs: true,
 		opts: function (o) {
-			var d = { categories: [{ slug: 'necessary', required: true }, { slug: 'statistics' }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/wp-admin/admin-ajax.php', pluginVersion: '0.4.2', cookieDays: 180 };
+			var d = { categories: [{ slug: 'necessary', required: true }, { slug: 'statistics' }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/wp-admin/admin-ajax.php', pluginVersion: CUR_VER, cookieDays: 180 };
 			Object.keys(o.data || {}).forEach(function (k) { d[k] = o.data[k]; });
 			if (o.svcByCat) { d.svcByCat = o.svcByCat; }
 			if (o.light) { d.mode = 'light'; }
@@ -1274,7 +1275,7 @@ BUILDS.forEach(function (B) {
 	}
 	var x = boot();
 	ok(!!x.ctx.CMP && typeof x.ctx.CMP.allowCategory === 'function' && typeof x.ctx.CMP.denyCategory === 'function' && typeof x.ctx.CMP.onConsent === 'function' && typeof x.ctx.CMP.whenAllowed === 'function', n + 'the new members are on window.CMP');
-	eq(x.ctx.CMP.version, '0.4.2', n + 'CMP.version is the package / plugin version');
+	eq(x.ctx.CMP.version, CUR_VER, n + 'CMP.version is the package / plugin version');
 	ok(typeof x.ctx.CMP.isAllowed === 'function' && typeof x.ctx.CMP.getConsent === 'function' && typeof x.ctx.CMP.openPreferences === 'function', n + 'the existing members are kept');
 	// Focus 1: called on load, no click.
 	var seen = [];
@@ -1367,7 +1368,7 @@ BUILDS.forEach(function (B) {
 });
 // Check mode (B3, WordPress only): check cookie, nothing logged.
 (function () {
-	var ch = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_check_consent', svcCookie: 'cmp_check_svc', ajaxUrl: '/wp-admin/admin-ajax.php', check: true, pluginVersion: '0.4.2' } });
+	var ch = bootCmp('../../assets/js/banner.js', { data: { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_check_consent', svcCookie: 'cmp_check_svc', ajaxUrl: '/wp-admin/admin-ajax.php', check: true, pluginVersion: CUR_VER } });
 	ch.gesture(true);
 	eq(ch.ctx.CMP.allowCategory('marketing'), true, 'B7.4 check mode: allowCategory applies');
 	eq([ch.cookie('cmp_check_consent').categories, ch.cookie('cmp_consent'), ch.posts.length], [['necessary', 'marketing'], null, 0], 'B7.4 check mode: check cookie written, real cookie untouched, nothing logged');

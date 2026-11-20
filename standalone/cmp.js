@@ -874,7 +874,7 @@
 		var VERSION = '1';
 		// The package version, for CMP.version (VERSION is the policy version of the
 		// cookie). Kept equal to the plugin's CMP_VERSION (checked in tests/run.js).
-		var PKG_VERSION = '0.4.2';
+		var PKG_VERSION = '1.0.0';
 
 		function renderPro(cfg) {
 			var root = document.createElement('div');

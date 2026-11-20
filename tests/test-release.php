@@ -347,3 +347,6 @@ cmp_assert( 0 !== $rc && false !== strpos( $out, 'must not write the real releas
 cmp_assert_eq( cmp_rel_snapshot( $cmp_rel_root . '/release' ), $cmp_rel_release_before, 'dry-runs leave the repo release/ byte-identical' );
 
 cmp_rel_rmdir( $cmp_rel_tmp );
+
+// The release runs the standalone (JS) tests too, so a stale cmp.js version cannot ship.
+cmp_assert( false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/bin/release.sh' ), 'node standalone/tests/run.js' ), 'release.sh runs the standalone tests' );
