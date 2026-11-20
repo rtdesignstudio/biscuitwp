@@ -2,7 +2,7 @@
 
 Consent Manager Pro. Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
 
-## 1.0.0 – TBD
+## 1.0.0 – 2026-11-20
 
 - Biblioteca de servicii: blocare automată pentru analytics, reclame, chat-uri și embed-uri (YouTube, Vimeo, Google Maps), servicii personalizate, excepții și „Încarcă mereu” per embed.
 - Tabelul de cookie-uri se generează din serviciile detectate și cele personalizate (`[cmp_cookie_table]`), cu date verificate la furnizori.
@@ -21,3 +21,6 @@ Consent Manager Pro. Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`;
 - Ecran Ghid în admin, cu linkuri contextuale.
 - Ecran Aspect: stil și culori separate, previzualizare pe site, garanții de conformitate.
 - Update-uri noi: manifest semnat pe consent.rt.md, pachete pe GitHub Releases, canale stable și beta, versiuni retrase; site-ul nu mai trimite date despre el.
+- Pe multisite, „Caută actualizări” apare și în panoul rețelei.
+- Scanarea citește corect sitemap-urile fără namespace pe PHP 7.4.
+- Plugin gratuit și open-source (GPL-2.0-or-later); pagini publice pentru securitate, confidențialitate și changelog pe consent.rt.md.
