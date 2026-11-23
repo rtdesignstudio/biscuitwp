@@ -1,0 +1,44 @@
+{
+    "format": 1,
+    "slug": "consent-manager-pro",
+    "channel": "stable",
+    "version": "1.0.0",
+    "package": "https://github.com/rtdesignstudio/consent-manager-pro/releases/download/v1.0.0/consent-manager-pro.zip",
+    "sha256": "982ad3b19870277de3a816cd63102919297761b2eb9bc2d3d01b2dbe63700a13",
+    "signature": "aFogxyVQ4Z9bdqpxbA+84kJiii7f9Pzp8uJiheO2BwgWhhbZR7XnIKoJSzUqsZRcUaGf7S1iMUZVDS7JeGAlAw==",
+    "requires_wp": "6.0",
+    "requires_php": "7.4",
+    "tested_wp": "6.9",
+    "released": "2026-11-20T10:06:09Z",
+    "issued": "2026-11-23T07:49:22Z",
+    "expires": "2027-01-22T07:49:22Z",
+    "revoked": [],
+    "notes": [
+        {
+            "version": "1.0.0",
+            "date": "2026-11-20",
+            "items": [
+                "Biblioteca de servicii: blocare automată pentru analytics, reclame, chat-uri și embed-uri (YouTube, Vimeo, Google Maps), servicii personalizate, excepții și „Încarcă mereu” per embed.",
+                "Tabelul de cookie-uri se generează din serviciile detectate și cele personalizate ([cmp_cookie_table]), cu date verificate la furnizori.",
+                "Integrare opțională cu WP Consent API.",
+                "Moduri de măsurare Strict și Advanced (GA4/GTM cu Consent Mode implicit „denied”); instrumentele de analytics fără cookie-uri sunt scutite implicit.",
+                "Re-consimțământ țintit: vizitatorul e întrebat din nou doar pentru serviciile noi.",
+                "Texte legale RO/RU/EN pentru Moldova (Legea 195/2024, Legea 72/2025, GDPR), cu blocuri condiționale și adresa operatorului.",
+                "Scanare pe mai multe pagini, cu sursele și resursele care trimit IP-ul vizitatorului; ecranul Verificare testează în browser ce se încarcă înainte și după consimțământ.",
+                "Comutatoare pentru emoji-urile WordPress și Gravatar.",
+                "Accesibilitate WCAG 2.2 AA: contrast, focus vizibil, tasta Escape, ținte de 24 px, mișcare redusă.",
+                "Banda de cookie-uri pe telefon pe două rânduri, cu detalii la cerere; resurse minificate sub 12 KB, fără deplasări de layout.",
+                "Test e2e în browser real: niciun tracker nu se încarcă înainte de consimțământ, pentru fiecare serviciu din bibliotecă.",
+                "Ștergerea completă a datelor la dezinstalare (opțională) și suport multisite.",
+                "API JavaScript public: onConsent, whenAllowed, allowCategory, denyCategory, version; în PHP, cmp_is_allowed().",
+                "Administrarea tradusă în engleză și rusă.",
+                "Ecran Ghid în admin, cu linkuri contextuale.",
+                "Ecran Aspect: stil și culori separate, previzualizare pe site, garanții de conformitate.",
+                "Update-uri noi: manifest semnat pe consent.rt.md, pachete pe GitHub Releases, canale stable și beta, versiuni retrase; site-ul nu mai trimite date despre el.",
+                "Pe multisite, „Caută actualizări” apare și în panoul rețelei.",
+                "Scanarea citește corect sitemap-urile fără namespace pe PHP 7.4.",
+                "Plugin gratuit și open-source (GPL-2.0-or-later); pagini publice pentru securitate, confidențialitate și changelog pe consent.rt.md."
+            ]
+        }
+    ]
+}
