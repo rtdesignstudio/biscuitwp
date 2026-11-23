@@ -584,6 +584,24 @@ if ( '' === $cmp_site_node ) {
 	cmp_assert( empty( $r['error'] ) && true === $r['counter']['hidden'], 'counter: endpoint down -> the line stays hidden, the check still works' );
 	$r = $cmp_site_dom( 'ro', 'owner-required', false, 500 );
 	cmp_assert( '500 de verificări făcute până acum' === $r['counter']['text'], 'counter: no check sent -> the number does not move (' . $r['counter']['text'] . ')' );
+	// „Ce găsim cel mai des”: from 100 checks, rows sorted, whole percentages.
+	$cmp_site_found = json_encode( array( 'checks' => 160, 'found' => array( 'of' => 150, 'tracker' => 101, 'google-fonts' => 92, 'ip-resources' => 55, 'no-policy' => 28, 'no-banner' => 36 ) ) );
+	$r = $cmp_site_dom( 'ro', 'owner-required', false, $cmp_site_found );
+	cmp_assert( empty( $r['error'] ) && false === $r['found']['hidden'], 'found (ro): shown from 100 checks' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
+	cmp_assert_eq(
+		$r['found']['text'],
+		array( 'Ce găsim cel mai des', 'Tracker pornit înainte de acord', '67%', 'Google Fonts încărcate de la Google', '61%', 'Alte resurse care trimit IP-ul vizitatorului', '37%', 'Trackere fără niciun banner de cookie-uri', '24%', 'Niciun link spre politica de confidențialitate', '19%', 'Din 150 de verificări făcute cu instrumentul. Un site verificat de mai multe ori se numără de fiecare dată.' ),
+		'found (ro): title, rows from most to least frequent, note'
+	);
+	cmp_assert_eq( $r['found']['widths'], array( 'width:67%', 'width:61%', 'width:37%', 'width:24%', 'width:19%' ), 'found: bar widths match the percentages' );
+	$r = $cmp_site_dom( 'en', 'owner-required', false, $cmp_site_found );
+	cmp_assert( 'What we find most often' === $r['found']['text'][0] && 'Tracker started before consent' === $r['found']['text'][1] && 'From 150 checks made with the tool. A site checked several times counts each time.' === end( $r['found']['text'] ), 'found (en): title, first row, note' );
+	$r = $cmp_site_dom( 'ro', 'owner-required', false, json_encode( array( 'checks' => 120, 'found' => array( 'of' => 99, 'tracker' => 50, 'google-fonts' => 1, 'ip-resources' => 1, 'no-policy' => 1, 'no-banner' => 1 ) ) ) );
+	cmp_assert( true === $r['found']['hidden'] && array() === $r['found']['text'], 'found: under 100 checks the block stays hidden and empty' );
+	$r = $cmp_site_dom( 'ro', 'owner-required', false, json_encode( array( 'checks' => 300, 'found' => array( 'of' => 200, 'tracker' => 'x', 'google-fonts' => 900, 'ip-resources' => -3 ) ) ) );
+	cmp_assert( false === $r['found']['hidden'] && in_array( '100%', $r['found']['text'], true ) && in_array( '0%', $r['found']['text'], true ) && 7 === count( array_filter( $r['found']['text'], function ( $t ) { return '0%' === $t || '100%' === $t; } ) ) + 2, 'found: bad numbers read 0, nothing above 100%' );
+	$r = $cmp_site_dom( 'ro', 'owner-required', false, 'fail' );
+	cmp_assert( true === $r['found']['hidden'], 'found: endpoint down -> hidden' );
 	// A site that does not look like WordPress: the plugin is for WordPress, the problems stay.
 	$r = $cmp_site_dom( 'ro', 'issues-other' );
 	cmp_assert( empty( $r['error'] ), 'render issues-other (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );

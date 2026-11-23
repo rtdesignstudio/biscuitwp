@@ -2,14 +2,15 @@
 /**
  * Consent Manager Pro, "Verifică-ți site-ul": GET /api/contor.php.
  *
- * The public total of successful checks, {"checks": N}, shown under the form
- * from 100 on. One number kept in the counter folder outside the web root
+ * The public total of successful checks and how many found each kind of
+ * problem, {"checks": N, "found": {...}}, shown under the form from 100 on. One number kept in the counter folder outside the web root
  * (lib/ratelimit.php); nothing about any site or visitor. PHP 7.4+.
  */
 ini_set( 'display_errors', '0' );
 if ( ! defined( 'CMP_CHECK' ) ) {
 	define( 'CMP_CHECK', true );
 }
+require_once __DIR__ . '/lib/check.php'; // The kinds of „Ce găsim cel mai des”.
 require_once __DIR__ . '/lib/ratelimit.php';
 require_once __DIR__ . '/lib/endpoint.php';
 

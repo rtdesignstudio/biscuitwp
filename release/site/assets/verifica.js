@@ -67,6 +67,9 @@
 		oursTitle: 'You already use Consent Manager Pro',
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
 		checks: function (n) { return group(n, ',') + ' checks so far'; },
+		foundTitle: 'What we find most often',
+		foundKinds: { 'tracker': 'Tracker started before consent', 'google-fonts': 'Google Fonts loaded from Google', 'ip-resources': 'Other resources that send the visitor\'s IP', 'no-banner': 'Trackers with no cookie banner at all', 'no-policy': 'No link to the privacy policy' },
+		foundNote: function (n) { return 'From ' + group(n, ',') + ' checks made with the tool. A site checked several times counts each time.'; },
 		otherTitle: 'Your site does not look like WordPress',
 		otherText: 'The problems above apply on any platform and are fixed in the site\'s code. Consent Manager Pro is a WordPress plugin; for other sites there is the standalone version: two files, and you mark the scripts that wait for consent yourself.',
 		standalone: 'Standalone version',
@@ -150,7 +153,10 @@
 		fixText: 'Oprește trackerele până la acord, mută Google Fonts pe serverul tău și îți dă textele legale pentru Moldova. Gratuit.',
 		oursTitle: 'Folosești deja Consent Manager Pro',
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
-		checks: function (n) { var r = n % 100; return group(n, '.') + (r === 0 || r >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
+		checks: function (n) { return group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
+		foundTitle: 'Ce găsim cel mai des',
+		foundKinds: { 'tracker': 'Tracker pornit înainte de acord', 'google-fonts': 'Google Fonts încărcate de la Google', 'ip-resources': 'Alte resurse care trimit IP-ul vizitatorului', 'no-banner': 'Trackere fără niciun banner de cookie-uri', 'no-policy': 'Niciun link spre politica de confidențialitate' },
+		foundNote: function (n) { return 'Din ' + group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute cu instrumentul. Un site verificat de mai multe ori se numără de fiecare dată.'; },
 		otherTitle: 'Site-ul tău nu pare făcut pe WordPress',
 		otherText: 'Problemele de mai sus rămân valabile pe orice platformă și se rezolvă în codul site-ului. Consent Manager Pro e un plugin WordPress; pentru alte site-uri există versiunea standalone: două fișiere, iar scripturile care așteaptă acordul le marchezi singur.',
 		standalone: 'Versiunea standalone',
@@ -303,7 +309,35 @@
 				checks = Math.floor(d.checks);
 				showChecks();
 			}
+			if (d) { showFound(d.found); }
 		}).catch(function () {});
+	}
+	// „Ce găsim cel mai des”: from 100 counted checks, one row per kind, most frequent first.
+	function showFound(f) {
+		var box = doc.getElementById('verifica-gasim');
+		var of = f && typeof f === 'object' ? num(f.of) : 0;
+		if (!box || of < 100) { return; }
+		var rows = ['tracker', 'google-fonts', 'ip-resources', 'no-policy', 'no-banner'].map(function (k, i) {
+			return { k: k, i: i, pct: Math.round(Math.min(num(f[k]), of) * 100 / of) };
+		});
+		rows.sort(function (a, b) { return b.pct - a.pct || a.i - b.i; });
+		box.appendChild(el('h3', null, T.foundTitle));
+		var ul = el('ul', 'found-list');
+		rows.forEach(function (r) {
+			var li = el('li');
+			li.appendChild(el('span', 'found-label', T.foundKinds[r.k]));
+			var bar = el('span', 'found-bar');
+			bar.setAttribute('aria-hidden', 'true');
+			var fill = el('span');
+			fill.setAttribute('style', 'width:' + r.pct + '%');
+			bar.appendChild(fill);
+			li.appendChild(bar);
+			li.appendChild(el('span', 'found-pct', r.pct + '%'));
+			ul.appendChild(li);
+		});
+		box.appendChild(ul);
+		box.appendChild(el('p', 'muted small', T.foundNote(of)));
+		box.hidden = false;
 	}
 	function ownerOk() {
 		if (!owner) { return; }

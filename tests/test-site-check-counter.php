@@ -93,14 +93,14 @@ cmp_assert( 'owner_required' === $r['body']['code'] && 2 === cmp_check_total_rea
 
 // GET /api/contor.php.
 $r = cmp_check_counter_handle( 'GET', $cmp_ctr_hd, '' );
-cmp_assert( 200 === $r['code'] && array( 'checks' => 2 ) === $r['body'], 'contor: GET -> 200 {"checks": 2}' );
+cmp_assert( 200 === $r['code'] && 2 === $r['body']['checks'], 'contor: GET -> 200 {"checks": 2}' );
 cmp_assert( isset( $r['headers']['Cache-Control'] ) && 'public, max-age=300' === $r['headers']['Cache-Control'], 'contor: cached 5 minutes' );
 $r = cmp_check_counter_handle( 'HEAD', $cmp_ctr_hd, '' );
 cmp_assert( 200 === $r['code'], 'contor: HEAD -> 200' );
 $r = cmp_check_counter_handle( 'POST', $cmp_ctr_hd, '' );
 cmp_assert( 405 === $r['code'] && isset( $r['headers']['Allow'] ) && 'GET, HEAD' === $r['headers']['Allow'] && 2 === cmp_check_total_read( $cmp_ctr_hd ), 'contor: POST -> 405, counts nothing' );
 $r = cmp_check_counter_handle( 'GET', $cmp_ctr_tmp . '/nothing-here', '' );
-cmp_assert( 200 === $r['code'] && array( 'checks' => 0 ) === $r['body'], 'contor: no counter yet -> 0' );
+cmp_assert( 200 === $r['code'] && 0 === $r['body']['checks'], 'contor: no counter yet -> 0' );
 $r = cmp_check_counter_handle( 'GET', $cmp_ctr_tmp . '/www/counters', $cmp_ctr_tmp . '/www' );
 cmp_assert( 503 === $r['code'] && ! isset( $r['body']['checks'] ), 'contor: a counter folder inside the web root -> 503' );
 

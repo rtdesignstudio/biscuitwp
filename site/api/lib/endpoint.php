@@ -270,6 +270,7 @@ function cmp_check_handle( array $req, string $rate_dir, string $services_path, 
 	// The public counter: only checks that read the site. A failure to count never fails the check.
 	if ( isset( $res['body']['status'] ) && in_array( $res['body']['status'], array( 'clean', 'issues', 'unsure' ), true ) ) {
 		cmp_check_total_add( $rate_dir );
+		cmp_check_found_add( $rate_dir, cmp_check_found_kinds( $res['body'] ) );
 	}
 	return $res;
 }
@@ -671,7 +672,7 @@ function cmp_check_counter_handle( string $method, string $rate_dir, string $doc
 	if ( cmp_check_dir_inside( $rate_dir, $docroot ) ) {
 		return array( 'code' => 503, 'headers' => array( 'Cache-Control' => 'no-store' ), 'body' => array( 'status' => 'error' ) );
 	}
-	return array( 'code' => 200, 'headers' => array( 'Cache-Control' => 'public, max-age=300' ), 'body' => array( 'checks' => cmp_check_total_read( $rate_dir ) ) );
+	return array( 'code' => 200, 'headers' => array( 'Cache-Control' => 'public, max-age=300' ), 'body' => array( 'checks' => cmp_check_total_read( $rate_dir ), 'found' => cmp_check_found_read( $rate_dir ) ) );
 }
 
 /** Run /api/contor.php for the current request. */
@@ -694,6 +695,6 @@ function cmp_check_counter_main( string $rate_dir ): void {
 		}
 	}
 	if ( 'HEAD' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? (string) $_SERVER['REQUEST_METHOD'] : '' ) ) {
-		echo json_encode( $res['body'] ); // phpcs:ignore -- only an int or a fixed string.
+		echo json_encode( $res['body'] ); // phpcs:ignore -- only ints and fixed strings.
 	}
 }

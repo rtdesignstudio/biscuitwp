@@ -423,13 +423,17 @@ function cmp_check_total_parse( string $raw ): int {
 	return 1 === preg_match( '/^[0-9]{1,15}$/', $raw ) ? (int) $raw : 0;
 }
 
-/** Add one successful check to the total, under an exclusive lock. */
-function cmp_check_total_add( string $dir ): bool {
+/**
+ * Rewrite one small file of the counter folder (0600) under an exclusive lock:
+ * $change gets the current content and returns the new one. Never follows a
+ * symlink.
+ */
+function cmp_check_stat_update( string $dir, string $name, callable $change ): bool {
 	$dir = cmp_check_rate_prepare_dir( $dir );
 	if ( false === $dir ) {
 		return false;
 	}
-	$path = cmp_check_total_path( $dir );
+	$path = $dir . '/' . $name;
 	if ( is_link( $path ) ) {
 		return false;
 	}
@@ -439,8 +443,8 @@ function cmp_check_total_add( string $dir ): bool {
 	}
 	$ok = false;
 	if ( flock( $fh, LOCK_EX ) ) {
-		$n = cmp_check_total_parse( (string) stream_get_contents( $fh, 32, 0 ) ) + 1;
-		$ok = ftruncate( $fh, 0 ) && false !== fwrite( $fh, (string) $n ) && fflush( $fh );
+		$new = (string) $change( (string) stream_get_contents( $fh, 4096, 0 ) );
+		$ok  = ftruncate( $fh, 0 ) && rewind( $fh ) && false !== fwrite( $fh, $new ) && fflush( $fh );
 		flock( $fh, LOCK_UN );
 	}
 	fclose( $fh );
@@ -448,21 +452,84 @@ function cmp_check_total_add( string $dir ): bool {
 	return $ok;
 }
 
-/** The total of successful checks; 0 when missing or unreadable. Creates nothing. */
-function cmp_check_total_read( string $dir ): int {
-	$path = cmp_check_total_path( $dir );
+/** Read one small file of the counter folder under a shared lock; '' when missing. Creates nothing. */
+function cmp_check_stat_read( string $dir, string $name ): string {
+	$path = rtrim( $dir, '/' ) . '/' . $name;
 	if ( is_link( $path ) || ! is_file( $path ) ) {
-		return 0;
+		return '';
 	}
 	$fh = @fopen( $path, 'r' ); // phpcs:ignore
 	if ( false === $fh ) {
-		return 0;
+		return '';
 	}
-	$n = 0;
+	$raw = '';
 	if ( flock( $fh, LOCK_SH ) ) {
-		$n = cmp_check_total_parse( (string) stream_get_contents( $fh, 32 ) );
+		$raw = (string) stream_get_contents( $fh, 4096 );
 		flock( $fh, LOCK_UN );
 	}
 	fclose( $fh );
-	return $n;
+	return $raw;
+}
+
+/** Add one successful check to the total. */
+function cmp_check_total_add( string $dir ): bool {
+	return cmp_check_stat_update(
+		$dir,
+		'total-checks.txt',
+		function ( $raw ) {
+			return (string) ( cmp_check_total_parse( $raw ) + 1 );
+		}
+	);
+}
+
+/** The total of successful checks; 0 when missing or unreadable. */
+function cmp_check_total_read( string $dir ): int {
+	return cmp_check_total_parse( cmp_check_stat_read( $dir, 'total-checks.txt' ) );
+}
+
+/**
+ * „Ce găsim cel mai des”: found-stats.json holds the checks counted ('of') and,
+ * per kind (cmp_check_found_kind_ids()), how many of them found it. Only these
+ * six numbers; a kind is never above 'of'.
+ */
+function cmp_check_found_parse( string $raw ): array {
+	$d   = json_decode( $raw, true );
+	$out = array( 'of' => 0 );
+	foreach ( cmp_check_found_kind_ids() as $k ) {
+		$out[ $k ] = 0;
+	}
+	if ( ! is_array( $d ) ) {
+		return $out;
+	}
+	$num = function ( $v ) {
+		return is_int( $v ) && $v >= 0 ? $v : 0;
+	};
+	$out['of'] = $num( isset( $d['of'] ) ? $d['of'] : 0 );
+	foreach ( cmp_check_found_kind_ids() as $k ) {
+		$out[ $k ] = min( $out['of'], $num( isset( $d[ $k ] ) ? $d[ $k ] : 0 ) );
+	}
+	return $out;
+}
+
+/** Count one successful check and the kinds it found (unknown kinds ignored). */
+function cmp_check_found_add( string $dir, array $kinds ): bool {
+	return cmp_check_stat_update(
+		$dir,
+		'found-stats.json',
+		function ( $raw ) use ( $kinds ) {
+			$s = cmp_check_found_parse( $raw );
+			$s['of']++;
+			foreach ( array_unique( $kinds ) as $k ) {
+				if ( is_string( $k ) && in_array( $k, cmp_check_found_kind_ids(), true ) ) {
+					$s[ $k ]++;
+				}
+			}
+			return (string) json_encode( $s );
+		}
+	);
+}
+
+/** The stats of „Ce găsim cel mai des”; zeros when missing or unreadable. */
+function cmp_check_found_read( string $dir ): array {
+	return cmp_check_found_parse( cmp_check_stat_read( $dir, 'found-stats.json' ) );
 }

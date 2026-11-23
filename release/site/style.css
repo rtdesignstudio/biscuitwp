@@ -225,6 +225,18 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .field-error { margin: 8px 0 0 34px; font-size: 15px; font-weight: 500; color: #b3261e; }
 .notice { padding-left: 16px; border-left: 2px solid var(--ink); }
 .result:empty { display: none; }
+/* „Ce găsim cel mai des”: one row per kind, a bar in ink on a soft track. */
+.found { margin: 40px 0 0; padding-top: 24px; border-top: 1px solid var(--line); }
+.found h3 { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
+.found-list { list-style: none; margin: 0 0 12px; padding: 0; }
+.found-list li { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(80px, 1fr) 3.2em; gap: 16px; align-items: center; padding: 8px 0; }
+.found-bar { display: block; height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; }
+.found-bar > span { display: block; height: 100%; background: var(--ink); border-radius: 4px; }
+.found-pct { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+@media (max-width: 560px) {
+	.found-list li { grid-template-columns: 1fr 3.2em; gap: 6px 12px; }
+	.found-bar { grid-column: 1 / -1; grid-row: 2; }
+}
 .result { margin: 32px 0; }
 
 /* result: a block under an ink line, with a small status marker (no coloured panels) */

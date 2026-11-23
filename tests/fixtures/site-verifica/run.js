@@ -4,7 +4,8 @@
    tests/test-site.php). innerHTML, outerHTML and insertAdjacentHTML throw here.
 
    node run.js <ro|en> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
-   The counter endpoint answers {"checks": N}, or 404 when no number is given. */
+   The counter endpoint answers {"checks": N}, or 404 when no number is given; a JSON
+   object instead of the number is sent as the whole answer. */
 var fs = require('fs');
 var path = require('path');
 var vm = require('vm');
@@ -76,13 +77,14 @@ var doc = {
 	getElementById: function (id) { return byId[id] || null; }
 };
 var byId = {};
-['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-owner', 'verifica-owner-eroare', 'verifica-contor'].forEach(function (id) {
+['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-owner', 'verifica-owner-eroare', 'verifica-contor', 'verifica-gasim'].forEach(function (id) {
 	byId[id] = new El(id === 'verifica-form' ? 'form' : (id === 'verifica-rezultat' ? 'div' : (id.indexOf('eroare') > 0 || id === 'verifica-contor' ? 'p' : 'input')));
 	byId[id].id = id;
 });
 byId['verifica-form'].hidden = true;
 byId['verifica-owner-eroare'].hidden = true;
 byId['verifica-contor'].hidden = true;
+byId['verifica-gasim'].hidden = true;
 byId['verifica-url'].value = 'exemplu.md';
 byId['verifica-owner'].checked = ownerTicked;
 
@@ -102,7 +104,8 @@ var win = {
 		if (url === '/api/contor.php') {
 			counterFetches++;
 			if (counterArg === 'fail') { return Promise.resolve({ status: 404, json: function () { return Promise.reject(new Error('404')); } }); }
-			return Promise.resolve({ status: 200, json: function () { return Promise.resolve({ checks: Number(counterArg) }); } });
+			var answer = counterArg.charAt(0) === '{' ? JSON.parse(counterArg) : { checks: Number(counterArg) };
+			return Promise.resolve({ status: 200, json: function () { return Promise.resolve(answer); } });
 		}
 		fetches++;
 		sentBody = JSON.parse(opt.body);
@@ -148,6 +151,15 @@ function finish() {
 		fetches: fetches,
 		counterFetches: counterFetches,
 		counter: { hidden: byId['verifica-contor'].hidden, text: byId['verifica-contor'].textContent },
+		found: (function () {
+			var g = byId['verifica-gasim'], lines = [];
+			dump(g, lines);
+			return {
+				hidden: g.hidden,
+				text: lines,
+				widths: all(g, function (n) { return n.getAttribute('style') !== null; }).map(function (n) { return n.getAttribute('style'); })
+			};
+		}()),
 		confetti: canvases,
 		ownerError: byId['verifica-owner-eroare'].hidden ? '' : byId['verifica-owner-eroare'].textContent,
 		ownerInvalid: byId['verifica-owner'].getAttribute('aria-invalid'),

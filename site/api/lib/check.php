@@ -1902,3 +1902,46 @@ function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0
 		'wordpress' => $wordpress,
 	);
 }
+
+/**
+ * „Ce găsim cel mai des”: the kinds of problem counted per check, in display
+ * order for equal counts.
+ */
+function cmp_check_found_kind_ids(): array {
+	return array( 'tracker', 'google-fonts', 'ip-resources', 'no-policy', 'no-banner' );
+}
+
+/**
+ * The kinds a check result shows (each at most once), from its issue findings:
+ * a tracker or tracker cookie before consent; Google Fonts; another resource
+ * that sends the IP; no privacy policy link; trackers with no CMP at all.
+ *
+ * @param array $result A check result (cmp_check_aggregate() / the endpoint body).
+ * @return array Kind ids, in cmp_check_found_kind_ids() order.
+ */
+function cmp_check_found_kinds( array $result ): array {
+	$on       = array();
+	$findings = isset( $result['findings'] ) && is_array( $result['findings'] ) ? $result['findings'] : array();
+	foreach ( $findings as $f ) {
+		if ( ! is_array( $f ) || ! isset( $f['id'], $f['severity'] ) || 'issue' !== $f['severity'] || ! is_string( $f['id'] ) ) {
+			continue;
+		}
+		$id = $f['id'];
+		if ( 0 === strpos( $id, 'tracker:' ) || 0 === strpos( $id, 'cookie:' ) ) {
+			$on['tracker'] = true;
+		} elseif ( 'resource:google-fonts' === $id ) {
+			$on['google-fonts'] = true;
+		} elseif ( 0 === strpos( $id, 'resource:' ) ) {
+			$on['ip-resources'] = true;
+		} elseif ( 'policy:missing' === $id ) {
+			$on['no-policy'] = true;
+		}
+	}
+	$cmp = isset( $result['cmp'] ) && is_string( $result['cmp'] ) && '' !== $result['cmp'];
+	if ( isset( $on['tracker'] ) && ! $cmp ) {
+		$on['no-banner'] = true;
+	}
+	return array_values( array_filter( cmp_check_found_kind_ids(), function ( $k ) use ( $on ) {
+		return isset( $on[ $k ] );
+	} ) );
+}
