@@ -407,3 +407,62 @@ function cmp_check_slot_release( $fh ): void {
 		fclose( $fh );
 	}
 }
+
+/**
+ * The public total of successful checks: one number in total-checks.txt in the
+ * counter folder (0600), nothing about the site or the visitor. Never deleted by
+ * cmp_check_rate_cleanup(), which only touches the per-visitor *.cnt files.
+ */
+function cmp_check_total_path( string $dir ): string {
+	return rtrim( $dir, '/' ) . '/total-checks.txt';
+}
+
+/** The number in an open total file (0 for anything but digits). */
+function cmp_check_total_parse( string $raw ): int {
+	$raw = trim( $raw );
+	return 1 === preg_match( '/^[0-9]{1,15}$/', $raw ) ? (int) $raw : 0;
+}
+
+/** Add one successful check to the total, under an exclusive lock. */
+function cmp_check_total_add( string $dir ): bool {
+	$dir = cmp_check_rate_prepare_dir( $dir );
+	if ( false === $dir ) {
+		return false;
+	}
+	$path = cmp_check_total_path( $dir );
+	if ( is_link( $path ) ) {
+		return false;
+	}
+	$fh = @fopen( $path, 'c+' ); // phpcs:ignore
+	if ( false === $fh ) {
+		return false;
+	}
+	$ok = false;
+	if ( flock( $fh, LOCK_EX ) ) {
+		$n = cmp_check_total_parse( (string) stream_get_contents( $fh, 32, 0 ) ) + 1;
+		$ok = ftruncate( $fh, 0 ) && false !== fwrite( $fh, (string) $n ) && fflush( $fh );
+		flock( $fh, LOCK_UN );
+	}
+	fclose( $fh );
+	@chmod( $path, 0600 ); // phpcs:ignore
+	return $ok;
+}
+
+/** The total of successful checks; 0 when missing or unreadable. Creates nothing. */
+function cmp_check_total_read( string $dir ): int {
+	$path = cmp_check_total_path( $dir );
+	if ( is_link( $path ) || ! is_file( $path ) ) {
+		return 0;
+	}
+	$fh = @fopen( $path, 'r' ); // phpcs:ignore
+	if ( false === $fh ) {
+		return 0;
+	}
+	$n = 0;
+	if ( flock( $fh, LOCK_SH ) ) {
+		$n = cmp_check_total_parse( (string) stream_get_contents( $fh, 32 ) );
+		flock( $fh, LOCK_UN );
+	}
+	fclose( $fh );
+	return $n;
+}

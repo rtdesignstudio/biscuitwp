@@ -7,6 +7,8 @@
 
 	var doc = document;
 	var en = doc.documentElement.lang === 'en';
+	// 1240 -> "1.240" (ro) or "1,240" (en): fixed, not left to the browser's locale data.
+	function group(n, sep) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep); }
 	var T = en ? {
 		empty: 'Enter your site\'s address, for example example.com.',
 		owner: "Tick that you own the site or have the owner's permission.",
@@ -64,6 +66,7 @@
 		fixText: 'It keeps trackers off until consent, moves Google Fonts to your server and gives you the legal texts for Moldova. Free.',
 		oursTitle: 'You already use Consent Manager Pro',
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
+		checks: function (n) { return group(n, ',') + ' checks so far'; },
 		otherTitle: 'Your site does not look like WordPress',
 		otherText: 'The problems above apply on any platform and are fixed in the site\'s code. Consent Manager Pro is a WordPress plugin; for other sites there is the standalone version: two files, and you mark the scripts that wait for consent yourself.',
 		standalone: 'Standalone version',
@@ -147,6 +150,7 @@
 		fixText: 'Oprește trackerele până la acord, mută Google Fonts pe serverul tău și îți dă textele legale pentru Moldova. Gratuit.',
 		oursTitle: 'Folosești deja Consent Manager Pro',
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
+		checks: function (n) { var r = n % 100; return group(n, '.') + (r === 0 || r >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
 		otherTitle: 'Site-ul tău nu pare făcut pe WordPress',
 		otherText: 'Problemele de mai sus rămân valabile pe orice platformă și se rezolvă în codul site-ului. Consent Manager Pro e un plugin WordPress; pentru alte site-uri există versiunea standalone: două fișiere, iar scripturile care așteaptă acordul le marchezi singur.',
 		standalone: 'Versiunea standalone',
@@ -282,6 +286,24 @@
 		owner.setAttribute('aria-invalid', 'true');
 		if (ownerErr) { ownerErr.textContent = T.owner; ownerErr.hidden = false; }
 		owner.focus();
+	}
+	// The counter line under the form: the total of successful checks, from 100 on.
+	var counter = doc.getElementById('verifica-contor');
+	var checks = -1;
+	function showChecks() {
+		if (!counter || checks < 100) { return; }
+		counter.textContent = T.checks(checks);
+		counter.hidden = false;
+	}
+	if (counter) {
+		window.fetch('/api/contor.php', { credentials: 'omit' }).then(function (r) {
+			return r && r.status === 200 ? r.json() : null;
+		}).then(function (d) {
+			if (d && typeof d.checks === 'number' && isFinite(d.checks) && d.checks >= 0) {
+				checks = Math.floor(d.checks);
+				showChecks();
+			}
+		}).catch(function () {});
 	}
 	function ownerOk() {
 		if (!owner) { return; }
@@ -489,6 +511,10 @@
 		var issues = bySeverity(findings, 'issue'), unsure = bySeverity(findings, 'unsure'), info = bySeverity(findings, 'info');
 		var ok = arr(data.passed);
 		var ours = data.cmp === 'Consent Manager Pro';
+		if (checks >= 0 && (data.status === 'clean' || data.status === 'issues' || data.status === 'unsure')) {
+			checks++; // This check is in the total now.
+			showChecks();
+		}
 		// Only an explicit false: an older answer without the field keeps the plugin box.
 		var other = !ours && data.wordpress === false;
 		var counts = [issues.length, unsure.length, ok.filter(function (p) { return p && typeof p === 'object' && str(p.title); }).length];

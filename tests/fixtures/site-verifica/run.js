@@ -3,7 +3,8 @@
    the server's answer and prints what the visitor would read, as JSON (for
    tests/test-site.php). innerHTML, outerHTML and insertAdjacentHTML throw here.
 
-   node run.js <ro|en> <fixture name> <owner 1|0> */
+   node run.js <ro|en> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
+   The counter endpoint answers {"checks": N}, or 404 when no number is given. */
 var fs = require('fs');
 var path = require('path');
 var vm = require('vm');
@@ -11,6 +12,8 @@ var vm = require('vm');
 var lang = process.argv[2] === 'en' ? 'en' : 'ro';
 var fixture = JSON.parse(fs.readFileSync(path.join(__dirname, process.argv[3] + '.json'), 'utf8'));
 var ownerTicked = process.argv[4] !== '0';
+var counterArg = process.argv[5] || 'fail';
+var counterFetches = 0;
 
 function Text(t) { this.nodeType = 3; this.data = String(t); this.parentNode = null; }
 Object.defineProperty(Text.prototype, 'textContent', { get: function () { return this.data; } });
@@ -73,12 +76,13 @@ var doc = {
 	getElementById: function (id) { return byId[id] || null; }
 };
 var byId = {};
-['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-owner', 'verifica-owner-eroare'].forEach(function (id) {
-	byId[id] = new El(id === 'verifica-form' ? 'form' : (id === 'verifica-rezultat' ? 'div' : (id.indexOf('eroare') > 0 ? 'p' : 'input')));
+['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-owner', 'verifica-owner-eroare', 'verifica-contor'].forEach(function (id) {
+	byId[id] = new El(id === 'verifica-form' ? 'form' : (id === 'verifica-rezultat' ? 'div' : (id.indexOf('eroare') > 0 || id === 'verifica-contor' ? 'p' : 'input')));
 	byId[id].id = id;
 });
 byId['verifica-form'].hidden = true;
 byId['verifica-owner-eroare'].hidden = true;
+byId['verifica-contor'].hidden = true;
 byId['verifica-url'].value = 'exemplu.md';
 byId['verifica-owner'].checked = ownerTicked;
 
@@ -95,6 +99,11 @@ var win = {
 	clearInterval: function () {},
 	AbortController: function () { this.signal = {}; this.abort = function () {}; },
 	fetch: function (url, opt) {
+		if (url === '/api/contor.php') {
+			counterFetches++;
+			if (counterArg === 'fail') { return Promise.resolve({ status: 404, json: function () { return Promise.reject(new Error('404')); } }); }
+			return Promise.resolve({ status: 200, json: function () { return Promise.resolve({ checks: Number(counterArg) }); } });
+		}
 		fetches++;
 		sentBody = JSON.parse(opt.body);
 		return Promise.resolve({ status: 200, json: function () { return Promise.resolve(fixture); } });
@@ -137,6 +146,8 @@ function finish() {
 		hrefs: all(out, function (n) { return n.tagName === 'A'; }).map(function (a) { return a.getAttribute('href'); }),
 		body: sentBody,
 		fetches: fetches,
+		counterFetches: counterFetches,
+		counter: { hidden: byId['verifica-contor'].hidden, text: byId['verifica-contor'].textContent },
 		confetti: canvases,
 		ownerError: byId['verifica-owner-eroare'].hidden ? '' : byId['verifica-owner-eroare'].textContent,
 		ownerInvalid: byId['verifica-owner'].getAttribute('aria-invalid'),

@@ -267,6 +267,10 @@ function cmp_check_handle( array $req, string $rate_dir, string $services_path, 
 	register_shutdown_function( 'cmp_check_slot_release', $slot ); // Also on a fatal error or a time limit.
 	$res = cmp_check_site( $url, $lang, $services_path, $fetcher, null === $net ? array() : $net );
 	cmp_check_slot_release( $slot ); // One slot for the whole multi-page check.
+	// The public counter: only checks that read the site. A failure to count never fails the check.
+	if ( isset( $res['body']['status'] ) && in_array( $res['body']['status'], array( 'clean', 'issues', 'unsure' ), true ) ) {
+		cmp_check_total_add( $rate_dir );
+	}
 	return $res;
 }
 
@@ -652,4 +656,44 @@ function cmp_check_main( string $rate_dir ): void {
 		time()
 	);
 	cmp_check_send( $res );
+}
+
+/**
+ * GET /api/contor.php: the public total of successful checks, {"checks": N}.
+ * Reads one number; creates nothing, counts nothing.
+ *
+ * @return array array( code, headers, body ).
+ */
+function cmp_check_counter_handle( string $method, string $rate_dir, string $docroot ): array {
+	if ( 'GET' !== $method && 'HEAD' !== $method ) {
+		return array( 'code' => 405, 'headers' => array( 'Allow' => 'GET, HEAD', 'Cache-Control' => 'no-store' ), 'body' => array( 'status' => 'error' ) );
+	}
+	if ( cmp_check_dir_inside( $rate_dir, $docroot ) ) {
+		return array( 'code' => 503, 'headers' => array( 'Cache-Control' => 'no-store' ), 'body' => array( 'status' => 'error' ) );
+	}
+	return array( 'code' => 200, 'headers' => array( 'Cache-Control' => 'public, max-age=300' ), 'body' => array( 'checks' => cmp_check_total_read( $rate_dir ) ) );
+}
+
+/** Run /api/contor.php for the current request. */
+function cmp_check_counter_main( string $rate_dir ): void {
+	$res = cmp_check_counter_handle(
+		isset( $_SERVER['REQUEST_METHOD'] ) ? (string) $_SERVER['REQUEST_METHOD'] : '',
+		$rate_dir,
+		isset( $_SERVER['DOCUMENT_ROOT'] ) ? (string) $_SERVER['DOCUMENT_ROOT'] : ''
+	);
+	if ( ! headers_sent() ) {
+		http_response_code( (int) $res['code'] );
+		header_remove( 'X-Powered-By' );
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Referrer-Policy: no-referrer' );
+		foreach ( $res['headers'] as $name => $value ) { // Only fixed names and our own values.
+			if ( in_array( $name, array( 'Allow', 'Cache-Control' ), true ) ) {
+				header( $name . ': ' . $value );
+			}
+		}
+	}
+	if ( 'HEAD' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? (string) $_SERVER['REQUEST_METHOD'] : '' ) ) {
+		echo json_encode( $res['body'] ); // phpcs:ignore -- only an int or a fixed string.
+	}
 }

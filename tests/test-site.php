@@ -124,7 +124,7 @@ foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'changelog/feed.xml
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ), "build-site: writes {$f}" );
 }
 cmp_assert( ! file_exists( $cmp_site_out1 . '/.well-known/security.txt.in' ), 'build-site: the security.txt template is not copied' );
-foreach ( array( 'api/verifica.php', 'api/.htaccess', 'api/lib/check.php', 'api/lib/signatures.php', 'api/lib/fetch.php', 'api/lib/ratelimit.php', 'api/lib/endpoint.php' ) as $f ) {
+foreach ( array( 'api/verifica.php', 'api/contor.php', 'api/.htaccess', 'api/lib/check.php', 'api/lib/signatures.php', 'api/lib/fetch.php', 'api/lib/ratelimit.php', 'api/lib/endpoint.php' ) as $f ) {
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ) && hash_file( 'sha256', $cmp_site_out1 . '/' . $f ) === hash_file( 'sha256', $cmp_site_root . '/site/' . $f ), "build-site: copies site/{$f} as is" );
 }
 cmp_assert( is_file( $cmp_site_out1 . '/api/services.json' ) && hash_file( 'sha256', $cmp_site_out1 . '/api/services.json' ) === hash_file( 'sha256', $cmp_site_root . '/data/services.json' ), 'build-site: api/services.json is data/services.json' );
@@ -544,8 +544,8 @@ $cmp_site_node = trim( (string) shell_exec( 'command -v node 2>/dev/null' ) );
 if ( '' === $cmp_site_node ) {
 	echo "  (skip: node not found, the verifica.js render run is not checked)\n";
 } else {
-	$cmp_site_dom = function ( $lang, $fixture, $owner = true ) use ( $cmp_site_root ) {
-		$cmd = 'node ' . escapeshellarg( $cmp_site_root . '/tests/fixtures/site-verifica/run.js' ) . ' ' . escapeshellarg( $lang ) . ' ' . escapeshellarg( $fixture ) . ' ' . ( $owner ? '1' : '0' );
+	$cmp_site_dom = function ( $lang, $fixture, $owner = true, $checks = 'fail' ) use ( $cmp_site_root ) {
+		$cmd = 'node ' . escapeshellarg( $cmp_site_root . '/tests/fixtures/site-verifica/run.js' ) . ' ' . escapeshellarg( $lang ) . ' ' . escapeshellarg( $fixture ) . ' ' . ( $owner ? '1' : '0' ) . ' ' . escapeshellarg( (string) $checks );
 		$o   = json_decode( (string) shell_exec( $cmd . ' 2>&1' ), true );
 		return is_array( $o ) ? $o : array( 'text' => '', 'body' => null, 'error' => 'no output', 'fetches' => 0 );
 	};
@@ -568,6 +568,22 @@ if ( '' === $cmp_site_node ) {
 	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
 		cmp_assert( 1 === preg_match( '#<a data-standalone href="https://github\.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README\.md">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
 	}
+	// The counter line under the form: from 100 successful checks, +1 after a check that read the site.
+	$r = $cmp_site_dom( 'ro', 'clean', true, 1239 );
+	cmp_assert( empty( $r['error'] ) && 1 === $r['counterFetches'], 'counter (ro): asks /api/contor.php once' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
+	cmp_assert( false === $r['counter']['hidden'] && '1.240 de verificări făcute până acum' === $r['counter']['text'], 'counter (ro): 1239 + this check -> „1.240 de verificări făcute până acum” (' . $r['counter']['text'] . ')' );
+	$r = $cmp_site_dom( 'en', 'clean', true, 1239 );
+	cmp_assert( false === $r['counter']['hidden'] && '1,240 checks so far' === $r['counter']['text'], 'counter (en): „1,240 checks so far” (' . $r['counter']['text'] . ')' );
+	$r = $cmp_site_dom( 'ro', 'issues-sitemap', true, 99 );
+	cmp_assert( false === $r['counter']['hidden'] && '100 de verificări făcute până acum' === $r['counter']['text'], 'counter (ro): 99 + a check with issues reaches the 100 threshold (' . $r['counter']['text'] . ')' );
+	$r = $cmp_site_dom( 'ro', 'unsure', true, 115 );
+	cmp_assert( '116 verificări făcute până acum' === $r['counter']['text'], 'counter (ro): 116 without „de” (' . $r['counter']['text'] . ')' );
+	$r = $cmp_site_dom( 'ro', 'clean', true, 50 );
+	cmp_assert( true === $r['counter']['hidden'] && '' === $r['counter']['text'], 'counter: under 100 the line stays hidden and empty' );
+	$r = $cmp_site_dom( 'ro', 'clean', true, 'fail' );
+	cmp_assert( empty( $r['error'] ) && true === $r['counter']['hidden'], 'counter: endpoint down -> the line stays hidden, the check still works' );
+	$r = $cmp_site_dom( 'ro', 'owner-required', false, 500 );
+	cmp_assert( '500 de verificări făcute până acum' === $r['counter']['text'], 'counter: no check sent -> the number does not move (' . $r['counter']['text'] . ')' );
 	// A site that does not look like WordPress: the plugin is for WordPress, the problems stay.
 	$r = $cmp_site_dom( 'ro', 'issues-other' );
 	cmp_assert( empty( $r['error'] ), 'render issues-other (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
