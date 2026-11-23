@@ -5,7 +5,9 @@
 
    node run.js <ro|en> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
    The counter endpoint answers {"checks": N}, or 404 when no number is given; a JSON
-   object instead of the number is sent as the whole answer. */
+   object instead of the number is sent as the whole answer.
+   [<share: "" | "noclip">]: after the report, its "Copy" and "Save as PDF" buttons are
+   clicked; "noclip" makes the clipboard refuse. */
 var fs = require('fs');
 var path = require('path');
 var vm = require('vm');
@@ -15,6 +17,8 @@ var fixture = JSON.parse(fs.readFileSync(path.join(__dirname, process.argv[3] + 
 var ownerTicked = process.argv[4] !== '0';
 var counterArg = process.argv[5] || 'fail';
 var counterFetches = 0;
+var shareArg = process.argv[6] || '';
+var copied = null, printCalls = 0, printState = null;
 
 function Text(t) { this.nodeType = 3; this.data = String(t); this.parentNode = null; }
 Object.defineProperty(Text.prototype, 'textContent', { get: function () { return this.data; } });
@@ -91,7 +95,18 @@ byId['verifica-owner'].checked = ownerTicked;
 var fetches = 0, sentBody = null, errors = [];
 var pending = 0;
 function later(f) { pending++; setImmediate(function () { pending--; try { f(); } catch (e) { errors.push(String(e && e.stack || e)); } }); }
+var winListeners = {};
 var win = {
+	addEventListener: function (t, f) { (winListeners[t] = winListeners[t] || []).push(f); },
+	location: { origin: 'https://consent.rt.md' },
+	navigator: { clipboard: { writeText: function (t) { if (shareArg === 'noclip') { return Promise.reject(new Error('denied')); } copied = t; return Promise.resolve(); } } },
+	print: function () {
+		printCalls++;
+		(winListeners.beforeprint || []).forEach(function (f) { f(); });
+		var det = all(byId['verifica-rezultat'], function (n) { return n.tagName === 'DETAILS'; });
+		printState = { htmlClass: doc.documentElement.className || '', details: det.length, open: det.filter(function (d) { return d.getAttribute('open') !== null; }).length };
+		(winListeners.afterprint || []).forEach(function (f) { f(); });
+	},
 	matchMedia: function () { return { matches: false }; },
 	innerWidth: 1280, innerHeight: 800,
 	requestAnimationFrame: function () { return 0; },
@@ -135,8 +150,20 @@ function all(n, f, acc) {
 	return acc;
 }
 
+var clicked = false;
 function finish() {
 	if (pending) { setImmediate(finish); return; }
+	if (!clicked) {
+		clicked = true;
+		var btn = function (cls) { return all(byId['verifica-rezultat'], function (n) { return n.tagName === 'BUTTON' && (' ' + n.className + ' ').indexOf(' ' + cls + ' ') >= 0; })[0]; };
+		var c = btn('r-copy'), p = btn('r-print');
+		try {
+			if (c) { (c.listeners.click || []).forEach(function (f) { f({ preventDefault: function () {} }); }); }
+			if (p) { (p.listeners.click || []).forEach(function (f) { f({ preventDefault: function () {} }); }); }
+		} catch (e) { errors.push(String(e && e.stack || e)); }
+		setImmediate(finish);
+		return;
+	}
 	var out = byId['verifica-rezultat'];
 	var lines = [];
 	dump(out, lines);
@@ -150,6 +177,13 @@ function finish() {
 		body: sentBody,
 		fetches: fetches,
 		counterFetches: counterFetches,
+		buttons: all(byId['verifica-rezultat'], function (n) { return n.tagName === 'BUTTON'; }).map(function (b) { return b.textContent; }),
+		copied: copied,
+		shareStatus: (all(byId['verifica-rezultat'], function (n) { return / r-share-status/.test(' ' + n.className); })[0] || { textContent: null }).textContent,
+		printCalls: printCalls,
+		printState: printState,
+		openAfter: all(byId['verifica-rezultat'], function (n) { return n.tagName === 'DETAILS' && n.getAttribute('open') !== null; }).length,
+		htmlClassAfter: doc.documentElement.className || '',
 		counter: { hidden: byId['verifica-contor'].hidden, text: byId['verifica-contor'].textContent },
 		found: (function () {
 			var g = byId['verifica-gasim'], lines = [];

@@ -544,8 +544,8 @@ $cmp_site_node = trim( (string) shell_exec( 'command -v node 2>/dev/null' ) );
 if ( '' === $cmp_site_node ) {
 	echo "  (skip: node not found, the verifica.js render run is not checked)\n";
 } else {
-	$cmp_site_dom = function ( $lang, $fixture, $owner = true, $checks = 'fail' ) use ( $cmp_site_root ) {
-		$cmd = 'node ' . escapeshellarg( $cmp_site_root . '/tests/fixtures/site-verifica/run.js' ) . ' ' . escapeshellarg( $lang ) . ' ' . escapeshellarg( $fixture ) . ' ' . ( $owner ? '1' : '0' ) . ' ' . escapeshellarg( (string) $checks );
+	$cmp_site_dom = function ( $lang, $fixture, $owner = true, $checks = 'fail', $share = '' ) use ( $cmp_site_root ) {
+		$cmd = 'node ' . escapeshellarg( $cmp_site_root . '/tests/fixtures/site-verifica/run.js' ) . ' ' . escapeshellarg( $lang ) . ' ' . escapeshellarg( $fixture ) . ' ' . ( $owner ? '1' : '0' ) . ' ' . escapeshellarg( (string) $checks ) . ' ' . escapeshellarg( (string) $share );
 		$o   = json_decode( (string) shell_exec( $cmd . ' 2>&1' ), true );
 		return is_array( $o ) ? $o : array( 'text' => '', 'body' => null, 'error' => 'no output', 'fetches' => 0 );
 	};
@@ -602,6 +602,38 @@ if ( '' === $cmp_site_node ) {
 	cmp_assert( false === $r['found']['hidden'] && in_array( '100%', $r['found']['text'], true ) && in_array( '0%', $r['found']['text'], true ) && 7 === count( array_filter( $r['found']['text'], function ( $t ) { return '0%' === $t || '100%' === $t; } ) ) + 2, 'found: bad numbers read 0, nothing above 100%' );
 	$r = $cmp_site_dom( 'ro', 'owner-required', false, 'fail' );
 	cmp_assert( true === $r['found']['hidden'], 'found: endpoint down -> hidden' );
+	// Sharing the report: "Salvează ca PDF" (the browser's print, every detail open) and "Copiază raportul" (plain text).
+	$r = $cmp_site_dom( 'ro', 'issues-sitemap' );
+	cmp_assert( empty( $r['error'] ), 'share (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
+	cmp_assert_eq( $r['buttons'], array( 'Salvează ca PDF', 'Copiază raportul' ), 'share (ro): the two buttons under the report' );
+	cmp_assert( is_string( $r['copied'] ), 'share (ro): "Copiază raportul" writes to the clipboard' );
+	$cmp_site_txt = (string) $r['copied'];
+	foreach ( array( 'exemplu.md Am găsit 3 probleme', '3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'www.googletagmanager.com/gtag/js', '- /contacte/', 'Baza legală: Legea 195/2024', 'Am verificat 10 pagini.', 'În regulă', '- HTTPS', 'Raport făcut cu „Verifică-ți site-ul”, https://consent.rt.md/' ) as $need ) {
+		cmp_assert( false !== strpos( $cmp_site_txt, $need ), "share (ro): the copied text has „{$need}”" );
+	}
+	foreach ( array( 'Salvează ca PDF', 'Copiază raportul', 'Descarcă', 'Vezi ce face', 'Raport „Verifică-ți site-ul” de pe consent.rt.md' ) as $bad ) {
+		cmp_assert( false === strpos( $cmp_site_txt, $bad ), "share (ro): the copied text has no „{$bad}”" );
+	}
+	cmp_assert( false === strpos( $cmp_site_txt, "\n\n\n" ), 'share (ro): no triple blank lines' );
+	cmp_assert( 0 === strpos( (string) $r['shareStatus'], 'Am copiat raportul' ), 'share (ro): says it was copied (' . $r['shareStatus'] . ')' );
+	cmp_assert( 1 === $r['printCalls'], 'share: "Salvează ca PDF" opens the print dialog' );
+	cmp_assert( is_array( $r['printState'] ) && $r['printState']['details'] > 0 && $r['printState']['details'] === $r['printState']['open'], 'share: every folded detail is open while printing' );
+	cmp_assert( is_array( $r['printState'] ) && false !== strpos( $r['printState']['htmlClass'], 'print-report' ), 'share: the page is marked print-report while printing' );
+	cmp_assert( 0 === $r['openAfter'] && false === strpos( $r['htmlClassAfter'], 'print-report' ), 'share: after printing the details fold again and the mark goes' );
+	cmp_assert( false !== strpos( $r['text'], 'Raport „Verifică-ți site-ul” de pe consent.rt.md, ' ), 'share (ro): the print-only title line is in the report' );
+	$r = $cmp_site_dom( 'en', 'issues-sitemap' );
+	cmp_assert_eq( $r['buttons'], array( 'Save as PDF', 'Copy the report' ), 'share (en): the two buttons' );
+	cmp_assert( false !== strpos( (string) $r['copied'], 'Report made with “Check your site”, https://consent.rt.md/' ) && 0 === strpos( (string) $r['shareStatus'], 'Report copied' ), 'share (en): footer and status' );
+	$r = $cmp_site_dom( 'ro', 'issues-sitemap', true, 'fail', 'noclip' );
+	cmp_assert( null === $r['copied'] && 0 === strpos( (string) $r['shareStatus'], 'Nu am putut copia raportul' ), 'share (ro): a refused clipboard says so (' . $r['shareStatus'] . ')' );
+	foreach ( array( 'clean', 'unsure' ) as $fx ) {
+		$r = $cmp_site_dom( 'ro', $fx );
+		cmp_assert_eq( $r['buttons'], array( 'Salvează ca PDF', 'Copiază raportul' ), "share: {$fx} report has the buttons" );
+	}
+	$r = $cmp_site_dom( 'ro', 'owner-required', false );
+	cmp_assert_eq( $r['buttons'], array(), 'share: no report, no buttons' );
+	$cmp_site_css = (string) file_get_contents( $cmp_site_root . '/site/style.css' );
+	cmp_assert( 1 === preg_match( '/@media print\s*\{[^@]*\.print-report/s', $cmp_site_css ) && 1 === preg_match( '/\.r-print-head\s*\{\s*display:\s*none/', $cmp_site_css ), 'style.css: print rules for the report, the title line hidden on screen' );
 	// A site that does not look like WordPress: the plugin is for WordPress, the problems stay.
 	$r = $cmp_site_dom( 'ro', 'issues-other' );
 	cmp_assert( empty( $r['error'] ), 'render issues-other (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );

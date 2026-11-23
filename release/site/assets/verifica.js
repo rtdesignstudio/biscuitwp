@@ -68,6 +68,13 @@
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
 		checks: function (n) { return group(n, ',') + ' checks so far'; },
 		foundTitle: 'What we find most often',
+		savePdf: 'Save as PDF',
+		copy: 'Copy the report',
+		copied: 'Report copied. Paste it into an email or a message.',
+		copyFailed: 'Could not copy the report. Use “Save as PDF” instead.',
+		months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+		printHead: function (d) { return 'Report from “Check your site” on consent.rt.md, ' + d; },
+		copyFoot: function (d, url) { return 'Report made with “Check your site”, ' + url + ', ' + d + '.'; },
 		foundKinds: { 'tracker': 'Tracker started before consent', 'google-fonts': 'Google Fonts loaded from Google', 'ip-resources': 'Other resources that send the visitor\'s IP', 'no-banner': 'Trackers with no cookie banner at all', 'no-policy': 'No link to the privacy policy' },
 		foundNote: function (n) { return 'From ' + group(n, ',') + ' checks made with the tool. A site checked several times counts each time.'; },
 		otherTitle: 'Your site does not look like WordPress',
@@ -155,6 +162,13 @@
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
 		checks: function (n) { return group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
 		foundTitle: 'Ce găsim cel mai des',
+		savePdf: 'Salvează ca PDF',
+		copy: 'Copiază raportul',
+		copied: 'Am copiat raportul. Lipește-l într-un email sau mesaj.',
+		copyFailed: 'Nu am putut copia raportul. Folosește „Salvează ca PDF”.',
+		months: ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'],
+		printHead: function (d) { return 'Raport „Verifică-ți site-ul” de pe consent.rt.md, ' + d; },
+		copyFoot: function (d, url) { return 'Raport făcut cu „Verifică-ți site-ul”, ' + url + ', ' + d + '.'; },
 		foundKinds: { 'tracker': 'Tracker pornit înainte de acord', 'google-fonts': 'Google Fonts încărcate de la Google', 'ip-resources': 'Alte resurse care trimit IP-ul vizitatorului', 'no-banner': 'Trackere fără niciun banner de cookie-uri', 'no-policy': 'Niciun link spre politica de confidențialitate' },
 		foundNote: function (n) { return 'Din ' + group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute cu instrumentul. Un site verificat de mai multe ori se numără de fiecare dată.'; },
 		otherTitle: 'Site-ul tău nu pare făcut pe WordPress',
@@ -348,6 +362,119 @@
 
 	function clear() {
 		while (out.firstChild) { out.removeChild(out.firstChild); }
+		markHtml('has-report', false);
+	}
+
+	/* Sharing the report: nothing leaves the browser. "Salvează ca PDF" is the
+	   browser's own print dialog, with every folded detail open and only the
+	   report on paper (print rules in style.css); "Copiază raportul" puts the
+	   report's text on the clipboard. */
+	function markHtml(cls, on) {
+		var h = doc.documentElement, c = (' ' + (h.className || '') + ' ').replace(' ' + cls + ' ', ' ');
+		h.className = (on ? c + cls : c).replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+	}
+	function today() {
+		var d = new Date();
+		return d.getDate() + ' ' + T.months[d.getMonth()] + ' ' + d.getFullYear();
+	}
+	var reopened = [];
+	function printPrep() {
+		if (!out.firstChild) { return; }
+		markHtml('print-report', true);
+		all(out, 'DETAILS').forEach(function (d) {
+			if (d.getAttribute('open') === null) { d.setAttribute('open', ''); reopened.push(d); }
+		});
+	}
+	function printDone() {
+		reopened.forEach(function (d) { d.removeAttribute('open'); });
+		reopened = [];
+		markHtml('print-report', false);
+	}
+	if (window.addEventListener) {
+		window.addEventListener('beforeprint', function () { if (!reopened.length) { printPrep(); } });
+		window.addEventListener('afterprint', printDone);
+	}
+	// Elements of a tag under a node, in document order (no querySelector needed).
+	function all(node, tag, acc) {
+		acc = acc || [];
+		Array.prototype.forEach.call(node.childNodes || [], function (c) {
+			if (c.nodeType !== 1) { return; }
+			if (c.tagName === tag) { acc.push(c); }
+			all(c, tag, acc);
+		});
+		return acc;
+	}
+	// The report as plain text: one line per block, "- " before list items; the
+	// buttons, links and the print-only title are left out.
+	var BLOCK = /^(H3|H4|P|LI|DT|DD|UL|OL|DL|DIV|SUMMARY|DETAILS)$/;
+	function reportText(node) {
+		var lines = [], cur = '', pad = '';
+		function flush() {
+			var t = cur.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+			if (t) { lines.push(pad + t); }
+			cur = '';
+		}
+		function spaces(n) { return new Array(n + 1).join('  '); }
+		// depth: how many list items hold this node (2 spaces each).
+		function walk(n, depth) {
+			if (n.nodeType === 3) { cur += n.data; return; }
+			if (n.nodeType !== 1) { return; }
+			var cls = ' ' + (n.className || '') + ' ';
+			if (/ (actions|r-share|r-print-head|r-dt-fold) /.test(cls) || n.tagName === 'BUTTON' || n.tagName === 'A') { return; }
+			var block = BLOCK.test(n.tagName), kids = n.childNodes;
+			if (block) {
+				flush();
+				if (n.tagName === 'H4' && lines.length) { lines.push(''); }
+				pad = spaces(depth);
+				if (n.tagName === 'LI') { cur = '- '; depth++; }
+			}
+			Array.prototype.forEach.call(kids, function (c, i) {
+				walk(c, depth);
+				if (c.nodeType === 1 && !BLOCK.test(c.tagName)) {
+					var next = kids[i + 1];
+					// "Title: what to do" after a bold title followed by inline text; else a space.
+					cur += c.tagName === 'STRONG' && next && !(next.nodeType === 1 && BLOCK.test(next.tagName)) ? ': ' : ' ';
+				}
+			});
+			if (block) { flush(); pad = spaces(depth); }
+		}
+		walk(node, 0);
+		return lines.join('\n').replace(/\n{3,}/g, '\n\n');
+	}
+	function copyText(text, done) {
+		var nav = window.navigator;
+		if (nav && nav.clipboard && nav.clipboard.writeText) {
+			nav.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+			return;
+		}
+		done(false);
+	}
+	function share(r) {
+		var date = today();
+		var head = el('p', 'r-print-head', T.printHead(date));
+		r.box.insertBefore ? r.box.insertBefore(head, r.box.firstChild) : r.box.appendChild(head);
+		var wrap = el('div', 'r-share');
+		var pdf = el('button', 'btn btn-ghost r-print', T.savePdf);
+		var cp = el('button', 'btn btn-ghost r-copy', T.copy);
+		pdf.setAttribute('type', 'button');
+		cp.setAttribute('type', 'button');
+		var msg = el('p', 'muted small r-share-status');
+		msg.setAttribute('role', 'status');
+		pdf.addEventListener('click', function () {
+			printPrep();
+			window.print();
+		});
+		cp.addEventListener('click', function () {
+			var origin = window.location && window.location.origin ? window.location.origin + '/' : 'consent.rt.md';
+			copyText(reportText(r.box) + '\n\n' + T.copyFoot(date, origin), function (ok) {
+				msg.textContent = ok ? T.copied : T.copyFailed;
+			});
+		});
+		wrap.appendChild(pdf);
+		wrap.appendChild(cp);
+		wrap.appendChild(msg);
+		r.box.appendChild(wrap);
+		markHtml('has-report', true);
 	}
 	function busy(on) {
 		submit.disabled = on;
@@ -563,6 +690,7 @@
 			passed(r.box, ok);
 			r.box.appendChild(el('p', 'muted', T.cleanLimits));
 			list(r.box, info, T.info, 'muted-list');
+			share(r);
 			show(r);
 			confetti();
 		} else if (data.status === 'issues') {
@@ -581,6 +709,7 @@
 				other ?
 				[[standaloneHref(), T.standalone, 'btn'], ['#cum-verifici', T.howto, 'btn btn-ghost']] :
 				[[downloadHref(), T.download, 'btn'], ['#functii', T.features, 'btn btn-ghost']]);
+			share(r);
 			show(r);
 		} else if (data.status === 'unsure') {
 			r = summary('unsure', data, T.unsureTitle, counts);
@@ -589,6 +718,7 @@
 			passed(r.box, ok);
 			list(r.box, info, T.info, 'muted-list');
 			actions(r.box, [['#cum-verifici', T.howto, 'btn btn-ghost']]);
+			share(r);
 			show(r);
 		} else if (data.status === 'error' && !str(data.code) && findings.length) {
 			// The page was fetched, but there was nothing to analyse (an empty page).

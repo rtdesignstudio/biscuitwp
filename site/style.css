@@ -226,6 +226,22 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .notice { padding-left: 16px; border-left: 2px solid var(--ink); }
 .result:empty { display: none; }
 /* „Ce găsim cel mai des”: one row per kind, a bar in ink on a soft track. */
+/* Sharing the report: two buttons and a status line; the title line is for paper only. */
+.r-share { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 24px 0 16px; }
+.r-share .btn { min-height: 48px; }
+.r-share-status { flex-basis: 100%; margin: 0; }
+.r-share-status:empty { display: none; }
+.r-print-head { display: none; }
+@media print {
+	.print-report body { background: #fff; }
+	.print-report header.site, .print-report footer.site, .print-report main > section:not(#verifica),
+	.print-report #verifica .wrap > :not(.result), .print-report .r-share, .print-report .r .actions,
+	.print-report .sheet, .print-report .skip, .print-report canvas { display: none !important; }
+	.print-report main > section#verifica { padding: 0; border: 0; }
+	.print-report .r-print-head { display: block; margin: 0 0 12px; font-size: 12px; color: #444; }
+	.print-report .r { border-top-width: 1px; }
+	.print-report .r li, .print-report .r dd { break-inside: avoid; }
+}
 .found { margin: 40px 0 0; padding-top: 24px; border-top: 1px solid var(--line); }
 .found h3 { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
 .found-list { list-style: none; margin: 0 0 12px; padding: 0; }
