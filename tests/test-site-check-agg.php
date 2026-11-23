@@ -215,7 +215,7 @@ $pages = array(
 	cmp_sca_page( '<html><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC123"></script></head><body>' . $cmp_sca_pol . '</body></html>', $p3 ),
 );
 $a = cmp_check_aggregate( $pages, 'ro' );
-cmp_assert_eq( array_keys( $a ), array( 'status', 'findings', 'cmp', 'passed', 'top', 'engine' ), 'aggregate: shape' );
+cmp_assert_eq( array_keys( $a ), array( 'status', 'findings', 'cmp', 'passed', 'top', 'engine', 'wordpress' ), 'aggregate: shape' );
 cmp_assert_eq( $a['engine'], 'html-v2', 'aggregate: engine html-v2' );
 $ga = array_values(
 	array_filter(

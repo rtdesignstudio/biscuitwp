@@ -63,7 +63,7 @@ function cmp_sc_sev( array $r, $sev ) {
 /** The result has the documented shape. */
 function cmp_sc_valid( $r ) {
 	// v1 keys first, v2 additions after (test-site-check-agg.php covers those).
-	if ( ! is_array( $r ) || array_keys( $r ) !== array( 'status', 'findings', 'cmp', 'passed', 'top', 'rank' ) ) {
+	if ( ! is_array( $r ) || array_keys( $r ) !== array( 'status', 'findings', 'cmp', 'passed', 'top', 'rank', 'wordpress' ) || ! is_bool( $r['wordpress'] ) ) {
 		return false;
 	}
 	if ( ! in_array( $r['status'], array( 'clean', 'issues', 'unsure', 'error' ), true ) || ! is_array( $r['findings'] ) ) {

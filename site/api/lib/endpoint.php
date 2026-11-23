@@ -597,6 +597,7 @@ function cmp_check_site_response( array $results, int $unread, string $final, ar
 			'pages'       => $pages,
 			'passed'      => isset( $agg['passed'] ) && is_array( $agg['passed'] ) ? $agg['passed'] : array(),
 			'top'         => isset( $agg['top'] ) && is_array( $agg['top'] ) ? $agg['top'] : array(),
+			'wordpress'   => isset( $agg['wordpress'] ) && true === $agg['wordpress'],
 		),
 	);
 }

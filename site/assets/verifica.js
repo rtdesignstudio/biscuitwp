@@ -64,6 +64,9 @@
 		fixText: 'It keeps trackers off until consent, moves Google Fonts to your server and gives you the legal texts for Moldova. Free.',
 		oursTitle: 'You already use Consent Manager Pro',
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
+		otherTitle: 'Your site does not look like WordPress',
+		otherText: 'The problems above apply on any platform and are fixed in the site\'s code. Consent Manager Pro is a WordPress plugin; for other sites there is the standalone version: two files, and you mark the scripts that wait for consent yourself.',
+		standalone: 'Standalone version',
 		download: 'Download',
 		latest: 'Latest version',
 		features: 'See what it does',
@@ -144,6 +147,9 @@
 		fixText: 'Oprește trackerele până la acord, mută Google Fonts pe serverul tău și îți dă textele legale pentru Moldova. Gratuit.',
 		oursTitle: 'Folosești deja Consent Manager Pro',
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
+		otherTitle: 'Site-ul tău nu pare făcut pe WordPress',
+		otherText: 'Problemele de mai sus rămân valabile pe orice platformă și se rezolvă în codul site-ului. Consent Manager Pro e un plugin WordPress; pentru alte site-uri există versiunea standalone: două fișiere, iar scripturile care așteaptă acordul le marchezi singur.',
+		standalone: 'Versiunea standalone',
 		download: 'Descarcă',
 		latest: 'Ultima versiune',
 		features: 'Vezi ce face',
@@ -210,6 +216,11 @@
 		return a;
 	}
 	function str(v) { return typeof v === 'string' ? v : ''; }
+	// The standalone guide, from the page's own link (this script names no outside address).
+	function standaloneHref() {
+		var a = doc.querySelector('a[data-standalone]');
+		return a ? a.getAttribute('href') : '#instalare';
+	}
 	function downloadHref() {
 		var a = doc.querySelector('a[data-download]');
 		return a ? a.getAttribute('href') : '#instalare';
@@ -478,6 +489,8 @@
 		var issues = bySeverity(findings, 'issue'), unsure = bySeverity(findings, 'unsure'), info = bySeverity(findings, 'info');
 		var ok = arr(data.passed);
 		var ours = data.cmp === 'Consent Manager Pro';
+		// Only an explicit false: an older answer without the field keeps the plugin box.
+		var other = !ours && data.wordpress === false;
 		var counts = [issues.length, unsure.length, ok.filter(function (p) { return p && typeof p === 'object' && str(p.title); }).length];
 		var r;
 		if (ours && data.status === 'issues') {
@@ -500,11 +513,13 @@
 			passed(r.box, ok);
 			list(r.box, info, T.info, 'muted-list');
 			var fix = el('div', 'fix');
-			fix.appendChild(el('h4', null, ours ? T.oursTitle : T.fixTitle));
-			fix.appendChild(el('p', null, ours ? T.oursText : T.fixText));
+			fix.appendChild(el('h4', null, ours ? T.oursTitle : other ? T.otherTitle : T.fixTitle));
+			fix.appendChild(el('p', null, ours ? T.oursText : other ? T.otherText : T.fixText));
 			r.box.appendChild(fix);
 			actions(fix, ours ?
 				[[downloadHref(), T.latest, 'btn'], ['#cum-verifici', T.howto, 'btn btn-ghost']] :
+				other ?
+				[[standaloneHref(), T.standalone, 'btn'], ['#cum-verifici', T.howto, 'btn btn-ghost']] :
 				[[downloadHref(), T.download, 'btn'], ['#functii', T.features, 'btn btn-ghost']]);
 			show(r);
 		} else if (data.status === 'unsure') {

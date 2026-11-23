@@ -363,7 +363,7 @@ if ( $cmp_cd_port > 0 && $cmp_cd_sport > 0 ) {
 	}
 	cmp_assert( is_array( $gt ) && array( '/p/3' ) === $cmp_cd_paths( $gt['pages'] ) && 'issues' === $r['body']['status'] && in_array( $gt['id'], $r['body']['top'], true ), 's50: the tracker of /p/3 is reported with its page, issues, in top' );
 	// The response shape: the design's keys, nothing internal.
-	cmp_assert_eq( array_keys( $r['body'] ), array( 'status', 'findings', 'cmp', 'checked_url', 'engine', 'pages', 'passed', 'top' ), 'response: top-level keys' );
+	cmp_assert_eq( array_keys( $r['body'] ), array( 'status', 'findings', 'cmp', 'checked_url', 'engine', 'pages', 'passed', 'top', 'wordpress' ), 'response: top-level keys' );
 	cmp_assert_eq( array_keys( $p ), array( 'checked', 'failed', 'total', 'total_source', 'capped', 'stopped' ), 'response: pages keys' );
 	cmp_assert( null === $p['stopped'], 's50: not stopped early' );
 	$k = cmp_cd_keys( $r['body'] );

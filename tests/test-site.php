@@ -535,7 +535,7 @@ cmp_assert( 1 === preg_match( "#data\.status === 'clean'\)\s*\{[^}]*confetti\(\)
 preg_match_all( '#link\(([^,]+),#', $cmp_site_js, $lk );
 foreach ( $lk[1] as $href ) {
 	$href = trim( $href );
-	cmp_assert( in_array( $href, array( 'href', "'#cum-verifici'", "'#functii'", 'downloadHref()', 'it[0]' ), true ), "verifica.js: link href {$href} is a fixed address" );
+	cmp_assert( in_array( $href, array( 'href', "'#cum-verifici'", "'#functii'", 'downloadHref()', 'standaloneHref()', 'it[0]' ), true ), "verifica.js: link href {$href} is a fixed address" );
 }
 cmp_assert( false === strpos( $cmp_site_js, "setAttribute('href', data" ) && false === strpos( $cmp_site_js, '.href =' ), 'verifica.js: no href from the response' );
 // The renderer, run in node on a fake DOM (innerHTML and friends throw there) with
@@ -564,6 +564,22 @@ if ( '' === $cmp_site_node ) {
 	$r = $cmp_site_dom( 'en', 'issues-sitemap' );
 	foreach ( array( 'We found 3 problems', 'What to do first', 'We checked 10 pages.', 'The site has 84 pages; we checked the first 10. A full check is not available right now.', 'All good', 'On which pages (7)', 'With Consent Manager Pro: ' ) as $need ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
+	}
+	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
+		cmp_assert( 1 === preg_match( '#<a data-standalone href="https://github\.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README\.md">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
+	}
+	// A site that does not look like WordPress: the plugin is for WordPress, the problems stay.
+	$r = $cmp_site_dom( 'ro', 'issues-other' );
+	cmp_assert( empty( $r['error'] ), 'render issues-other (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
+	foreach ( array( 'Site-ul tău nu pare făcut pe WordPress', 'Problemele de mai sus rămân valabile pe orice platformă', 'versiunea standalone', 'Versiunea standalone' ) as $need ) {
+		cmp_assert( false !== strpos( $r['text'], $need ), "render issues-other (ro): shows „{$need}”" );
+	}
+	cmp_assert( false === strpos( $r['text'], 'Consent Manager Pro rezolvă asta' ), 'render issues-other (ro): no „rezolvă asta”' );
+	cmp_assert_eq( $r['hrefs'], array( '#instalare', '#cum-verifici' ), 'render issues-other: standalone (fallback in the fake DOM) and how-to links' );
+	cmp_assert( false === strpos( $r['text'], 'Vezi ce face' ), 'render issues-other (ro): no plugin features button' );
+	$r = $cmp_site_dom( 'en', 'issues-other' );
+	foreach ( array( 'Your site does not look like WordPress', 'The problems above apply on any platform', 'Standalone version' ) as $need ) {
+		cmp_assert( false !== strpos( $r['text'], $need ), "render issues-other (en): shows „{$need}”" );
 	}
 	$r = $cmp_site_dom( 'ro', 'links' );
 	cmp_assert( false !== strpos( $r['text'], 'Site-ul are cel puțin 14 pagini; am verificat primele 10. Verificarea completă nu e disponibilă acum.' ), 'render links (ro): „cel puțin” for pages found in links' );

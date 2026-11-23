@@ -1314,6 +1314,16 @@ function cmp_check_status( array $findings ): string {
 }
 
 /**
+ * Does the page come from WordPress? Only signs WordPress itself prints: its
+ * folders (wp-content, wp-includes), the REST API link, the generator tag, the
+ * emoji loader. A site that hides all of them reads as not WordPress, so the
+ * report hedges ("nu pare").
+ */
+function cmp_check_is_wordpress( string $html ): bool {
+	return 1 === preg_match( '#/wp-(?:content|includes)/|/wp-json/|<meta[^>]+content=["\']WordPress[\s"\']|_wpemojiSettings|wp-emoji-release#i', $html );
+}
+
+/**
  * Analyse a homepage fetched without cookies, as a new visitor sees it.
  *
  * @param string $html     The response body (only the first 2 MB are read).
@@ -1344,6 +1354,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 		'banner'   => false,
 		'policy'   => false,
 		'https'    => 1 === preg_match( '#^https://#i', trim( $url ) ),
+		'wordpress' => false,
 	);
 	$add      = function ( $id, $severity, $text_key, array $vars, $law_kind, $fix_key = '' ) use ( &$findings, $lang ) {
 		if ( isset( $findings[ $id ] ) ) {
@@ -1406,6 +1417,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			'passed'   => 'error' === $status ? array() : cmp_check_passed_list( cmp_check_passed_ids( $sev, $ctx['complete'], $ctx['banner'], $ctx['policy'], $ctx['https'] ), $lang ),
 			'top'      => cmp_check_top( $list, $ranks ),
 			'rank'     => $ranks,
+			'wordpress' => $ctx['wordpress'],
 		);
 	};
 
@@ -1413,6 +1425,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 		$add( 'page:empty', 'info', 'empty', array(), '' );
 		return $finish( 'error', null );
 	}
+	$ctx['wordpress'] = cmp_check_is_wordpress( $html );
 	if ( strlen( $html ) > CMP_CHECK_MAX_BYTES ) {
 		$html = substr( $html, 0, CMP_CHECK_MAX_BYTES );
 		$add( 'page:truncated', 'unsure', 'truncated', array(), '' );
@@ -1752,6 +1765,7 @@ function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0
 	$home_pass = array();
 	$errors    = 0;
 	$worst     = 'clean'; // Worst page status among the checked pages.
+	$wordpress = false; // Any page that shows WordPress.
 	foreach ( array_values( $page_results ) as $i => $p ) {
 		if ( ! is_array( $p ) ) {
 			$errors++;
@@ -1759,6 +1773,9 @@ function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0
 		}
 		$url    = isset( $p['url'] ) && is_string( $p['url'] ) ? cmp_check_plain( $p['url'], 2048 ) : '';
 		$status = isset( $p['status'] ) && is_string( $p['status'] ) ? $p['status'] : 'error';
+		if ( isset( $p['wordpress'] ) && true === $p['wordpress'] ) {
+			$wordpress = true;
+		}
 		if ( null === $cmp && isset( $p['cmp'] ) && is_string( $p['cmp'] ) && '' !== $p['cmp'] ) {
 			$cmp = cmp_check_plain( $p['cmp'], 100 ); // Index 0 first: the homepage wins.
 		}
@@ -1882,5 +1899,6 @@ function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0
 		'passed'   => cmp_check_passed_list( $passed, $lang ),
 		'top'      => cmp_check_top( $list, $rank ),
 		'engine'   => 'html-v2',
+		'wordpress' => $wordpress,
 	);
 }
