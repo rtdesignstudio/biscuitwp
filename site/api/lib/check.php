@@ -125,7 +125,8 @@ function cmp_check_merge_extra( array $services, string $lang ): array {
 		if ( isset( $ids[ $x['id'] ] ) ) {
 			continue;
 		}
-		$x['name'] = isset( $x['name'][ $lang ] ) ? $x['name'][ $lang ] : $x['id'];
+		// A language without its own name (signatures.php names ro / en) uses the Romanian one: the names are brand names.
+		$x['name'] = isset( $x['name'][ $lang ] ) ? $x['name'][ $lang ] : ( isset( $x['name']['ro'] ) ? $x['name']['ro'] : $x['id'] );
 		$new[]     = $x;
 	}
 	// Additions first: their src_re (Google Ads ids on gtag/js) must win over the library's hosts.
@@ -958,9 +959,25 @@ function cmp_check_is_challenge( string $html ): bool {
 }
 
 /* ------------------------------------------------------------------
- * Texts (RO / EN). Romanian: comma-below ș/ț, " - " instead of a dash, "tu".
+ * Texts (RO / EN / RU). Romanian: comma-below ș/ț, " - " instead of a dash, "tu".
+ * Russian: «вы», «…» quotes, no em dash (the site's ru glossary).
  * Laws: only as docs/product/2026-11-18-cadru-legal-moldova.md cites them.
  * ------------------------------------------------------------------ */
+
+/** A supported language: 'ro' (default), 'en' or 'ru'; anything else gives 'ro'. */
+function cmp_check_lang( $lang ): string {
+	return is_string( $lang ) && in_array( $lang, array( 'ro', 'en', 'ru' ), true ) ? $lang : 'ro';
+}
+
+/** Russian plural form for $n: $one (1, 21...), $few (2-4, 22-24...) or $many (0, 5-20, 25...). */
+function cmp_check_ru_plural( int $n, string $one, string $few, string $many ): string {
+	$a = abs( $n ) % 10;
+	$b = abs( $n ) % 100;
+	if ( 1 === $a && 11 !== $b ) {
+		return $one;
+	}
+	return $a >= 2 && $a <= 4 && ( $b < 12 || $b > 14 ) ? $few : $many;
+}
 
 /** The law citation for a kind of finding. */
 function cmp_check_law( string $kind, string $lang ): string {
@@ -969,19 +986,22 @@ function cmp_check_law( string $kind, string $lang ): string {
 		'consent'  => array(
 			'ro' => 'Legea nr. 195/2024, art. 6–7; Legea nr. 72/2025, art. 116',
 			'en' => 'Law No. 195/2024, Arts. 6–7; Law No. 72/2025, Art. 116',
+			'ru' => 'Закон № 195/2024, ст. 6–7; Закон № 72/2025, ст. 116',
 		),
 		// Legal doc line 31 (art. 44–49, "Pentru alte țări, inclusiv SUA (Google, Meta)") and line 62 ("Transferuri spre SUA (GA, Meta) | L195 art. 44–49").
 		'transfer' => array(
 			'ro' => 'Legea nr. 195/2024, art. 44–49 (transferuri în afara SEE, de ex. SUA)',
 			'en' => 'Law No. 195/2024, Arts. 44–49 (transfers outside the EEA, e.g. the US)',
+			'ru' => 'Закон № 195/2024, ст. 44–49 (передача за пределы ЕЭЗ, например в США)',
 		),
 		// Legal doc line 57, the table row "Informare clară despre scopuri, înainte": "L72 art. 116(5), L195 art. 12–13".
 		'inform'   => array(
 			'ro' => 'Legea nr. 72/2025, art. 116 alin. (5); Legea nr. 195/2024, art. 12–13',
 			'en' => 'Law No. 72/2025, Art. 116(5); Law No. 195/2024, Arts. 12–13',
+			'ru' => 'Закон № 72/2025, ст. 116 ч. (5); Закон № 195/2024, ст. 12–13',
 		),
 	);
-	return isset( $laws[ $kind ] ) ? $laws[ $kind ][ $lang ] : '';
+	return isset( $laws[ $kind ] ) ? $laws[ $kind ][ cmp_check_lang( $lang ) ] : '';
 }
 
 /** Title and explanation of a finding, with {placeholders} filled from $vars (plain text). */
@@ -990,81 +1010,101 @@ function cmp_check_text( string $key, string $lang, array $vars = array() ): arr
 		'tracker'          => array(
 			'ro' => array( '{name} pornește înainte de acord', 'Pagina pornește {name} imediat ce intră cineva, fără să-l întrebe. Un tracker are voie să pornească doar după ce vizitatorul spune „Da” în banner.' ),
 			'en' => array( '{name} starts before consent', 'The page starts {name} as soon as someone arrives, without asking. A tracker may only start after the visitor says yes in the banner.' ),
+			'ru' => array( '{name} запускается до согласия', 'Страница запускает {name}, как только кто-то на неё заходит, не спрашивая его. Трекер можно запускать только после того, как посетитель скажет «Да» в баннере.' ),
 		),
 		'embed'            => array(
 			'ro' => array( '{name} se încarcă înainte de acord', 'Pagina încarcă {name} direct, așa că furnizorul primește IP-ul vizitatorului și poate pune cookie-uri înainte de acord. Pune în loc o imagine care încarcă {name} doar la clic.' ),
 			'en' => array( '{name} loads before consent', 'The page loads {name} directly, so the provider gets the visitor\'s IP address and can set cookies before consent. Show a placeholder that loads {name} only on click.' ),
+			'ru' => array( '{name} загружается до согласия', 'Страница загружает {name} напрямую, поэтому поставщик получает IP-адрес посетителя и может установить файлы cookie до согласия. Поставьте вместо него изображение, которое загружает {name} только по клику.' ),
 		),
 		'cookieless'       => array(
 			'ro' => array( 'Folosești {name}', '{name} spune că nu folosește cookie-uri. Pomenește-l totuși în politica de confidențialitate.' ),
 			'en' => array( 'You use {name}', '{name} says it uses no cookies. Mention it in your privacy policy anyway.' ),
+			'ru' => array( 'Вы используете {name}', '{name} заявляет, что не использует файлы cookie. Всё равно упомяните его в политике конфиденциальности.' ),
 		),
 		'loader'           => array(
 			'ro' => array( '{name} poate încărca trackere pe care nu le vedem', '{name} încarcă alte scripturi după ce pagina pornește, așa că de aici nu putem ști ce aduce. Verifică singur: deschide site-ul într-o fereastră privată, apoi în DevTools, la Network și la Application - Cookies, uită-te ce apare înainte să alegi ceva în banner.' ),
 			'en' => array( '{name} may load trackers we cannot see', '{name} loads other scripts after the page starts, so we cannot tell from here what it brings. Check it yourself: open the site in a private window, then in DevTools, under Network and Application - Cookies, look at what shows up before you choose anything in the banner.' ),
+			'ru' => array( '{name} может загружать трекеры, которых мы не видим', '{name} загружает другие скрипты после запуска страницы, поэтому отсюда мы не можем знать, что он приносит. Проверьте сами: откройте сайт в приватном окне, затем в DevTools, на вкладках Network и Application - Cookies, посмотрите, что появляется до того, как вы что-либо выберете в баннере.' ),
 		),
 		'resource'         => array(
 			'ro' => array( '{name} trimite IP-ul vizitatorilor', 'Pagina încarcă {what} ({hosts}). Browserul fiecărui vizitator se conectează la acel server și îi trimite adresa IP, care e o dată personală, fără să fi fost întrebat. Găzduiește fișierele pe serverul tău sau renunță la ele.' ),
 			'en' => array( '{name} sends your visitors\' IP address', 'The page loads {what} ({hosts}). Every visitor\'s browser connects to that server and sends it their IP address, which is personal data, without being asked. Host the files on your own server or drop them.' ),
+			'ru' => array( '{name}: передача IP-адреса посетителей', 'Страница загружает {what} ({hosts}). Браузер каждого посетителя подключается к этому серверу и передаёт ему IP-адрес, а это персональные данные, хотя посетителя никто не спросил. Разместите файлы на своём сервере или откажитесь от них.' ),
 		),
 		'held-attribute'   => array(
 			'ro' => array( '{name}: marcat pentru banner, dar tot JavaScript', 'Scriptul are marcajul unui banner de cookie-uri, dar tipul lui e tot JavaScript. E oprit doar dacă bannerul rulează în modul de blocare automată; altfel pornește înainte de acord. Verifică în DevTools, la Network, ce se încarcă înainte să alegi ceva în banner.' ),
 			'en' => array( '{name}: marked for the banner, but still JavaScript', 'The script carries a cookie banner\'s marker, but its type is still JavaScript. It is held only if the banner runs in automatic blocking mode; otherwise it starts before consent. Check in DevTools, under Network, what loads before you choose anything in the banner.' ),
+			'ru' => array( '{name}: помечен для баннера, но всё равно JavaScript', 'У скрипта есть пометка баннера cookie, но его тип по-прежнему JavaScript. Он остановлен, только если баннер работает в режиме автоматической блокировки; иначе он запускается до согласия. Проверьте в DevTools, на вкладке Network, что загружается до того, как вы что-либо выберете в баннере.' ),
 		),
 		'held-unknown'     => array(
 			'ro' => array( '{name}: script cu un tip necunoscut', 'Scriptul are un tip pe care nu-l recunoaștem, așa că nu știm dacă pornește înainte de acord. Verifică în DevTools, la Network, ce se încarcă înainte să alegi ceva în banner.' ),
 			'en' => array( '{name}: a script of an unknown type', 'The script has a type we do not recognise, so we cannot tell whether it starts before consent. Check in DevTools, under Network, what loads before you choose anything in the banner.' ),
+			'ru' => array( '{name}: скрипт неизвестного типа', 'У скрипта тип, который мы не распознаём, поэтому мы не знаем, запускается ли он до согласия. Проверьте в DevTools, на вкладке Network, что загружается до того, как вы что-либо выберете в баннере.' ),
 		),
 		'consent-mode'     => array(
 			'ro' => array( '{name} pornește în Consent Mode, înainte de acord', '{name} se încarcă cu acordul setat pe „refuzat”. Nu pune cookie-uri, dar trimite lui Google semnale fără cookie, cu IP-ul vizitatorului, înainte de acord. E o zonă gri: IP-ul e o dată personală, iar lectura sigură a legii e opt-in înainte de orice cookie neesențial.' ),
 			'en' => array( '{name} runs in Consent Mode, before consent', '{name} loads with consent set to "denied". It sets no cookies, but it sends Google cookieless pings, with the visitor\'s IP address, before consent. This is a grey zone: the IP address is personal data, and the safe reading of the law is opt-in before any non-essential cookie.' ),
+			'ru' => array( '{name} запускается в Consent Mode, до согласия', '{name} загружается с согласием в состоянии «отказ» (denied). Он не устанавливает файлы cookie, но до согласия отправляет Google сигналы без cookie, с IP-адресом посетителя. Это серая зона: IP-адрес относится к персональным данным, а безопасное прочтение закона: opt-in до любого необязательного cookie.' ),
 		),
 		'cookie'           => array(
 			'ro' => array( 'Cookie-ul {cookie} ({name}) e pus înainte de acord', 'Serverul trimite cookie-ul {cookie}, al serviciului {name}, de la prima vizită. Cookie-urile de analiză sau de marketing au nevoie de acord înainte.' ),
 			'en' => array( 'The {cookie} cookie ({name}) is set before consent', 'The server sends the {cookie} cookie, used by {name}, on the very first visit. Analytics and marketing cookies need consent first.' ),
+			'ru' => array( 'Файл cookie {cookie} ({name}) устанавливается до согласия', 'Сервер отправляет cookie {cookie} сервиса {name} с первого визита. Аналитическим и маркетинговым cookie сначала нужно согласие.' ),
 		),
 		'cookies-other'    => array(
 			'ro' => array( 'Serverul mai pune cookie-uri: {list}', 'Nu le recunoaștem. Dacă sunt strict necesare (sesiune, coș, securitate), nu au nevoie de acord. Dacă urmăresc vizitatorul, au nevoie.' ),
 			'en' => array( 'The server sets other cookies too: {list}', 'We do not recognise them. If they are strictly necessary (session, cart, security), they need no consent. If they track the visitor, they do.' ),
+			'ru' => array( 'Сервер устанавливает и другие файлы cookie: {list}', 'Мы их не распознаём. Если они строго необходимы (сессия, корзина, безопасность), согласие для них не нужно. Если они отслеживают посетителя, нужно.' ),
 		),
 		'policy'           => array(
 			'ro' => array( 'Nu găsim un link spre politica de confidențialitate', 'Pagina are trackere, dar nu găsim pe ea un link spre politica de confidențialitate sau de cookie-uri. Vizitatorul trebuie să afle clar, dinainte, ce colectezi și de ce.' ),
 			'en' => array( 'We cannot find a link to a privacy policy', 'The page has trackers, but we cannot find a link to a privacy or cookie policy on it. Visitors must be told clearly, beforehand, what you collect and why.' ),
+			'ru' => array( 'Мы не находим ссылку на политику конфиденциальности', 'На странице есть трекеры, но мы не находим на ней ссылку на политику конфиденциальности или политику cookie. Посетитель должен заранее и ясно узнать, что вы собираете и зачем.' ),
 		),
 		'cmp'              => array(
 			'ro' => array( 'Site-ul folosește {name}', 'Am găsit bannerul {name}. Un banner ajută doar dacă ține trackerele oprite până la acord.' ),
 			'en' => array( 'The site uses {name}', 'We found the {name} banner. A banner only helps if it keeps trackers off until consent.' ),
+			'ru' => array( 'Сайт использует {name}', 'Мы нашли баннер {name}. Баннер помогает, только если держит трекеры выключенными до согласия.' ),
 		),
 		'ours'             => array(
 			'ro' => array( 'Folosești deja Consent Manager Pro', 'Pluginul nostru e pe pagină. Mulțumim că îl folosești!' ),
 			'en' => array( 'You already use Consent Manager Pro', 'Our plugin is on the page. Thank you for using it!' ),
+			'ru' => array( 'Вы уже используете Consent Manager Pro', 'Наш плагин есть на странице. Спасибо, что пользуетесь им!' ),
 		),
 		'ours-attention'   => array(
 			'ro' => array( 'Folosești deja Consent Manager Pro', 'Pluginul nostru e pe pagină, dar ceva tot pornește înainte de acord. Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.' ),
 			'en' => array( 'You already use Consent Manager Pro', 'Our plugin is on the page, but something still starts before consent. Check script blocking and the service list in its settings, then update the plugin to the latest version.' ),
+			'ru' => array( 'Вы уже используете Consent Manager Pro', 'Наш плагин есть на странице, но что-то всё равно запускается до согласия. Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.' ),
 		),
 		'empty'            => array(
 			'ro' => array( 'Pagina e goală', 'Serverul a răspuns, dar fără conținut, așa că nu avem ce verifica.' ),
 			'en' => array( 'The page is empty', 'The server answered, but with no content, so there is nothing to check.' ),
+			'ru' => array( 'Страница пустая', 'Сервер ответил, но без содержимого, поэтому нам нечего проверять.' ),
 		),
 		'challenge'        => array(
 			'ro' => array( 'Site-ul blochează verificările automate', 'Am primit o pagină de protecție anti-bot în locul site-ului. Verifică singur, din browser, cu DevTools.' ),
 			'en' => array( 'The site blocks automated checks', 'We got an anti-bot protection page instead of the site. Check it yourself in your browser, with DevTools.' ),
+			'ru' => array( 'Сайт блокирует автоматические проверки', 'Вместо сайта мы получили страницу защиты от ботов. Проверьте сами, в браузере, с помощью DevTools.' ),
 		),
 		'truncated'        => array(
 			'ro' => array( 'Am verificat doar primii 2 MB ai paginii', 'Pagina e foarte mare. Ce e după primii 2 MB nu am citit.' ),
 			'en' => array( 'We only checked the first 2 MB of the page', 'The page is very large. We did not read past the first 2 MB.' ),
+			'ru' => array( 'Мы проверили только первые 2 МБ страницы', 'Страница очень большая. То, что идёт после первых 2 МБ, мы не читали.' ),
 		),
 		'partial'          => array(
 			'ro' => array( 'Nu am putut citi toată pagina', 'Pagina are prea multe elemente ca s-o citim până la capăt. Ce e spre final nu am verificat.' ),
 			'en' => array( 'We could not read the whole page', 'The page has too many elements to read to the end. We did not check what comes last.' ),
+			'ru' => array( 'Мы не смогли прочитать всю страницу', 'На странице слишком много элементов, чтобы прочитать её до конца. То, что ближе к концу, мы не проверили.' ),
 		),
 		// No law: the legal doc (docs/product/2026-11-18-cadru-legal-moldova.md) says nothing about HTTPS or transport security.
 		'transport'        => array(
 			'ro' => array( 'Site-ul nu folosește HTTPS', 'Pagina s-a deschis prin http, fără criptare, așa că tot ce trimite vizitatorul, inclusiv formularele și cookie-urile, circulă necriptat. Sursele noastre legale nu numesc HTTPS, așa că nu dăm aici un articol de lege, dar e o măsură de bază de securitate.' ),
 			'en' => array( 'The site does not use HTTPS', 'The page opened over http, without encryption, so everything the visitor sends, forms and cookies included, travels unencrypted. Our legal sources do not name HTTPS, so we cite no article of law here, but it is a basic security measure.' ),
+			'ru' => array( 'Сайт не использует HTTPS', 'Страница открылась по http, без шифрования, поэтому всё, что отправляет посетитель, включая формы и файлы cookie, передаётся незашифрованным. Наши правовые источники не упоминают HTTPS, поэтому мы не приводим здесь статью закона, но это базовая мера безопасности.' ),
 		),
 	);
+	$lang = cmp_check_lang( $lang );
 	$pair = isset( $t[ $key ][ $lang ] ) ? $t[ $key ][ $lang ] : array( '', '' );
 	$map  = array();
 	foreach ( $vars as $k => $v ) {
@@ -1085,113 +1125,141 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 	$check = array(
 		'ro' => 'Ecranul Verificare din Consent Manager Pro testează în browserul tău ce se încarcă înainte și după acord.',
 		'en' => 'The Check screen in Consent Manager Pro tests in your browser what loads before and after consent.',
+		'ru' => 'Экран «Проверка» в Consent Manager Pro проверяет в вашем браузере, что загружается до и после согласия.',
 	);
 	$t     = array(
 		'tracker'         => array(
 			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro recunoaște {name} și îl blochează până la acord, fără cod în plus.' ),
 			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Consent Manager Pro recognises {name} and blocks it until consent, with no extra code.' ),
+			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'Consent Manager Pro распознаёт {name} и блокирует его до согласия, без дополнительного кода.' ),
 		),
 		'tracker-custom'  => array(
 			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Adaugă {name} în Consent Manager Pro ca serviciu personalizat, cu domeniile lui, și pluginul îl blochează până la acord.' ),
 			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Add {name} to Consent Manager Pro as a custom service, with its hosts, and the plugin blocks it until consent.' ),
+			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'Добавьте {name} в Consent Manager Pro как пользовательский сервис, с его доменами, и плагин заблокирует его до согласия.' ),
 		),
 		'tracker-pixel'   => array(
 			'ro' => array( 'Pornește pixelul {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro nu blochează pixelii puși ca imagine. Mută pixelul în fragmentul JavaScript al serviciului, pe care pluginul îl blochează până la acord, sau afișează-l doar când cmp_is_allowed(\'{category}\') e adevărat.' ),
 			'en' => array( 'Fire the {name} pixel only after the visitor accepts in the banner.', 'Consent Manager Pro does not block pixels added as images. Move the pixel into the service\'s JavaScript snippet, which the plugin blocks until consent, or output it only when cmp_is_allowed(\'{category}\') is true.' ),
+			'ru' => array( 'Запускайте пиксель {name} только после того, как посетитель согласится в баннере.', 'Consent Manager Pro не блокирует пиксели, добавленные как изображение. Перенесите пиксель во фрагмент JavaScript сервиса, который плагин блокирует до согласия, или выводите его, только когда cmp_is_allowed(\'{category}\') возвращает true.' ),
 		),
 		'embed'           => array(
 			'ro' => array( 'Înlocuiește {name} cu o previzualizare statică și încarcă playerul sau harta abia după ce vizitatorul acceptă.', 'Consent Manager Pro afișează în locul lui {name} un înlocuitor, care îl încarcă doar după acord.' ),
 			'en' => array( 'Replace {name} with a static preview and load the player or map only once the visitor accepts.', 'Consent Manager Pro shows a placeholder instead of {name} and loads it only after consent.' ),
+			'ru' => array( 'Замените {name} статичным превью и загружайте плеер или карту, только когда посетитель согласится.', 'Consent Manager Pro показывает вместо {name} заглушку, которая загружает его только после согласия.' ),
 		),
 		'cookieless'      => array(
 			'ro' => array( 'Pomenește {name} în politica de confidențialitate.', 'Consent Manager Pro îl scutește implicit de acord, ca instrument fără cookie-uri, și îți generează politica de confidențialitate.' ),
 			'en' => array( 'Mention {name} in your privacy policy.', 'Consent Manager Pro exempts it from consent by default, as a cookieless tool, and generates your privacy policy.' ),
+			'ru' => array( 'Упомяните {name} в политике конфиденциальности.', 'Consent Manager Pro по умолчанию освобождает его от согласия как инструмент без cookie и создаёт для вас политику конфиденциальности.' ),
 		),
 		'loader-gtm'      => array(
 			'ro' => array( 'În Google Tag Manager, pornește fiecare tag doar cu acord, prin Consent Mode.', 'Consent Manager Pro trimite semnalele Google Consent Mode v2 înainte ca GTM să pornească tagurile. Ce încarcă GTM controlezi din GTM.' ),
 			'en' => array( 'In Google Tag Manager, fire each tag only with consent, through Consent Mode.', 'Consent Manager Pro sends the Google Consent Mode v2 signals before GTM fires its tags. What GTM loads, you control in GTM.' ),
+			'ru' => array( 'В Google Tag Manager запускайте каждый тег только при согласии, через Consent Mode.', 'Consent Manager Pro передаёт сигналы Google Consent Mode v2 до того, как GTM запустит теги. Что загружает GTM, вы контролируете в GTM.' ),
 		),
 		'loader'          => array(
 			'ro' => array( 'Află ce scripturi aduce {name} și pornește-le doar după acord.', $check['ro'] ),
 			'en' => array( 'Find out which scripts {name} brings and start them only after consent.', $check['en'] ),
+			'ru' => array( 'Выясните, какие скрипты приносит {name}, и запускайте их только после согласия.', $check['ru'] ),
 		),
 		'resource-google-fonts' => array(
 			'ro' => array( 'Găzduiește fonturile pe serverul tău.', 'În modul Pro, Consent Manager Pro are o opțiune care descarcă o dată fonturile încărcate printr-un tag link și le servește de pe serverul tău. Fonturile aduse prin @import sau prin JavaScript trebuie mutate de mână.' ),
 			'en' => array( 'Host the fonts on your own server.', 'In Pro mode, Consent Manager Pro has an option that downloads, once, the fonts loaded through a link tag and serves them from your own server. Fonts brought in by @import or by JavaScript have to be moved by hand.' ),
+			'ru' => array( 'Разместите шрифты на своём сервере.', 'В режиме Pro в Consent Manager Pro есть опция, которая один раз скачивает шрифты, загружаемые через тег link, и отдаёт их с вашего сервера. Шрифты, подключённые через @import или через JavaScript, нужно перенести вручную.' ),
 		),
 		'resource-emoji'  => array(
 			'ro' => array( 'Oprește emoji-urile WordPress sau servește-le de pe serverul tău.', 'Consent Manager Pro are un comutator care oprește emoji-urile WordPress.' ),
 			'en' => array( 'Turn off WordPress emoji or serve them from your own server.', 'Consent Manager Pro has a switch that turns off WordPress emoji.' ),
+			'ru' => array( 'Отключите эмодзи WordPress или отдавайте их со своего сервера.', 'В Consent Manager Pro есть переключатель, который отключает эмодзи WordPress.' ),
 		),
 		'resource-gravatar' => array(
 			'ro' => array( 'Folosește avatare locale în locul Gravatar.', 'Consent Manager Pro are un comutator care înlocuiește Gravatar cu un avatar local.' ),
 			'en' => array( 'Use local avatars instead of Gravatar.', 'Consent Manager Pro has a switch that replaces Gravatar with a local avatar.' ),
+			'ru' => array( 'Используйте локальные аватары вместо Gravatar.', 'В Consent Manager Pro есть переключатель, который заменяет Gravatar локальным аватаром.' ),
 		),
 		'resource'        => array(
 			'ro' => array( 'Găzduiește fișierele pe serverul tău sau renunță la ele.', 'Scanarea din Consent Manager Pro îți arată pe ce pagini se încarcă {what}, ca să știi ce muți pe serverul tău.' ),
 			'en' => array( 'Host the files on your own server or drop them.', 'The Consent Manager Pro scan shows you which pages load {what}, so you know what to move to your own server.' ),
+			'ru' => array( 'Разместите файлы на своём сервере или откажитесь от них.', 'Сканирование в Consent Manager Pro показывает, на каких страницах загружаются {what}, чтобы вы знали, что перенести на свой сервер.' ),
 		),
 		'held-attribute'  => array(
 			'ro' => array( 'Fă scriptul inert până la acord (type="text/plain") sau pornește blocarea automată a bannerului.', 'Consent Manager Pro rescrie pe server scripturile cunoscute ca inerte până la acord, fără să depindă de un mod de blocare automată.' ),
 			'en' => array( 'Make the script inert until consent (type="text/plain") or turn on the banner\'s automatic blocking.', 'Consent Manager Pro rewrites known scripts on the server as inert until consent, without relying on an automatic blocking mode.' ),
+			'ru' => array( 'Сделайте скрипт неактивным до согласия (type="text/plain") или включите автоматическую блокировку баннера.', 'Consent Manager Pro на сервере переписывает известные скрипты в неактивные до согласия, не завися от режима автоматической блокировки.' ),
 		),
 		'held-unknown'    => array(
 			'ro' => array( 'Verifică în DevTools ce se încarcă înainte de acord și ține trackerele oprite până atunci.', $check['ro'] ),
 			'en' => array( 'Check in DevTools what loads before consent and keep trackers off until then.', $check['en'] ),
+			'ru' => array( 'Проверьте в DevTools, что загружается до согласия, и держите трекеры выключенными до этого момента.', $check['ru'] ),
 		),
 		'consent-mode'    => array(
 			'ro' => array( 'Pentru siguranță deplină, încarcă {name} doar după acord.', 'Consent Manager Pro are două moduri de măsurare: Strict încarcă Google Analytics doar după acord, Advanced îl pornește în Consent Mode.' ),
 			'en' => array( 'To be fully safe, load {name} only after consent.', 'Consent Manager Pro has two measurement modes: Strict loads Google Analytics only after consent, Advanced starts it in Consent Mode.' ),
+			'ru' => array( 'Для полной уверенности загружайте {name} только после согласия.', 'В Consent Manager Pro есть два режима измерения: Strict загружает Google Analytics только после согласия, Advanced запускает его в Consent Mode.' ),
 		),
 		'cookie'          => array(
 			'ro' => array( 'Pune cookie-ul {cookie} doar după acord: pornește {name} abia după ce vizitatorul acceptă.', 'Consent Manager Pro blochează serviciile cunoscute până la acord. Dacă serverul tău pune cookie-ul, întreabă întâi pluginul, cu cmp_is_allowed().' ),
 			'en' => array( 'Set the {cookie} cookie only after consent: start {name} only once the visitor accepts.', 'Consent Manager Pro blocks known services until consent. If your server sets the cookie, ask the plugin first, with cmp_is_allowed().' ),
+			'ru' => array( 'Устанавливайте cookie {cookie} только после согласия: запускайте {name}, только когда посетитель согласится.', 'Consent Manager Pro блокирует известные сервисы до согласия. Если cookie устанавливает ваш сервер, сначала спросите плагин, через cmp_is_allowed().' ),
 		),
 		'cookies-other'   => array(
 			'ro' => array( 'Află ce face fiecare cookie. Cele care urmăresc vizitatorul se pun doar după acord.', 'În Consent Manager Pro le poți trece în categorii, cu furnizor, durată și scop, iar ele apar în tabelul de cookie-uri.' ),
 			'en' => array( 'Find out what each cookie does. The ones that track the visitor are set only after consent.', 'In Consent Manager Pro you can list them under categories, with provider, duration and purpose, and they show up in the cookie table.' ),
+			'ru' => array( 'Выясните, что делает каждый cookie. Те, что отслеживают посетителя, устанавливаются только после согласия.', 'В Consent Manager Pro их можно распределить по категориям, с поставщиком, сроком и целью, и они появятся в таблице cookie.' ),
 		),
 		'policy'          => array(
 			'ro' => array( 'Pune pe fiecare pagină, de obicei în subsol, un link spre politica de confidențialitate și de cookie-uri.', 'Consent Manager Pro generează politica de confidențialitate și pe cea de cookie-uri (RO, RU, EN), iar shortcode-ul [cmp_privacy_link] pune linkul.' ),
 			'en' => array( 'Put a link to your privacy and cookie policy on every page, usually in the footer.', 'Consent Manager Pro generates the privacy and cookie policies (RO, RU, EN), and the [cmp_privacy_link] shortcode adds the link.' ),
+			'ru' => array( 'Разместите на каждой странице, обычно в подвале, ссылку на политику конфиденциальности и политику cookie.', 'Consent Manager Pro создаёт политику конфиденциальности и политику cookie (RO, RU, EN), а шорткод [cmp_privacy_link] добавляет ссылку.' ),
 		),
 		'cmp'             => array(
 			'ro' => array( 'Verifică dacă bannerul ține trackerele oprite până la acord.', 'Consent Manager Pro blochează scripturile și embed-urile cunoscute până la acord și e gratuit.' ),
 			'en' => array( 'Check that the banner keeps trackers off until consent.', 'Consent Manager Pro blocks known scripts and embeds until consent, and it is free.' ),
+			'ru' => array( 'Проверьте, держит ли баннер трекеры выключенными до согласия.', 'Consent Manager Pro блокирует известные скрипты и встраивания до согласия, и он бесплатный.' ),
 		),
 		'ours'            => array(
 			'ro' => array( 'Ține pluginul la ultima versiune.', $check['ro'] ),
 			'en' => array( 'Keep the plugin on the latest version.', $check['en'] ),
+			'ru' => array( 'Держите плагин на последней версии.', $check['ru'] ),
 		),
 		'ours-attention'  => array(
 			'ro' => array( 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul.', $check['ro'] ),
 			'en' => array( 'Check script blocking and the service list in the settings, then update the plugin.', $check['en'] ),
+			'ru' => array( 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин.', $check['ru'] ),
 		),
 		'empty'           => array(
 			'ro' => array( 'Verifică dacă adresa e corectă și dacă pagina se deschide în browser.', $check['ro'] ),
 			'en' => array( 'Check that the address is right and that the page opens in a browser.', $check['en'] ),
+			'ru' => array( 'Проверьте, правильный ли адрес и открывается ли страница в браузере.', $check['ru'] ),
 		),
 		'challenge'       => array(
 			'ro' => array( 'Verifică singur, din browser, cu DevTools.', $check['ro'] ),
 			'en' => array( 'Check it yourself in your browser, with DevTools.', $check['en'] ),
+			'ru' => array( 'Проверьте сами, в браузере, с помощью DevTools.', $check['ru'] ),
 		),
 		'truncated'       => array(
 			'ro' => array( 'Verifică restul paginii din browser, cu DevTools.', $check['ro'] ),
 			'en' => array( 'Check the rest of the page in your browser, with DevTools.', $check['en'] ),
+			'ru' => array( 'Проверьте остальную часть страницы в браузере, с помощью DevTools.', $check['ru'] ),
 		),
 		'partial'         => array(
 			'ro' => array( 'Verifică restul paginii din browser, cu DevTools.', $check['ro'] ),
 			'en' => array( 'Check the rest of the page in your browser, with DevTools.', $check['en'] ),
+			'ru' => array( 'Проверьте остальную часть страницы в браузере, с помощью DevTools.', $check['ru'] ),
 		),
 		'unread'          => array(
 			'ro' => array( 'Deschide paginile care nu au putut fi citite și verifică-le singur, din browser.', $check['ro'] ),
 			'en' => array( 'Open the pages that could not be read and check them yourself in your browser.', $check['en'] ),
+			'ru' => array( 'Откройте страницы, которые не удалось прочитать, и проверьте их сами в браузере.', $check['ru'] ),
 		),
 		'transport'       => array(
 			'ro' => array( 'Instalează un certificat TLS (de exemplu Let\'s Encrypt) și trimite tot traficul pe https.', 'Consent Manager Pro nu configurează HTTPS: asta se face la găzduire.' ),
 			'en' => array( 'Install a TLS certificate (for example Let\'s Encrypt) and send all traffic to https.', 'Consent Manager Pro does not set up HTTPS: that is done at your hosting.' ),
+			'ru' => array( 'Установите сертификат TLS (например, Let\'s Encrypt) и переведите весь трафик на https.', 'Consent Manager Pro не настраивает HTTPS: это делается на хостинге.' ),
 		),
 	);
+	$lang  = cmp_check_lang( $lang );
 	$pair  = isset( $t[ $key ][ $lang ] ) ? $t[ $key ][ $lang ] : array( '', '' );
 	$map   = array();
 	foreach ( $vars as $k => $v ) {
@@ -1203,26 +1271,51 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 	);
 }
 
-/** The six checks of the "passed" list, in display order: id => array( ro, en ). */
+/** The six checks of the "passed" list, in display order: id => array( ro => title, en => title, ru => title ). */
 function cmp_check_passed_titles(): array {
 	return array(
-		'no-trackers'        => array( 'Niciun tracker activ înainte de acord', 'No tracker active before consent' ),
-		'no-tracker-cookies' => array( 'Niciun cookie de tracker trimis de server', 'No tracker cookie sent by the server' ),
-		'no-ip-resources'    => array( 'Nicio resursă care trimite IP-ul vizitatorilor', 'No resource that sends visitors\' IP address' ),
-		'banner'             => array( 'Bannerul de cookie-uri e pe pagină', 'The cookie banner is on the page' ),
-		'policy'             => array( 'Linkul spre politica de confidențialitate e pe pagină', 'The privacy policy link is on the page' ),
-		'https'              => array( 'HTTPS', 'HTTPS' ),
+		'no-trackers'        => array(
+			'ro' => 'Niciun tracker activ înainte de acord',
+			'en' => 'No tracker active before consent',
+			'ru' => 'Ни одного активного трекера до согласия',
+		),
+		'no-tracker-cookies' => array(
+			'ro' => 'Niciun cookie de tracker trimis de server',
+			'en' => 'No tracker cookie sent by the server',
+			'ru' => 'Сервер не отправляет cookie трекеров',
+		),
+		'no-ip-resources'    => array(
+			'ro' => 'Nicio resursă care trimite IP-ul vizitatorilor',
+			'en' => 'No resource that sends visitors\' IP address',
+			'ru' => 'Нет ресурсов, передающих IP-адрес посетителей',
+		),
+		'banner'             => array(
+			'ro' => 'Bannerul de cookie-uri e pe pagină',
+			'en' => 'The cookie banner is on the page',
+			'ru' => 'Баннер cookie есть на странице',
+		),
+		'policy'             => array(
+			'ro' => 'Linkul spre politica de confidențialitate e pe pagină',
+			'en' => 'The privacy policy link is on the page',
+			'ru' => 'Ссылка на политику конфиденциальности есть на странице',
+		),
+		'https'              => array(
+			'ro' => 'HTTPS',
+			'en' => 'HTTPS',
+			'ru' => 'HTTPS',
+		),
 	);
 }
 
 /** Passed ids as a list of array( id, title ), in display order. */
 function cmp_check_passed_list( array $ids, string $lang ): array {
-	$out = array();
+	$out  = array();
+	$lang = cmp_check_lang( $lang );
 	foreach ( cmp_check_passed_titles() as $id => $titles ) {
 		if ( in_array( $id, $ids, true ) ) {
 			$out[] = array(
 				'id'    => $id,
-				'title' => $titles[ 'en' === $lang ? 1 : 0 ],
+				'title' => $titles[ $lang ],
 			);
 		}
 	}
@@ -1280,18 +1373,43 @@ function cmp_check_top( array $findings, array $rank ): array {
 
 /** Name of a resource type: 'title' (start of a sentence) or 'what' (inside one). */
 function cmp_check_resource_label( string $type, string $lang, string $form = 'title' ): string {
+	// type => lang => array( title, what ).
 	$labels = array(
-		'google-fonts' => array( 'Google Fonts', 'Google Fonts', 'Google Fonts', 'Google Fonts' ),
-		'adobe-fonts'  => array( 'Adobe Fonts', 'Adobe Fonts', 'Adobe Fonts', 'Adobe Fonts' ),
-		'font-awesome' => array( 'Font Awesome', 'Font Awesome', 'Font Awesome', 'Font Awesome' ),
-		'cdn'          => array( 'Un CDN public', 'fișiere de pe un CDN public', 'A public CDN', 'files from a public CDN' ),
-		'gravatar'     => array( 'Gravatar', 'avatare Gravatar', 'Gravatar', 'Gravatar avatars' ),
-		'emoji'        => array( 'Emoji WordPress', 'emoji-urile WordPress', 'WordPress emoji', 'WordPress emoji' ),
+		'google-fonts' => array(
+			'ro' => array( 'Google Fonts', 'Google Fonts' ),
+			'en' => array( 'Google Fonts', 'Google Fonts' ),
+			'ru' => array( 'Google Fonts', 'Google Fonts' ),
+		),
+		'adobe-fonts'  => array(
+			'ro' => array( 'Adobe Fonts', 'Adobe Fonts' ),
+			'en' => array( 'Adobe Fonts', 'Adobe Fonts' ),
+			'ru' => array( 'Adobe Fonts', 'Adobe Fonts' ),
+		),
+		'font-awesome' => array(
+			'ro' => array( 'Font Awesome', 'Font Awesome' ),
+			'en' => array( 'Font Awesome', 'Font Awesome' ),
+			'ru' => array( 'Font Awesome', 'Font Awesome' ),
+		),
+		'cdn'          => array(
+			'ro' => array( 'Un CDN public', 'fișiere de pe un CDN public' ),
+			'en' => array( 'A public CDN', 'files from a public CDN' ),
+			'ru' => array( 'Публичный CDN', 'файлы с публичного CDN' ),
+		),
+		'gravatar'     => array(
+			'ro' => array( 'Gravatar', 'avatare Gravatar' ),
+			'en' => array( 'Gravatar', 'Gravatar avatars' ),
+			'ru' => array( 'Gravatar', 'аватары Gravatar' ),
+		),
+		'emoji'        => array(
+			'ro' => array( 'Emoji WordPress', 'emoji-urile WordPress' ),
+			'en' => array( 'WordPress emoji', 'WordPress emoji' ),
+			'ru' => array( 'Эмодзи WordPress', 'эмодзи WordPress' ),
+		),
 	);
 	if ( ! isset( $labels[ $type ] ) ) {
 		return $type;
 	}
-	return $labels[ $type ][ ( 'en' === $lang ? 2 : 0 ) + ( 'what' === $form ? 1 : 0 ) ];
+	return $labels[ $type ][ cmp_check_lang( $lang ) ][ 'what' === $form ? 1 : 0 ];
 }
 
 /** Finding ids for services: the brief's short names where they differ from the library id. */
@@ -1330,7 +1448,7 @@ function cmp_check_is_wordpress( string $html ): bool {
  * @param array  $headers  Response headers: name => value|values, or "Name: value" lines.
  * @param string $url      The checked URL (own-site resources are not third-party).
  * @param array  $services The service library (cmp_check_load_services()).
- * @param string $lang     'ro' (default) or 'en'.
+ * @param string $lang     'ro' (default), 'en' or 'ru'.
  * @return array array(
  *               'status'   => clean|issues|unsure|error,
  *               'findings' => list of array( id, severity => issue|unsure|info, title, explain, law,
@@ -1343,7 +1461,7 @@ function cmp_check_is_wordpress( string $html ): bool {
  *               The first three keys and the first five finding keys are the v1 shape.
  */
 function cmp_check_analyze( string $html, array $headers, string $url, array $services, string $lang = 'ro' ): array {
-	$lang     = 'en' === $lang ? 'en' : 'ro';
+	$lang     = cmp_check_lang( $lang );
 	$lib_ids  = array_flip( array_column( cmp_check_norm_services( $services ), 'id' ) );
 	$services = cmp_check_merge_extra( cmp_check_norm_services( $services ), $lang );
 	$findings = array();
@@ -1385,7 +1503,12 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			$evidence[ $id ][] = $s;
 		}
 	};
-	$inline = 'en' === $lang ? 'inline script in the page' : 'script inline în pagină';
+	$inlines = array(
+		'ro' => 'script inline în pagină',
+		'en' => 'inline script in the page',
+		'ru' => 'встроенный скрипт на странице',
+	);
+	$inline  = $inlines[ $lang ];
 	$finish = function ( $status, $cmp ) use ( &$findings, &$evidence, &$rank, &$ctx, $lang ) {
 		$list = array();
 		$sev  = array();
@@ -1730,7 +1853,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
  *
  * @param array  $page_results List of cmp_check_analyze() results, each with
  *                             'url' (the page). The first one is the homepage.
- * @param string $lang         'ro' (default) or 'en', as the page results.
+ * @param string $lang         'ro' (default), 'en' or 'ru', as the page results.
  * @param int    $unread       Pages that could not be fetched at all (not in $page_results).
  * @return array array(
  *               'status'   => the cmp_check_status() rules over every finding of
@@ -1750,7 +1873,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
  *               'engine'   => 'html-v2' ).
  */
 function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0 ): array {
-	$lang      = 'en' === $lang ? 'en' : 'ro';
+	$lang      = cmp_check_lang( $lang );
 	$level     = array(
 		'info'   => 0,
 		'unsure' => 1,
@@ -1839,17 +1962,23 @@ function cmp_check_aggregate( array $page_results, string $lang, int $unread = 0
 	$missed = $errors + max( 0, $unread );
 	if ( $checked > 0 && $missed > 0 ) {
 		$one              = 1 === $missed;
-		$title            = 'en' === $lang
-			? $missed . ( $one ? ' page could not be read, so we cannot say everything is fine' : ' pages could not be read, so we cannot say everything is fine' )
-			: $missed . ( $one ? ' pagină nu a putut fi citită, așa că nu putem spune că totul e în regulă' : ' pagini nu au putut fi citite, așa că nu putem spune că totul e în regulă' );
+		$titles           = array(
+			'ro' => $missed . ( $one ? ' pagină nu a putut fi citită, așa că nu putem spune că totul e în regulă' : ' pagini nu au putut fi citite, așa că nu putem spune că totul e în regulă' ),
+			'en' => $missed . ( $one ? ' page could not be read, so we cannot say everything is fine' : ' pages could not be read, so we cannot say everything is fine' ),
+			'ru' => $missed . ' ' . cmp_check_ru_plural( $missed, 'страницу', 'страницы', 'страниц' ) . ' не удалось прочитать, поэтому мы не можем сказать, что всё в порядке',
+		);
+		$explains         = array(
+			'ro' => 'Am verificat celelalte pagini, dar ce e pe paginile pe care nu le-am putut citi nu apare în raport.',
+			'en' => 'We checked the other pages, but whatever is on the pages we could not read is not in this report.',
+			'ru' => 'Остальные страницы мы проверили, но то, что есть на страницах, которые мы не смогли прочитать, в отчёт не попало.',
+		);
+		$title            = $titles[ $lang ];
 		$fix              = cmp_check_fix( 'unread', $lang );
 		$merged['pages:unread'] = array(
 			'id'       => 'pages:unread',
 			'severity' => 'unsure',
 			'title'    => $title,
-			'explain'  => 'en' === $lang
-				? 'We checked the other pages, but whatever is on the pages we could not read is not in this report.'
-				: 'Am verificat celelalte pagini, dar ce e pe paginile pe care nu le-am putut citi nu apare în raport.',
+			'explain'  => $explains[ $lang ],
 			'law'      => '',
 			'evidence' => array(),
 			'pages'    => array(),

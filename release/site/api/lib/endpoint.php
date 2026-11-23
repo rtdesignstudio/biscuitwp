@@ -11,7 +11,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * (cmp_check_main).
  *
  * Request: POST, form-encoded or JSON, fields url (required, at most 2048
- * characters), lang (ro|en, default ro) and owner (required: the visitor
+ * characters), lang (ro|en|ru, default ro) and owner (required: the visitor
  * confirms owning the site or having the owner's permission; JSON 1, "1" or
  * true, form "1"). Response: JSON
  * { status, findings[], cmp, checked_url, engine: "html-v2", pages{}, passed[], top[] },
@@ -106,8 +106,25 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'busy'               => 'There are a lot of checks right now. Try again in a few minutes.',
 			'forbidden'          => 'The check can only be started from the consent.rt.md page.',
 		),
+		'ru' => array(
+			'method_not_allowed' => 'Проверка запускается из формы на странице.',
+			'bad_request'        => 'Введите адрес сайта, который хотите проверить.',
+			'owner_required'     => 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
+			'bad_url'            => 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
+			'blocked_address'    => 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
+			'fetch_failed'       => 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
+			'timeout'            => 'Сайт ответил слишком медленно (более 10 секунд). Попробуйте ещё раз позже.',
+			'too_large'          => 'Главная страница больше 2 МБ, это слишком много для автоматической проверки.',
+			'too_many_redirects' => 'Сайт перенаправляет слишком много раз (более 3).',
+			'http_status'        => 'Сайт ответил ошибкой HTTP %d, поэтому мы не смогли прочитать страницу.',
+			'not_html'           => 'Адрес не ведёт на веб-страницу (HTML).',
+			'rate_limited'       => 'Вы сделали много проверок за короткое время. Попробуйте ещё раз через минуту.',
+			'unavailable'        => 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
+			'busy'               => 'Сейчас идёт очень много проверок. Попробуйте ещё раз через несколько минут.',
+			'forbidden'          => 'Проверку можно запустить только со страницы consent.rt.md.',
+		),
 	);
-	$lang = 'en' === $lang ? 'en' : 'ro';
+	$lang = cmp_check_lang( $lang );
 	$msg  = isset( $t[ $lang ][ $code ] ) ? $t[ $lang ][ $code ] : $t[ $lang ]['fetch_failed'];
 	return 'http_status' === $code ? sprintf( $msg, max( 0, min( 999, $status ) ) ) : $msg;
 }
@@ -161,7 +178,7 @@ function cmp_check_read_request( string $content_type, string $raw, array $post 
 	}
 	return array(
 		'url'   => trim( $url ),
-		'lang'  => 'en' === $lang ? 'en' : 'ro',
+		'lang'  => cmp_check_lang( $lang ),
 		'owner' => '1' === $owner || ( $json && ( 1 === $owner || true === $owner ) ),
 	);
 }

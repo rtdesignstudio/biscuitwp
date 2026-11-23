@@ -119,6 +119,9 @@ $cmp_site_pages = array(
 	'confidentialitate/index.html' => 'ro',
 	'en/privacy/index.html'       => 'en',
 	'changelog/index.html'        => 'ro',
+	'ru/index.html'               => 'ru',
+	'ru/security/index.html'      => 'ru',
+	'ru/privacy/index.html'       => 'ru',
 );
 foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'changelog/feed.xml', 'style.css', '.well-known/security.txt' ) ) as $f ) {
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ), "build-site: writes {$f}" );
@@ -225,22 +228,29 @@ foreach ( $cmp_site_pages as $page => $lang ) {
 }
 
 // ---- Shared header and footer, style assets (Task 1 of the landing) ---------------
-// page => [ lang, current nav key, language-switch target ]
+// page => [ lang, current nav key, language switch: lang => target ]
+$cmp_site_home  = array( 'ro' => '/', 'en' => '/en/', 'ru' => '/ru/' );
+$cmp_site_sec   = array( 'ro' => '/securitate/', 'en' => '/en/security/', 'ru' => '/ru/security/' );
+$cmp_site_priv  = array( 'ro' => '/confidentialitate/', 'en' => '/en/privacy/', 'ru' => '/ru/privacy/' );
 $cmp_site_frame = array(
-	'index.html'                   => array( 'ro', 'home', '/en/' ),
-	'en/index.html'                => array( 'en', 'home', '/' ),
-	'securitate/index.html'        => array( 'ro', 'security', '/en/security/' ),
-	'en/security/index.html'       => array( 'en', 'security', '/securitate/' ),
-	'confidentialitate/index.html' => array( 'ro', 'privacy', '/en/privacy/' ),
-	'en/privacy/index.html'        => array( 'en', 'privacy', '/confidentialitate/' ),
-	'changelog/index.html'         => array( 'ro', 'changelog', '/en/' ),
+	'index.html'                   => array( 'ro', 'home', $cmp_site_home ),
+	'en/index.html'                => array( 'en', 'home', $cmp_site_home ),
+	'ru/index.html'                => array( 'ru', 'home', $cmp_site_home ),
+	'securitate/index.html'        => array( 'ro', 'security', $cmp_site_sec ),
+	'en/security/index.html'       => array( 'en', 'security', $cmp_site_sec ),
+	'ru/security/index.html'       => array( 'ru', 'security', $cmp_site_sec ),
+	'confidentialitate/index.html' => array( 'ro', 'privacy', $cmp_site_priv ),
+	'en/privacy/index.html'        => array( 'en', 'privacy', $cmp_site_priv ),
+	'ru/privacy/index.html'        => array( 'ru', 'privacy', $cmp_site_priv ),
+	'changelog/index.html'         => array( 'ro', 'changelog', array( 'ro' => '/changelog/', 'en' => '/en/', 'ru' => '/ru/' ) ),
 );
 $cmp_site_nav = array(
 	'ro' => array( 'home' => '/', 'security' => '/securitate/', 'privacy' => '/confidentialitate/', 'changelog' => '/changelog/' ),
 	'en' => array( 'home' => '/en/', 'security' => '/en/security/', 'privacy' => '/en/privacy/', 'changelog' => '/changelog/' ),
+	'ru' => array( 'home' => '/ru/', 'security' => '/ru/security/', 'privacy' => '/ru/privacy/', 'changelog' => '/changelog/' ),
 );
 foreach ( $cmp_site_frame as $page => $fr ) {
-	list( $lang, $cur, $alt ) = $fr;
+	list( $lang, $cur, $alts ) = $fr;
 	$src = (string) @file_get_contents( $cmp_site_root . '/site/' . $page );
 	cmp_assert_eq( substr_count( $src, '<!-- HEADER' ), 1, "site/{$page}: one header marker" );
 	cmp_assert_eq( substr_count( $src, '<!-- FOOTER' ), 1, "site/{$page}: one footer marker" );
@@ -259,9 +269,14 @@ foreach ( $cmp_site_frame as $page => $fr ) {
 		cmp_assert( false !== strpos( $part, 'https://github.com/rtdesignstudio/consent-manager-pro' ), "{$page}: {$where} links GitHub" );
 	}
 	cmp_assert( false !== strpos( $head, 'href="' . $cmp_site_nav[ $lang ]['home'] . '"' ), "{$page}: header links home" );
-	cmp_assert( false !== strpos( $head, 'href="' . $alt . '"' ), "{$page}: header has the language switch to {$alt}" );
-	cmp_assert( false !== strpos( $head, 'hreflang="' . ( 'ro' === $lang ? 'en' : 'ro' ) . '"' ), "{$page}: language switch has hreflang" );
-	cmp_assert( false !== strpos( $foot, 'href="' . $alt . '"' ) && false !== strpos( $foot, 'hreflang="' . ( 'ro' === $lang ? 'en' : 'ro' ) . '"' ), "{$page}: footer has the language switch to {$alt}" );
+	foreach ( $alts as $al => $alt ) {
+		$sw = '<a href="' . $alt . '" hreflang="' . $al . '" lang="' . $al . '">';
+		if ( $al === $lang ) {
+			cmp_assert( false === strpos( $head, 'hreflang="' . $al . '"' ) && false === strpos( $foot, 'hreflang="' . $al . '"' ), "{$page}: no switch to its own language" );
+		} else {
+			cmp_assert( false !== strpos( $head, $sw ) && false !== strpos( $foot, '<li>' . $sw ), "{$page}: header and footer switch to {$al} ({$alt})" );
+		}
+	}
 	cmp_assert( 1 === preg_match( '#<a href="' . preg_quote( $cmp_site_nav[ $lang ][ $cur ], '#' ) . '"[^>]*aria-current="page"#', $head ), "{$page}: current page marked in the nav" );
 	cmp_assert_eq( substr_count( $head, 'aria-current="page"' ), 1, "{$page}: exactly one current item" );
 	cmp_assert( false !== strpos( $foot, 'href="https://rt.md/"' ) && false !== strpos( $foot, 'RT Design Studio' ), "{$page}: footer links RT Design Studio" );
@@ -269,11 +284,11 @@ foreach ( $cmp_site_frame as $page => $fr ) {
 	preg_match_all( '#<link rel="stylesheet" href="([^"]+)"#', $html, $css_links );
 	cmp_assert_eq( array_map( 'basename', $css_links[1] ), array( 'style.css' ), "{$page}: one stylesheet, style.css (rt.md v2 tokens live there)" );
 	cmp_assert( false !== strpos( $html, '<meta name="color-scheme" content="light">' ), "{$page}: light only, like rt.md" );
-	if ( 'ro' === $lang ) {
-		cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$page}: no em dash in Romanian text" );
+	if ( 'en' !== $lang ) {
+		cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$page}: no em dash in {$lang} text" );
 	}
 }
-foreach ( array( 'header.ro.html', 'footer.ro.html', 'header.en.html', 'footer.en.html' ) as $f ) {
+foreach ( array( 'header.ro.html', 'footer.ro.html', 'header.en.html', 'footer.en.html', 'header.ru.html', 'footer.ru.html' ) as $f ) {
 	cmp_assert( is_file( $cmp_site_root . '/site/partials/' . $f ), "site/partials/{$f} exists" );
 }
 foreach ( array( 'partials/header.ro.html', 'partials/footer.ro.html', 'demo/index.html', 'demo/embed/index.html' ) as $f ) {
@@ -283,7 +298,7 @@ cmp_assert( ! is_dir( $cmp_site_out1 . '/partials' ), 'build-site: partials are 
 foreach ( array( 'assets/tokens.css', 'assets/typography.css' ) as $f ) {
 	cmp_assert( ! is_file( $cmp_site_root . '/site/' . $f ) && ! is_file( $cmp_site_out1 . '/' . $f ), "build-site: no old design-system file {$f}" );
 }
-foreach ( array( 'fonts/inter-tight/OFL.txt', 'fonts/inter-tight/inter-tight-normal-latin.woff2', 'fonts/inter-tight/inter-tight-normal-latin-ext.woff2' ) as $f ) {
+foreach ( array( 'fonts/inter-tight/OFL.txt', 'fonts/inter-tight/inter-tight-normal-latin.woff2', 'fonts/inter-tight/inter-tight-normal-latin-ext.woff2', 'fonts/inter-tight/inter-tight-normal-cyrillic.woff2', 'fonts/inter-tight/inter-tight-normal-cyrillic-ext.woff2' ) as $f ) {
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ), "build-site: writes {$f}" );
 }
 $cmp_site_ofl = $cmp_site_read( 'fonts/inter-tight/OFL.txt' );
@@ -347,7 +362,7 @@ foreach ( cmp_site_files( $cmp_site_root . '/site' ) as $f ) {
 }
 
 // Privacy pages: every outgoing host the plugin can contact is declared.
-foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html' ) as $page ) {
+foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html', 'ru/privacy/index.html' ) as $page ) {
 	$html = $cmp_site_read( $page );
 	foreach ( array( 'consent.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/README.md' ) as $needle ) {
 		cmp_assert( false !== strpos( $html, $needle ), "{$page}: mentions {$needle}" );
@@ -373,7 +388,7 @@ file_put_contents( $cmp_site_badbeta, json_encode( array( 'version' => '1.0"><sc
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_tmp . '/out8' ), array_merge( $cmp_site_env, array( 'CMP_BETA_MANIFEST' => $cmp_site_badbeta ) ) );
 cmp_assert( 0 !== $rc, 'build-site: a beta manifest with an invalid version fails' );
 
-foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $lang ) {
+foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' => 'ru' ) as $page => $lang ) {
 	$html = $cmp_site_read( $page );
 	foreach ( array( 'verifica', 'legea', 'functii', 'demo', 'comparatie', 'resurse' ) as $id ) {
 		cmp_assert( false !== strpos( $html, 'id="' . $id . '"' ), "{$page}: section #{$id}" );
@@ -404,7 +419,7 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $la
 	cmp_assert( false !== strpos( $sec, 'id="cum-verifici"' ), "{$page}: how to check it yourself (#cum-verifici)" );
 	cmp_assert( 1 === preg_match( '#<button\b[^>]*\bid="verifica-anuleaza"[^>]*>#', $sec, $cbm ) && 1 === preg_match( '#\shidden[\s>]#', $cbm[0] ), "{$page}: the Cancel button is hidden until a check runs" );
 	// The demo, in an iframe of /demo/, with three styles.
-	$demo_base = 'ro' === $lang ? '/demo/embed/' : '/demo/en/embed/';
+	$demo_base = 'ro' === $lang ? '/demo/embed/' : '/demo/' . $lang . '/embed/';
 	cmp_assert( 1 === preg_match( '#<iframe\b[^>]*\bsrc="' . preg_quote( $demo_base, '#' ) . '\?style=(minimal|brand|friendly)"[^>]*\bname="cmp-demo"[^>]*\btitle="[^"]+"#', $html ), "{$page}: demo iframe of {$demo_base}" );
 	foreach ( array( 'minimal', 'brand', 'friendly' ) as $st ) {
 		cmp_assert( 1 === preg_match( '#<a\b[^>]*href="' . preg_quote( $demo_base, '#' ) . '\?style=' . $st . '"[^>]*target="cmp-demo"#', $html ), "{$page}: demo style switch {$st}" );
@@ -710,7 +725,7 @@ foreach ( array( 'site/assets/verifica.js', 'site/assets/site.js', 'site/index.h
 
 // The demo: pages under /demo/, only local files. The embed pages (in the landing's
 // iframe) are bare: no site header or footer and no style switch of their own.
-foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html' => array( 'en', false ), 'demo/embed/index.html' => array( 'ro', true ), 'demo/en/embed/index.html' => array( 'en', true ) ) as $page => $dm ) {
+foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html' => array( 'en', false ), 'demo/embed/index.html' => array( 'ro', true ), 'demo/en/embed/index.html' => array( 'en', true ), 'demo/ru/index.html' => array( 'ru', false ), 'demo/ru/embed/index.html' => array( 'ru', true ) ) as $page => $dm ) {
 	list( $lang, $bare ) = $dm;
 	$html = $cmp_site_read( $page );
 	cmp_assert( '' !== $html, "build-site: writes {$page}" );
@@ -956,3 +971,18 @@ foreach ( cmp_site_files( $cmp_site_out1 ) as $f ) {
 	$h = (string) file_get_contents( $cmp_site_out1 . '/' . $f );
 	cmp_assert_eq( substr_count( $h, $cmp_site_widget ), false !== strpos( $h, '<footer class="site">' ) ? 1 : 0, "out/{$f}: feedback widget loader with the footer only" );
 }
+
+// ---- The Russian version: same hooks as the Romanian pages, no Romanian or em dash left ----
+foreach ( array( 'ru/index.html', 'ru/privacy/index.html', 'ru/security/index.html', 'demo/ru/index.html', 'demo/ru/embed/index.html', 'partials/header.ru.html', 'partials/footer.ru.html' ) as $f ) {
+	$src = (string) @file_get_contents( $cmp_site_root . '/site/' . $f );
+	cmp_assert( '' !== $src, "site/{$f} exists" );
+	cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$f}: no em dash" );
+	$text = preg_replace( '/<[^>]*>/', ' ', preg_replace( '#<(script|style)\b.*?</\1>#s', '', $src ) );
+	cmp_assert( 0 === preg_match( '/[ăâîșțĂÂÎȘȚ]/u', str_replace( 'München', '', $text ) ), "site/{$f}: no Romanian text left" );
+}
+$cmp_site_ru = (string) @file_get_contents( $cmp_site_root . '/site/ru/index.html' );
+foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">', 'Проверьте свой сайт' ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_ru, $need ), "ru/index.html: has {$need}" );
+}
+cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/demo/demo.js' ), "ru: '/ru/privacy/'" ), 'demo.js: the Russian demo banner links the Russian privacy page' );
+cmp_assert( 1 === preg_match( '/@font-face\s*\{[^}]*inter-tight-normal-cyrillic\.woff2[^}]*U\+0400-045F/s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: Inter Tight Cyrillic for the Russian pages' );

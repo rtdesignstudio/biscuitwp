@@ -9,6 +9,22 @@
 	font-style: normal;
 	font-weight: 100 900;
 	font-display: swap;
+	src: url("fonts/inter-tight/inter-tight-normal-cyrillic-ext.woff2") format("woff2");
+	unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+	font-family: "Inter Tight";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("fonts/inter-tight/inter-tight-normal-cyrillic.woff2") format("woff2");
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+	font-family: "Inter Tight";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
 	src: url("fonts/inter-tight/inter-tight-normal-latin-ext.woff2") format("woff2");
 	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
@@ -85,7 +101,7 @@ header.site nav li { margin: 0; }
 header.site nav a, .lang a { display: inline-block; padding: 10px 0; font-size: 15px; color: var(--mute-text); text-decoration: none; transition: color .3s; }
 header.site nav a:hover, .lang a:hover { color: var(--ink); }
 header.site nav a[aria-current="page"] { color: var(--ink); }
-.lang { margin: 0; }
+.lang { margin: 0; display: flex; gap: 0 16px; }
 
 /* Fixed header (rt.md .top), only with JavaScript: without it the header stays in the
    page flow. It is transparent at the top of the page; after the first steps of scrolling

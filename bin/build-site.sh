@@ -17,12 +17,13 @@
 #                   https://github.com/rtdesignstudio/consent-manager-pro/releases/latest
 #                   when a stable manifest exists, else releases/tag/v<version> of the
 #                   beta manifest, else the releases page;
-#   every page      <!-- HEADER page=<key> alt=<url> --> and <!-- FOOTER --> are replaced
-#                   by site/partials/{header,footer}.<lang>.html (lang = the page's
-#                   <html lang>); page = the current nav item (home, security, privacy,
-#                   changelog), alt = the paired page for the language switch.
-#                   site/partials/ itself is not copied to the output. The footer
-#                   repeats the language switch ({{ALT}}).
+#   every page      <!-- HEADER page=<key> ro=<url> en=<url> ru=<url> --> and <!-- FOOTER -->
+#                   are replaced by site/partials/{header,footer}.<lang>.html (lang = the
+#                   page's <html lang>: ro, en or ru); page = the current nav item (home,
+#                   security, privacy, changelog); ro / en / ru = this page in each
+#                   language, for the language switch ({{LANGS}} in the header: links to
+#                   the two other languages; {{LANGS_LI}} in the footer: the same, as <li>).
+#                   site/partials/ itself is not copied to the output.
 #                   A page with <!-- BARE --> instead (the demo embedded in the
 #                   landing's iframe) gets neither; it must not carry the other two.
 #   assets/         site.js (phone menu, motion), verifica.js and favicon/rt-favicon-512.png
@@ -250,6 +251,15 @@ $txt = array(
 		"unset"               => "not set yet",
 		"none"                => "Currently none.",
 	),
+	"ru" => array(
+		"SIGN_PUBLIC_KEY"     => array( "Ключ релизов", "Подписывает zip-пакеты." ),
+		"MANIFEST_PUBLIC_KEY" => array( "Ключ манифестов", "Подписывает манифесты обновлений." ),
+		"RESCUE_PUBLIC_KEY"   => array( "Резервный ключ", "Хранится офлайн. Может подписывать и пакеты, и манифесты, если один из других ключей нужно заменить." ),
+		"pub"                 => "Открытый ключ (base64)",
+		"fp"                  => "Отпечаток SHA-256",
+		"unset"               => "ещё не задан",
+		"none"                => "Пока нет.",
+	),
 );
 
 function keys_html( array $keys, array $t ) {
@@ -290,7 +300,7 @@ function revoked_html( array $revoked, array $t ) {
 	return $out . "</ul>";
 }
 
-foreach ( array( "securitate/index.html" => "ro", "en/security/index.html" => "en" ) as $f => $lang ) {
+foreach ( array( "securitate/index.html" => "ro", "en/security/index.html" => "en", "ru/security/index.html" => "ru" ) as $f => $lang ) {
 	$p    = $dir . "/" . $f;
 	$html = rd( $p );
 	$html = fill( $html, "<!-- KEYS -->", keys_html( $keys, $txt[ $lang ] ), $f );
@@ -377,11 +387,12 @@ if ( is_file( $manifest ) ) {
 // ---- Shared header and footer (site/partials) -------------------------------------
 $partials = array();
 foreach ( array( "header", "footer" ) as $kind ) {
-	foreach ( array( "ro", "en" ) as $l ) {
+	foreach ( array( "ro", "en", "ru" ) as $l ) {
 		$partials[ $kind ][ $l ] = rtrim( rd( $dir . "/partials/" . $kind . "." . $l . ".html" ), "\n" );
 	}
 }
 $nav_keys = array( "home", "security", "privacy", "changelog" );
+$lang_names = array( "ro" => "Română", "en" => "English", "ru" => "Русский" );
 $pit      = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir . "/partials", FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 $pages    = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $pages as $f ) {
@@ -389,7 +400,7 @@ foreach ( $pages as $f ) {
 	$p    = $f->getPathname();
 	$rel  = substr( $p, strlen( $dir ) + 1 );
 	$html = rd( $p );
-	if ( ! preg_match( '/<html lang="(ro|en)"/', $html, $lm ) ) { fail( $rel . ": <html lang> must be ro or en" ); }
+	if ( ! preg_match( '/<html lang="(ro|en|ru)"/', $html, $lm ) ) { fail( $rel . ": <html lang> must be ro, en or ru" ); }
 	$l = $lm[1];
 	if ( false !== strpos( $html, "<!-- BARE" ) ) {
 		// A bare page: no shared header or footer at all.
@@ -406,14 +417,18 @@ foreach ( $pages as $f ) {
 		foreach ( $am as $a ) { $attrs[ $a[1] ] = $a[2]; }
 	}
 	$page = isset( $attrs["page"] ) ? $attrs["page"] : "";
-	$alt  = isset( $attrs["alt"] ) ? $attrs["alt"] : "";
 	if ( "" !== $page && ! in_array( $page, $nav_keys, true ) ) { fail( $rel . ": unknown page=" . $page . " in the header marker" ); }
-	if ( ! preg_match( "#^/[A-Za-z0-9/_.-]*$#", $alt ) ) { fail( $rel . ": the header marker needs alt=/path/ (the paired page)" ); }
+	$links = array();
+	foreach ( $lang_names as $code => $name ) {
+		$u = isset( $attrs[ $code ] ) ? $attrs[ $code ] : "";
+		if ( ! preg_match( "#^/[A-Za-z0-9/_.-]*$#", $u ) ) { fail( $rel . ": the header marker needs " . $code . "=/path/ (this page in that language)" ); }
+		if ( $code !== $l ) { $links[] = "<a href=\"" . h( $u ) . "\" hreflang=\"" . $code . "\" lang=\"" . $code . "\">" . $name . "</a>"; }
+	}
 	$header = $partials["header"][ $l ];
 	foreach ( $nav_keys as $k ) { $header = str_replace( "{{CUR_" . $k . "}}", $page === $k ? " aria-current=\"page\"" : "", $header ); }
-	$header = str_replace( "{{ALT}}", h( $alt ), $header );
+	$header = str_replace( "{{LANGS}}", implode( " ", $links ), $header );
 	$html   = preg_replace_callback( '/<!-- HEADER( [^>]*?)? -->/', function () use ( $header ) { return $header; }, $html );
-	$html   = fill( $html, "<!-- FOOTER -->", str_replace( "{{ALT}}", h( $alt ), $partials["footer"][ $l ] ), $rel );
+	$html   = fill( $html, "<!-- FOOTER -->", str_replace( "{{LANGS_LI}}", "<li>" . implode( "</li>\n<li>", $links ) . "</li>", $partials["footer"][ $l ] ), $rel );
 	$html   = str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html );
 	wr( $p, $html );
 }

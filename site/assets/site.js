@@ -8,7 +8,7 @@
 
 	var doc = document;
 	var root = doc.documentElement;
-	var en = root.lang === 'en';
+	var en = root.lang === 'en', ru = root.lang === 'ru';
 	var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	root.classList.add('js');
@@ -21,7 +21,7 @@
 		var nav = header && header.querySelector('nav');
 		var bar = header && header.querySelector('.wrap');
 		if (!nav || !bar) { return; }
-		var L = en ? ['Menu', 'Close'] : ['Meniu', 'Închide'];
+		var L = en ? ['Menu', 'Close'] : ru ? ['Меню', 'Закрыть'] : ['Meniu', 'Închide'];
 
 		var btn = doc.createElement('button');
 		btn.className = 'menu-btn';

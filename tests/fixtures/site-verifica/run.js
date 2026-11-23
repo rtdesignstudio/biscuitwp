@@ -3,7 +3,7 @@
    the server's answer and prints what the visitor would read, as JSON (for
    tests/test-site.php). innerHTML, outerHTML and insertAdjacentHTML throw here.
 
-   node run.js <ro|en> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
+   node run.js <ro|en|ru> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
    The counter endpoint answers {"checks": N}, or 404 when no number is given; a JSON
    object instead of the number is sent as the whole answer.
    [<share: "" | "noclip">]: after the report, its "Copy" and "Save as PDF" buttons are
@@ -12,7 +12,7 @@ var fs = require('fs');
 var path = require('path');
 var vm = require('vm');
 
-var lang = process.argv[2] === 'en' ? 'en' : 'ro';
+var lang = process.argv[2] === 'en' || process.argv[2] === 'ru' ? process.argv[2] : 'ro';
 var fixture = JSON.parse(fs.readFileSync(path.join(__dirname, process.argv[3] + '.json'), 'utf8'));
 var ownerTicked = process.argv[4] !== '0';
 var counterArg = process.argv[5] || 'fail';

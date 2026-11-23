@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<title>Демо · Consent Manager Pro</title>
+<meta name="description" content="Баннер Consent Manager Pro в трёх стилях. Без трекеров.">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/demo/cmp.min.css">
+<script src="/demo/demo.js"></script>
+<script src="/demo/cmp.min.js" defer></script>
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="demo">
+<!-- HEADER ro=/demo/ en=/demo/en/ ru=/demo/ru/ -->
+<main id="main" class="wrap">
+<h1>Демо: баннер</h1>
+<p>Так баннер видит новый посетитель. Выберите стиль, затем попробуйте кнопки. Страница не загружает никаких трекеров.</p>
+<p class="switch" role="group" aria-label="Стиль баннера">
+<a href="/demo/ru/?style=minimal" data-style="minimal">Минимальный</a>
+<a href="/demo/ru/?style=brand" data-style="brand">Brand</a>
+<a href="/demo/ru/?style=friendly" data-style="friendly">Дружелюбный</a>
+</p>
+<p class="actions">
+<button type="button" class="btn" id="demo-reset">Показать снова</button>
+<a class="btn btn-ghost" href="#cmp-settings" data-cmp-settings>Настройки cookie</a>
+</p>
+<p class="muted small">Демо ставит один cookie, <code>cmp_consent</code>, строго необходимый: он запоминает ваш выбор на один день, только на <code>/demo/</code>. «Показать снова» его удаляет.</p>
+</main>
+<!-- FOOTER -->
+</body>
+</html>
