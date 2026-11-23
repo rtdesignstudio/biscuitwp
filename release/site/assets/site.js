@@ -13,6 +13,11 @@
 
 	root.classList.add('js');
 
+	/* "Salvează ca PDF" on printable pages: the browser's own print dialog. */
+	Array.prototype.forEach.call(doc.querySelectorAll('[data-print]'), function (b) {
+		b.addEventListener('click', function () { window.print(); });
+	});
+
 	/* ---- Phone menu (rt.md): a button with two lines (long on top, short below) opens a
 	   white sheet with the same links as the header nav, large and numbered; the same
 	   button turns into an x and closes it. The header stays above the sheet. ---------- */

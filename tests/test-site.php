@@ -986,3 +986,28 @@ foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica
 }
 cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/demo/demo.js' ), "ru: '/ru/privacy/'" ), 'demo.js: the Russian demo banner links the Russian privacy page' );
 cmp_assert( 1 === preg_match( '/@font-face\s*\{[^}]*inter-tight-normal-cyrillic\.woff2[^}]*U\+0400-045F/s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: Inter Tight Cyrillic for the Russian pages' );
+
+// ---- „Legea 195/2024 pe scurt”: the checklist page in three languages ----------------
+$cmp_site_law = array( 'legea-195/index.html' => 'ro', 'en/law-195/index.html' => 'en', 'ru/law-195/index.html' => 'ru' );
+$cmp_site_law_n = null;
+foreach ( $cmp_site_law as $f => $lang ) {
+	$src = (string) @file_get_contents( $cmp_site_root . '/site/' . $f );
+	cmp_assert( '' !== $src, "site/{$f} exists" );
+	cmp_assert( false !== strpos( $src, '<html lang="' . $lang . '"' ) && false !== strpos( $src, '<body class="checklist">' ), "site/{$f}: lang {$lang}, checklist body" );
+	cmp_assert( false !== strpos( $src, '<!-- HEADER ro=/legea-195/ en=/en/law-195/ ru=/ru/law-195/ -->' ) && 1 === substr_count( $src, '<!-- FOOTER -->' ), "site/{$f}: header and footer markers" );
+	cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$f}: no em dash" );
+	cmp_assert( 1 === preg_match( '#<button type="button" class="btn btn-ghost" data-print>[^<]+</button>#', $src ), "site/{$f}: the Save as PDF button" );
+	preg_match_all( '#<li><label><input type="checkbox"> <strong>[^<]+</strong></label>.*?<p class="law">[^<]+</p>.*?</li>#s', $src, $items );
+	$n = count( $items[0] );
+	cmp_assert( $n >= 18, "site/{$f}: at least 18 checklist items, each with a checkbox and a law reference ({$n})" );
+	cmp_assert( null === $cmp_site_law_n || $cmp_site_law_n === $n, "site/{$f}: same number of items in every language" );
+	$cmp_site_law_n = $n;
+	foreach ( array( '195/2024', '1 000 000 MDL', '2 000 000 MDL', '72', '250', '14', 'https://www.legis.md/cautare/getResults?doc_id=155899&amp;lang=ro', 'https://datepersonale.md/wp-content/uploads/2024/09/Law-no.-195-2024-on-personal-data-protection-1.pdf', '<time datetime="2026-11-23">' ) as $need ) {
+		cmp_assert( false !== strpos( $src, $need ), "site/{$f}: has {$need}" );
+	}
+}
+foreach ( array( 'index.html' => '/legea-195/', 'en/index.html' => '/en/law-195/', 'ru/index.html' => '/ru/law-195/' ) as $f => $href ) {
+	cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/' . $f ), '<p class="law-link">' ) && false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/' . $f ), 'href="' . $href . '"' ), "site/{$f}: the law section links {$href}" );
+}
+cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' ), "querySelectorAll('[data-print]')" ), 'site.js: data-print buttons open the print dialog' );
+cmp_assert( 1 === preg_match( '/@media print\s*\{[^@]*\.checklist header\.site/s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: the checklist prints without header and footer' );
