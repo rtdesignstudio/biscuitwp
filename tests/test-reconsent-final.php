@@ -118,6 +118,10 @@ if ( method_exists( 'CMP_Legal', 'has_generated_header' ) && method_exists( 'CMP
 	cmp_assert_eq( CMP_Legal::has_generated_header( '<p>Document generat automat de Consent Manager Pro</p>' ), true, 'I2 header: without the period' );
 	cmp_assert_eq( CMP_Legal::has_generated_header( '<p>Политика</p><p>Документ автоматически создан Consent Manager Pro.</p>' ), false, 'I2 header: not at the start -> no' );
 	cmp_assert_eq( CMP_Legal::has_generated_header( '<p>Our own privacy text. Document generat automat de Consent Manager Pro.</p>' ), false, 'I2 header: text before it -> no' );
+	foreach ( array( 'Document generat automat de BiscuitWP.', 'Документ автоматически создан BiscuitWP.', 'Document generated automatically by BiscuitWP.', 'Документ автоматически создан Consent Manager Pro.', 'Document generated automatically by Consent Manager Pro.' ) as $fx_hdr ) {
+		cmp_assert_eq( CMP_Legal::has_generated_header( '<p><em>' . $fx_hdr . '</em></p>' ), true, "I2 header: recognised after the rename too: $fx_hdr" );
+	}
+	cmp_assert_eq( CMP_Legal::has_generated_header( '<p>Our own privacy text. Document generat automat de BiscuitWP.</p>' ), false, 'I2 header: new name, text before it -> no' );
 	cmp_assert_eq( CMP_Legal::has_generated_header( '' ), false, 'I2 header: empty -> no' );
 	cmp_assert_eq( CMP_Legal::has_generated_header( null ), false, 'I2 header: null -> no' );
 	cmp_assert_eq( CMP_Legal::refreshable_translation( 'privacy', 'privacy', '<p>anything</p>' ), true, 'I2 refreshable: marked for this type' );
@@ -129,7 +133,7 @@ $fx_legal = $fx_src( 'includes/modules/class-legal.php' );
 cmp_assert( 1 === preg_match( "/function sync_translation\(.*?self::refreshable_translation\(.*?update_post_meta\( \\\$existing_id, '_cmp_legal_type', \\\$type \);/s", $fx_legal ), 'I2: sync_translation refreshes recognised translations and marks them' );
 $fx_lp = $fx_src( 'includes/admin/class-legal-page.php' );
 cmp_assert( false === strpos( $fx_lp, 'Regenerarea suprascrie și traducerile create de plugin; paginile create de tine nu sunt atinse.' ), 'I2: old hint replaced' );
-cmp_assert( false !== strpos( $fx_lp, 'Document generat automat de Consent Manager Pro' ), 'I2: the hint names the header that identifies plugin pages' );
+cmp_assert( false !== strpos( $fx_lp, '„Document generat automat de BiscuitWP”' ) && false !== strpos( $fx_lp, '„Document generat automat de Consent Manager Pro”' ), 'I2: the hint names the header that identifies plugin pages (current and former name)' );
 
 // ---------------------------------------------------------------------------
 // T6: Light cookie table lists only what loads in Light.

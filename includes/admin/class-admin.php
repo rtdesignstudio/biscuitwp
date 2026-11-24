@@ -83,8 +83,8 @@ class CMP_Admin {
 
 	public function menu() {
 		add_menu_page(
-			__( 'Consent Manager', 'consent-manager-pro' ),
-			__( 'Consent Manager', 'consent-manager-pro' ),
+			__( 'BiscuitWP', 'consent-manager-pro' ),
+			__( 'BiscuitWP', 'consent-manager-pro' ),
 			'manage_options',
 			self::SLUG,
 			array( 'CMP_Settings_Page', 'render' ),
@@ -151,7 +151,7 @@ class CMP_Admin {
 		$msg = CMP_Services::using_fallback()
 			? __( 'Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul).', 'consent-manager-pro' )
 			: __( 'Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect.', 'consent-manager-pro' );
-		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Consent Manager Pro:', 'consent-manager-pro' ) . '</strong> '
+		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> '
 			. esc_html( $msg )
 			. ' <a href="' . esc_url( admin_url( 'admin.php?page=' . CMP_Services_Page::SLUG ) ) . '">' . esc_html__( 'Detalii în „Servicii”', 'consent-manager-pro' ) . '</a></p></div>';
 	}
@@ -176,17 +176,17 @@ class CMP_Admin {
 		}
 		$v = sanitize_text_field( wp_unslash( $_GET['cmp_up'] ) );
 		if ( 'unavailable' === $v ) {
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.', 'consent-manager-pro' ) . '</p></div>';
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.', 'consent-manager-pro' ) . '</p></div>';
 		} elseif ( 'latest' === $v ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf(
 				/* translators: %s — current plugin version */
-				__( 'Consent Manager Pro: ai ultima versiune (%s).', 'consent-manager-pro' ),
+				__( 'BiscuitWP: ai ultima versiune (%s).', 'consent-manager-pro' ),
 				CMP_VERSION
 			) ) . '</p></div>';
 		} else {
 			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf(
 				/* translators: %s — new version number */
-				__( 'Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now" din lista de mai jos.', 'consent-manager-pro' ),
+				__( 'BiscuitWP: este disponibilă versiunea %s — folosește „Update now" din lista de mai jos.', 'consent-manager-pro' ),
 				$v
 			) ) . '</p></div>';
 		}

@@ -168,14 +168,19 @@ cmp_assert( in_array( 'tracker:ga4', cmp_sc_ids( $r ), true ), 'cookiebot ignore
 $r = cmp_sc_run( 'x', array(), 'ro', '<script data-cmp-category="statistics" src="https://www.googletagmanager.com/gtag/js?id=G-1"></script>' );
 cmp_assert( in_array( 'tracker:ga4', cmp_sc_ids( $r ), true ), 'data-cmp-category alone on a live script: still reported (only the blocker rewrite makes it inert)' );
 
-// Consent Manager Pro.
+// BiscuitWP.
 $r = cmp_sc_run( 'cmp-pro-js' );
-cmp_assert_eq( $r['cmp'], 'Consent Manager Pro', 'cmp.js: Consent Manager Pro' );
+cmp_assert_eq( $r['cmp'], 'BiscuitWP', 'cmp.js: BiscuitWP' );
 $f = cmp_sc_find( $r, 'cmp:consent-manager-pro' );
 cmp_assert( null !== $f && 'info' === $f['severity'], 'cmp.js: info finding for our plugin' );
 cmp_assert_eq( $r['status'], 'clean', 'cmp.js: clean' );
 $r = cmp_sc_run( 'cmp-pro-markup' );
-cmp_assert_eq( $r['cmp'], 'Consent Manager Pro', 'data-cmp-action: Consent Manager Pro' );
+cmp_assert_eq( $r['cmp'], 'BiscuitWP', 'data-cmp-action: BiscuitWP' );
+// The page compares data.cmp with the same display name the server sends (the slug and needles are unchanged).
+$sc_vjs = (string) file_get_contents( dirname( __DIR__ ) . '/site/assets/verifica.js' );
+cmp_assert( false !== strpos( $sc_vjs, "var ours = data.cmp === 'BiscuitWP';" ), 'verifica.js: "ours" compares with the display name BiscuitWP' );
+$sc_sig = cmp_check_cmp_signatures();
+cmp_assert( 'consent-manager-pro' === $sc_sig[0]['slug'] && 'BiscuitWP' === $sc_sig[0]['name'] && in_array( '/wp-content/plugins/consent-manager-pro/', $sc_sig[0]['needles'], true ), 'signatures: ours first, slug and plugin-path needle unchanged, displayed as BiscuitWP' );
 $r = cmp_sc_run( 'x', array(), 'ro', '<script src="https://cdn.other.example/cmp.js"></script>' );
 cmp_assert_eq( $r['cmp'], null, 'cmp.js on another host is not ours' );
 $clean_text = cmp_sc_find( cmp_sc_run( 'cmp-pro-markup' ), 'cmp:consent-manager-pro' )['explain'];

@@ -1,6 +1,6 @@
 # Security Policy
 
-Consent Manager Pro handles consent records for site visitors, so we take security reports seriously. Thank you for reporting responsibly.
+BiscuitWP handles consent records for site visitors, so we take security reports seriously. Thank you for reporting responsibly.
 
 ## Reporting a vulnerability
 

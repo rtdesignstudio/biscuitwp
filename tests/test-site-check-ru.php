@@ -274,7 +274,7 @@ foreach ( $agg['findings'] as $f ) {
 		$t = $f;
 	}
 }
-cmp_assert( null !== $t && 'Вы уже используете Consent Manager Pro' === $t['title'] && false !== strpos( $t['explain'], 'что-то всё равно запускается до согласия' ) && '' === cmp_ru_bad( $t['fix'] ), 'ru: our own plugin\'s attention finding in Russian' );
+cmp_assert( null !== $t && 'Вы уже используете BiscuitWP' === $t['title'] && false !== strpos( $t['explain'], 'что-то всё равно запускается до согласия' ) && '' === cmp_ru_bad( $t['fix'] ), 'ru: our own plugin\'s attention finding in Russian' );
 
 /* ------------------------------------------------------------------
  * The endpoint: lang=ru accepted, Russian error messages.
@@ -360,7 +360,7 @@ $cmp_ru_own = function ( $text, $fixture ) {
 			$strings[] = ( isset( $p['path'] ) ? $p['path'] : '/' ) . ( isset( $p['query'] ) ? '?' . $p['query'] : '' );
 		}
 	}
-	$strings = array_merge( $strings, array( 'Consent Manager Pro', 'Google Fonts', 'consent.rt.md', 'https://consent.rt.md/', 'PDF', 'DevTools', 'HTTPS', 'HTTP', 'WordPress', 'standalone' ) );
+	$strings = array_merge( $strings, array( 'BiscuitWP', 'Google Fonts', 'consent.rt.md', 'https://consent.rt.md/', 'PDF', 'DevTools', 'HTTPS', 'HTTP', 'WordPress', 'standalone' ) );
 	usort(
 		$strings,
 		function ( $a, $b ) {
@@ -395,7 +395,7 @@ $r = $cmp_ru_dom( 'ru', 'issues-sitemap', true, '1239' );
 cmp_assert( empty( $r['error'] ), 'render (ru): issues-sitemap runs without errors' . ( empty( $r['error'] ) ? '' : ': ' . $r['error'] ) );
 cmp_assert( isset( $r['body']['lang'] ) && 'ru' === $r['body']['lang'] && 1 === $r['body']['owner'], 'render (ru): the request body sends lang=ru' );
 $text = isset( $r['text'] ) ? $r['text'] : '';
-foreach ( array( 'Мы нашли 3 проблемы', 'С чего начать', 'Проблемы', 'Нужно проверить', 'Что мы нашли', 'На каких страницах (7)', 'Почему это важно', 'Как исправить', 'Правовая основа: ', 'С Consent Manager Pro: ', 'В порядке', 'Полезно знать', 'Мы проверили 10 страниц. На сайте 84 страницы; мы проверили первые 10. Полная проверка сейчас недоступна.', 'Не удалось прочитать: /lent/ (не ответила вовремя).', 'Consent Manager Pro это исправляет', 'Скачать', 'Что он умеет' ) as $need ) {
+foreach ( array( 'Мы нашли 3 проблемы', 'С чего начать', 'Проблемы', 'Нужно проверить', 'Что мы нашли', 'На каких страницах (7)', 'Почему это важно', 'Как исправить', 'Правовая основа: ', 'С BiscuitWP: ', 'В порядке', 'Полезно знать', 'Мы проверили 10 страниц. На сайте 84 страницы; мы проверили первые 10. Полная проверка сейчас недоступна.', 'Не удалось прочитать: /lent/ (не ответила вовремя).', 'BiscuitWP это исправляет', 'Скачать', 'Что он умеет' ) as $need ) {
 	cmp_assert( false !== strpos( $text, $need ), "render (ru): issues-sitemap shows „{$need}”" );
 }
 cmp_assert_eq( isset( $r['facts'] ) ? $r['facts'] : '', '3|проблемы,1|нужно проверить,4|в порядке', 'render (ru): the counters with Russian plurals' );

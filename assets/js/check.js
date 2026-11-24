@@ -1,4 +1,4 @@
-/* Consent Manager Pro: "Verificare" admin screen. Loads the scanned pages one
+/* BiscuitWP: "Verificare" admin screen. Loads the scanned pages one
  * at a time in a hidden frame in check mode (?cmp_check=<nonce>), collects what
  * each page reports (before / after a simulated "Acceptă tot") and saves the
  * raw data; the server classifies it and the screen shows the report. ES5. */

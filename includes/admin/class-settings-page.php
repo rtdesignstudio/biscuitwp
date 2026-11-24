@@ -93,7 +93,7 @@ class CMP_Settings_Page {
 		$s = CMP_Consent::get_settings();
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'Consent Manager — Setări', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'modes' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Setări', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'modes' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['cmp_measurement'] ) && 'ack' === $_GET['cmp_measurement'] ) : ?>
 				<div class="notice notice-error"><p><?php esc_html_e( 'Celelalte setări au fost salvate, dar modul Advanced nu a fost activat: bifează confirmarea de sub opțiune. Măsurarea a rămas pe Strict.', 'consent-manager-pro' ); ?></p></div>
 			<?php elseif ( isset( $_GET['updated'] ) ) : ?>

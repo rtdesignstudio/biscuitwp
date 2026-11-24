@@ -176,7 +176,7 @@ class CMP_Services_Page {
 		}
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'Consent Manager — Servicii', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Servicii', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'consent-manager-pro' ); ?></p></div>
 			<?php endif; ?>
@@ -423,7 +423,7 @@ class CMP_Services_Page {
 		}
 		$url     = admin_url( 'admin.php?page=' . self::SLUG );
 		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_services_notice' ), 'cmp_dismiss_services_notice' );
-		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Consent Manager Pro:', 'consent-manager-pro' ) . '</strong> ';
+		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> ';
 		if ( $names ) {
 			echo esc_html( sprintf( /* translators: %s: service names */ __( 'Am început să blocăm până la acord: %s —', 'consent-manager-pro' ), implode( ', ', $names ) ) );
 		} else {

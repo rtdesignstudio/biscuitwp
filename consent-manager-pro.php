@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Consent Manager Pro
+ * Plugin Name: BiscuitWP
  * Plugin URI: https://consent.rt.md/
  * Description: Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN).
  * Version: 1.0.0

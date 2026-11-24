@@ -5,7 +5,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 }
 
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": the request / response logic of
+ * BiscuitWP, "Verifică-ți site-ul": the request / response logic of
  * POST /api/verifica.php, kept apart from the superglobals so it can be tested
  * without a web server (cmp_check_handle) and run as is by verifica.php
  * (cmp_check_main).

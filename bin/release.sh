@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Release Consent Manager Pro (B8a: signed static manifests on consent.rt.md,
+# Release BiscuitWP (B8a: signed static manifests on consent.rt.md,
 # zips on GitHub Releases).
 #
 #   bin/release.sh X.Y.Z [--dry-run [--skip-checks]]   build, sign, GitHub prerelease, manifest-beta.json

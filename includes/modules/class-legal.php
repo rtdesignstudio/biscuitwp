@@ -298,8 +298,8 @@ class CMP_Legal {
 		}
 		$table = self::current_table_html( 'ro' );
 		wp_add_privacy_policy_content(
-			'Consent Manager Pro',
-			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
+			'BiscuitWP',
+			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
 		);
 	}
 
@@ -338,8 +338,15 @@ class CMP_Legal {
 		return isset( $s['legal_meta'] ) && is_array( $s['legal_meta'] ) ? $s['legal_meta'] : array();
 	}
 
-	/** Opening words of the generated-document header (0.3.x-0.4.x and RO/RU/EN since 0.5.0). */
+	/**
+	 * Opening words of the generated-document header (0.3.x-0.4.x and RO/RU/EN
+	 * since 0.5.0). The product was renamed to BiscuitWP after 1.0.0; pages
+	 * generated before carry the former name, so both are recognised.
+	 */
 	const GENERATED_HEADERS = array(
+		'Document generat automat de BiscuitWP',
+		'Документ автоматически создан BiscuitWP',
+		'Document generated automatically by BiscuitWP',
 		'Document generat automat de Consent Manager Pro',
 		'Документ автоматически создан Consent Manager Pro',
 		'Document generated automatically by Consent Manager Pro',

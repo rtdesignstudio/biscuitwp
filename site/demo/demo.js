@@ -1,4 +1,4 @@
-/* Consent Manager Pro, consent.rt.md: the live demo (/demo/, /demo/en/ and /demo/ru/).
+/* BiscuitWP, consent.rt.md: the live demo (/demo/, /demo/en/ and /demo/ru/).
    Sets window.CMP_CONFIG for the standalone banner (cmp.min.js, loaded next, with
    defer) from ?style=minimal|brand|friendly. The demo loads no trackers.
    Its only cookie, cmp_consent, is strictly necessary and kept on /demo/ only:

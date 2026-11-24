@@ -1,4 +1,4 @@
-/* Consent Manager Pro — full-page overlay + centered modal (egov design system).
+/* BiscuitWP — full-page overlay + centered modal (egov design system).
  * Theme-agnostic: everything scoped under .cmp with custom properties. The
  * overlay blocks the page (blur + scrim) and scroll is locked via the
  * body.cmp-has-banner class (added by banner.js) until the user decides. */

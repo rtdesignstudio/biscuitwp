@@ -4,7 +4,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 	exit;
 }
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": signatures of consent banners
+ * BiscuitWP, "Verifică-ți site-ul": signatures of consent banners
  * (CMPs), tag loaders and the markers CMPs use to hold a script until consent.
  * Data only. Every needle is lowercase and matched case-insensitively.
  */
@@ -13,14 +13,14 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * Known CMPs, in detection order (ours first). Each needle is a plain substring
  * of the page HTML: plugin paths, CDN hosts and attributes specific to that
  * product, never generic words that could appear in an article.
- * Consent Manager Pro's standalone build (a same-site cmp.js / cmp.min.js) is
+ * BiscuitWP's standalone build (a same-site cmp.js / cmp.min.js) is
  * matched separately in check.php.
  */
 function cmp_check_cmp_signatures() {
 	return array(
 		array(
 			'slug'    => 'consent-manager-pro',
-			'name'    => 'Consent Manager Pro',
+			'name'    => 'BiscuitWP',
 			'needles' => array( '/wp-content/plugins/consent-manager-pro/', 'data-cmp-action', 'id="cmp-overlay"', 'data-cmp-block=', 'data-cmp-embed-src' ),
 		),
 		array(

@@ -19,7 +19,7 @@ cmp_assert( false === stripos( $lic, 'WordPress' ), 'LICENSE: no WordPress text'
 
 // readme.txt.
 $rt = $cmp_rd_read( 'readme.txt' );
-cmp_assert( 0 === strpos( $rt, '=== Consent Manager Pro ===' ), 'readme.txt: title' );
+cmp_assert( 0 === strpos( $rt, '=== BiscuitWP ===' ), 'readme.txt: title' );
 cmp_assert( false !== strpos( $rt, 'Requires PHP: 7.4' ), 'readme.txt: Requires PHP' );
 cmp_assert( false !== strpos( $rt, 'License: GPLv2 or later' ), 'readme.txt: License' );
 $main = $cmp_rd_read( 'consent-manager-pro.php' );

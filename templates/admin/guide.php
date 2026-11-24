@@ -29,7 +29,7 @@ if ( function_exists( 'cmp_is_allowed' ) && cmp_is_allowed( 'statistics' ) ) {
 CMPCODE;
 ?>
 <div class="wrap cmp-admin cmp-guide">
-	<h1><?php esc_html_e( 'Consent Manager — Ghid', 'consent-manager-pro' ); ?></h1>
+	<h1><?php esc_html_e( 'BiscuitWP — Ghid', 'consent-manager-pro' ); ?></h1>
 	<p><?php esc_html_e( 'Ghidul te duce de la instalare la un site care cere acord corect. Citește-l o dată de la cap la coadă, apoi revino la secțiunea de care ai nevoie.', 'consent-manager-pro' ); ?></p>
 	<p><?php esc_html_e( 'Fiecare ecran al pluginului are sus un link „Ghid”. El te aduce direct la secțiunea despre acel ecran.', 'consent-manager-pro' ); ?></p>
 
@@ -257,7 +257,7 @@ CMPCODE;
 		<h2 id="update"><?php echo esc_html( $titles['update'] ); ?></h2>
 		<p><?php esc_html_e( 'Pluginul se actualizează din ecranul Plugins, ca orice plugin. După un update, fă trei verificări:', 'consent-manager-pro' ); ?></p>
 		<ol>
-			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Servicii screen */ __( 'Citește notificările Consent Manager Pro din admin. De exemplu, „Am început să blocăm până la acord: …” apare o singură dată, după actualizarea de la o versiune 0.4.x, și numește serviciile care până atunci rulau fără acord. Deschide %1$sServicii%2$s și verifică lista „Găsite pe site”: după un update, biblioteca poate recunoaște servicii noi fără să te anunțe.', 'consent-manager-pro' ), 'cmp-services' ) ); ?></li>
+			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Servicii screen */ __( 'Citește notificările BiscuitWP din admin. De exemplu, „Am început să blocăm până la acord: …” apare o singură dată, după actualizarea de la o versiune 0.4.x, și numește serviciile care până atunci rulau fără acord. Deschide %1$sServicii%2$s și verifică lista „Găsite pe site”: după un update, biblioteca poate recunoaște servicii noi fără să te anunțe.', 'consent-manager-pro' ), 'cmp-services' ) ); ?></li>
 			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Verificare screen */ __( 'Rulează %1$sVerificare%2$s, ca să vezi că paginile sunt încă verzi.', 'consent-manager-pro' ), 'cmp-check' ) ); ?></li>
 			<li><?php echo wp_kses_post( CMP_Guide::with_links( /* translators: %1$s, %2$s: link to the Pagini legale screen */ __( 'Dacă %1$sPagini legale%2$s spune că șabloanele au fost actualizate, regenerează fiecare document. Mesajul dispare după ce le regenerezi pe toate trei.', 'consent-manager-pro' ), 'cmp-legal' ) ); ?></li>
 		</ol>

@@ -1,4 +1,4 @@
-# Consent Manager Pro
+# BiscuitWP
 
 Free and open-source GDPR cookie consent for WordPress: a consent banner that blocks scripts and embeds until the visitor decides, Google Consent Mode v2, a legal pages generator and a consent audit log. Theme-agnostic, no jQuery, no external dependencies. Available in Romanian, Russian and English.
 
@@ -6,7 +6,7 @@ Free and open-source GDPR cookie consent for WordPress: a consent banner that bl
 - **License:** GPL-2.0-or-later (see [LICENSE](LICENSE))
 - **Requires:** WordPress 6.0+, PHP 7.4+
 
-Consent Manager Pro is free, and it stays free. "Pro" means professional, not paid: there is no paid version, no license key and no upsell.
+BiscuitWP (formerly Consent Manager Pro) is free, and it stays free: there is no paid version, no license key and no upsell.
 
 ## What it does
 
@@ -25,7 +25,7 @@ Consent Manager Pro is free, and it stays free. "Pro" means professional, not pa
 2. In WordPress, go to **Plugins > Add New > Upload Plugin**, or unzip it into `wp-content/plugins/`.
 3. Activate it. The audit table and the default categories are created on activation.
 
-Configure under **WP Admin > Consent Manager** (a "Settings" link is also shown directly in the plugins list).
+Configure under **WP Admin > BiscuitWP** (a "Settings" link is also shown directly in the plugins list).
 
 ## Configuration
 
@@ -81,7 +81,7 @@ document.addEventListener('cmp:consent', e => e.detail.categories);
 
 ## Services library
 
-`data/services.json` holds 14 known services, each with provider, hosts, cookies and a default category. The blocker matches the host of each `<script>`/`<iframe>` (parsed, with boundaries) and tags it with `data-cmp-service`; it stays blocked until the category is accepted. Manage it under **WP Admin → Consent Manager → Services** (override a category, disable a service, add custom ones).
+`data/services.json` holds 14 known services, each with provider, hosts, cookies and a default category. The blocker matches the host of each `<script>`/`<iframe>` (parsed, with boundaries) and tags it with `data-cmp-service`; it stays blocked until the category is accepted. Manage it under **WP Admin → BiscuitWP → Services** (override a category, disable a service, add custom ones).
 
 | Default category | Services |
 |---|---|

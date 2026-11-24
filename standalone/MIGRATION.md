@@ -5,7 +5,7 @@ Pași de urmat pentru fiecare pagină HTML (fiecare limbă, fiecare LP).
 ## 1. Adaugă loader-ul (o singură dată per pagină, în `<head>`)
 
 ```html
-<!-- Consent Manager Pro -->
+<!-- BiscuitWP -->
 <link rel="stylesheet" href="https://rt.md/cmp/cmp.css">
 <script>
 window.CMP_CONFIG = {

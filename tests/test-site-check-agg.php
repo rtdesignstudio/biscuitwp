@@ -149,7 +149,7 @@ cmp_assert_eq( array_values( array_diff( $want, array_keys( $cmp_sca_seen ) ) ),
 $ro = cmp_sca_find( cmp_sca_run( $cmp_sca_ga . $cmp_sca_pol ), 'tracker:ga4' );
 $en = cmp_sca_find( cmp_sca_run( $cmp_sca_ga . $cmp_sca_pol, 'https://exemplu.md/', array(), 'en' ), 'tracker:ga4' );
 cmp_assert( $ro['fix'] !== $en['fix'] && $ro['cmp_fix'] !== $en['cmp_fix'], 'fix/cmp_fix: English texts differ from Romanian' );
-cmp_assert( false !== strpos( $ro['cmp_fix'], 'Consent Manager Pro' ) && false !== strpos( $ro['fix'], 'Google Analytics' ), 'fix/cmp_fix: name the service and the plugin' );
+cmp_assert( false !== strpos( $ro['cmp_fix'], 'BiscuitWP' ) && false !== strpos( $ro['fix'], 'Google Analytics' ), 'fix/cmp_fix: name the service and the plugin' );
 $f = cmp_sca_find( cmp_sca_run( '<script async src="https://www.googletagmanager.com/gtag/js?id=AW-1"></script>' . $cmp_sca_pol ), 'tracker:google-ads' );
 cmp_assert( false !== strpos( $f['cmp_fix'], 'personalizat' ), 'cmp_fix: a tracker outside the plugin library is added as a custom service' );
 $f = cmp_sca_find( cmp_sca_run( $cmp_sca_gf ), 'resource:google-fonts' );

@@ -1,4 +1,4 @@
-# Consent Manager Pro — Standalone Bundle
+# BiscuitWP — Standalone Bundle
 
 A standalone, plugin-independent consent management solution for cookie consent, preferences, and tracking control.
 

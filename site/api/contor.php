@@ -1,6 +1,6 @@
 <?php
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": GET /api/contor.php.
+ * BiscuitWP, "Verifică-ți site-ul": GET /api/contor.php.
  *
  * The public total of successful checks and how many found each kind of
  * problem, {"checks": N, "found": {...}}, shown under the form from 100 on. One number kept in the counter folder outside the web root

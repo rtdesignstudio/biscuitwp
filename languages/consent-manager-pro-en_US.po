@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Consent Manager Pro\n"
+"Project-Id-Version: BiscuitWP\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro-public\n"
-"POT-Creation-Date: 2026-11-24T07:28:04+00:00\n"
+"POT-Creation-Date: 2026-11-24T07:45:38+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
-"Last-Translator: Consent Manager Pro\n"
+"Last-Translator: BiscuitWP\n"
 "Language-Team: en_US\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
@@ -15,9 +15,10 @@ msgstr ""
 "X-Domain: consent-manager-pro\n"
 
 #. Plugin Name of the plugin
-#: consent-manager-pro.php
-msgid "Consent Manager Pro"
-msgstr "Consent Manager Pro"
+#: consent-manager-pro.php includes/admin/class-admin.php:86
+#: includes/admin/class-admin.php:87
+msgid "BiscuitWP"
+msgstr "BiscuitWP"
 
 #. Plugin URI of the plugin
 #: consent-manager-pro.php
@@ -30,7 +31,10 @@ msgid ""
 "Free and open-source GDPR cookie consent: a consent banner, the legal pages "
 "(Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. "
 "Multilingual (RO, RU, EN)."
-msgstr "Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN)."
+msgstr ""
+"Free and open-source GDPR cookie consent: a consent banner, the legal pages "
+"(Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. "
+"Multilingual (RO, RU, EN)."
 
 #. Author of the plugin
 #: consent-manager-pro.php
@@ -50,10 +54,6 @@ msgstr "Settings"
 #: includes/admin/class-admin.php:66 includes/admin/class-admin.php:79
 msgid "Caută actualizări"
 msgstr "Check for updates"
-
-#: includes/admin/class-admin.php:86 includes/admin/class-admin.php:87
-msgid "Consent Manager"
-msgstr "Consent Manager"
 
 #: includes/admin/class-admin.php:95 includes/admin/class-settings-page.php:120
 msgid "Aspect"
@@ -94,9 +94,9 @@ msgstr "Guide"
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
 #: includes/admin/class-check-page.php:486
-#: includes/admin/class-legal-page.php:406
-#: includes/admin/class-legal-page.php:459
-#: includes/admin/class-legal-page.php:469
+#: includes/admin/class-legal-page.php:408
+#: includes/admin/class-legal-page.php:461
+#: includes/admin/class-legal-page.php:471
 #: includes/admin/class-services-page.php:284
 #: includes/admin/class-services-page.php:364
 #: includes/admin/class-services-page.php:375
@@ -127,8 +127,8 @@ msgstr ""
 #: includes/admin/class-admin.php:154
 #: includes/admin/class-services-page.php:426
 #: includes/modules/class-updater.php:621
-msgid "Consent Manager Pro:"
-msgstr "Consent Manager Pro:"
+msgid "BiscuitWP:"
+msgstr "BiscuitWP:"
 
 #: includes/admin/class-admin.php:156
 msgid "Detalii în „Servicii”"
@@ -136,27 +136,25 @@ msgstr "Details in “Services”"
 
 #: includes/admin/class-admin.php:179
 msgid ""
-"Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din "
-"nou mai târziu."
+"BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai "
+"târziu."
 msgstr ""
-"Consent Manager Pro: we could not check for updates right now. Please try "
-"again later."
+"BiscuitWP: we could not check for updates right now. Please try again later."
 
 #. translators: %s — current plugin version
 #: includes/admin/class-admin.php:183
 #, php-format
-msgid "Consent Manager Pro: ai ultima versiune (%s)."
-msgstr "Consent Manager Pro: you have the latest version (%s)."
+msgid "BiscuitWP: ai ultima versiune (%s)."
+msgstr "BiscuitWP: you have the latest version (%s)."
 
 #. translators: %s — new version number
 #: includes/admin/class-admin.php:189
 #, php-format
 msgid ""
-"Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" "
-"din lista de mai jos."
+"BiscuitWP: este disponibilă versiunea %s — folosește „Update now\" din lista "
+"de mai jos."
 msgstr ""
-"Consent Manager Pro: version %s is available — use “Update now” in the list "
-"below."
+"BiscuitWP: version %s is available — use “Update now” in the list below."
 
 #: includes/admin/class-appearance-page.php:76
 msgid ""
@@ -212,8 +210,8 @@ msgid "Nu se aplică în modul Light."
 msgstr "Does not apply in Light mode."
 
 #: includes/admin/class-appearance-page.php:159
-msgid "Consent Manager — Aspect"
-msgstr "Consent Manager — Appearance"
+msgid "BiscuitWP — Aspect"
+msgstr "BiscuitWP — Appearance"
 
 #: includes/admin/class-appearance-page.php:160
 msgid ""
@@ -845,8 +843,8 @@ msgid "Golește registrul"
 msgstr "Clear the register"
 
 #: includes/admin/class-categories-page.php:20
-msgid "Consent Manager — Categorii"
-msgstr "Consent Manager — Categories"
+msgid "BiscuitWP — Categorii"
+msgstr "BiscuitWP — Categories"
 
 #: includes/admin/class-categories-page.php:22
 msgid "Categorii salvate."
@@ -1095,8 +1093,8 @@ msgid "sursa: %s"
 msgstr "source: %s"
 
 #: includes/admin/class-check-page.php:236
-msgid "Consent Manager — Verificare"
-msgstr "Consent Manager — Check"
+msgid "BiscuitWP — Verificare"
+msgstr "BiscuitWP — Check"
 
 #: includes/admin/class-check-page.php:238
 msgid "Lista de pagini a fost salvată. Scanarea pornește din nou."
@@ -1197,7 +1195,7 @@ msgstr "No pages scanned yet. Click “Rescan”."
 
 #: includes/admin/class-check-page.php:293
 #: includes/admin/class-check-page.php:409
-#: includes/admin/class-legal-page.php:345
+#: includes/admin/class-legal-page.php:347
 msgid "Pagina"
 msgstr "Page"
 
@@ -1548,97 +1546,97 @@ msgid "Politica de cookie-uri"
 msgstr "Cookie Policy"
 
 #. translators: %s: page title
-#: includes/admin/class-legal-page.php:120
+#: includes/admin/class-legal-page.php:122
 #, php-format
 msgid "„%s” a fost generată pentru alt mod de măsurare. Regenerează pagina."
 msgstr ""
 "“%s” was generated for a different measurement mode. Regenerate the page."
 
-#: includes/admin/class-legal-page.php:243
+#: includes/admin/class-legal-page.php:245
 msgid "bannerul de cookie-uri"
 msgstr "the cookie banner"
 
-#: includes/admin/class-legal-page.php:244
+#: includes/admin/class-legal-page.php:246
 msgid "blocarea serviciilor până la acord"
 msgstr "blocking services until consent"
 
-#: includes/admin/class-legal-page.php:245
+#: includes/admin/class-legal-page.php:247
 msgid "registrul de consimțăminte"
 msgstr "the consent register"
 
-#: includes/admin/class-legal-page.php:246
+#: includes/admin/class-legal-page.php:248
 msgid "șabloanele paginilor legale"
 msgstr "the legal page templates"
 
-#: includes/admin/class-legal-page.php:247
+#: includes/admin/class-legal-page.php:249
 msgid "tabelul de cookie-uri"
 msgstr "the cookie table"
 
-#: includes/admin/class-legal-page.php:248
+#: includes/admin/class-legal-page.php:250
 msgid "re-consimțământul la servicii noi"
 msgstr "asking for consent again when new services appear"
 
-#: includes/admin/class-legal-page.php:251
+#: includes/admin/class-legal-page.php:253
 msgid "registrul activităților de prelucrare"
 msgstr "the record of processing activities"
 
-#: includes/admin/class-legal-page.php:252
+#: includes/admin/class-legal-page.php:254
 msgid "numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu"
 msgstr "appointing a data protection officer (DPO), if required"
 
-#: includes/admin/class-legal-page.php:253
+#: includes/admin/class-legal-page.php:255
 msgid "temeiul legal pentru transferurile de date în afara țării"
 msgstr "the legal basis for data transfers outside the country"
 
-#: includes/admin/class-legal-page.php:254
+#: includes/admin/class-legal-page.php:256
 msgid "informarea pentru alte prelucrări (formulare, newsletter, magazin)"
 msgstr "the notices for other processing (forms, newsletter, shop)"
 
-#: includes/admin/class-legal-page.php:255
+#: includes/admin/class-legal-page.php:257
 msgid "verificarea textelor de către un jurist"
 msgstr "a legal review of the texts"
 
-#: includes/admin/class-legal-page.php:256
+#: includes/admin/class-legal-page.php:258
 msgid "notificarea CNPDCP, unde e cazul"
 msgstr "notifying the NCPDP, where applicable"
 
-#: includes/admin/class-legal-page.php:257
+#: includes/admin/class-legal-page.php:259
 msgid "serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)"
 msgstr "services the plugin does not recognize (add them in “Services”)"
 
-#: includes/admin/class-legal-page.php:268
+#: includes/admin/class-legal-page.php:270
 msgid "Ce face pluginul și ce rămâne la tine"
 msgstr "What the plugin does and what is up to you"
 
-#: includes/admin/class-legal-page.php:269
+#: includes/admin/class-legal-page.php:271
 msgid "Ce face pluginul"
 msgstr "What the plugin does"
 
-#: includes/admin/class-legal-page.php:270
+#: includes/admin/class-legal-page.php:272
 msgid "Ce rămâne la tine"
 msgstr "What is up to you"
 
-#: includes/admin/class-legal-page.php:271
+#: includes/admin/class-legal-page.php:273
 msgid "Am înțeles, restrânge"
 msgstr "Got it, collapse"
 
-#: includes/admin/class-legal-page.php:296
+#: includes/admin/class-legal-page.php:298
 msgid "Publicată"
 msgstr "Published"
 
-#: includes/admin/class-legal-page.php:297
+#: includes/admin/class-legal-page.php:299
 msgid "Ciornă (nu e vizibilă vizitatorilor)"
 msgstr "Draft (not visible to visitors)"
 
-#: includes/admin/class-legal-page.php:298
+#: includes/admin/class-legal-page.php:300
 msgid "Lipsește"
 msgstr "Missing"
 
-#: includes/admin/class-legal-page.php:302
-msgid "Consent Manager — Pagini legale"
-msgstr "Consent Manager — Legal pages"
-
 #: includes/admin/class-legal-page.php:304
+msgid "BiscuitWP — Pagini legale"
+msgstr "BiscuitWP — Legal pages"
+
+#: includes/admin/class-legal-page.php:306
 msgid ""
 "Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). "
 "Regenerează fiecare document ca să le preiei; traducerile create de plugin "
@@ -1650,12 +1648,12 @@ msgstr ""
 "along with it. This message disappears once you regenerate all three "
 "documents or close it."
 
-#: includes/admin/class-legal-page.php:305
+#: includes/admin/class-legal-page.php:307
 #: includes/admin/class-services-page.php:433
 msgid "Închide"
 msgstr "Close"
 
-#: includes/admin/class-legal-page.php:311
+#: includes/admin/class-legal-page.php:313
 msgid ""
 "Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și "
 "public-o din editor."
@@ -1663,11 +1661,11 @@ msgstr ""
 "The page was generated. If it is new, it is saved as a draft: review it and "
 "publish it from the editor."
 
-#: includes/admin/class-legal-page.php:313
+#: includes/admin/class-legal-page.php:315
 msgid "Salvat."
 msgstr "Saved."
 
-#: includes/admin/class-legal-page.php:316
+#: includes/admin/class-legal-page.php:318
 msgid ""
 "Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. "
 "Revizuiește textul cu un specialist înainte de publicare."
@@ -1675,7 +1673,7 @@ msgstr ""
 "The templates are an informational starting point, NOT legal advice. Have "
 "the text reviewed by a specialist before publishing."
 
-#: includes/admin/class-legal-page.php:317
+#: includes/admin/class-legal-page.php:319
 msgid ""
 "Textele depind de modul ales în Setări (Pro sau Light) și de blocarea "
 "scripturilor. După ce schimbi modul sau blocarea, regenerează paginile "
@@ -1684,7 +1682,7 @@ msgstr ""
 "The texts depend on the mode chosen in Settings (Pro or Light) and on script "
 "blocking. After you change the mode or blocking, regenerate the legal pages."
 
-#: includes/admin/class-legal-page.php:317
+#: includes/admin/class-legal-page.php:319
 msgid ""
 "După ce schimbi durata acordului sau a registrului în Setări, regenerează "
 "paginile legale."
@@ -1692,41 +1690,41 @@ msgstr ""
 "After you change the consent or register duration in Settings, regenerate "
 "the legal pages."
 
-#: includes/admin/class-legal-page.php:325
+#: includes/admin/class-legal-page.php:327
 msgid "Datele operatorului"
 msgstr "Controller details"
 
-#: includes/admin/class-legal-page.php:326
+#: includes/admin/class-legal-page.php:328
 msgid "Apar în paginile generate. Se salvează, nu trebuie completate din nou."
 msgstr ""
 "They appear in the generated pages. They are saved, so you don’t have to "
 "fill them in again."
 
-#: includes/admin/class-legal-page.php:328
+#: includes/admin/class-legal-page.php:330
 msgid "Denumire operator"
 msgstr "Controller name"
 
-#: includes/admin/class-legal-page.php:330
+#: includes/admin/class-legal-page.php:332
 msgid "Email contact"
 msgstr "Contact email"
 
-#: includes/admin/class-legal-page.php:332
+#: includes/admin/class-legal-page.php:334
 msgid "Responsabil date (DPO)"
 msgstr "Data protection officer (DPO)"
 
-#: includes/admin/class-legal-page.php:334
+#: includes/admin/class-legal-page.php:336
 msgid "Jurisdicție"
 msgstr "Jurisdiction"
 
-#: includes/admin/class-legal-page.php:336
+#: includes/admin/class-legal-page.php:338
 msgid "Adresa (opțional, recomandat pentru firme)"
 msgstr "Address (optional, recommended for companies)"
 
-#: includes/admin/class-legal-page.php:340
+#: includes/admin/class-legal-page.php:342
 msgid "Documente"
 msgstr "Documents"
 
-#: includes/admin/class-legal-page.php:341
+#: includes/admin/class-legal-page.php:343
 msgid ""
 "Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. "
 "Linkul „Politica de confidențialitate” din banner apare doar când pagina e "
@@ -1736,40 +1734,40 @@ msgstr ""
 "The “Privacy Policy” link in the banner appears only once the page is "
 "published."
 
-#: includes/admin/class-legal-page.php:344
+#: includes/admin/class-legal-page.php:346
 msgid "Document"
 msgstr "Document"
 
-#: includes/admin/class-legal-page.php:346
+#: includes/admin/class-legal-page.php:348
 msgid "Stare"
 msgstr "Status"
 
-#: includes/admin/class-legal-page.php:347
+#: includes/admin/class-legal-page.php:349
 msgid "Șablon"
 msgstr "Template"
 
-#: includes/admin/class-legal-page.php:361
+#: includes/admin/class-legal-page.php:363
 msgid "— niciuna —"
 msgstr "— none —"
 
-#: includes/admin/class-legal-page.php:367
+#: includes/admin/class-legal-page.php:369
 msgid ""
 "Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești."
 msgstr "Suggested: the WordPress privacy page. Save to use it."
 
-#: includes/admin/class-legal-page.php:370
+#: includes/admin/class-legal-page.php:372
 msgid "Folosește și ca pagina de confidențialitate a WordPress"
 msgstr "Also use as the WordPress privacy page"
 
-#: includes/admin/class-legal-page.php:376
+#: includes/admin/class-legal-page.php:378
 msgid "Editează"
 msgstr "Edit"
 
-#: includes/admin/class-legal-page.php:377
+#: includes/admin/class-legal-page.php:379
 msgid "Vezi"
 msgstr "View"
 
-#: includes/admin/class-legal-page.php:382
+#: includes/admin/class-legal-page.php:384
 msgid ""
 "Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în "
 "pagină se pierd. Continui?"
@@ -1777,31 +1775,33 @@ msgstr ""
 "The page text will be replaced with the template. Manual edits to the page "
 "will be lost. Continue?"
 
-#: includes/admin/class-legal-page.php:382
+#: includes/admin/class-legal-page.php:384
 msgid "Regenerează"
 msgstr "Regenerate"
 
-#: includes/admin/class-legal-page.php:384
+#: includes/admin/class-legal-page.php:386
 msgid "Generează"
 msgstr "Generate"
 
-#: includes/admin/class-legal-page.php:392
+#: includes/admin/class-legal-page.php:394
 msgid ""
 "Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: "
 "cele marcate de plugin și cele care încep cu rândul „Document generat "
-"automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). "
-"Celelalte traduceri nu sunt atinse."
+"automat de BiscuitWP” sau, înainte de redenumire, „Document generat automat "
+"de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte "
+"traduceri nu sunt atinse."
 msgstr ""
 "Regenerating also overwrites the linked translations the plugin created: "
 "those marked by the plugin and those starting with the line “Document "
-"generat automat de Consent Manager Pro” (copies made by versions 0.4.x). "
-"Other translations are left untouched."
+"generat automat de BiscuitWP” or, before the rename, “Document generat "
+"automat de Consent Manager Pro” (copies made by versions 0.4.x). Other "
+"translations are left untouched."
 
-#: includes/admin/class-legal-page.php:393
+#: includes/admin/class-legal-page.php:395
 msgid "Salvează"
 msgstr "Save"
 
-#: includes/admin/class-legal-page.php:443
+#: includes/admin/class-legal-page.php:445
 msgid "Nu am putut crea pagina."
 msgstr "Could not create the page."
 
@@ -1871,8 +1871,8 @@ msgid "Are script (doar un administrator cu drept de cod îl poate modifica)"
 msgstr "Has a script (only an administrator allowed to add code can change it)"
 
 #: includes/admin/class-services-page.php:179
-msgid "Consent Manager — Servicii"
-msgstr "Consent Manager — Services"
+msgid "BiscuitWP — Servicii"
+msgstr "BiscuitWP — Services"
 
 #: includes/admin/class-services-page.php:181
 msgid "Servicii salvate."
@@ -2074,8 +2074,8 @@ msgid "Tracking fără acord."
 msgstr "Tracking without consent."
 
 #: includes/admin/class-settings-page.php:96
-msgid "Consent Manager — Setări"
-msgstr "Consent Manager — Settings"
+msgid "BiscuitWP — Setări"
+msgstr "BiscuitWP — Settings"
 
 #: includes/admin/class-settings-page.php:98
 msgid ""
@@ -2241,7 +2241,11 @@ msgid ""
 "„Doar cele necesare” și nu mai arată bannerul (vizitatorul poate accepta "
 "oricând din „Setări cookie”). Legea din Moldova nu o cere explicit, de aceea "
 "e o opțiune, pornită implicit."
-msgstr "When the visitor’s browser sends the GPC signal, the plugin records “Necessary only” and does not show the banner (the visitor can accept at any time from “Cookie settings”). Moldovan law does not require it explicitly, so it is an option, on by default."
+msgstr ""
+"When the visitor’s browser sends the GPC signal, the plugin records "
+"“Necessary only” and does not show the banner (the visitor can accept at any "
+"time from “Cookie settings”). Moldovan law does not require it explicitly, "
+"so it is an option, on by default."
 
 #: includes/admin/class-settings-page.php:173
 msgid "Localizare Google Fonts"
@@ -2386,10 +2390,9 @@ msgstr "Regenerate the legal pages."
 
 #: includes/modules/class-legal.php:302
 msgid ""
-"Acest site folosește cookie-uri gestionate prin Consent Manager Pro. Cookie-"
-"urile utilizate:"
-msgstr ""
-"This site uses cookies managed through Consent Manager Pro. Cookies used:"
+"Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile "
+"utilizate:"
+msgstr "This site uses cookies managed through BiscuitWP. Cookies used:"
 
 #: includes/modules/class-preview.php:207
 msgid "Previzualizare aspect"
@@ -2479,8 +2482,8 @@ msgid "Pachetul de update depășește dimensiunea maximă permisă."
 msgstr "The update package exceeds the maximum allowed size."
 
 #: templates/admin/guide.php:32
-msgid "Consent Manager — Ghid"
-msgstr "Consent Manager — Guide"
+msgid "BiscuitWP — Ghid"
+msgstr "BiscuitWP — Guide"
 
 #: templates/admin/guide.php:33
 msgid ""
@@ -2621,7 +2624,13 @@ msgid ""
 "opri asta din Setări, opțiunea „Respectă semnalul Global Privacy Control "
 "(GPC)” (pornită implicit); atunci vizitatorii cu GPC văd bannerul ca toți "
 "ceilalți."
-msgstr "If the visitor’s browser sends the Global Privacy Control (GPC) signal, the plugin records a refusal automatically (“Necessary only”) and does not show the banner. The visitor can accept at any time from “Cookie settings”. You can turn this off in Settings, option “Respect the Global Privacy Control (GPC) signal” (on by default); visitors with GPC then see the banner like everyone else."
+msgstr ""
+"If the visitor’s browser sends the Global Privacy Control (GPC) signal, the "
+"plugin records a refusal automatically (“Necessary only”) and does not show "
+"the banner. The visitor can accept at any time from “Cookie settings”. You "
+"can turn this off in Settings, option “Respect the Global Privacy Control "
+"(GPC) signal” (on by default); visitors with GPC then see the banner like "
+"everyone else."
 
 #: templates/admin/guide.php:68
 msgid ""
@@ -3651,15 +3660,15 @@ msgstr ""
 #: templates/admin/guide.php:260
 #, php-format
 msgid ""
-"Citește notificările Consent Manager Pro din admin. De exemplu, „Am început "
-"să blocăm până la acord: …” apare o singură dată, după actualizarea de la o "
-"versiune 0.4.x, și numește serviciile care până atunci rulau fără acord. "
-"Deschide %1$sServicii%2$s și verifică lista „Găsite pe site”: după un "
-"update, biblioteca poate recunoaște servicii noi fără să te anunțe."
+"Citește notificările BiscuitWP din admin. De exemplu, „Am început să blocăm "
+"până la acord: …” apare o singură dată, după actualizarea de la o versiune "
+"0.4.x, și numește serviciile care până atunci rulau fără acord. Deschide "
+"%1$sServicii%2$s și verifică lista „Găsite pe site”: după un update, "
+"biblioteca poate recunoaște servicii noi fără să te anunțe."
 msgstr ""
-"Read the Consent Manager Pro notices in the admin. For example, “We started "
-"blocking until consent: …” appears only once, after updating from a 0.4.x "
-"version, and names the services that used to run without consent. Open "
+"Read the BiscuitWP notices in the admin. For example, “We started blocking "
+"until consent: …” appears only once, after updating from a 0.4.x version, "
+"and names the services that used to run without consent. Open "
 "%1$sServices%2$s and check the “Found on the site” list: after an update, "
 "the library may recognize new services without telling you."
 

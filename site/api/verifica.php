@@ -1,6 +1,6 @@
 <?php
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": POST /api/verifica.php.
+ * BiscuitWP, "Verifică-ți site-ul": POST /api/verifica.php.
  *
  * Checks up to 10 pages of a visitor-given public site, after the visitor
  * confirms owning it: the homepage, then pages from robots.txt / the sitemap

@@ -565,7 +565,7 @@ class CMP_Updater {
 		$m    = $r['manifest'];
 		$info = new stdClass();
 
-		$info->name          = esc_html( 'Consent Manager Pro' );
+		$info->name          = esc_html( 'BiscuitWP' );
 		$info->slug          = self::SLUG;
 		$info->version       = esc_html( $m['version'] );
 		$info->requires      = esc_html( self::str_field( $m, 'requires_wp' ) );
@@ -618,7 +618,7 @@ class CMP_Updater {
 		$on_plugins = ( 'plugins.php' === $hook );
 		$on_ours    = ( false !== strpos( $hook, 'cmp-' ) );
 		$security   = '<a href="' . esc_url( self::SECURITY_URL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Despre siguranța actualizărilor', 'consent-manager-pro' ) . '</a>';
-		$prefix     = '<strong>' . esc_html__( 'Consent Manager Pro:', 'consent-manager-pro' ) . '</strong> ';
+		$prefix     = '<strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> ';
 		$out        = array();
 
 		if ( ! empty( $state['revoked_installed'] ) ) {

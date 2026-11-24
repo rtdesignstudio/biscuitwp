@@ -1,6 +1,10 @@
 # Changelog
 
-Consent Manager Pro. Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
+BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
+
+## 1.1.0 – TBD
+
+- Pluginul se numește acum BiscuitWP (fost Consent Manager Pro). Se schimbă doar numele afișat: setările, datele, cookie-urile, shortcode-urile și API-ul rămân aceleași.
 
 ## 1.0.0 – 2026-11-20
 

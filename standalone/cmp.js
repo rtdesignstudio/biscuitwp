@@ -1,5 +1,5 @@
 /*!
- * Consent Manager Pro — standalone bundle
+ * BiscuitWP — standalone bundle
  * Pure helper section (Task 2). Browser DOM/controller code is added in a
  * later task inside the same IIFE.
  */

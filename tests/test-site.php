@@ -162,13 +162,13 @@ if ( false !== $xml ) {
 	cmp_assert_eq( (string) $xml['version'], '2.0', 'feed: RSS 2.0' );
 	cmp_assert_eq( count( $xml->channel->item ), 2, 'feed: 2 items (TBD skipped)' );
 	$it = $xml->channel->item[0];
-	cmp_assert_eq( (string) $it->title, 'Consent Manager Pro 1.2.3', 'feed: newest item title' );
+	cmp_assert_eq( (string) $it->title, 'BiscuitWP 1.2.3', 'feed: newest item title' );
 	cmp_assert_eq( (string) $it->link, 'https://consent.rt.md/changelog/#v1-2-3', 'feed: item link to the anchor' );
 	cmp_assert( 1 === preg_match( '/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} [+-]\d{4}$/', (string) $it->pubDate ), 'feed: pubDate is RFC 822' );
 	cmp_assert_eq( strtotime( (string) $it->pubDate ), strtotime( '2026-10-05T00:00:00Z' ), 'feed: pubDate is the release date' );
 	cmp_assert( false !== strpos( (string) $it->description, '&lt;b&gt;&amp;&lt;/b&gt;' ), 'feed: description keeps the item text escaped as HTML' );
 	cmp_assert( false !== strpos( (string) $it->description, '<li>' ), 'feed: description is a list' );
-	cmp_assert_eq( (string) $xml->channel->item[1]->title, 'Consent Manager Pro 1.1.0', 'feed: second item' );
+	cmp_assert_eq( (string) $xml->channel->item[1]->title, 'BiscuitWP 1.1.0', 'feed: second item' );
 }
 
 // ---- security.txt -------------------------------------------------------------
@@ -429,7 +429,7 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' 
 	$cmp_sec = isset( $cm[0] ) ? $cm[0] : '';
 	cmp_assert( 1 === preg_match( '#<table\b.*?</table>#s', $cmp_sec, $tm ), "{$page}: comparison table" );
 	$table = isset( $tm[0] ) ? $tm[0] : '';
-	foreach ( array( 'Consent Manager Pro', 'Complianz', 'CookieYes', 'Cookiebot' ) as $prod ) {
+	foreach ( array( 'BiscuitWP', 'Complianz', 'CookieYes', 'Cookiebot' ) as $prod ) {
 		cmp_assert( false !== strpos( $table, $prod ), "{$page}: comparison has {$prod}" );
 	}
 	preg_match_all( '#<tr>(.*?)</tr>#s', $table, $rows );
@@ -467,7 +467,7 @@ cmp_assert( $cmp_site_js === (string) @file_get_contents( $cmp_site_out1 . '/ass
 foreach ( array( 'innerHTML', 'outerHTML', 'insertAdjacentHTML', 'document.write', 'eval(', 'new Function', 'setAttribute(\'on', 'createContextualFragment', 'DOMParser' ) as $bad ) {
 	cmp_assert( false === strpos( $cmp_site_js, $bad ), "verifica.js: does not use {$bad}" );
 }
-foreach ( array( 'textContent', 'AbortController', '/api/verifica.php', 'prefers-reduced-motion', '#functii', '#cum-verifici', 'aria-current', 'rate_limited', 'busy', "'clean'", "'issues'", "'unsure'", "'error'", 'Consent Manager Pro' ) as $need ) {
+foreach ( array( 'textContent', 'AbortController', '/api/verifica.php', 'prefers-reduced-motion', '#functii', '#cum-verifici', 'aria-current', 'rate_limited', 'busy', "'clean'", "'issues'", "'unsure'", "'error'", 'BiscuitWP' ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_js, $need ), "verifica.js: uses {$need}" );
 }
 cmp_assert( false === strpos( $cmp_site_js, "\xe2\x80\x94" ), 'verifica.js: no em dash' );
@@ -568,7 +568,7 @@ if ( '' === $cmp_site_node ) {
 	$r = $cmp_site_dom( 'ro', 'issues-sitemap' );
 	cmp_assert( empty( $r['error'] ), 'render issues (ro): runs without errors' . ( empty( $r['error'] ) ? '' : ' — ' . $r['error'] ) );
 	cmp_assert( isset( $r['body']['owner'] ) && 1 === $r['body']['owner'] && 'ro' === $r['body']['lang'], 'render (ro): POST body has owner=1 and the language' );
-	foreach ( array( 'exemplu.md', 'Am găsit 3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'Ce am găsit', 'www.googletagmanager.com/gtag/js', 'Pe ce pagini (7)', '/contacte/', 'De ce contează', 'Baza legală: Legea 195/2024', 'Cum rezolvi', 'Cu Consent Manager Pro: ', 'Am verificat 10 pagini.', 'Site-ul are 84 de pagini; am verificat primele 10. Verificarea completă nu e disponibilă acum.', 'În regulă', 'HTTPS', 'Nu am putut citi: ', '/lent/ (nu a răspuns la timp)', 'De știut', 'Consent Manager Pro rezolvă asta' ) as $need ) {
+	foreach ( array( 'exemplu.md', 'Am găsit 3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'Ce am găsit', 'www.googletagmanager.com/gtag/js', 'Pe ce pagini (7)', '/contacte/', 'De ce contează', 'Baza legală: Legea 195/2024', 'Cum rezolvi', 'Cu BiscuitWP: ', 'Am verificat 10 pagini.', 'Site-ul are 84 de pagini; am verificat primele 10. Verificarea completă nu e disponibilă acum.', 'În regulă', 'HTTPS', 'Nu am putut citi: ', '/lent/ (nu a răspuns la timp)', 'De știut', 'BiscuitWP rezolvă asta' ) as $need ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (ro): shows „{$need}”" );
 	}
 	cmp_assert( false !== strpos( $r['facts'], '3|probleme' ) && false !== strpos( $r['facts'], '1|de verificat' ) && false !== strpos( $r['facts'], '4|în regulă' ), 'render issues (ro): counters 3 problems, 1 to check, 4 passed (' . $r['facts'] . ')' );
@@ -577,7 +577,7 @@ if ( '' === $cmp_site_node ) {
 	cmp_assert( 0 === $r['confetti'], 'render issues: no confetti' );
 	cmp_assert_eq( $r['hrefs'], array( '#instalare', '#functii' ), 'render issues: only fixed links' );
 	$r = $cmp_site_dom( 'en', 'issues-sitemap' );
-	foreach ( array( 'We found 3 problems', 'What to do first', 'We checked 10 pages.', 'The site has 84 pages; we checked the first 10. A full check is not available right now.', 'All good', 'On which pages (7)', 'With Consent Manager Pro: ' ) as $need ) {
+	foreach ( array( 'We found 3 problems', 'What to do first', 'We checked 10 pages.', 'The site has 84 pages; we checked the first 10. A full check is not available right now.', 'All good', 'On which pages (7)', 'With BiscuitWP: ' ) as $need ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
 	}
 	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
@@ -655,7 +655,7 @@ if ( '' === $cmp_site_node ) {
 	foreach ( array( 'Site-ul tău nu pare făcut pe WordPress', 'Problemele de mai sus rămân valabile pe orice platformă', 'versiunea standalone', 'Versiunea standalone' ) as $need ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues-other (ro): shows „{$need}”" );
 	}
-	cmp_assert( false === strpos( $r['text'], 'Consent Manager Pro rezolvă asta' ), 'render issues-other (ro): no „rezolvă asta”' );
+	cmp_assert( false === strpos( $r['text'], 'BiscuitWP rezolvă asta' ), 'render issues-other (ro): no „rezolvă asta”' );
 	cmp_assert_eq( $r['hrefs'], array( '#instalare', '#cum-verifici' ), 'render issues-other: standalone (fallback in the fake DOM) and how-to links' );
 	cmp_assert( false === strpos( $r['text'], 'Vezi ce face' ), 'render issues-other (ro): no plugin features button' );
 	$r = $cmp_site_dom( 'en', 'issues-other' );
@@ -804,7 +804,7 @@ foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'demo/index.html', 
 	cmp_assert_eq( substr_count( $html, $cmp_site_sjs ), 1, "{$page}: loads /assets/site.js once, deferred" );
 	cmp_assert( 1 === preg_match( '#<header class="site">(.*?)</header>#s', $html, $hm ) && false !== strpos( $hm[1], '<a class="logo" href="https://rt.md/" aria-label="RT Design Studio">' . $cmp_site_badge ), "{$page}: header starts with the RT symbol, linking to rt.md" );
 	cmp_assert( isset( $hm[1] ) && false === strpos( $hm[1], 'class="badge"' ) && false === strpos( $hm[1], 'xmlns' ), "{$page}: header uses the current symbol, not the old framed badge" );
-	cmp_assert( isset( $hm[1] ) && false !== strpos( $hm[1], '>Consent Manager Pro</a>' ) && 1 === preg_match( '#<nav\b#', $hm[1] ), "{$page}: header keeps the product name and the inline nav" );
+	cmp_assert( isset( $hm[1] ) && false !== strpos( $hm[1], '>BiscuitWP</a>' ) && 1 === preg_match( '#<nav\b#', $hm[1] ), "{$page}: header keeps the product name and the inline nav" );
 	cmp_assert( 1 === preg_match( '#<footer class="site">(.*?)</footer>#s', $html, $fm ) && 1 === preg_match( '#<a href="https://rt\.md/"[^>]*>' . preg_quote( $cmp_site_badge, '#' ) . '.*?</svg>RT Design Studio</a>#s', $fm[1] ), "{$page}: footer shows the RT symbol next to RT Design Studio" );
 }
 foreach ( array( 'site' => $cmp_site_root . '/site', 'out' => $cmp_site_out1 ) as $label => $dir ) {
@@ -870,7 +870,7 @@ list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshella
 cmp_assert_eq( $rc, 0, 'build-site, 25 versions: exits 0' );
 $x = @simplexml_load_string( (string) @file_get_contents( $cmp_site_out4 . '/changelog/feed.xml' ) );
 cmp_assert( false !== $x && 20 === count( $x->channel->item ), 'feed: at most 20 items' );
-cmp_assert( false !== $x && 'Consent Manager Pro 2.25.0' === (string) $x->channel->item[0]->title, 'feed: newest of 25 first' );
+cmp_assert( false !== $x && 'BiscuitWP 2.25.0' === (string) $x->channel->item[0]->title, 'feed: newest of 25 first' );
 cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_out4 . '/changelog/index.html' ), 'id="v2-1-0"' ), 'changelog page: all 25 versions (oldest included)' );
 
 // ---- Refusals ---------------------------------------------------------------------
@@ -894,11 +894,16 @@ cmp_assert( 0 !== $rc, 'build-site: an unreadable stable manifest fails' );
 // ---- final UI fixes: titles, labels, strict input, failure labels, privacy facts ----------
 $cmp_f_ro = $cmp_site_read( 'index.html' );
 $cmp_f_en = $cmp_site_read( 'en/index.html' );
-cmp_assert( false !== strpos( $cmp_f_ro, '<title>Consent Manager Pro · Cookie-uri cu acord, pentru site-urile din Moldova</title>' ), 'landing RO: the neutral title' );
-cmp_assert( false !== strpos( $cmp_f_en, '<title>Consent Manager Pro · Cookies with consent, for sites in Moldova</title>' ), 'landing EN: the neutral title' );
+cmp_assert( false !== strpos( $cmp_f_ro, '<title>BiscuitWP. Cookie-uri cu acord, nu cu noroc.</title>' ), 'landing RO: the title is the slogan with the product name' );
+cmp_assert( false !== strpos( $cmp_f_en, '<title>BiscuitWP. Cookies by consent, not by luck.</title>' ), 'landing EN: the title is the slogan with the product name' );
+cmp_assert( false !== strpos( $cmp_site_read( 'ru/index.html' ), '<title>BiscuitWP. Cookie с согласия, а не на удачу.</title>' ), 'landing RU: the title is the slogan with the product name' );
+foreach ( array( 'index.html', 'en/index.html', 'ru/index.html' ) as $cmp_f_page ) {
+	$cmp_f_html = $cmp_site_read( $cmp_f_page );
+	cmp_assert( false === strpos( $cmp_f_html, 'Consent Manager Pro' ) && 0 === preg_match( '#<summary>[^<]*(?:„Pro”|"Pro"|«Pro»)#u', $cmp_f_html ), "{$cmp_f_page}: only the BiscuitWP name, no FAQ about \"Pro\"" );
+}
 cmp_assert( false === stripos( $cmp_f_ro, 'conform' ), 'landing RO: never „conform”' );
 cmp_assert( false === stripos( $cmp_f_en, 'compliant' ) && false === stripos( $cmp_f_en, 'compliance' ), 'landing EN: never "compliant"' );
-cmp_assert( false === stripos( $cmp_f_ro . $cmp_f_en, 'og:title' ) || ( false === stripos( $cmp_f_ro, 'og:title" content="Consent Manager Pro · Cookie-uri conf' ) ), 'landing: no og claim of conformity' );
+cmp_assert( false === stripos( $cmp_f_ro . $cmp_f_en, 'og:title' ) || ( false === stripos( $cmp_f_ro, 'og:title" content="BiscuitWP · Cookie-uri conf' ) ), 'landing: no og claim of conformity' );
 $cmp_f_js = (string) file_get_contents( $cmp_site_root . '/site/assets/verifica.js' );
 cmp_assert( false !== strpos( $cmp_f_js, "law: 'Baza legală: '" ) && false !== strpos( $cmp_f_js, "law: 'Legal basis: '" ), 'verifica.js: the label before the law is „Baza legală:” / "Legal basis:"' );
 cmp_assert( false === strpos( $cmp_f_js, "law: 'Legea: '" ) && false === strpos( $cmp_f_js, "law: 'Law: '" ), 'verifica.js: no doubled „Legea: Legea”' );

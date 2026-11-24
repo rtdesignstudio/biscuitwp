@@ -156,7 +156,7 @@ class CMP_Appearance_Page {
 		}
 		?>
 		<div class="wrap cmp-admin cmp-ap" data-cmp-ap data-cmp-ap-mode="<?php echo esc_attr( $mode ); ?>">
-			<h1><?php esc_html_e( 'Consent Manager — Aspect', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'appearance' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Aspect', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'appearance' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<p><?php esc_html_e( 'Cum arată bannerul pe site. Ce alegi aici nu poate face bannerul neconform: „Accept” și „Refuz” rămân la fel de vizibile.', 'consent-manager-pro' ); ?></p>
 			<?php if ( $light ) : ?>
 				<div class="notice notice-info inline cmp-ap-light-note"><p><?php esc_html_e( 'Ești în modul Light. Câmpurile care nu se aplică cardului Light sunt dezactivate: formatul și poziția, fundalul, lățimea, butoanele, redeschiderea și textele butoanelor din Pro. Valorile lor salvate rămân.', 'consent-manager-pro' ); ?></p></div>

@@ -1,4 +1,4 @@
-/* Consent Manager Pro: the check-mode runner (admin "Verificare" screen).
+/* BiscuitWP: the check-mode runner (admin "Verificare" screen).
  * Enqueued only in check mode (CMP_Scanner::check_mode()), after banner.js, so
  * visitors never download it. It measures the page before and after "Accept
  * all" and posts the results to the parent of the same origin only. It reaches

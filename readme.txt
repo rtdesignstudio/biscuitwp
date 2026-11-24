@@ -1,4 +1,4 @@
-=== Consent Manager Pro ===
+=== BiscuitWP ===
 Tags: cookie consent, gdpr, consent mode, privacy policy, cookie banner
 Requires at least: 6.0
 Tested up to: 6.9
@@ -11,7 +11,7 @@ Free and open-source GDPR cookie consent: banner, Google Consent Mode v2, legal 
 
 == Description ==
 
-Consent Manager Pro is free and open-source software made by RT (https://rt.md). "Pro" means professional: there is no paid version.
+BiscuitWP (formerly Consent Manager Pro) is free and open-source software made by RT (https://rt.md). There is no paid version.
 
 * Consent banner that blocks scripts and embeds until the visitor decides
 * Google Consent Mode v2 and Global Privacy Control support
@@ -32,7 +32,7 @@ Privacy: https://consent.rt.md/en/privacy/
 
 1. Download the latest zip from GitHub Releases.
 2. In WordPress, go to Plugins > Add New > Upload Plugin and upload the zip, or unzip it into `wp-content/plugins/`.
-3. Activate the plugin and configure it under Consent Manager.
+3. Activate the plugin and configure it under BiscuitWP.
 
 == Changelog ==
 

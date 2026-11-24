@@ -347,14 +347,14 @@ foreach ( $list as $s ) {
 		if ( "" !== $t ) { $desc .= "<li>" . h( $t ) . "</li>"; }
 	}
 	$desc  .= "</ul>";
-	$items .= "<item>\n<title>" . x( "Consent Manager Pro " . $s["version"] ) . "</title>\n<link>" . x( $link ) . "</link>\n<guid isPermaLink=\"true\">" . x( $link ) . "</guid>\n<pubDate>" . gmdate( DATE_RSS, $ts ) . "</pubDate>\n<description>" . x( $desc ) . "</description>\n</item>\n";
+	$items .= "<item>\n<title>" . x( "BiscuitWP " . $s["version"] ) . "</title>\n<link>" . x( $link ) . "</link>\n<guid isPermaLink=\"true\">" . x( $link ) . "</guid>\n<pubDate>" . gmdate( DATE_RSS, $ts ) . "</pubDate>\n<description>" . x( $desc ) . "</description>\n</item>\n";
 }
 $feed = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 	. "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n<channel>\n"
-	. "<title>Consent Manager Pro: changelog</title>\n"
+	. "<title>BiscuitWP: changelog</title>\n"
 	. "<link>" . $base . "changelog/</link>\n"
 	. "<atom:link href=\"" . $base . "changelog/feed.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n"
-	. "<description>Ce s-a schimbat în fiecare versiune a Consent Manager Pro.</description>\n"
+	. "<description>Ce s-a schimbat în fiecare versiune a BiscuitWP.</description>\n"
 	. "<language>ro</language>\n"
 	. ( null === $last ? "" : "<lastBuildDate>" . gmdate( DATE_RSS, $last ) . "</lastBuildDate>\n" )
 	. $items

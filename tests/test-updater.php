@@ -634,7 +634,7 @@ $t_info = CMP_Updater::plugin_info( false, 'plugin_information', $t_args );
 cmp_assert( is_object( $t_info ), 'plugin_info: our slug -> object' );
 cmp_assert_eq( $t_info->slug, 'consent-manager-pro', 'plugin_info: slug' );
 cmp_assert_eq( $t_info->version, '1.0.0', 'plugin_info: version' );
-cmp_assert_eq( $t_info->name, 'Consent Manager Pro', 'plugin_info: name' );
+cmp_assert_eq( $t_info->name, 'BiscuitWP', 'plugin_info: name' );
 cmp_assert_eq( $t_info->homepage, 'https://consent.rt.md/', 'plugin_info: homepage' );
 cmp_assert_eq( $t_info->requires, '6.0', 'plugin_info: requires' );
 cmp_assert_eq( $t_info->requires_php, '7.4', 'plugin_info: requires_php' );
@@ -733,7 +733,7 @@ cmp_assert( 1 === preg_match( "/function update_state_notices\(\)\s*\{\s*if \( !
 cmp_assert( false !== strpos( $t_admin, "add_action( 'admin_notices', array( \$this, 'update_state_notices' ) )" ), 'admin: update_state_notices hooked on admin_notices' );
 cmp_assert( false !== strpos( $t_admin, "add_action( 'network_admin_notices', array( \$this, 'update_state_notices' ) )" ), 'admin: update_state_notices hooked on network_admin_notices' );
 cmp_assert( false !== strpos( $t_admin, 'CMP_Updater::check_result( CMP_Updater::fetch_manifest() )' ), 'admin: check_updates reports through check_result' );
-cmp_assert( false !== strpos( $t_admin, "'unavailable' === \$v" ) && false !== strpos( $t_admin, 'Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.' ), 'admin: unavailable notice' );
+cmp_assert( false !== strpos( $t_admin, "'unavailable' === \$v" ) && false !== strpos( $t_admin, 'BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.' ), 'admin: unavailable notice' );
 cmp_assert( false !== strpos( $t_admin, 'delete_site_transient( CMP_Updater::CACHE_KEY )' ), 'admin: check_updates clears the manifest cache (site transient)' );
 
 cmp_t_seam( array() );

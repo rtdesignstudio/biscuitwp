@@ -28,7 +28,7 @@ add_action(
 			exit;
 		}
 		if ( ! class_exists( 'CMP_Services' ) || ! class_exists( 'CMP_Consent' ) ) {
-			wp_send_json( array( 'error' => 'Consent Manager Pro is not active' ), 500 );
+			wp_send_json( array( 'error' => 'BiscuitWP is not active' ), 500 );
 		}
 		$slugs = array();
 		foreach ( (array) CMP_Consent::get_categories() as $cat ) {

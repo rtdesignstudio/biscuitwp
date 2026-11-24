@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate an Ed25519 key pair for Consent Manager Pro updates.
+# Generate an Ed25519 key pair for BiscuitWP updates.
 #   bin/keygen.sh manifest            -> ~/.config/cmp-release/manifest.key
 #   bin/keygen.sh rescue --out <path> -> <path> (keep it offline)
 # Writes the base64 SECRET key (64 bytes, sodium format) with chmod 600,

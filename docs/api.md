@@ -1,4 +1,4 @@
-# Consent Manager Pro: public API
+# BiscuitWP: public API
 
 The same JavaScript API is available in the WordPress plugin and in the standalone build (`standalone/cmp.js`), plus one PHP helper for themes. Use it to tie your own code (a chat widget, a map, an analytics snippet) to the visitor's consent without reading the plugin source.
 

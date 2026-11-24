@@ -36,9 +36,9 @@ for loc in $LOCALES; do
 		cat > "$po" <<EOF
 msgid ""
 msgstr ""
-"Project-Id-Version: Consent Manager Pro\n"
+"Project-Id-Version: BiscuitWP\n"
 "PO-Revision-Date: $(date -u '+%Y-%m-%d %H:%M+0000')\n"
-"Last-Translator: Consent Manager Pro\n"
+"Last-Translator: BiscuitWP\n"
 "Language-Team: ${loc}\n"
 "Language: ${loc}\n"
 "MIME-Version: 1.0\n"

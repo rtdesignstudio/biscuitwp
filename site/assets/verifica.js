@@ -1,4 +1,4 @@
-/* Consent Manager Pro, consent.rt.md: the "Verifică-ți site-ul" tool, its confetti
+/* BiscuitWP, consent.rt.md: the "Verifică-ți site-ul" tool, its confetti
    and the demo style switch. No libraries, nothing loaded from other sites.
    Everything that comes from the server (titles, explanations, the checked address)
    is written with textContent only, never parsed as HTML. */
@@ -59,13 +59,13 @@
 		onPages: 'On which pages',
 		why: 'Why it matters',
 		howFix: 'How to fix it',
-		withCmp: 'With Consent Manager Pro: ',
+		withCmp: 'With BiscuitWP: ',
 		passed: 'All good',
 		info: 'Good to know',
 		howto: 'How to check it yourself',
-		fixTitle: 'Consent Manager Pro fixes this',
+		fixTitle: 'BiscuitWP fixes this',
 		fixText: 'It keeps trackers off until consent, moves Google Fonts to your server and gives you the legal texts for Moldova. Free.',
-		oursTitle: 'You already use Consent Manager Pro',
+		oursTitle: 'You already use BiscuitWP',
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
 		checks: function (n) { return group(n, ',') + ' checks so far'; },
 		foundTitle: 'What we find most often',
@@ -79,7 +79,7 @@
 		foundKinds: { 'tracker': 'Tracker started before consent', 'google-fonts': 'Google Fonts loaded from Google', 'ip-resources': 'Other resources that send the visitor\'s IP', 'no-banner': 'Trackers with no cookie banner at all', 'no-policy': 'No link to the privacy policy' },
 		foundNote: function (n) { return 'From ' + group(n, ',') + ' checks made with the tool. A site checked several times counts each time.'; },
 		otherTitle: 'Your site does not look like WordPress',
-		otherText: 'The problems above apply on any platform and are fixed in the site\'s code. Consent Manager Pro is a WordPress plugin; for other sites there is the standalone version: two files, and you mark the scripts that wait for consent yourself.',
+		otherText: 'The problems above apply on any platform and are fixed in the site\'s code. BiscuitWP is a WordPress plugin; for other sites there is the standalone version: two files, and you mark the scripts that wait for consent yourself.',
 		standalone: 'Standalone version',
 		download: 'Download',
 		latest: 'Latest version',
@@ -153,13 +153,13 @@
 		onPages: 'На каких страницах',
 		why: 'Почему это важно',
 		howFix: 'Как исправить',
-		withCmp: 'С Consent Manager Pro: ',
+		withCmp: 'С BiscuitWP: ',
 		passed: 'В порядке',
 		info: 'Полезно знать',
 		howto: 'Как проверить самостоятельно',
-		fixTitle: 'Consent Manager Pro это исправляет',
+		fixTitle: 'BiscuitWP это исправляет',
 		fixText: 'Блокирует трекеры до согласия, переносит Google Fonts на ваш сервер и даёт вам правовые тексты для Молдовы. Бесплатно.',
-		oursTitle: 'Вы уже используете Consent Manager Pro',
+		oursTitle: 'Вы уже используете BiscuitWP',
 		oursText: 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.',
 		checks: function (n) { return group(n, ' ') + ' ' + ru(n, 'проверка', 'проверки', 'проверок') + ' с момента запуска'; },
 		foundTitle: 'Что мы находим чаще всего',
@@ -173,7 +173,7 @@
 		foundKinds: { 'tracker': 'Трекер запущен до согласия', 'google-fonts': 'Google Fonts загружаются с Google', 'ip-resources': 'Другие ресурсы, передающие IP-адрес посетителя', 'no-banner': 'Трекеры вообще без баннера cookie', 'no-policy': 'Нет ссылки на политику конфиденциальности' },
 		foundNote: function (n) { return 'Из ' + group(n, ' ') + ' ' + ru(n, 'проверки, сделанной', 'проверок, сделанных', 'проверок, сделанных') + ' с помощью инструмента. Сайт, проверенный несколько раз, учитывается каждый раз.'; },
 		otherTitle: 'Ваш сайт, похоже, сделан не на WordPress',
-		otherText: 'Проблемы выше актуальны на любой платформе и исправляются в коде сайта. Consent Manager Pro является плагином для WordPress; для других сайтов есть автономная версия (standalone): два файла, а скрипты, которые ждут согласия, вы помечаете сами.',
+		otherText: 'Проблемы выше актуальны на любой платформе и исправляются в коде сайта. BiscuitWP является плагином для WordPress; для других сайтов есть автономная версия (standalone): два файла, а скрипты, которые ждут согласия, вы помечаете сами.',
 		standalone: 'Автономная версия',
 		download: 'Скачать',
 		latest: 'Последняя версия',
@@ -247,13 +247,13 @@
 		onPages: 'Pe ce pagini',
 		why: 'De ce contează',
 		howFix: 'Cum rezolvi',
-		withCmp: 'Cu Consent Manager Pro: ',
+		withCmp: 'Cu BiscuitWP: ',
 		passed: 'În regulă',
 		info: 'De știut',
 		howto: 'Cum verifici singur',
-		fixTitle: 'Consent Manager Pro rezolvă asta',
+		fixTitle: 'BiscuitWP rezolvă asta',
 		fixText: 'Oprește trackerele până la acord, mută Google Fonts pe serverul tău și îți dă textele legale pentru Moldova. Gratuit.',
-		oursTitle: 'Folosești deja Consent Manager Pro',
+		oursTitle: 'Folosești deja BiscuitWP',
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
 		checks: function (n) { return group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
 		foundTitle: 'Ce găsim cel mai des',
@@ -267,7 +267,7 @@
 		foundKinds: { 'tracker': 'Tracker pornit înainte de acord', 'google-fonts': 'Google Fonts încărcate de la Google', 'ip-resources': 'Alte resurse care trimit IP-ul vizitatorului', 'no-banner': 'Trackere fără niciun banner de cookie-uri', 'no-policy': 'Niciun link spre politica de confidențialitate' },
 		foundNote: function (n) { return 'Din ' + group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute cu instrumentul. Un site verificat de mai multe ori se numără de fiecare dată.'; },
 		otherTitle: 'Site-ul tău nu pare făcut pe WordPress',
-		otherText: 'Problemele de mai sus rămân valabile pe orice platformă și se rezolvă în codul site-ului. Consent Manager Pro e un plugin WordPress; pentru alte site-uri există versiunea standalone: două fișiere, iar scripturile care așteaptă acordul le marchezi singur.',
+		otherText: 'Problemele de mai sus rămân valabile pe orice platformă și se rezolvă în codul site-ului. BiscuitWP e un plugin WordPress; pentru alte site-uri există versiunea standalone: două fișiere, iar scripturile care așteaptă acordul le marchezi singur.',
 		standalone: 'Versiunea standalone',
 		download: 'Descarcă',
 		latest: 'Ultima versiune',
@@ -771,7 +771,7 @@
 		var findings = arr(data.findings).filter(function (f) { return f && typeof f === 'object'; });
 		var issues = bySeverity(findings, 'issue'), unsure = bySeverity(findings, 'unsure'), info = bySeverity(findings, 'info');
 		var ok = arr(data.passed);
-		var ours = data.cmp === 'Consent Manager Pro';
+		var ours = data.cmp === 'BiscuitWP';
 		if (checks >= 0 && (data.status === 'clean' || data.status === 'issues' || data.status === 'unsure')) {
 			checks++; // This check is in the total now.
 			showChecks();

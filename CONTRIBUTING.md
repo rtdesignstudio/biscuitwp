@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping with Consent Manager Pro. It is free and open-source (GPL-2.0-or-later); issues and pull requests are welcome on GitHub. For security problems, do not open an issue: see [SECURITY.md](SECURITY.md).
+Thanks for helping with BiscuitWP. It is free and open-source (GPL-2.0-or-later); issues and pull requests are welcome on GitHub. For security problems, do not open an issue: see [SECURITY.md](SECURITY.md).
 
 Requirements for the plugin itself: PHP 7.4+, WordPress 6.0+. Keep new code compatible with PHP 7.4 and add no runtime dependencies.
 
