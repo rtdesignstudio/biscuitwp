@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: BiscuitWP\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro-public\n"
-"POT-Creation-Date: 2026-11-24T11:07:55+00:00\n"
+"POT-Creation-Date: 2026-11-24T12:39:09+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: BiscuitWP\n"
 "Language-Team: ru_RU\n"
@@ -2398,12 +2398,13 @@ msgstr ""
 msgid "Regenerează paginile legale."
 msgstr "Создайте юридические страницы заново."
 
-#: includes/class-migrate-folder.php:158 includes/class-migrate-folder.php:166
-#: includes/class-migrate-folder.php:175 includes/class-migrate-folder.php:199
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:216 includes/class-migrate-folder.php:224
+#: includes/class-migrate-folder.php:233 includes/class-migrate-folder.php:259
 msgid "Mută pluginul în folderul biscuitwp"
 msgstr "Переместить плагин в папку biscuitwp"
 
-#: includes/class-migrate-folder.php:185
+#: includes/class-migrate-folder.php:243
 msgid ""
 "Rezultatul mutării nu e încă disponibil. Reîncarcă pagina peste câteva "
 "secunde."
@@ -2411,38 +2412,35 @@ msgstr ""
 "Результат перемещения пока недоступен. Перезагрузите страницу через "
 "несколько секунд."
 
-#: includes/class-migrate-folder.php:190
+#: includes/class-migrate-folder.php:248
 msgid "Bifează confirmarea ca să muți pluginul."
 msgstr "Отметьте подтверждение, чтобы переместить плагин."
 
-#: includes/class-migrate-folder.php:193
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:253
+#, php-format
 msgid ""
-"Pluginul rulează încă din folderul vechi, plugins/consent-manager-pro. "
-"Butonul de mai jos îl mută în plugins/biscuitwp, fără să-l dezactiveze: "
-"setările, registrul și paginile legale rămân la fel. După mutare, golește "
-"cache-ul paginilor și verifică bannerul pe site."
-msgstr ""
-"Плагин всё ещё работает из старой папки plugins/consent-manager-pro. Кнопка "
-"ниже перемещает его в plugins/biscuitwp, не отключая его: настройки, журнал "
-"и юридические страницы остаются прежними. После перемещения очистите кеш "
-"страниц и проверьте баннер на сайте."
+"Pluginul rulează încă din folderul vechi, %s. Butonul de mai jos îl mută în "
+"plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile "
+"legale rămân la fel. După mutare, golește cache-ul paginilor și verifică "
+"bannerul pe site."
+msgstr "Плагин всё ещё работает из старой папки %s. Кнопка ниже перемещает его в plugins/biscuitwp, не отключая его: настройки, журнал и юридические страницы остаются прежними. После перемещения очистите кеш страниц и проверьте баннер на сайте."
 
-#: includes/class-migrate-folder.php:198
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:258
+#, php-format
 msgid ""
-"Am înțeles: pluginul își mută folderul din plugins/consent-manager-pro în "
-"plugins/biscuitwp, fără să se dezactiveze."
-msgstr ""
-"Я понимаю: плагин перемещает свою папку из plugins/consent-manager-pro в "
-"plugins/biscuitwp, не отключаясь."
+"Am înțeles: pluginul își mută folderul din %s în plugins/biscuitwp, fără să "
+"se dezactiveze."
+msgstr "Я понимаю: плагин перемещает свою папку из %s в plugins/biscuitwp, не отключаясь."
 
-#: includes/class-migrate-folder.php:202
+#: includes/class-migrate-folder.php:262
 msgid ""
-"Pluginul nu rulează din folderul plugins/consent-manager-pro. Nu e nimic de "
-"mutat."
-msgstr ""
-"Плагин не работает из папки plugins/consent-manager-pro. Перемещать нечего."
+"Pluginul nu rulează dintr-un folder vechi care poate fi mutat (de exemplu, "
+"rulează deja din plugins/biscuitwp). Nu e nimic de mutat."
+msgstr "Плагин не работает из старой папки, которую можно переместить (например, он уже работает из plugins/biscuitwp). Перемещать нечего."
 
-#: includes/class-migrate-folder.php:215
+#: includes/class-migrate-folder.php:275
 msgid ""
 "BiscuitWP rulează acum din folderul plugins/biscuitwp. Golește cache-ul "
 "paginilor (pluginul de cache, serverul sau CDN-ul), apoi deschide prima "
@@ -2452,7 +2450,7 @@ msgstr ""
 "(плагин кеширования, сервер или CDN), затем откройте главную страницу сайта "
 "и проверьте, что баннер появляется:"
 
-#: includes/class-migrate-folder.php:219
+#: includes/class-migrate-folder.php:279
 msgid ""
 "Mutarea a întâmpinat o eroare la scrierea setărilor, iar revenirea la "
 "folderul vechi nu a fost posibilă, așa că setările au fost îndreptate spre "
@@ -2463,7 +2461,7 @@ msgstr ""
 "экране «Плагины», что BiscuitWP активен."
 
 #. translators: %s: the reason
-#: includes/class-migrate-folder.php:224
+#: includes/class-migrate-folder.php:284
 #, php-format
 msgid ""
 "BiscuitWP nu și-a putut muta folderul și merge în continuare din cel vechi. "
@@ -2472,7 +2470,7 @@ msgstr ""
 "BiscuitWP не удалось переместить свою папку, плагин продолжает работать из "
 "старой. Причина: %s"
 
-#: includes/class-migrate-folder.php:232
+#: includes/class-migrate-folder.php:292
 msgid ""
 "există deja un folder plugins/biscuitwp. Șterge-l sau redenumește-l, apoi "
 "încearcă din nou."
@@ -2480,7 +2478,7 @@ msgstr ""
 "папка plugins/biscuitwp уже существует. Удалите или переименуйте её, затем "
 "попробуйте снова."
 
-#: includes/class-migrate-folder.php:234
+#: includes/class-migrate-folder.php:294
 msgid ""
 "serverul nu permite scrierea în folderul plugins. Cere-i celui care "
 "administrează serverul să o permită, apoi încearcă din nou."
@@ -2488,7 +2486,7 @@ msgstr ""
 "сервер не разрешает запись в папку plugins. Попросите администратора сервера "
 "разрешить её, затем попробуйте снова."
 
-#: includes/class-migrate-folder.php:236
+#: includes/class-migrate-folder.php:296
 msgid ""
 "chiar acum rulează un update sau o altă mutare. Încearcă din nou peste "
 "câteva minute."
@@ -2496,7 +2494,7 @@ msgstr ""
 "прямо сейчас выполняется обновление или другое перемещение. Попробуйте снова "
 "через несколько минут."
 
-#: includes/class-migrate-folder.php:239
+#: includes/class-migrate-folder.php:299
 msgid ""
 "rețeaua are prea multe site-uri sau mai multe rețele, iar mutarea nu le "
 "poate acoperi pe toate în siguranță."
@@ -2504,12 +2502,12 @@ msgstr ""
 "в сети слишком много сайтов или несколько сетей, и перемещение не может "
 "безопасно охватить их все."
 
-#: includes/class-migrate-folder.php:241
+#: includes/class-migrate-folder.php:301
 msgid "pluginul nu e activ din folderul vechi pe niciun site."
 msgstr "плагин не активен из старой папки ни на одном сайте."
 
 #. translators: %s: internal error code
-#: includes/class-migrate-folder.php:244
+#: includes/class-migrate-folder.php:304
 #, php-format
 msgid ""
 "o eroare la mutare (cod: %s). Nimic nu s-a pierdut; încearcă din nou mai "
@@ -2517,7 +2515,7 @@ msgid ""
 msgstr ""
 "ошибка при перемещении (код: %s). Ничего не потеряно; попробуйте позже."
 
-#: includes/class-migrate-folder.php:268
+#: includes/class-migrate-folder.php:328
 msgid "Nu ai voie să muți pluginul."
 msgstr "У вас нет прав на перемещение плагина."
 

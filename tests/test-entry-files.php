@@ -262,7 +262,19 @@ cmp_assert_eq( is_array( $cmp_ef_out ) ? array_keys( $cmp_ef_out ) : null, array
 // Without the stub flag (consent-manager-pro/ is a real, unmoved copy) both folders keep their own row.
 $cmp_ef_out = method_exists( 'CMP_Plugin', 'fix_plugin_rows' ) ? CMP_Plugin::fix_plugin_rows( $cmp_ef_layout, array( 'biscuitwp/biscuitwp.php' ), 'biscuitwp/biscuitwp.php' ) : null;
 cmp_assert_eq( is_array( $cmp_ef_out ) ? array_keys( $cmp_ef_out ) : null, array( 'akismet/akismet.php', 'biscuitwp/biscuitwp.php', 'consent-manager-pro/consent-manager-pro.php' ), 'plugin rows: a folder that is not our stub keeps its own row (I4: the historical path)' );
-cmp_assert( false !== strpos( $cmp_ef_plugin_src, "CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/' . CMP_Migrate_Folder::OLD_DIR )" ), 'plugin rows (R1-I3): the filter flags plugins/consent-manager-pro when it is exactly our stub' );
+// 1.1.1: the stub may sit in any old folder (e.g. consent-manager-pro-main/).
+$cmp_ef_layout2 = array(
+	'biscuitwp/biscuitwp.php'                          => $cmp_ef_row,
+	'biscuitwp/consent-manager-pro.php'                => $cmp_ef_row,
+	'consent-manager-pro-main/biscuitwp.php'           => $cmp_ef_row,
+	'consent-manager-pro-main/consent-manager-pro.php' => $cmp_ef_row,
+);
+$cmp_ef_out = method_exists( 'CMP_Plugin', 'fix_plugin_rows' ) ? CMP_Plugin::fix_plugin_rows( $cmp_ef_layout2, array( 'biscuitwp/biscuitwp.php' ), 'biscuitwp/biscuitwp.php', array( 'consent-manager-pro-main' ) ) : null;
+cmp_assert_eq( is_array( $cmp_ef_out ) ? array_keys( $cmp_ef_out ) : null, array( 'biscuitwp/biscuitwp.php' ), 'plugin rows (1.1.1, moved from consent-manager-pro-main/ with its stub): exactly one row' );
+// An unmoved consent-manager-pro-main/ (both files, legacy active): one row, the active one.
+$cmp_ef_out = method_exists( 'CMP_Plugin', 'fix_plugin_rows' ) ? CMP_Plugin::fix_plugin_rows( array( 'consent-manager-pro-main/biscuitwp.php' => $cmp_ef_row, 'consent-manager-pro-main/consent-manager-pro.php' => $cmp_ef_row ), array( 'consent-manager-pro-main/consent-manager-pro.php' ), 'consent-manager-pro-main/consent-manager-pro.php' ) : null;
+cmp_assert_eq( is_array( $cmp_ef_out ) ? array_keys( $cmp_ef_out ) : null, array( 'consent-manager-pro-main/consent-manager-pro.php' ), 'plugin rows (1.1.1, unmoved consent-manager-pro-main/): one row, the active entry file' );
+cmp_assert( false !== strpos( $cmp_ef_plugin_src, 'CMP_Migrate_Folder::stub_candidates()' ) && false !== strpos( $cmp_ef_plugin_src, 'CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . \'/\' . $cmp_dir )' ), 'plugin rows: the filter flags every stub candidate folder that is exactly our stub' );
 // Not ours: an old 0.4.x copy (its own text domain) and other plugins are never touched.
 $cmp_ef_old04 = array( 'consent-manager-pro/consent-manager-pro.php' => array( 'Name' => 'Consent Manager Pro', 'TextDomain' => 'consent-manager-pro' ), 'x/biscuitwp.php' => array( 'Name' => 'Other', 'TextDomain' => 'other' ) );
 cmp_assert_eq( $cmp_ef_fix( $cmp_ef_old04, array() ), $cmp_ef_old04, 'plugin rows: files of another text domain are never hidden' );

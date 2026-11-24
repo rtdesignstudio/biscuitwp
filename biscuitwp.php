@@ -3,7 +3,7 @@
  * Plugin Name: BiscuitWP
  * Plugin URI: https://biscuitwp.rt.md/
  * Description: Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN).
- * Version: 1.1.0
+ * Version: 1.1.1
  * Requires PHP: 7.4
  * Author: RT.md
  * Author URI: https://rt.md
@@ -28,7 +28,7 @@ if ( defined( 'CMP_VERSION' ) ) {
 // one-time "services now wait for consent" notice never fires (see
 // CMP_Plugin::maybe_upgrade). The DB schema does not depend on this value
 // (CMP_Installer::SCHEMA / cmp_db_schema).
-define( 'CMP_VERSION', '1.1.0' );
+define( 'CMP_VERSION', '1.1.1' );
 
 // The entry file WordPress actually loaded: this file, or the legacy loader
 // consent-manager-pro.php, which defines it first (CMP_Plugin::main_file()).

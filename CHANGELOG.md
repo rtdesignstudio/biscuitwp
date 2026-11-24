@@ -2,6 +2,10 @@
 
 BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
 
+## 1.1.1 – 2026-11-24
+
+- Butonul de mutare merge și când pluginul stă într-un folder cu alt nume (de exemplu consent-manager-pro-main).
+
 ## 1.1.0 – 2026-11-24
 
 - Pluginul se numește acum BiscuitWP (fost Consent Manager Pro).

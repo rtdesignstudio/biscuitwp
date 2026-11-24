@@ -85,6 +85,9 @@ class CMP_Migrate_Folder {
 	/** Token of this attempt, stored with the result and carried by the redirect. */
 	private static $attempt = '';
 
+	/** The old folder this run works on (current_old_dir(), or a stub candidate in the cleanup). */
+	private static $from = '';
+
 	// ---------------------------------------------------------------------
 	// Registration (from CMP_Plugin).
 	// ---------------------------------------------------------------------
@@ -105,19 +108,74 @@ class CMP_Migrate_Folder {
 	}
 
 	/**
-	 * The plugin runs from exactly WP_PLUGIN_DIR/consent-manager-pro (either entry
-	 * file), a real folder (not a symlink, not mu-plugins): the move applies.
+	 * The folder the plugin runs from, when the move applies to it, else ''. It must
+	 * be a direct child of WP_PLUGIN_DIR (one name, no dot folder), not biscuitwp,
+	 * not a symlink, the very folder of the loaded entry file (realpath), and hold
+	 * both entry files with our header. Usually consent-manager-pro; sites installed
+	 * from a GitHub zip may have another name (e.g. consent-manager-pro-main).
 	 */
-	public static function runs_from_old_folder() {
+	public static function current_old_dir() {
 		if ( ! defined( 'WP_PLUGIN_DIR' ) || ! defined( 'CMP_ENTRY' ) || ! class_exists( 'CMP_Plugin' ) ) {
-			return false;
+			return '';
 		}
-		$old = WP_PLUGIN_DIR . '/' . self::OLD_DIR;
-		if ( is_link( $old ) || ! is_dir( $old ) || self::OLD_DIR !== dirname( CMP_Plugin::basename() ) ) {
-			return false;
+		$dir = dirname( CMP_Plugin::basename() );
+		if ( ! self::valid_dir_name( $dir ) ) {
+			return '';
+		}
+		$path = WP_PLUGIN_DIR . '/' . $dir;
+		if ( is_link( $path ) || ! is_dir( $path ) ) {
+			return '';
 		}
 		$here = realpath( dirname( CMP_ENTRY ) );
-		return false !== $here && realpath( $old ) === $here;
+		if ( false === $here || realpath( $path ) !== $here ) {
+			return '';
+		}
+		foreach ( array( 'biscuitwp.php', basename( self::OLD ) ) as $file ) {
+			if ( is_link( $path . '/' . $file ) || ! is_file( $path . '/' . $file ) ) {
+				return '';
+			}
+			$hdr = self::header_block( (string) @file_get_contents( $path . '/' . $file, false, null, 0, 8192 ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			if ( false === strpos( $hdr, "\n * Plugin Name: BiscuitWP\n" ) || false === strpos( $hdr, "\n * Text Domain: biscuitwp\n" ) ) {
+				return '';
+			}
+		}
+		return $dir;
+	}
+
+	/** A plain folder name directly in WP_PLUGIN_DIR that may be an old folder. Pure. */
+	public static function valid_dir_name( $dir ) {
+		return is_string( $dir ) && '' !== $dir && self::NEW_DIR !== $dir && 1 === preg_match( '#^[^./\\\\][^/\\\\]*$#', $dir );
+	}
+
+	/** The plugin runs from a folder the move applies to (see current_old_dir()). */
+	public static function runs_from_old_folder() {
+		return '' !== self::current_old_dir();
+	}
+
+	/**
+	 * Folders that may hold our stub after a move: the one recorded by the move
+	 * (`from`) and consent-manager-pro. Names only, validated.
+	 */
+	public static function stub_candidates() {
+		$out   = array( self::OLD_DIR );
+		$state = function_exists( 'get_site_option' ) ? get_site_option( self::STATE, array() ) : array();
+		if ( is_array( $state ) && isset( $state['from'] ) && self::valid_dir_name( $state['from'] ) && ! in_array( $state['from'], $out, true ) ) {
+			array_unshift( $out, (string) $state['from'] );
+		}
+		return $out;
+	}
+
+	/** Does any stub candidate folder exist (so the cleanup is worth registering)? */
+	public static function stub_candidate_exists() {
+		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+			return false;
+		}
+		foreach ( self::stub_candidates() as $dir ) {
+			if ( is_dir( WP_PLUGIN_DIR . '/' . $dir ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Who may move: manage_options on single site; a super admin on multisite. */
@@ -190,16 +248,18 @@ class CMP_Migrate_Folder {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Bifează confirmarea ca să muți pluginul.', 'biscuitwp' ) . '</p></div>';
 		}
 		if ( self::offer_here() ) {
-			echo '<p>' . esc_html__( 'Pluginul rulează încă din folderul vechi, plugins/consent-manager-pro. Butonul de mai jos îl mută în plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile legale rămân la fel. După mutare, golește cache-ul paginilor și verifică bannerul pe site.', 'biscuitwp' ) . '</p>';
+			$from = 'plugins/' . self::current_old_dir();
+			/* translators: %s: the current folder, e.g. plugins/consent-manager-pro */
+			echo '<p>' . esc_html( sprintf( __( 'Pluginul rulează încă din folderul vechi, %s. Butonul de mai jos îl mută în plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile legale rămân la fel. După mutare, golește cache-ul paginilor și verifică bannerul pe site.', 'biscuitwp' ), $from ) ) . '</p>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 			echo '<input type="hidden" name="action" value="' . esc_attr( self::ACTION ) . '">';
 			wp_nonce_field( self::ACTION );
 			// Explicit <label for>: the checkbox's accessible name is the sentence, not its value.
-			echo '<p><input type="checkbox" id="cmp-confirm" name="cmp_confirm" value="1" required> <label for="cmp-confirm">' . esc_html__( 'Am înțeles: pluginul își mută folderul din plugins/consent-manager-pro în plugins/biscuitwp, fără să se dezactiveze.', 'biscuitwp' ) . '</label></p>';
+			echo '<p><input type="checkbox" id="cmp-confirm" name="cmp_confirm" value="1" required> <label for="cmp-confirm">' . esc_html( sprintf( /* translators: %s: the current folder, e.g. plugins/consent-manager-pro */ __( 'Am înțeles: pluginul își mută folderul din %s în plugins/biscuitwp, fără să se dezactiveze.', 'biscuitwp' ), $from ) ) . '</label></p>';
 			echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Mută pluginul în folderul biscuitwp', 'biscuitwp' ) . '</button></p></form>';
 		} elseif ( ! $has_result && ! self::runs_from_old_folder() ) {
 			// Not under a move result: right after a move the plugin no longer runs from the old folder by design.
-			echo '<p>' . esc_html__( 'Pluginul nu rulează din folderul plugins/consent-manager-pro. Nu e nimic de mutat.', 'biscuitwp' ) . '</p>';
+			echo '<p>' . esc_html__( 'Pluginul nu rulează dintr-un folder vechi care poate fi mutat (de exemplu, rulează deja din plugins/biscuitwp). Nu e nimic de mutat.', 'biscuitwp' ) . '</p>';
 		}
 		echo '</div>';
 	}
@@ -293,19 +353,23 @@ class CMP_Migrate_Folder {
 	// ---------------------------------------------------------------------
 
 	/** The two old-folder paths, both moved to NEW. */
-	public static function old_paths() {
-		return array( self::OLD, self::OLD_SIB );
+	public static function old_paths( $dir = null ) {
+		if ( null === $dir ) {
+			$dir = '' !== self::$from ? self::$from : self::OLD_DIR;
+		}
+		return array( $dir . '/' . basename( self::OLD ), $dir . '/' . basename( self::OLD_SIB ) );
 	}
 
 	/**
 	 * List option (active_plugins, auto_update_plugins): either old path becomes
 	 * NEW (at the first old position), order kept, never a duplicate. Pure.
 	 */
-	public static function replace_in_list( array $plugins ) {
+	public static function replace_in_list( array $plugins, ?array $old = null ) {
+		$old = null === $old ? self::old_paths() : $old;
 		$has_new = in_array( self::NEW, $plugins, true );
 		$out     = array();
 		foreach ( $plugins as $p ) {
-			if ( in_array( $p, self::old_paths(), true ) ) {
+			if ( in_array( $p, $old, true ) ) {
 				if ( $has_new ) {
 					continue;
 				}
@@ -322,11 +386,12 @@ class CMP_Migrate_Folder {
 	 * becomes NEW, value and position kept (the first one wins); an existing NEW
 	 * key keeps its own value. Pure.
 	 */
-	public static function replace_in_map( array $map ) {
+	public static function replace_in_map( array $map, ?array $old = null ) {
+		$old = null === $old ? self::old_paths() : $old;
 		$has_new = array_key_exists( self::NEW, $map );
 		$out     = array();
 		foreach ( $map as $k => $v ) {
-			if ( in_array( $k, self::old_paths(), true ) ) {
+			if ( in_array( $k, $old, true ) ) {
 				if ( $has_new ) {
 					continue;
 				}
@@ -469,8 +534,16 @@ class CMP_Migrate_Folder {
 	 * @param string $plugins_dir WP_PLUGIN_DIR.
 	 */
 	public static function remove_stub_folders( $plugins_dir ) {
-		foreach ( array( self::OLD_DIR, self::STUB_TMP ) as $name ) {
-			self::remove_stub_dir( rtrim( (string) $plugins_dir, '/' ) . '/' . $name );
+		$base    = rtrim( (string) $plugins_dir, '/' );
+		$entries = is_dir( $base ) ? @scandir( $base ) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		$names   = array( self::STUB_TMP );
+		foreach ( is_array( $entries ) ? $entries : array() as $name ) {
+			if ( self::valid_dir_name( $name ) ) {
+				$names[] = $name; // Any old folder name; removed only when it is exactly our stub.
+			}
+		}
+		foreach ( $names as $name ) {
+			self::remove_stub_dir( $base . '/' . $name );
 		}
 	}
 
@@ -659,11 +732,13 @@ class CMP_Migrate_Folder {
 	}
 
 	private static function do_run() {
-		if ( ! self::runs_from_old_folder() ) {
+		$dir = self::current_old_dir();
+		if ( '' === $dir ) {
 			return;
 		}
-		$now = time();
-		$old = WP_PLUGIN_DIR . '/' . self::OLD_DIR;
+		self::$from = $dir;
+		$now        = time();
+		$old        = WP_PLUGIN_DIR . '/' . $dir;
 		if ( self::is_our_stub_dir( $old ) ) {
 			return; // Already moved, only the stub is left: a request that started before the move.
 		}
@@ -872,16 +947,12 @@ class CMP_Migrate_Folder {
 			if ( ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 				return;
 			}
-			$old = WP_PLUGIN_DIR . '/' . self::OLD_DIR;
 			$new = WP_PLUGIN_DIR . '/' . self::NEW_DIR;
 			if ( self::NEW_DIR !== dirname( CMP_Plugin::basename() ) || realpath( dirname( CMP_ENTRY ) ) !== realpath( $new ) ) {
 				return;
 			}
 			if ( self::is_our_stub_dir( WP_PLUGIN_DIR . '/' . self::STUB_TMP ) ) {
 				self::remove_stub_dir( WP_PLUGIN_DIR . '/' . self::STUB_TMP );
-			}
-			if ( ! self::is_our_stub_dir( $old ) ) {
-				return;
 			}
 			$state = get_site_option( self::STATE, array() );
 			$ts    = is_array( $state ) && isset( $state['ts'] ) ? (int) $state['ts'] : 0;
@@ -892,11 +963,18 @@ class CMP_Migrate_Folder {
 			if ( $multisite && (int) get_sites( array( 'count' => true ) ) > self::MAX_SITES ) {
 				return;
 			}
-			$plan = self::plan( $multisite );
-			if ( $plan['active'] ) {
-				return; // Some site still activates an old path: the stub keeps it loadable.
+			foreach ( self::stub_candidates() as $dir ) {
+				$old = WP_PLUGIN_DIR . '/' . $dir;
+				if ( ! self::is_our_stub_dir( $old ) ) {
+					continue;
+				}
+				self::$from = $dir;
+				$plan       = self::plan( $multisite );
+				if ( ! $plan['active'] ) { // Otherwise some site still activates an old path there: the stub keeps it loadable.
+					self::remove_stub_dir( $old );
+				}
 			}
-			self::remove_stub_dir( $old );
+			self::$from = '';
 		} catch ( \Throwable $e ) {
 			unset( $e );
 		}
@@ -927,6 +1005,7 @@ class CMP_Migrate_Folder {
 				'ts'      => (int) $now,
 				'attempt' => self::$attempt,
 				'moved'   => (bool) $moved,
+				'from'    => self::$from,
 			)
 		);
 	}

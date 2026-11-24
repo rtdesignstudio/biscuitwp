@@ -103,8 +103,12 @@ class CMP_Plugin {
 			$active = array_merge( $active, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
 		}
 		$stubs = array();
-		if ( defined( 'WP_PLUGIN_DIR' ) && class_exists( 'CMP_Migrate_Folder' ) && CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/' . CMP_Migrate_Folder::OLD_DIR ) ) {
-			$stubs[] = CMP_Migrate_Folder::OLD_DIR;
+		if ( defined( 'WP_PLUGIN_DIR' ) && class_exists( 'CMP_Migrate_Folder' ) ) {
+			foreach ( CMP_Migrate_Folder::stub_candidates() as $cmp_dir ) {
+				if ( CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/' . $cmp_dir ) ) {
+					$stubs[] = $cmp_dir;
+				}
+			}
 		}
 		return self::fix_plugin_rows( $plugins, $active, self::basename(), $stubs );
 	}
@@ -165,7 +169,7 @@ class CMP_Plugin {
 			if ( is_admin() ) {
 				CMP_Migrate_Folder::register_admin();
 			}
-			if ( defined( 'WP_PLUGIN_DIR' ) && is_dir( WP_PLUGIN_DIR . '/consent-manager-pro' ) && ! CMP_Migrate_Folder::runs_from_old_folder() ) {
+			if ( CMP_Migrate_Folder::stub_candidate_exists() && ! CMP_Migrate_Folder::runs_from_old_folder() ) {
 				CMP_Migrate_Folder::register_cleanup();
 			}
 		}

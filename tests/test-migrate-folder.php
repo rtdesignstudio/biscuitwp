@@ -77,7 +77,7 @@ if ( $mf_ok ) {
 $mf_src        = is_file( $mf_file ) ? (string) file_get_contents( $mf_file ) : '';
 $mf_plugin_src = (string) file_get_contents( $mf_root . '/includes/class-plugin.php' );
 cmp_assert( false === strpos( $mf_plugin_src, 'CMP_Migrate_Folder::register()' ) && false === strpos( $mf_plugin_src, "'run' )" ), 'migrate: CMP_Plugin registers no automatic move' );
-cmp_assert( 1 === preg_match( "/if \( is_admin\(\) \|\| wp_doing_cron\(\) \) \{\s*require_once CMP_PATH \. 'includes\/class-migrate-folder\.php';\s*if \( is_admin\(\) \) \{\s*CMP_Migrate_Folder::register_admin\(\);\s*\}\s*if \( defined\( 'WP_PLUGIN_DIR' \) && is_dir\( WP_PLUGIN_DIR \. '\/consent-manager-pro' \) && ! CMP_Migrate_Folder::runs_from_old_folder\(\) \) \{\s*CMP_Migrate_Folder::register_cleanup\(\);/", $mf_plugin_src ), 'migrate: CMP_Plugin registers the move screen in admin and the stub cleanup (admin/cron, from biscuitwp/)' );
+cmp_assert( 1 === preg_match( "/if \( is_admin\(\) \|\| wp_doing_cron\(\) \) \{\s*require_once CMP_PATH \. 'includes\/class-migrate-folder\.php';\s*if \( is_admin\(\) \) \{\s*CMP_Migrate_Folder::register_admin\(\);\s*\}\s*if \( CMP_Migrate_Folder::stub_candidate_exists\(\) && ! CMP_Migrate_Folder::runs_from_old_folder\(\) \) \{\s*CMP_Migrate_Folder::register_cleanup\(\);/", $mf_plugin_src ), 'migrate: CMP_Plugin registers the move screen in admin and the stub cleanup (admin/cron, from biscuitwp/)' );
 cmp_assert( 1 === substr_count( $mf_src, "array( __CLASS__, 'run' )" ) && 1 === preg_match( "/public static function queue\\( \\\$token = '' \\) \\{[^}]*self::\\\$queued  = true;[^}]*add_action\\( 'shutdown', array\\( __CLASS__, 'run' \\), PHP_INT_MAX \\);/", $mf_src ), 'migrate: run() is hooked only by queue(), on shutdown at PHP_INT_MAX' );
 cmp_assert( 1 === preg_match( "/public static function run\(\) \{\s*if \( ! self::\\\$queued \) \{\s*return;/", $mf_src ), 'migrate: run() does nothing unless queued by the confirmed request' );
 cmp_assert( 1 === preg_match( "/public static function handle\(\) \{\s*if \( ! self::user_may_move\(\) \) \{\s*wp_die\([^;]*;\s*\}\s*check_admin_referer\( self::ACTION \);/", $mf_src ), 'migrate: the handler checks the capability, then the nonce' );
@@ -111,6 +111,7 @@ define( 'ABSPATH', $sc['abspath'] . '/' );
 define( 'WP_PLUGIN_DIR', $sc['plugins'] );
 define( 'CMP_ENTRY', $sc['entry'] );
 define( 'CMP_PATH', $sc['root'] . '/' );
+define( 'MF_OLDF', isset( $sc['folder'] ) ? $sc['folder'] : 'consent-manager-pro' );
 $GLOBALS['o']        = $sc['blogs'];
 $GLOBALS['so']       = $sc['site'];
 $GLOBALS['blog']     = isset( $sc['current_blog'] ) ? (int) $sc['current_blog'] : 1;
@@ -229,7 +230,7 @@ function mf_loadable() {
 	$ours = 0;
 	clearstatcache();
 	foreach ( $slots as $paths ) {
-		$mine = array_filter( $paths, function ( $p ) { return 0 === strpos( $p, 'consent-manager-pro/' ) || 0 === strpos( $p, 'biscuitwp/' ); } );
+		$mine = array_filter( $paths, function ( $p ) { return 0 === strpos( $p, MF_OLDF . '/' ) || 0 === strpos( $p, 'biscuitwp/' ); } );
 		if ( ! $mine ) { continue; }
 		$ours++;
 		$ok = false;
@@ -249,7 +250,7 @@ $seam['on_step']            = function ( $name ) {
 	$GLOBALS['steps'][] = array(
 		'step'     => $name,
 		'loadable' => mf_loadable(),
-		'stub'     => CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/consent-manager-pro' ),
+		'stub'     => CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/' . MF_OLDF ),
 		'new_dir'  => is_dir( WP_PLUGIN_DIR . '/biscuitwp' ),
 	);
 };
@@ -276,6 +277,10 @@ switch ( $sc['mode'] ) {
 	case 'menu':
 		CMP_Migrate_Folder::add_page();
 		break;
+	case 'uninstall':
+		CMP_Migrate_Folder::remove_stub_folders( WP_PLUGIN_DIR );
+		$out['left'] = array_values( array_diff( scandir( WP_PLUGIN_DIR ), array( '.', '..' ) ) );
+		break;
 	case 'unqueued':
 		CMP_Migrate_Folder::run();
 		break;
@@ -289,7 +294,7 @@ switch ( $sc['mode'] ) {
 		CMP_Migrate_Folder::run();
 }
 clearstatcache();
-$old = WP_PLUGIN_DIR . '/consent-manager-pro';
+$old = WP_PLUGIN_DIR . '/' . MF_OLDF;
 echo json_encode( $out + array(
 	'errors'          => $GLOBALS['errors'],
 	'blogs'           => $GLOBALS['o'],
@@ -320,14 +325,15 @@ $mf_run = function ( array $sc ) use ( $mf_tmp, $mf_root, &$mf_n ) {
 	$mf_n++;
 	$base    = $mf_tmp . '/s' . $mf_n;
 	$plugins = $base . '/wp/wp-content/plugins';
-	@mkdir( $plugins . '/consent-manager-pro', 0777, true );
-	copy( $mf_root . '/consent-manager-pro.php', $plugins . '/consent-manager-pro/consent-manager-pro.php' );
-	copy( $mf_root . '/biscuitwp.php', $plugins . '/consent-manager-pro/biscuitwp.php' );
-	file_put_contents( $plugins . '/consent-manager-pro/includes-marker.txt', 'real plugin folder' );
+	$folder  = isset( $sc['folder'] ) ? $sc['folder'] : 'consent-manager-pro';
+	@mkdir( $plugins . '/' . $folder, 0777, true );
+	copy( $mf_root . '/consent-manager-pro.php', $plugins . '/' . $folder . '/consent-manager-pro.php' );
+	copy( $mf_root . '/biscuitwp.php', $plugins . '/' . $folder . '/biscuitwp.php' );
+	file_put_contents( $plugins . '/' . $folder . '/includes-marker.txt', 'real plugin folder' );
 	$sc += array(
 		'mode'   => 'run',
 		'legacy' => true,
-		'entry'  => $plugins . '/consent-manager-pro/consent-manager-pro.php',
+		'entry'  => $plugins . '/' . $folder . '/consent-manager-pro.php',
 		'blogs'  => array( 1 => array() ),
 		'site'   => array(),
 		'caps'   => array(),
@@ -832,6 +838,125 @@ if ( $mf_ok ) {
 	$mf_out = (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp . '/stubmissing/driver.php' ) . ' ' . escapeshellarg( $mf_sb2 . '/consent-manager-pro/consent-manager-pro.php' ) . ' 2>&1' );
 	cmp_assert_eq( json_decode( $mf_out, true ), array( 'ok' => true, 'loaded' => false, 'leak' => false ), 'migrate stub (R1-I3): target missing -> loads nothing, no error, no leaked variable' );
 }
+
+// ---------------------------------------------------------------------------
+// 1.1.1: any old folder name (e.g. consent-manager-pro-main from a GitHub "main" zip).
+// ---------------------------------------------------------------------------
+$mf_mf   = 'consent-manager-pro-main';
+$mf_mold = $mf_mf . '/consent-manager-pro.php';
+$mf_msib = $mf_mf . '/biscuitwp.php';
+if ( $mf_ok ) {
+	cmp_assert_eq( CMP_Migrate_Folder::old_paths( $mf_mf ), array( $mf_mold, $mf_msib ), '1.1.1: old_paths() of another folder = both entry files there' );
+	cmp_assert_eq( CMP_Migrate_Folder::replace_in_list( array( 'a/a.php', $mf_mold, $mf_old ), CMP_Migrate_Folder::old_paths( $mf_mf ) ), array( 'a/a.php', $mf_new, $mf_old ), '1.1.1: replace_in_list with that folder\'s paths only touches that folder' );
+	cmp_assert_eq( CMP_Migrate_Folder::replace_in_map( array( $mf_msib => 7 ), CMP_Migrate_Folder::old_paths( $mf_mf ) ), array( $mf_new => 7 ), '1.1.1: replace_in_map with that folder\'s paths' );
+}
+$mf_main_single = array(
+	1 => array(
+		'active_plugins'      => array( 'akismet/akismet.php', $mf_mold, 'z/z.php' ),
+		'uninstall_plugins'   => array( $mf_mold => 'cb' ),
+		'auto_update_plugins' => array( $mf_mold ),
+	),
+);
+// The button and the screen name the real folder.
+$mf_h = $mf_page( array( 'folder' => $mf_mf, 'caps' => array( 'manage_options' ), 'blogs' => $mf_main_single ) );
+cmp_assert( false !== strpos( $mf_h, '<form' ) && false !== strpos( $mf_h, 'plugins/consent-manager-pro-main' ) && false === strpos( $mf_h, 'plugins/consent-manager-pro ' ) && false === strpos( $mf_h, 'plugins/consent-manager-pro.' ), '1.1.1 screen: button offered for consent-manager-pro-main/, texts name plugins/consent-manager-pro-main' );
+cmp_assert( 1 === preg_match( '#<label for="cmp-confirm">Am înțeles: pluginul își mută folderul din plugins/consent-manager-pro-main în plugins/biscuitwp, fără să se dezactiveze\.</label>#u', $mf_h ), '1.1.1 screen: the confirmation names the real folder' );
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'row', 'caps' => array( 'manage_options' ) ) );
+cmp_assert( 2 === count( (array) $mf_g( $r, 'links' ) ), '1.1.1: row link offered in consent-manager-pro-main/' );
+cmp_assert_eq( $mf_g( $mf_run( array( 'folder' => $mf_mf, 'mode' => 'check', 'post' => array( 'cmp_confirm' => '1' ), 'allowed' => true ) ), 'check' ), 'queued', '1.1.1: confirmed request in consent-manager-pro-main/ -> queued' );
+
+// The move.
+$r = $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single ) );
+cmp_assert_eq( $mf_g( $r, 'errors' ), array(), '1.1.1 run: no PHP warnings' );
+cmp_assert( true === $mf_g( $r, 'moved_file' ) && false === $mf_g( $r, 'real_old' ) && true === $mf_g( $r, 'stub_dir' ) && array( 'biscuitwp.php', 'consent-manager-pro.php' ) === $mf_g( $r, 'old_entries' ), '1.1.1 run: consent-manager-pro-main/ moved to biscuitwp/, our stub left at consent-manager-pro-main/' );
+cmp_assert_eq( $mf_g( $r, 'blogs.1.active_plugins' ), array( 'akismet/akismet.php', $mf_new, 'z/z.php' ), '1.1.1 run: active_plugins rewritten from consent-manager-pro-main/consent-manager-pro.php' );
+cmp_assert( array( $mf_new => 'cb' ) === $mf_g( $r, 'blogs.1.uninstall_plugins' ) && array( $mf_new ) === $mf_g( $r, 'blogs.1.auto_update_plugins' ), '1.1.1 run: uninstall_plugins and auto_update_plugins rewritten' );
+cmp_assert( 'done' === $mf_g( $mf_state( $r ), 'state' ) && $mf_mf === $mf_g( $mf_state( $r ), 'from' ), '1.1.1 run: done, the old folder recorded as from' );
+cmp_assert( $mf_all_loadable( $r ), '1.1.1 run: loadable before, at every step and after' );
+$r = $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'legacy' => false, 'prepare' => function ( $base, $plugins, $entry ) {
+	return $plugins . '/consent-manager-pro-main/biscuitwp.php';
+} ) );
+cmp_assert( true === $mf_g( $r, 'moved_file' ) && 'done' === $mf_g( $mf_state( $r ), 'state' ), '1.1.1 run: also when loaded through consent-manager-pro-main/biscuitwp.php' );
+$mf_main_ms = array(
+	'multisite' => true, 'network_admin' => true, 'super' => true, 'folder' => $mf_mf,
+	'blogs'     => array( 1 => array( 'active_plugins' => array( $mf_mold ) ), 2 => array( 'active_plugins' => array( $mf_msib ) ) ),
+	'site'      => array( 'active_sitewide_plugins' => array( $mf_msib => 5 ) ),
+);
+$r = $mf_run( $mf_main_ms );
+cmp_assert( array( $mf_new ) === $mf_g( $r, 'blogs.1.active_plugins' ) && array( $mf_new ) === $mf_g( $r, 'blogs.2.active_plugins' ) && array( $mf_new => 5 ) === $mf_g( $r, 'site.active_sitewide_plugins' ) && $mf_all_loadable( $r ), '1.1.1 run (multisite): both entry files of consent-manager-pro-main/ rewritten on every site and the network, loadable throughout' );
+
+// Rollback.
+$r = $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'fail' => array( 'blog:1:uninstall_plugins' ) ) );
+cmp_assert( $mf_unmoved( $r ) && $mf_main_single[1]['active_plugins'] === $mf_g( $r, 'blogs.1.active_plugins' ) && 'options' === $mf_g( $mf_state( $r ), 'reason' ) && $mf_all_loadable( $r ), '1.1.1 rollback: the real folder is back at consent-manager-pro-main/, options restored, loadable throughout' );
+// biscuitwp/ already there: refused.
+$r = $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'prepare' => function ( $base, $plugins, $entry ) {
+	@mkdir( $plugins . '/biscuitwp' );
+	return $entry;
+} ) );
+cmp_assert( true === $mf_g( $r, 'real_old' ) && 'new_exists' === $mf_g( $mf_state( $r ), 'reason' ), '1.1.1: plugins/biscuitwp exists -> refused (new_exists)' );
+
+// Cleanup of a stub left at consent-manager-pro-main/.
+$mf_left_main = function ( $extra = null ) use ( $mf_ok ) {
+	return function ( $base, $plugins, $entry ) use ( $extra, $mf_ok ) {
+		rename( $plugins . '/consent-manager-pro-main', $plugins . '/biscuitwp' );
+		mkdir( $plugins . '/consent-manager-pro-main' );
+		foreach ( array( 'consent-manager-pro.php', 'biscuitwp.php' ) as $f ) {
+			file_put_contents( $plugins . '/consent-manager-pro-main/' . $f, $mf_ok ? CMP_Migrate_Folder::stub_source() : '' );
+		}
+		if ( $extra ) {
+			file_put_contents( $plugins . '/consent-manager-pro-main/' . $extra, 'x' );
+		}
+		return $plugins . '/biscuitwp/biscuitwp.php';
+	};
+};
+$mf_main_moved = function ( $age, array $active ) use ( $mf_now, $mf_mf ) {
+	return array( 1 => array( 'active_plugins' => $active, 'cmp_folder_move' => array( 'state' => 'done', 'reason' => '', 'ts' => $mf_now - $age, 'from' => $mf_mf, 'moved' => true ) ) );
+};
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'cleanup', 'legacy' => false, 'blogs' => $mf_main_moved( 3601, array( $mf_new ) ), 'prepare' => $mf_left_main() ) );
+cmp_assert( false === $mf_g( $r, 'old_dir' ) && true === $mf_g( $r, 'new_dir' ), '1.1.1 cleanup: the stub at consent-manager-pro-main/ is removed after an hour' );
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'cleanup', 'legacy' => false, 'blogs' => $mf_main_moved( 3601, array( $mf_mold ) ), 'prepare' => $mf_left_main() ) );
+cmp_assert( true === $mf_g( $r, 'stub_dir' ), '1.1.1 cleanup: kept while consent-manager-pro-main/consent-manager-pro.php is still active' );
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'cleanup', 'legacy' => false, 'blogs' => $mf_main_moved( 60, array( $mf_new ) ), 'prepare' => $mf_left_main() ) );
+cmp_assert( true === $mf_g( $r, 'stub_dir' ), '1.1.1 cleanup: kept within the first hour' );
+cmp_assert( false !== strpos( (string) file_get_contents( $mf_root . '/includes/class-plugin.php' ), 'CMP_Migrate_Folder::stub_candidates()' ), '1.1.1: CMP_Plugin registers the cleanup and the row grouping from stub_candidates() (recorded folder + consent-manager-pro)' );
+
+// Uninstall: our stub in any folder is removed; nothing else.
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'uninstall', 'legacy' => false, 'prepare' => function ( $base, $plugins, $entry ) use ( $mf_left_main, $mf_ok ) {
+	$e = call_user_func( $mf_left_main(), $base, $plugins, $entry );
+	@mkdir( $plugins . '/other-plugin' );
+	file_put_contents( $plugins . '/other-plugin/biscuitwp.php', $mf_ok ? CMP_Migrate_Folder::stub_source() : '' );
+	file_put_contents( $plugins . '/other-plugin/readme.txt', 'x' );
+	return $e;
+} ) );
+cmp_assert_eq( $mf_g( $r, 'left' ), array( 'biscuitwp', 'other-plugin' ), '1.1.1 uninstall: the stub folder consent-manager-pro-main/ is removed, other folders are not' );
+
+// Refusals: nothing offered, nothing moved.
+$mf_refused = function ( $r, $label ) use ( $mf_g, $mf_logs, $mf_state ) {
+	cmp_assert( null === $mf_state( $r ) && ! $mf_logs( $r, 'update:' ) && false === $mf_g( $r, 'new_dir' ), "1.1.1 refused: $label" );
+};
+$mf_refused( $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'prepare' => function ( $base, $plugins, $entry ) {
+	@mkdir( $base . '/src', 0777, true );
+	rename( $plugins . '/consent-manager-pro-main', $base . '/src/consent-manager-pro-main' );
+	symlink( $base . '/src/consent-manager-pro-main', $plugins . '/consent-manager-pro-main' );
+	return $base . '/src/consent-manager-pro-main/consent-manager-pro.php';
+} ) ), 'symlinked consent-manager-pro-main/' );
+$mf_refused( $mf_run( array( 'folder' => $mf_mf, 'blogs' => array( 1 => array( 'active_plugins' => array( 'vendor/consent-manager-pro-main/consent-manager-pro.php' ) ) ), 'prepare' => function ( $base, $plugins, $entry ) {
+	@mkdir( $plugins . '/vendor', 0777, true );
+	rename( $plugins . '/consent-manager-pro-main', $plugins . '/vendor/consent-manager-pro-main' );
+	return $plugins . '/vendor/consent-manager-pro-main/consent-manager-pro.php';
+} ) ), 'a nested folder (vendor/consent-manager-pro-main/)' );
+$mf_refused( $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'prepare' => function ( $base, $plugins, $entry ) {
+	unlink( $plugins . '/consent-manager-pro-main/biscuitwp.php' );
+	return $entry;
+} ) ), 'the folder lacks biscuitwp.php' );
+$mf_refused( $mf_run( array( 'folder' => $mf_mf, 'blogs' => $mf_main_single, 'prepare' => function ( $base, $plugins, $entry ) {
+	file_put_contents( $plugins . '/consent-manager-pro-main/biscuitwp.php', "<?php\n/**\n * Plugin Name: Something Else\n * Text Domain: other\n */\n" );
+	return $entry;
+} ) ), 'biscuitwp.php there is not ours (other header)' );
+$r = $mf_run( array( 'folder' => $mf_mf, 'mode' => 'row', 'caps' => array( 'manage_options' ), 'legacy' => false, 'prepare' => $mf_left_main() ) );
+cmp_assert_eq( $mf_g( $r, 'links' ), array( 'x' ), '1.1.1 refused: running from biscuitwp/ -> no row link' );
+$mf_h = $mf_page( array( 'folder' => $mf_mf, 'caps' => array( 'manage_options' ), 'legacy' => false, 'prepare' => $mf_left_main() ) );
+cmp_assert( false === strpos( $mf_h, '<form' ) && false !== strpos( $mf_h, 'Nu e nimic de mutat.' ), '1.1.1 refused: running from biscuitwp/ -> no button' );
 
 // Guide paragraph and translations.
 $mf_guide = (string) file_get_contents( $mf_root . '/templates/admin/guide.php' );

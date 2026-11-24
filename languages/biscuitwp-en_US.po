@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: BiscuitWP\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro-public\n"
-"POT-Creation-Date: 2026-11-24T11:07:55+00:00\n"
+"POT-Creation-Date: 2026-11-24T12:39:09+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: BiscuitWP\n"
 "Language-Team: en_US\n"
@@ -2388,12 +2388,13 @@ msgstr ""
 msgid "Regenerează paginile legale."
 msgstr "Regenerate the legal pages."
 
-#: includes/class-migrate-folder.php:158 includes/class-migrate-folder.php:166
-#: includes/class-migrate-folder.php:175 includes/class-migrate-folder.php:199
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:216 includes/class-migrate-folder.php:224
+#: includes/class-migrate-folder.php:233 includes/class-migrate-folder.php:259
 msgid "Mută pluginul în folderul biscuitwp"
 msgstr "Move the plugin to the biscuitwp folder"
 
-#: includes/class-migrate-folder.php:185
+#: includes/class-migrate-folder.php:243
 msgid ""
 "Rezultatul mutării nu e încă disponibil. Reîncarcă pagina peste câteva "
 "secunde."
@@ -2401,39 +2402,35 @@ msgstr ""
 "The result of the move is not available yet. Reload the page in a few "
 "seconds."
 
-#: includes/class-migrate-folder.php:190
+#: includes/class-migrate-folder.php:248
 msgid "Bifează confirmarea ca să muți pluginul."
 msgstr "Tick the confirmation to move the plugin."
 
-#: includes/class-migrate-folder.php:193
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:253
+#, php-format
 msgid ""
-"Pluginul rulează încă din folderul vechi, plugins/consent-manager-pro. "
-"Butonul de mai jos îl mută în plugins/biscuitwp, fără să-l dezactiveze: "
-"setările, registrul și paginile legale rămân la fel. După mutare, golește "
-"cache-ul paginilor și verifică bannerul pe site."
-msgstr ""
-"The plugin still runs from the old folder, plugins/consent-manager-pro. The "
-"button below moves it to plugins/biscuitwp without deactivating it: "
-"settings, the register and the legal pages stay the same. After the move, "
-"clear the page cache and check the banner on the site."
+"Pluginul rulează încă din folderul vechi, %s. Butonul de mai jos îl mută în "
+"plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile "
+"legale rămân la fel. După mutare, golește cache-ul paginilor și verifică "
+"bannerul pe site."
+msgstr "The plugin still runs from the old folder, %s. The button below moves it to plugins/biscuitwp without deactivating it: settings, the register and the legal pages stay the same. After the move, clear the page cache and check the banner on the site."
 
-#: includes/class-migrate-folder.php:198
+#. translators: %s: the current folder, e.g. plugins/consent-manager-pro
+#: includes/class-migrate-folder.php:258
+#, php-format
 msgid ""
-"Am înțeles: pluginul își mută folderul din plugins/consent-manager-pro în "
-"plugins/biscuitwp, fără să se dezactiveze."
-msgstr ""
-"I understand: the plugin moves its folder from plugins/consent-manager-pro "
-"to plugins/biscuitwp, without being deactivated."
+"Am înțeles: pluginul își mută folderul din %s în plugins/biscuitwp, fără să "
+"se dezactiveze."
+msgstr "I understand: the plugin moves its folder from %s to plugins/biscuitwp, without being deactivated."
 
-#: includes/class-migrate-folder.php:202
+#: includes/class-migrate-folder.php:262
 msgid ""
-"Pluginul nu rulează din folderul plugins/consent-manager-pro. Nu e nimic de "
-"mutat."
-msgstr ""
-"The plugin does not run from the plugins/consent-manager-pro folder. There "
-"is nothing to move."
+"Pluginul nu rulează dintr-un folder vechi care poate fi mutat (de exemplu, "
+"rulează deja din plugins/biscuitwp). Nu e nimic de mutat."
+msgstr "The plugin does not run from an old folder that can be moved (for example, it already runs from plugins/biscuitwp). There is nothing to move."
 
-#: includes/class-migrate-folder.php:215
+#: includes/class-migrate-folder.php:275
 msgid ""
 "BiscuitWP rulează acum din folderul plugins/biscuitwp. Golește cache-ul "
 "paginilor (pluginul de cache, serverul sau CDN-ul), apoi deschide prima "
@@ -2443,7 +2440,7 @@ msgstr ""
 "(the caching plugin, the server or the CDN), then open the site's front page "
 "and check that the banner appears:"
 
-#: includes/class-migrate-folder.php:219
+#: includes/class-migrate-folder.php:279
 msgid ""
 "Mutarea a întâmpinat o eroare la scrierea setărilor, iar revenirea la "
 "folderul vechi nu a fost posibilă, așa că setările au fost îndreptate spre "
@@ -2454,7 +2451,7 @@ msgstr ""
 "Check on the Plugins screen that BiscuitWP is active."
 
 #. translators: %s: the reason
-#: includes/class-migrate-folder.php:224
+#: includes/class-migrate-folder.php:284
 #, php-format
 msgid ""
 "BiscuitWP nu și-a putut muta folderul și merge în continuare din cel vechi. "
@@ -2463,7 +2460,7 @@ msgstr ""
 "BiscuitWP could not move its folder and keeps working from the old one. "
 "Reason: %s"
 
-#: includes/class-migrate-folder.php:232
+#: includes/class-migrate-folder.php:292
 msgid ""
 "există deja un folder plugins/biscuitwp. Șterge-l sau redenumește-l, apoi "
 "încearcă din nou."
@@ -2471,7 +2468,7 @@ msgstr ""
 "a plugins/biscuitwp folder already exists. Delete or rename it, then try "
 "again."
 
-#: includes/class-migrate-folder.php:234
+#: includes/class-migrate-folder.php:294
 msgid ""
 "serverul nu permite scrierea în folderul plugins. Cere-i celui care "
 "administrează serverul să o permită, apoi încearcă din nou."
@@ -2479,14 +2476,14 @@ msgstr ""
 "the server does not allow writing to the plugins folder. Ask whoever manages "
 "the server to allow it, then try again."
 
-#: includes/class-migrate-folder.php:236
+#: includes/class-migrate-folder.php:296
 msgid ""
 "chiar acum rulează un update sau o altă mutare. Încearcă din nou peste "
 "câteva minute."
 msgstr ""
 "an update or another move is running right now. Try again in a few minutes."
 
-#: includes/class-migrate-folder.php:239
+#: includes/class-migrate-folder.php:299
 msgid ""
 "rețeaua are prea multe site-uri sau mai multe rețele, iar mutarea nu le "
 "poate acoperi pe toate în siguranță."
@@ -2494,12 +2491,12 @@ msgstr ""
 "the network has too many sites or several networks, and the move cannot "
 "cover them all safely."
 
-#: includes/class-migrate-folder.php:241
+#: includes/class-migrate-folder.php:301
 msgid "pluginul nu e activ din folderul vechi pe niciun site."
 msgstr "the plugin is not active from the old folder on any site."
 
 #. translators: %s: internal error code
-#: includes/class-migrate-folder.php:244
+#: includes/class-migrate-folder.php:304
 #, php-format
 msgid ""
 "o eroare la mutare (cod: %s). Nimic nu s-a pierdut; încearcă din nou mai "
@@ -2507,7 +2504,7 @@ msgid ""
 msgstr ""
 "an error during the move (code: %s). Nothing was lost; try again later."
 
-#: includes/class-migrate-folder.php:268
+#: includes/class-migrate-folder.php:328
 msgid "Nu ai voie să muți pluginul."
 msgstr "You are not allowed to move the plugin."
 
