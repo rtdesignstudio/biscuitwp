@@ -326,6 +326,13 @@ class CMP_Appearance_Page {
 							<label><?php esc_html_e( 'Margine', 'consent-manager-pro' ); ?>
 								<input type="number" name="<?php echo esc_attr( $n( 'gap' ) ); ?>" min="0" max="40" step="1" class="small-text" value="<?php echo esc_attr( (string) $a['gap'] ); ?>"> px
 							</label>
+							<label><?php esc_html_e( 'Densitate', 'consent-manager-pro' ); ?>
+								<select name="<?php echo esc_attr( $n( 'density' ) ); ?>">
+									<option value="compact"<?php selected( $a['density'], 'compact' ); ?>><?php esc_html_e( 'Compact', 'consent-manager-pro' ); ?></option>
+									<option value="normal"<?php selected( $a['density'], 'normal' ); ?>><?php esc_html_e( 'Normal', 'consent-manager-pro' ); ?></option>
+									<option value="comfortable"<?php selected( $a['density'], 'comfortable' ); ?>><?php esc_html_e( 'Extins', 'consent-manager-pro' ); ?></option>
+								</select>
+							</label>
 							<p class="description"><?php esc_html_e( 'Colțuri 0–24 px, lățimea maximă 360–960 px (doar în Pro), distanța față de marginea ecranului 0–40 px.', 'consent-manager-pro' ); ?></p>
 						</td>
 					</tr>

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Consent Manager Pro\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
-"pro\n"
-"POT-Creation-Date: 2026-11-20T07:45:47+00:00\n"
+"pro-public\n"
+"POT-Creation-Date: 2026-11-24T07:28:04+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: Consent Manager Pro\n"
 "Language-Team: ru_RU\n"
@@ -28,14 +28,10 @@ msgstr "https://consent.rt.md/"
 #. Description of the plugin
 #: consent-manager-pro.php
 msgid ""
-"Displays a GDPR-compliant cookie consent banner, generates the legal pages "
-"(Privacy Policy, Terms & Conditions, Cookie Policy) and keeps a consent "
-"audit log. Quick to configure, multilingual-ready."
-msgstr ""
-"Показывает баннер согласия на cookie в соответствии с GDPR, создаёт "
-"юридические страницы (Политика конфиденциальности, Условия использования, "
-"Политика использования файлов cookie) и ведёт реестр согласий. Быстрая "
-"настройка, поддержка нескольких языков."
+"Free and open-source GDPR cookie consent: a consent banner, the legal pages "
+"(Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. "
+"Multilingual (RO, RU, EN)."
+msgstr "Бесплатное решение с открытым исходным кодом для согласия на cookie по GDPR: баннер согласия, юридические страницы (Политика конфиденциальности, Условия использования, Политика использования файлов cookie) и реестр согласий. Многоязычный (RO, RU, EN)."
 
 #. Author of the plugin
 #: consent-manager-pro.php
@@ -47,54 +43,54 @@ msgstr "RT.md"
 msgid "https://rt.md"
 msgstr "https://rt.md"
 
-#: includes/admin/class-admin.php:62 includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:64 includes/admin/class-admin.php:94
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr "Настройки"
 
-#: includes/admin/class-admin.php:64
+#: includes/admin/class-admin.php:66 includes/admin/class-admin.php:79
 msgid "Caută actualizări"
 msgstr "Проверить обновления"
 
-#: includes/admin/class-admin.php:71 includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:86 includes/admin/class-admin.php:87
 msgid "Consent Manager"
 msgstr "Consent Manager"
 
-#: includes/admin/class-admin.php:80 includes/admin/class-settings-page.php:120
+#: includes/admin/class-admin.php:95 includes/admin/class-settings-page.php:120
 msgid "Aspect"
 msgstr "Оформление"
 
-#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:96
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr "Категории"
 
-#: includes/admin/class-admin.php:82
+#: includes/admin/class-admin.php:97
 #: includes/admin/class-audit-list-table.php:17
 #: includes/admin/class-guide.php:23
 msgid "Servicii"
 msgstr "Сервисы"
 
-#: includes/admin/class-admin.php:83
+#: includes/admin/class-admin.php:98
 msgid "Verificare"
 msgstr "Проверка"
 
-#: includes/admin/class-admin.php:84 includes/admin/class-audit-page.php:43
+#: includes/admin/class-admin.php:99 includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr "Реестр согласий"
 
-#: includes/admin/class-admin.php:85 includes/admin/class-guide.php:26
-#: includes/admin/class-settings-page.php:198
-#: includes/admin/class-settings-page.php:325
+#: includes/admin/class-admin.php:100 includes/admin/class-guide.php:26
+#: includes/admin/class-settings-page.php:206
+#: includes/admin/class-settings-page.php:333
 msgid "Pagini legale"
 msgstr "Юридические страницы"
 
-#: includes/admin/class-admin.php:86 includes/admin/class-guide.php:71
+#: includes/admin/class-admin.php:101 includes/admin/class-guide.php:71
 msgid "Ghid"
 msgstr "Руководство"
 
-#: includes/admin/class-admin.php:108
-#: includes/admin/class-appearance-page.php:507
+#: includes/admin/class-admin.php:123
+#: includes/admin/class-appearance-page.php:514
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
@@ -106,12 +102,12 @@ msgstr "Руководство"
 #: includes/admin/class-services-page.php:364
 #: includes/admin/class-services-page.php:375
 #: includes/admin/class-services-page.php:395
-#: includes/admin/class-settings-page.php:252
+#: includes/admin/class-settings-page.php:260
 #: includes/modules/class-fonts.php:127 includes/modules/class-fonts.php:186
 msgid "Acțiune neautorizată."
 msgstr "Действие не разрешено."
 
-#: includes/admin/class-admin.php:134
+#: includes/admin/class-admin.php:152
 msgid ""
 "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm "
 "doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google "
@@ -121,7 +117,7 @@ msgstr ""
 "её не восстановите, блокируются только Google Analytics, Tag Manager, Meta "
 "Pixel, YouTube, Vimeo и Google Maps (переустановите плагин)."
 
-#: includes/admin/class-admin.php:135
+#: includes/admin/class-admin.php:153
 msgid ""
 "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să "
 "nu fie blocate corect."
@@ -129,17 +125,17 @@ msgstr ""
 "В библиотеке сервисов (data/services.json) есть ошибки. Некоторые сервисы "
 "могут блокироваться неправильно."
 
-#: includes/admin/class-admin.php:136
+#: includes/admin/class-admin.php:154
 #: includes/admin/class-services-page.php:426
 #: includes/modules/class-updater.php:621
 msgid "Consent Manager Pro:"
 msgstr "Consent Manager Pro:"
 
-#: includes/admin/class-admin.php:138
+#: includes/admin/class-admin.php:156
 msgid "Detalii în „Servicii”"
 msgstr "Подробности в разделе «Сервисы»"
 
-#: includes/admin/class-admin.php:161
+#: includes/admin/class-admin.php:179
 msgid ""
 "Consent Manager Pro: nu am putut verifica update-urile acum. Încearcă din "
 "nou mai târziu."
@@ -148,13 +144,13 @@ msgstr ""
 "попытку позже."
 
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:165
+#: includes/admin/class-admin.php:183
 #, php-format
 msgid "Consent Manager Pro: ai ultima versiune (%s)."
 msgstr "Consent Manager Pro: у вас последняя версия (%s)."
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:171
+#: includes/admin/class-admin.php:189
 #, php-format
 msgid ""
 "Consent Manager Pro: este disponibilă versiunea %s — folosește „Update now\" "
@@ -212,7 +208,7 @@ msgid "Aspect salvat."
 msgstr "Оформление сохранено."
 
 #: includes/admin/class-appearance-page.php:148
-#: includes/admin/class-appearance-page.php:446
+#: includes/admin/class-appearance-page.php:453
 msgid "Nu se aplică în modul Light."
 msgstr "Не применяется в режиме Light."
 
@@ -485,7 +481,7 @@ msgid "Umbră"
 msgstr "Тень"
 
 #: includes/admin/class-appearance-page.php:317
-#: includes/admin/class-appearance-page.php:360
+#: includes/admin/class-appearance-page.php:367
 msgid "Fără"
 msgstr "Нет"
 
@@ -510,6 +506,22 @@ msgid "Margine"
 msgstr "Отступ"
 
 #: includes/admin/class-appearance-page.php:329
+msgid "Densitate"
+msgstr "Плотность"
+
+#: includes/admin/class-appearance-page.php:331
+msgid "Compact"
+msgstr "Компактная"
+
+#: includes/admin/class-appearance-page.php:332
+msgid "Normal"
+msgstr "Обычная"
+
+#: includes/admin/class-appearance-page.php:333
+msgid "Extins"
+msgstr "Просторная"
+
+#: includes/admin/class-appearance-page.php:336
 msgid ""
 "Colțuri 0–24 px, lățimea maximă 360–960 px (doar în Pro), distanța față de "
 "marginea ecranului 0–40 px."
@@ -517,24 +529,24 @@ msgstr ""
 "Углы 0–24 px, максимальная ширина 360–960 px (только в Pro), расстояние от "
 "края экрана 0–40 px."
 
-#: includes/admin/class-appearance-page.php:333
+#: includes/admin/class-appearance-page.php:340
 msgid "Butoane"
 msgstr "Кнопки"
 
-#: includes/admin/class-appearance-page.php:338
+#: includes/admin/class-appearance-page.php:345
 msgid "Plin"
 msgstr "Заливка"
 
-#: includes/admin/class-appearance-page.php:339
+#: includes/admin/class-appearance-page.php:346
 msgid "Contur"
 msgstr "Контур"
 
-#: includes/admin/class-appearance-page.php:340
-#: includes/admin/class-appearance-page.php:377
+#: includes/admin/class-appearance-page.php:347
+#: includes/admin/class-appearance-page.php:384
 msgid "Text"
 msgstr "Текст"
 
-#: includes/admin/class-appearance-page.php:346
+#: includes/admin/class-appearance-page.php:353
 msgid ""
 "„Accept” și „Refuz” arată mereu la fel: același stil, aceeași mărime. Nu "
 "există setare separată pe buton."
@@ -542,27 +554,27 @@ msgstr ""
 "«Принять» и «Отказаться» всегда выглядят одинаково: тот же стиль, тот же "
 "размер. Отдельной настройки для каждой кнопки нет."
 
-#: includes/admin/class-appearance-page.php:351
+#: includes/admin/class-appearance-page.php:358
 msgid "Texte"
 msgstr "Тексты"
 
-#: includes/admin/class-appearance-page.php:357
+#: includes/admin/class-appearance-page.php:364
 msgid "Animație"
 msgstr "Анимация"
 
-#: includes/admin/class-appearance-page.php:361
+#: includes/admin/class-appearance-page.php:368
 msgid "Apariție"
 msgstr "Появление"
 
-#: includes/admin/class-appearance-page.php:362
+#: includes/admin/class-appearance-page.php:369
 msgid "Alunecare"
 msgstr "Скольжение"
 
-#: includes/admin/class-appearance-page.php:364
+#: includes/admin/class-appearance-page.php:371
 msgid "Întârziere"
 msgstr "Задержка"
 
-#: includes/admin/class-appearance-page.php:367
+#: includes/admin/class-appearance-page.php:374
 msgid ""
 "Vizitatorii care cer mișcare redusă nu văd animația. Întârzierea (0–2 s) "
 "amână doar afișarea: trackerele rămân blocate de la început."
@@ -570,23 +582,23 @@ msgstr ""
 "Посетители, которые просят уменьшить движение, не видят анимацию. Задержка "
 "(0–2 с) только откладывает показ: трекеры заблокированы с самого начала."
 
-#: includes/admin/class-appearance-page.php:371
+#: includes/admin/class-appearance-page.php:378
 msgid "Redeschidere"
 msgstr "Повторное открытие"
 
-#: includes/admin/class-appearance-page.php:376
+#: includes/admin/class-appearance-page.php:383
 msgid "Iconiță"
 msgstr "Значок"
 
-#: includes/admin/class-appearance-page.php:378
+#: includes/admin/class-appearance-page.php:385
 msgid "Ambele"
 msgstr "Оба"
 
-#: includes/admin/class-appearance-page.php:379
+#: includes/admin/class-appearance-page.php:386
 msgid "Deloc"
 msgstr "Нет"
 
-#: includes/admin/class-appearance-page.php:385
+#: includes/admin/class-appearance-page.php:392
 msgid ""
 "Un buton plutitor (jos-stânga) care redeschide preferințele, după ce "
 "vizitatorul a ales. Recomandat: „Deloc”, cu un link „Setări cookie” în "
@@ -598,11 +610,11 @@ msgstr ""
 "подвале — шорткод [cmp_cookie_settings_link] или ссылка меню с URL #cmp-"
 "settings."
 
-#: includes/admin/class-appearance-page.php:390
+#: includes/admin/class-appearance-page.php:397
 msgid "Excluderi"
 msgstr "Исключения"
 
-#: includes/admin/class-appearance-page.php:393
+#: includes/admin/class-appearance-page.php:400
 msgid ""
 "Paginile pe care bannerul nu se deschide singur: o adresă pe rând, de "
 "exemplu /contact/. Pune * la final pentru toate paginile care încep așa, de "
@@ -614,7 +626,7 @@ msgstr ""
 "начинаются, например /landing/*. На сайте с языком в адресе пишите по строке "
 "для каждого языка (/ru/landing/*)."
 
-#: includes/admin/class-appearance-page.php:394
+#: includes/admin/class-appearance-page.php:401
 msgid ""
 "Blocarea rămâne activă și acolo: fără acord, trackerele nu se încarcă. "
 "Vizitatorul își poate deschide setările din linkul din footer sau din "
@@ -624,11 +636,11 @@ msgstr ""
 "Посетитель может открыть настройки по ссылке в подвале или кнопкой "
 "повторного открытия."
 
-#: includes/admin/class-appearance-page.php:398
+#: includes/admin/class-appearance-page.php:405
 msgid "CSS propriu"
 msgstr "Свой CSS"
 
-#: includes/admin/class-appearance-page.php:401
+#: includes/admin/class-appearance-page.php:408
 msgid ""
 "Se adaugă după CSS-ul bannerului, în ambele moduri. La salvare eliminăm "
 "@import, adresele spre alte site-uri și regulile care ar putea ascunde, "
@@ -642,57 +654,57 @@ msgstr ""
 "правила для .cmp__btn--primary или [data-cmp-action=\"reject\"]). Мы "
 "покажем, что удалили."
 
-#: includes/admin/class-appearance-page.php:403
+#: includes/admin/class-appearance-page.php:410
 msgid "Variabile disponibile"
 msgstr "Доступные переменные"
 
 #. translators: %s: example CSS rule
-#: includes/admin/class-appearance-page.php:404
+#: includes/admin/class-appearance-page.php:411
 #, php-format
 msgid "Le setezi pe .cmp (sau .cmp-light pentru modul Light), de exemplu %s."
 msgstr "Задавайте их на .cmp (или .cmp-light для режима Light), например %s."
 
-#: includes/admin/class-appearance-page.php:415
+#: includes/admin/class-appearance-page.php:422
 msgid "Salvează aspectul"
 msgstr "Сохранить оформление"
 
-#: includes/admin/class-appearance-page.php:427
+#: includes/admin/class-appearance-page.php:434
 msgid "Titlu banner"
 msgstr "Заголовок баннера"
 
-#: includes/admin/class-appearance-page.php:428
+#: includes/admin/class-appearance-page.php:435
 msgid "Text introductiv"
 msgstr "Вводный текст"
 
-#: includes/admin/class-appearance-page.php:429
+#: includes/admin/class-appearance-page.php:436
 msgid "Text notice (Light)"
 msgstr "Текст уведомления (Light)"
 
-#: includes/admin/class-appearance-page.php:430
+#: includes/admin/class-appearance-page.php:437
 msgid "Buton „Accept\""
 msgstr "Кнопка «Принять»"
 
-#: includes/admin/class-appearance-page.php:431
+#: includes/admin/class-appearance-page.php:438
 msgid "Buton „Doar necesare\""
 msgstr "Кнопка «Только необходимые»"
 
-#: includes/admin/class-appearance-page.php:432
+#: includes/admin/class-appearance-page.php:439
 msgid "Buton „Gestionează\""
 msgstr "Кнопка «Управление»"
 
-#: includes/admin/class-appearance-page.php:433
+#: includes/admin/class-appearance-page.php:440
 msgid "Buton „Confirmă selecția\""
 msgstr "Кнопка «Подтвердить выбор»"
 
-#: includes/admin/class-appearance-page.php:434
+#: includes/admin/class-appearance-page.php:441
 msgid "Titlu preferințe"
 msgstr "Заголовок настроек"
 
-#: includes/admin/class-appearance-page.php:446
+#: includes/admin/class-appearance-page.php:453
 msgid "Doar în modul Light."
 msgstr "Только в режиме Light."
 
-#: includes/admin/class-appearance-page.php:453
+#: includes/admin/class-appearance-page.php:460
 msgid ""
 "Site-ul folosește WPML sau Polylang. Textele de mai jos sunt cele de bază; "
 "le traduci în pluginul de traduceri, ca până acum."
@@ -700,23 +712,23 @@ msgstr ""
 "Сайт использует WPML или Polylang. Ниже — базовые тексты; их перевод "
 "делается в плагине переводов, как раньше."
 
-#: includes/admin/class-appearance-page.php:454
+#: includes/admin/class-appearance-page.php:461
 msgid "Deschide traducerile textelor"
 msgstr "Открыть переводы текстов"
 
-#: includes/admin/class-appearance-page.php:457
+#: includes/admin/class-appearance-page.php:464
 msgid "(implicit)"
 msgstr "(по умолчанию)"
 
-#: includes/admin/class-appearance-page.php:463
+#: includes/admin/class-appearance-page.php:470
 msgid "Câmp gol = textul implicit al limbii (arătat în câmp, estompat)."
 msgstr "Пустое поле = текст по умолчанию для языка (показан в поле бледным)."
 
-#: includes/admin/class-appearance-page.php:464
+#: includes/admin/class-appearance-page.php:471
 msgid "Limba textelor"
 msgstr "Язык текстов"
 
-#: includes/admin/class-appearance-page.php:490
+#: includes/admin/class-appearance-page.php:497
 msgid ""
 "Previzualizarea nu a putut fi pregătită. Reîncarcă pagina și încearcă din "
 "nou."
@@ -724,15 +736,15 @@ msgstr ""
 "Не удалось подготовить предпросмотр. Перезагрузите страницу и попробуйте "
 "снова."
 
-#: includes/admin/class-appearance-page.php:491
+#: includes/admin/class-appearance-page.php:498
 msgid "Deschide previzualizarea"
 msgstr "Открыть предпросмотр"
 
-#: includes/admin/class-appearance-page.php:492
+#: includes/admin/class-appearance-page.php:499
 msgid "Vezi pe site"
 msgstr "Посмотреть на сайте"
 
-#: includes/admin/class-appearance-page.php:493
+#: includes/admin/class-appearance-page.php:500
 msgid "(se deschide într-o filă nouă, cu setările nesalvate)"
 msgstr "(откроется в новой вкладке, с несохранёнными настройками)"
 
@@ -974,7 +986,7 @@ msgid "cod în pagină (temă, plugin sau conținut)"
 msgstr "код на странице (тема, плагин или контент)"
 
 #: includes/admin/class-check-page.php:119
-#: includes/admin/class-settings-page.php:228
+#: includes/admin/class-settings-page.php:236
 msgid "Google Fonts"
 msgstr "Google Fonts"
 
@@ -1106,7 +1118,7 @@ msgstr[2] ""
 
 #. translators: %d — count
 #: includes/admin/class-check-page.php:244
-#: includes/admin/class-settings-page.php:230
+#: includes/admin/class-settings-page.php:238
 #, php-format
 msgid "Localizate %d fonturi."
 msgstr "Локализовано шрифтов: %d."
@@ -2225,14 +2237,30 @@ msgstr ""
 "ссылку «Настройки cookie»."
 
 #: includes/admin/class-settings-page.php:165
+msgid "Global Privacy Control"
+msgstr "Global Privacy Control"
+
+#: includes/admin/class-settings-page.php:168
+msgid "Respectă semnalul Global Privacy Control (GPC)"
+msgstr "Учитывать сигнал Global Privacy Control (GPC)"
+
+#: includes/admin/class-settings-page.php:169
+msgid ""
+"Când browserul vizitatorului trimite semnalul GPC, pluginul înregistrează "
+"„Doar cele necesare” și nu mai arată bannerul (vizitatorul poate accepta "
+"oricând din „Setări cookie”). Legea din Moldova nu o cere explicit, de aceea "
+"e o opțiune, pornită implicit."
+msgstr "Когда браузер посетителя отправляет сигнал GPC, плагин записывает «Только необходимые» и не показывает баннер (посетитель может в любой момент дать согласие в «Настройках cookie»). Закон Молдовы прямо этого не требует, поэтому это опция, включённая по умолчанию."
+
+#: includes/admin/class-settings-page.php:173
 msgid "Localizare Google Fonts"
 msgstr "Локализация Google Fonts"
 
-#: includes/admin/class-settings-page.php:167
+#: includes/admin/class-settings-page.php:175
 msgid "Servește Google Fonts local (fără request la Google)"
 msgstr "Раздавать Google Fonts локально (без запросов к Google)"
 
-#: includes/admin/class-settings-page.php:169
+#: includes/admin/class-settings-page.php:177
 msgid ""
 "După activare (și Salvează), apasă „Localizează fonturile\" de mai jos ca să "
 "descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în "
@@ -2243,64 +2271,64 @@ msgstr ""
 "Pro."
 
 #. translators: %d — count
-#: includes/admin/class-settings-page.php:173
+#: includes/admin/class-settings-page.php:181
 #, php-format
 msgid "(%d fonturi localizate)"
 msgstr "(локализовано шрифтов: %d)"
 
-#: includes/admin/class-settings-page.php:180
+#: includes/admin/class-settings-page.php:188
 msgid "Resurse terțe WordPress"
 msgstr "Сторонние ресурсы WordPress"
 
-#: includes/admin/class-settings-page.php:182
+#: includes/admin/class-settings-page.php:190
 msgid ""
 "Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către "
 "s.w.org)"
 msgstr ""
 "Отключить эмодзи WordPress (они больше не передают IP посетителей на s.w.org)"
 
-#: includes/admin/class-settings-page.php:183
+#: includes/admin/class-settings-page.php:191
 msgid ""
 "Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash "
 "al emailului)"
 msgstr ""
 "Заменить Gravatar локальным аватаром (Gravatar передаёт IP и хеш email)"
 
-#: includes/admin/class-settings-page.php:187
+#: includes/admin/class-settings-page.php:195
 msgid "Versiune politică"
 msgstr "Версия политики"
 
-#: includes/admin/class-settings-page.php:190
+#: includes/admin/class-settings-page.php:198
 msgid "Incrementează pentru a re-afișa banner-ul tuturor vizitatorilor."
 msgstr "Увеличьте, чтобы снова показать баннер всем посетителям."
 
-#: includes/admin/class-settings-page.php:194
+#: includes/admin/class-settings-page.php:202
 msgid "Retenție log (luni)"
 msgstr "Срок хранения реестра (мес.)"
 
 #. translators: 1: published count, 2: total, 3: drafts
-#: includes/admin/class-settings-page.php:205
+#: includes/admin/class-settings-page.php:213
 #, php-format
 msgid "Publicate: %1$d din %2$d · ciorne: %3$d"
 msgstr "Опубликовано: %1$d из %2$d · черновики: %3$d"
 
-#: includes/admin/class-settings-page.php:211
+#: includes/admin/class-settings-page.php:219
 msgid "Gestionează paginile legale"
 msgstr "Управление юридическими страницами"
 
-#: includes/admin/class-settings-page.php:215
+#: includes/admin/class-settings-page.php:223
 msgid "Dezinstalare"
 msgstr "Удаление"
 
-#: includes/admin/class-settings-page.php:218
+#: includes/admin/class-settings-page.php:226
 msgid "Date"
 msgstr "Данные"
 
-#: includes/admin/class-settings-page.php:220
+#: includes/admin/class-settings-page.php:228
 msgid "Șterge toate datele la dezinstalare"
 msgstr "Удалить все данные при удалении плагина"
 
-#: includes/admin/class-settings-page.php:221
+#: includes/admin/class-settings-page.php:229
 msgid ""
 "Include registrul de consimțăminte, care e dovada legală a alegerilor "
 "vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să "
@@ -2310,15 +2338,15 @@ msgstr ""
 "Храните его столько, сколько требует закон (например, 13 месяцев), прежде "
 "чем удалять плагин с включённым параметром."
 
-#: includes/admin/class-settings-page.php:225
+#: includes/admin/class-settings-page.php:233
 msgid "Salvează setările"
 msgstr "Сохранить настройки"
 
-#: includes/admin/class-settings-page.php:233
+#: includes/admin/class-settings-page.php:241
 msgid "Fonturi localizate șterse."
 msgstr "Локализованные шрифты удалены."
 
-#: includes/admin/class-settings-page.php:235
+#: includes/admin/class-settings-page.php:243
 msgid ""
 "Descarcă fonturile Google folosite pe paginile scanate ale site-ului și "
 "servește-le local. Activează întâi opțiunea „Localizare Google Fonts\" de "
@@ -2328,15 +2356,15 @@ msgstr ""
 "раздаёт их локально. Сначала включите выше параметр «Локализация Google "
 "Fonts» и сохраните."
 
-#: includes/admin/class-settings-page.php:239
+#: includes/admin/class-settings-page.php:247
 msgid "Localizează fonturile"
 msgstr "Локализовать шрифты"
 
-#: includes/admin/class-settings-page.php:244
+#: includes/admin/class-settings-page.php:252
 msgid "Șterge fonturile localizate"
 msgstr "Удалить локализованные шрифты"
 
-#: includes/admin/class-settings-page.php:313
+#: includes/admin/class-settings-page.php:321
 msgid ""
 "Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de "
 "la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag "
@@ -2346,7 +2374,7 @@ msgstr ""
 "посетителей и оценивает посещения тех, кто отказался. Проверьте в Tag "
 "Manager, что теги учитывают Consent Mode."
 
-#: includes/admin/class-settings-page.php:315
+#: includes/admin/class-settings-page.php:323
 msgid ""
 "Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care "
 "refuză, deci statisticile vor arăta mai puține vizite."
@@ -2354,14 +2382,14 @@ msgstr ""
 "Вы перешли на Strict. Теперь вы не получаете данные от посетителей, которые "
 "отказались, поэтому статистика покажет меньше посещений."
 
-#: includes/admin/class-settings-page.php:317
+#: includes/admin/class-settings-page.php:325
 msgid ""
 "Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii»."
 msgstr ""
 "Google Analytics / Tag Manager остаются незаблокированными из-за настройки в "
 "разделе «Сервисы»."
 
-#: includes/admin/class-settings-page.php:323
+#: includes/admin/class-settings-page.php:331
 msgid "Regenerează paginile legale."
 msgstr "Создайте юридические страницы заново."
 
@@ -2386,7 +2414,7 @@ msgid "Închide previzualizarea"
 msgstr "Закрыть предпросмотр"
 
 #. translators: 1: pages scanned, 2: pages in the list
-#: includes/modules/class-scanner.php:1218
+#: includes/modules/class-scanner.php:1224
 #, php-format
 msgid ""
 "Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui "
@@ -2396,7 +2424,7 @@ msgstr ""
 "экрана"
 
 #. translators: 1: pages scanned, 2: pages in the list
-#: includes/modules/class-scanner.php:1220
+#: includes/modules/class-scanner.php:1226
 #, php-format
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr "Идёт сканирование (%1$d/%2$d)"
@@ -2600,11 +2628,11 @@ msgstr ""
 msgid ""
 "Dacă browserul vizitatorului trimite semnalul Global Privacy Control (GPC), "
 "pluginul înregistrează automat refuzul („Doar cele necesare”) și nu mai "
-"arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”."
-msgstr ""
-"Если браузер посетителя отправляет сигнал Global Privacy Control (GPC), "
-"плагин автоматически записывает отказ («Только необходимые») и не показывает "
-"баннер. Посетитель может в любой момент дать согласие в «Настройках cookie»."
+"arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”. Poți "
+"opri asta din Setări, opțiunea „Respectă semnalul Global Privacy Control "
+"(GPC)” (pornită implicit); atunci vizitatorii cu GPC văd bannerul ca toți "
+"ceilalți."
+msgstr "Если браузер посетителя отправляет сигнал Global Privacy Control (GPC), плагин автоматически записывает отказ («Только необходимые») и не показывает баннер. Посетитель может в любой момент дать согласие в «Настройках cookie». Это можно отключить в Настройках, опция «Учитывать сигнал Global Privacy Control (GPC)» (включена по умолчанию); тогда посетители с GPC видят баннер, как все остальные."
 
 #: templates/admin/guide.php:68
 msgid ""

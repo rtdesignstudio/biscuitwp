@@ -138,16 +138,16 @@ $t6_expect = array(
 		'rights' => 'Your rights as a data subject', 'remove' => 'Stop loading',
 	),
 );
-$t6_known = array( 'company', 'site_name', 'contact_email', 'dpo', 'jurisdiction', 'address', 'effective_date', 'retention_months', 'cookie_days', 'pro', 'light', 'blocking', 'advanced' );
+$t6_known = array( 'company', 'site_name', 'contact_email', 'dpo', 'jurisdiction', 'address', 'effective_date', 'retention_months', 'cookie_days', 'pro', 'light', 'blocking', 'advanced', 'gpc' );
 $t6_base  = array(
 	'company' => 'Acme SRL', 'site_name' => 'Acme', 'contact_email' => 'a@b.md', 'dpo' => 'Ion DPO',
 	'jurisdiction' => 'Republica Moldova', 'address' => 'str. X 1, Chișinău', 'effective_date' => '18.11.2026',
 	'retention_months' => '13', 'cookie_days' => '180',
 );
 $t6_modes = array(
-	'blocking' => array( 'pro' => '1', 'light' => '', 'blocking' => '1' ),
-	'pro'      => array( 'pro' => '1', 'light' => '', 'blocking' => '' ),
-	'light'    => array( 'pro' => '', 'light' => '1', 'blocking' => '' ),
+	'blocking' => array( 'pro' => '1', 'light' => '', 'blocking' => '1', 'gpc' => '1' ),
+	'pro'      => array( 'pro' => '1', 'light' => '', 'blocking' => '', 'gpc' => '1' ),
+	'light'    => array( 'pro' => '', 'light' => '1', 'blocking' => '', 'gpc' => '' ),
 );
 $t6_sections = array();
 $t6_render   = array();
@@ -260,10 +260,12 @@ if ( method_exists( 'CMP_Legal_Page', 'settings_vars' ) ) {
 	$t6_sv = function ( $s ) {
 		return CMP_Legal_Page::settings_vars( $s );
 	};
-	cmp_assert_eq( $t6_sv( array() ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '1', 'light' => '', 'blocking' => '' ), 'settings_vars defaults (pro, blocking off as in CMP_Blocker)' );
-	cmp_assert_eq( $t6_sv( array( 'retention_months' => 24, 'cookie_days' => 90, 'mode' => 'pro', 'block_scripts' => true ) ), array( 'retention_months' => '24', 'cookie_days' => '90', 'pro' => '1', 'light' => '', 'blocking' => '1' ), 'settings_vars: pro with blocking' );
-	cmp_assert_eq( $t6_sv( array( 'retention_months' => 0, 'cookie_days' => 9999, 'mode' => 'pro', 'block_scripts' => false ) ), array( 'retention_months' => '13', 'cookie_days' => '396', 'pro' => '1', 'light' => '', 'blocking' => '' ), 'settings_vars: invalid retention -> 13, days capped, pro without blocking' );
-	cmp_assert_eq( $t6_sv( array( 'mode' => 'light', 'block_scripts' => true ) ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '', 'light' => '1', 'blocking' => '' ), 'settings_vars: light (never "blocking")' );
+	cmp_assert_eq( $t6_sv( array() ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '1', 'light' => '', 'blocking' => '', 'gpc' => '1' ), 'settings_vars defaults (pro, blocking off as in CMP_Blocker)' );
+	cmp_assert_eq( $t6_sv( array( 'retention_months' => 24, 'cookie_days' => 90, 'mode' => 'pro', 'block_scripts' => true ) ), array( 'retention_months' => '24', 'cookie_days' => '90', 'pro' => '1', 'light' => '', 'blocking' => '1', 'gpc' => '1' ), 'settings_vars: pro with blocking' );
+	cmp_assert_eq( $t6_sv( array( 'retention_months' => 0, 'cookie_days' => 9999, 'mode' => 'pro', 'block_scripts' => false ) ), array( 'retention_months' => '13', 'cookie_days' => '396', 'pro' => '1', 'light' => '', 'blocking' => '', 'gpc' => '1' ), 'settings_vars: invalid retention -> 13, days capped, pro without blocking' );
+	cmp_assert_eq( $t6_sv( array( 'mode' => 'light', 'block_scripts' => true ) ), array( 'retention_months' => '13', 'cookie_days' => '180', 'pro' => '', 'light' => '1', 'blocking' => '', 'gpc' => '' ), 'settings_vars: light (never "blocking", no GPC text)' );
+	cmp_assert_eq( $t6_sv( array( 'respect_gpc' => false ) )['gpc'], '', 'settings_vars: GPC off -> no GPC paragraph in the policy' );
+	cmp_assert_eq( $t6_sv( array( 'respect_gpc' => true ) )['gpc'], '1', 'settings_vars: GPC on -> GPC paragraph' );
 	cmp_assert_eq( $t6_sv( array( 'mode' => 'weird' ) )['pro'], '1', 'settings_vars: unknown mode -> pro' );
 }
 $t6_src = (string) file_get_contents( __DIR__ . '/../includes/admin/class-legal-page.php' );
@@ -457,3 +459,13 @@ preg_match( '/function sync_translation\(.*?\n\t}\n/s', $b2_lsrc, $b2_st );
 cmp_assert( isset( $b2_st[0] ) && 2 === substr_count( $b2_st[0], "'_cmp_legal_mode', CMP_Legal_Page::page_mode(" ), 'sync_translation writes _cmp_legal_mode on refresh/adoption and on create' );
 cmp_assert( false !== strpos( $b2_src, "get_post_meta( (int) \$doc['id'], '_cmp_legal_mode', true )" ) && false !== strpos( $b2_src, 'self::mode_notices(' ), 'legal screen reads _cmp_legal_mode and shows mode_notices' );
 cmp_assert_eq( preg_match_all( '/page_mode\(\s*[^;]*?,\s*(self|CMP_Legal_Page)::services_history\(\)\s*\)/', $b2_src . $b2_lsrc ), 5, 'fix 1: every page_mode call passes services_history() (generate, cookie refresh, notice, sync refresh + create)' );
+
+// GPC option: the cookie policy names GPC only when the site honours it ({{#gpc}}, pro only).
+foreach ( array( 'ro', 'ru', 'en' ) as $t_gpc_l ) {
+	$t_gpc_tpl = (string) file_get_contents( __DIR__ . '/../templates/legal/' . $t_gpc_l . '/cookie.html' );
+	cmp_assert( 1 === preg_match( '/\{\{#gpc\}\}[^{]*Global Privacy Control[^{]*\{\{\/gpc\}\}/s', $t_gpc_tpl ), "{$t_gpc_l}/cookie: the GPC paragraph sits in {{#gpc}}" );
+	cmp_assert( 0 === preg_match( '/\{\{#pro\}\}[^{]*Global Privacy Control/s', $t_gpc_tpl ), "{$t_gpc_l}/cookie: the GPC paragraph no longer depends on {{#pro}} alone" );
+	$t_gpc_on  = CMP_Legal::fill_template( $t_gpc_tpl, array( 'pro' => '1', 'gpc' => '1' ) );
+	$t_gpc_off = CMP_Legal::fill_template( $t_gpc_tpl, array( 'pro' => '1', 'gpc' => '' ) );
+	cmp_assert( false !== strpos( $t_gpc_on, 'Global Privacy Control' ) && false === strpos( $t_gpc_off, 'Global Privacy Control' ), "{$t_gpc_l}/cookie: GPC text only with the option on" );
+}

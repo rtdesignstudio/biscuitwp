@@ -64,7 +64,7 @@ CMPCODE;
 
 		<h3><?php esc_html_e( 'Pro sau Light', 'consent-manager-pro' ); ?></h3>
 		<p><?php esc_html_e( 'Pro afișează un banner cu butoane de acceptare, de refuz și de alegere pe categorii. Pluginul ține minte alegerea vizitatorului și o scrie în registru. Alege Pro dacă folosești statistici, publicitate, un chat sau video încorporat.', 'consent-manager-pro' ); ?></p>
-		<p><?php esc_html_e( 'Dacă browserul vizitatorului trimite semnalul Global Privacy Control (GPC), pluginul înregistrează automat refuzul („Doar cele necesare”) și nu mai arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”.', 'consent-manager-pro' ); ?></p>
+		<p><?php esc_html_e( 'Dacă browserul vizitatorului trimite semnalul Global Privacy Control (GPC), pluginul înregistrează automat refuzul („Doar cele necesare”) și nu mai arată bannerul. Vizitatorul poate accepta oricând din „Setări cookie”. Poți opri asta din Setări, opțiunea „Respectă semnalul Global Privacy Control (GPC)” (pornită implicit); atunci vizitatorii cu GPC văd bannerul ca toți ceilalți.', 'consent-manager-pro' ); ?></p>
 		<p><?php esc_html_e( 'Light afișează doar o bară informativă. Nu cere acord și nu pune cookie-uri. De aceea serviciile care cer acord sunt blocate permanent: Google Analytics, Tag Manager, Meta Pixel și celelalte nu rulează deloc, în afară de excepțiile marcate de tine. Video-urile și hărțile se încarcă doar dacă vizitatorul apasă „Încarcă conținutul”.', 'consent-manager-pro' ); ?></p>
 		<p><?php esc_html_e( 'Alege Light pentru un site de prezentare fără tracking. Dacă în Light pluginul găsește scripturi de tracking pe site, ecranul Setări te avertizează.', 'consent-manager-pro' ); ?></p>
 

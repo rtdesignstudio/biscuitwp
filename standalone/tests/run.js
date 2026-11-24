@@ -1668,5 +1668,60 @@ ok(/appearance/.test(require('fs').readFileSync(require('path').join(__dirname, 
 	ok(!!esc && !/save\(|hide\(\)/.test(esc), n + 'Escape never saves nor closes the banner');
 	ok(!/<input[^>]*data-cmp-cat[^>]*\bchecked|<input[^>]*\bchecked[^>]*data-cmp-cat/.test(src), n + 'no pre-checked category toggle markup');
 });
+// ---- GPC per-site option (CMP_DATA.respectGPC; missing = on, as before the option) ----
+(function () {
+	var base = function (extra) {
+		var d = { categories: [{ slug: 'necessary', required: true }, { slug: 'marketing' }], version: '3', cookieName: 'cmp_consent', ajaxUrl: '/x', cookieDays: 180 };
+		Object.keys(extra).forEach(function (k) { d[k] = extra[k]; });
+		return d;
+	};
+	// wp_localize_script turns top-level scalars into strings: true -> "1", false -> "".
+	[['missing', {}, true], ['true', { respectGPC: true }, true], ['"1"', { respectGPC: '1' }, true],
+		['false', { respectGPC: false }, false], ['""', { respectGPC: '' }, false]].forEach(function (c) {
+		var g = bootCmp('../../assets/js/banner.js', { data: base(c[1]), nav: { globalPrivacyControl: true, userActivation: { isActive: false } } });
+		var ck = g.cookie('cmp_consent'), bn = g.ctx.document.querySelector('[data-cmp]');
+		if (c[2]) {
+			eq([ck && ck.decision, ck && ck.categories, bn.hidden], ['rejected_all', ['necessary'], true], 'GPC option ' + c[0] + ': GPC visitor -> "Doar cele necesare" recorded, no banner');
+		} else {
+			eq([ck, bn.hidden], [null, false], 'GPC option ' + c[0] + ': GPC visitor sees the banner like everyone else, nothing recorded');
+		}
+	});
+	var n0 = bootCmp('../../assets/js/banner.js', { data: base({ respectGPC: true }), nav: { globalPrivacyControl: false, userActivation: { isActive: false } } });
+	eq([n0.cookie('cmp_consent'), n0.ctx.document.querySelector('[data-cmp]').hidden], [null, false], 'GPC option on, no signal -> the banner as usual');
+	var ck0 = bootCmp('../../assets/js/banner.js', { data: base({ respectGPC: true, check: true }), nav: { globalPrivacyControl: true, userActivation: { isActive: false } } });
+	eq(ck0.cookie('cmp_consent'), null, 'GPC option on, check mode -> still no auto-refusal (unchanged)');
+})();
+
+// ---- Density (appearance.density): compact / normal / comfortable ----
+(function () {
+	var fs = require('fs'), path = require('path');
+	var na = function (d) { return cmp.normalizeConfig({ appearance: d === undefined ? {} : { density: d } }).appearance.density; };
+	eq([na(), na('normal'), na('compact'), na('comfortable'), na('huge'), na(3), na(null)], ['normal', 'normal', 'compact', 'comfortable', 'normal', 'normal', 'normal'], 'density cmp.js: values (unknown / missing -> normal)');
+	var brand = cmp.normalizeConfig({ appearance: {} }).appearance;
+	var withD = function (d) { var a = cmp.normalizeConfig({ appearance: { density: d } }).appearance; return [cmp.appearanceClasses(a, 'pro'), cmp.appearanceClasses(a, 'light'), cmp.appearanceCss(a)]; };
+	eq(withD('normal'), [cmp.appearanceClasses(brand, 'pro'), cmp.appearanceClasses(brand, 'light'), ''], 'density cmp.js: normal adds no class and no CSS');
+	eq(withD('compact')[0].slice(-1).concat(withD('compact')[1].slice(-1)), ['cmp--density-compact', 'cmp--density-compact'], 'density cmp.js: compact -> cmp--density-compact (Pro and Light)');
+	eq(withD('comfortable')[0].slice(-1).concat(withD('comfortable')[1].slice(-1)), ['cmp--density-comfortable', 'cmp--density-comfortable'], 'density cmp.js: comfortable -> cmp--density-comfortable (Pro and Light)');
+	// Normal = today, byte for byte: the PHP snapshot recorded before density existed.
+	var snap = JSON.parse(fs.readFileSync(path.join(__dirname, '../../tests/fixtures/appearance-normal.json'), 'utf8'));
+	var bad = [];
+	snap.forEach(function (c, i) {
+		[undefined, 'normal', 'bogus'].forEach(function (d) {
+			var raw = {}; Object.keys(c.in).forEach(function (k) { raw[k] = c.in[k]; });
+			if (d !== undefined) { raw.density = d; }
+			var a = cmp.normalizeConfig({ appearance: raw }).appearance;
+			if (JSON.stringify([cmp.appearanceClasses(a, 'pro'), cmp.appearanceClasses(a, 'light'), cmp.appearanceCss(a)]) !== JSON.stringify([c.pro, c.light, c.css])) { bad.push(i + '/' + d); }
+		});
+	});
+	ok(snap.length > 100 && bad.length === 0, 'density cmp.js: normal = today\'s classes and CSS for every PHP snapshot case (' + snap.length + ')' + (bad.length ? ' - ' + bad.join(', ') : ''));
+	// PHP = JS: the same fixture is checked against CMP_Appearance in tests/test-density.php.
+	var par = JSON.parse(fs.readFileSync(path.join(__dirname, '../../tests/fixtures/density-parity.json'), 'utf8'));
+	ok(par.length >= 9, 'density parity: fixture read');
+	par.forEach(function (c, i) {
+		var a = cmp.normalizeConfig({ appearance: c.in }).appearance;
+		eq([a.density, cmp.appearanceClasses(a, 'pro'), cmp.appearanceClasses(a, 'light'), cmp.appearanceCss(a)], [c.density, c.pro, c.light, c.css], 'density parity: case ' + i + ' cmp.js = PHP');
+	});
+	ok(/`density`/.test(fs.readFileSync(path.join(__dirname, '../README.md'), 'utf8')) && /compact/.test(fs.readFileSync(path.join(__dirname, '../README.md'), 'utf8')), 'density: standalone README documents appearance.density');
+})();
 console.log(passes + ' passed, ' + fails + ' failed');
 process.exit(fails ? 1 : 0);

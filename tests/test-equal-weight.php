@@ -22,7 +22,8 @@ foreach ( $cmp_sources as $cmp_name => $cmp_src ) {
 	cmp_assert_eq( count( $reject ), 2, "$cmp_name: reject button in both views" );
 	cmp_assert( 1 === count( $accept ) && $reject[0] === $accept[0], "$cmp_name: first view — reject styled exactly like accept" );
 	cmp_assert( 1 === count( $save ) && isset( $reject[1] ) && $reject[1] === $save[0], "$cmp_name: preferences — reject styled exactly like save" );
-	cmp_assert_eq( substr_count( $cmp_src, 'cmp__choices' ), 2, "$cmp_name: both decision pairs sit in an equal-width group" );
+	// The markup's class attribute (cmp.js also carries .cmp__choices in its density CSS strings).
+	cmp_assert_eq( substr_count( $cmp_src, 'class="cmp__choices"' ), 2, "$cmp_name: both decision pairs sit in an equal-width group" );
 }
 
 $cmp_css = (string) file_get_contents( __DIR__ . '/../assets/css/banner.css' );

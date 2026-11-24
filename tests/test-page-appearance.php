@@ -299,9 +299,11 @@ cmp_assert( false === strpos( $pa_tf( $pa_tcs, $pa_tp['passing'] ), 'cmp-ap-them
 cmp_assert( false !== strpos( $pa_tf( $pa_tcs, array() ), 'cmp-ap-theme-none' ), 'form I4: no known theme palette -> note (the palette is used)' );
 cmp_assert( false === strpos( $pa_tf( $pa_old, $pa_tp['twentytwentythree'] ), 'cmp-ap-theme-' ), 'form I4: option off -> nothing about the theme' );
 $pa_pro = $pa_form( array_merge( $pa_old, array( 'mode' => 'pro' ) ), false );
-foreach ( array( 'style', 'palette', 'accent', 'theme', 'dark_selector', 'format', 'backdrop', 'dim', 'blur', 'radius', 'shadow', 'maxw', 'gap', 'buttons', 'anim', 'delay', 'reopen', 'exclude', 'custom_css', 'font', 'theme_colors' ) as $pa_k ) {
+foreach ( array( 'style', 'palette', 'accent', 'theme', 'dark_selector', 'format', 'backdrop', 'dim', 'blur', 'radius', 'shadow', 'maxw', 'gap', 'density', 'buttons', 'anim', 'delay', 'reopen', 'exclude', 'custom_css', 'font', 'theme_colors' ) as $pa_k ) {
 	cmp_assert( false !== strpos( $pa_pro, 'name="cmp[appearance][' . $pa_k . ']' ), "form: field $pa_k" );
 }
+cmp_assert( 1 === preg_match( '#<select name="cmp\[appearance\]\[density\]"[^>]*>\s*<option value="compact"[^>]*>Compact</option>\s*<option value="normal"[^>]*>Normal</option>\s*<option value="comfortable"[^>]*>Extins</option>\s*</select>#', $pa_pro ), 'form: density select (Compact / Normal / Extins)' );
+cmp_assert( 1 === preg_match( '#<option value="normal" selected=\'selected\'>Normal</option>#', $pa_pro ), 'form: density normal selected by default' );
 cmp_assert( false !== strpos( $pa_pro, 'name="cmp[appearance][texts][ru][title]"' ) && false !== strpos( $pa_pro, 'name="cmp[appearance][texts][en][accept]"' ), 'form: per-language texts (no WPML)' );
 cmp_assert( 3 === substr_count( $pa_pro, 'role="tab"' ), 'form: three language tabs RO/RU/EN' );
 cmp_assert( false === strpos( $pa_pro, 'name="cmp[texts]' ), 'form: no single texts without WPML/Polylang' );
@@ -319,7 +321,7 @@ $pa_light = $pa_form( array_merge( $pa_old, array( 'mode' => 'light' ) ), false 
 foreach ( array( 'format', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen' ) as $pa_k ) {
 	cmp_assert( 1 === preg_match( '/name="cmp\[appearance\]\[' . $pa_k . '\]"[^>]*disabled/', $pa_light ), "form (Light): $pa_k disabled" );
 }
-foreach ( array( 'palette', 'accent', 'theme', 'radius', 'shadow', 'gap', 'anim', 'delay', 'exclude', 'font' ) as $pa_k ) {
+foreach ( array( 'palette', 'accent', 'theme', 'radius', 'shadow', 'gap', 'density', 'anim', 'delay', 'exclude', 'font' ) as $pa_k ) {
 	cmp_assert( 1 === preg_match( '/name="cmp\[appearance\]\[' . $pa_k . '\]"(?![^>]*disabled)/', $pa_light ), "form (Light): $pa_k enabled" );
 }
 cmp_assert( 1 === preg_match( '/name="cmp\[appearance\]\[texts\]\[ro\]\[reject\]"[^>]*disabled/', $pa_light ), 'form (Light): button texts disabled' );

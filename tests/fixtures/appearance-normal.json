@@ -1,0 +1,3657 @@
+[
+    {
+        "in": {},
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "minimal"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "brand"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "friendly"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "theme": "light"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "theme": "dark"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "theme": "auto"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "theme": "site"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "buttons": "solid"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "buttons": "outline"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "buttons": "text"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-text",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "anim": "none"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "anim": "fade"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "anim": "slide"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "backdrop": "blur"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "backdrop": "dim"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-dim"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "backdrop": "none"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-none"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "font": "system"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "font": "inherit"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{font-family:inherit}"
+    },
+    {
+        "in": {
+            "shadow": "none"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "shadow": "small"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-shadow:0 4px 14px rgba(0,0,0,.12)}"
+    },
+    {
+        "in": {
+            "shadow": "medium"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "shadow": "large"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "radius": 0
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:0px}"
+    },
+    {
+        "in": {
+            "radius": 12
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "radius": 24
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:24px}"
+    },
+    {
+        "in": {
+            "maxw": 360
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-maxw:360px}"
+    },
+    {
+        "in": {
+            "maxw": 720
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "maxw": 960
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-maxw:960px}"
+    },
+    {
+        "in": {
+            "gap": 0
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-gap:0px}"
+    },
+    {
+        "in": {
+            "gap": 24
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "gap": 40
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-gap:40px}"
+    },
+    {
+        "in": {
+            "blur": 0
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-blur:0px}"
+    },
+    {
+        "in": {
+            "blur": 5
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "blur": 10
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-blur:10px}"
+    },
+    {
+        "in": {
+            "dim": null
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "dim": 30
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-dim:.3}"
+    },
+    {
+        "in": {
+            "dim": 80
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-dim:.8}"
+    },
+    {
+        "in": {
+            "accent": ""
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "accent": "#e4572e"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "accent": "#003e96"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#003e96;--cmp-primary-hover:#002d6d;--cmp-primary-text:#ffffff}"
+    },
+    {
+        "in": {
+            "accent": "#ffd400"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#ffd400;--cmp-primary-hover:#ffdb29;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "format": "bar",
+            "position": "bottom"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-bar",
+            "cmp--pos-bottom",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "bar",
+            "position": "top"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-bar",
+            "cmp--pos-top",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "card",
+            "position": "bottom-right"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-card",
+            "cmp--pos-bottom-right",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "card",
+            "position": "bottom-left"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-card",
+            "cmp--pos-bottom-left",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "card",
+            "position": "top-right"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-card",
+            "cmp--pos-top-right",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "card",
+            "position": "top-left"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-card",
+            "cmp--pos-top-left",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "modal",
+            "position": "center"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "modal",
+            "position": "top"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-top-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "format": "modal",
+            "position": "bottom"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-bottom-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "minimal",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-outline",
+            "cmp--anim-fade",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-minimal",
+            "cmp--anim-fade",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:4px;--cmp-maxw:640px;--cmp-shadow:none}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ""
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "brand",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-none",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-brand",
+            "cmp--anim-none",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "light",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-light",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-light"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "dark",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--backdrop-blur",
+            "cmp--dark"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-dark",
+            "cmp--dark"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "auto",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-auto",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-auto"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}@media (prefers-color-scheme:dark){.cmp--theme-auto{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "neutral"
+        },
+        "pro": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--neutral",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "warm"
+        },
+        "pro": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--warm",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "dark"
+        },
+        "pro": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--dark",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    },
+    {
+        "in": {
+            "style": "friendly",
+            "theme": "site",
+            "accent": "#e4572e",
+            "palette": "egov"
+        },
+        "pro": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--fmt-modal",
+            "cmp--pos-middle-center",
+            "cmp--btn-solid",
+            "cmp--anim-slide",
+            "cmp--theme-site",
+            "cmp--backdrop-blur"
+        ],
+        "light": [
+            "cmp--egov",
+            "cmp--style-friendly",
+            "cmp--anim-slide",
+            "cmp--theme-site"
+        ],
+        "css": ".cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-primary:#e4572e;--cmp-primary-hover:#e97452;--cmp-primary-text:#000000;--cmp-radius:20px;--cmp-maxw:680px;--cmp-shadow:0 28px 70px rgba(0,0,0,.28)}.cmp--dark{--cmp-primary:#e56039;--cmp-primary-hover:#ea7d5d;--cmp-primary-text:#000000}"
+    }
+]

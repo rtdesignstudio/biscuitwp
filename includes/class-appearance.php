@@ -1,7 +1,7 @@
 <?php
 /**
  * B6: the banner's appearance (style, colours, theme, format, details,
- * buttons, animation, reopen, exclusions, custom CSS, texts per language).
+ * density, buttons, animation, reopen, exclusions, custom CSS, texts per language).
  *
  * Pure: no WordPress functions, so it loads in tests and standalone.
  *
@@ -13,7 +13,8 @@
  * The front end gets:
  *  - container classes (container_classes()) for what variables cannot do;
  *  - a small inline <style> (inline_css()) with only the --cmp-* values that
- *    differ from Brand + the chosen palette, so Brand + any palette = ''.
+ *    differ from Brand + the chosen palette, so Brand + any palette = ''
+ *    (plus the density rules, DENSITY_CSS, only for compact / comfortable).
  */
 require_once __DIR__ . '/class-contrast.php';
 
@@ -27,6 +28,7 @@ class CMP_Appearance {
 	const BUTTONS   = array( 'solid', 'outline', 'text' );
 	const ANIMS     = array( 'none', 'fade', 'slide' );
 	const REOPEN    = array( 'none', 'icon', 'text', 'both' );
+	const DENSITIES = array( 'compact', 'normal', 'comfortable' );
 	const LANGS     = array( 'ro', 'ru', 'en' );
 	/** The fields a style sets (spec table); a style switch reloads them. */
 	const STYLE_KEYS = array( 'radius', 'shadow', 'buttons', 'anim', 'maxw' );
@@ -117,6 +119,26 @@ class CMP_Appearance {
 	/** Default "like the site" dark selectors (matched on <html> or <body> by the banner JS). */
 	const DARK_SELECTOR = '.dark, [data-theme="dark"], .is-dark-theme';
 
+	/**
+	 * Density (compact / comfortable): spacing about 2/3 or 4/3 of today's
+	 * (modal 28/32 px, phone sheet 24/20, buttons 12/22, gaps 12, categories
+	 * 8/24 and 16), comfortable text +1 px. Appended to the inline block only
+	 * when chosen, so banner.css (and its gzip budget) and every "normal"
+	 * banner stay as they are. Same rule for every button (equal weight); the
+	 * bar keeps its centred content; the phone band gets its own values.
+	 * Mirrored as AP_DENSITY in standalone/cmp.js (density-parity.json).
+	 */
+	const DENSITY_CSS = array(
+		'compact'     => '@media (min-width:576px){.cmp--density-compact .cmp__modal{padding:19px 21px}.cmp--density-compact.cmp--fmt-bar .cmp__modal{padding-inline:max(21px,calc(50% - 600px))}.cmp--density-compact .cmp__title{margin-bottom:8px}.cmp--density-compact .cmp__main .cmp__text{margin-bottom:16px}.cmp--density-compact .cmp__actions,.cmp--density-compact .cmp__prefs-actions,.cmp--density-compact .cmp__choices{gap:8px}.cmp--density-compact .cmp__btn{padding:8px 15px}}'
+			. '@media (max-width:575px){.cmp--density-compact .cmp__modal{padding:16px 14px}.cmp--density-compact .cmp__actions{gap:5px 8px}.cmp--density-compact .cmp__choices{gap:5px}.cmp--density-compact .cmp__choices .cmp__btn{min-height:36px;padding:7px 8px}}'
+			. '.cmp--density-compact .cmp__prefs-header{gap:11px;margin-bottom:13px}.cmp--density-compact .cmp__cats{padding:5px 16px;margin-bottom:13px}.cmp--density-compact .cmp__cat{gap:11px;padding:11px 0}'
+			. '.cmp-light.cmp--density-compact{gap:9px;padding:12px 13px}.cmp--density-compact .cmp-light__btn{padding:7px 17px}',
+		'comfortable' => '@media (min-width:576px){.cmp--density-comfortable .cmp__modal{padding:37px 43px}.cmp--density-comfortable.cmp--fmt-bar .cmp__modal{padding-inline:max(43px,calc(50% - 600px))}.cmp--density-comfortable .cmp__title{margin-bottom:16px}.cmp--density-comfortable .cmp__main .cmp__text{margin-bottom:32px}.cmp--density-comfortable .cmp__actions,.cmp--density-comfortable .cmp__prefs-actions,.cmp--density-comfortable .cmp__choices{gap:16px}.cmp--density-comfortable .cmp__btn{padding:16px 29px}}'
+			. '@media (max-width:575px){.cmp--density-comfortable .cmp__modal{padding:32px 27px}.cmp--density-comfortable .cmp__actions{gap:11px 16px}.cmp--density-comfortable .cmp__choices{gap:11px}.cmp--density-comfortable .cmp__choices .cmp__btn{min-height:48px;padding:13px 16px}}'
+			. '.cmp--density-comfortable .cmp__text{font-size:15px}.cmp--density-comfortable .cmp__cat-desc{font-size:14px}.cmp--density-comfortable .cmp__prefs-header{gap:21px;margin-bottom:27px}.cmp--density-comfortable .cmp__cats{padding:11px 32px;margin-bottom:27px}.cmp--density-comfortable .cmp__cat{gap:21px;padding:21px 0}'
+			. '.cmp-light.cmp--density-comfortable{gap:19px;padding:24px 27px;font-size:15px}.cmp--density-comfortable .cmp-light__btn{padding:13px 35px}',
+	);
+
 	/** Each palette's scrim alpha in % (banner.css --cmp-scrim). dim = null means "the palette's". */
 	const PALETTE_DIM = array( 'neutral' => 55, 'warm' => 50, 'dark' => 60, 'egov' => 60 );
 
@@ -164,6 +186,7 @@ class CMP_Appearance {
 			'shadow'        => $s['shadow'],
 			'maxw'          => $s['maxw'],
 			'gap'           => 24,
+			'density'       => 'normal',
 			'buttons'       => $s['buttons'],
 			'anim'          => $s['anim'],
 			'delay'         => 0.0,
@@ -267,6 +290,9 @@ class CMP_Appearance {
 		if ( 'dark' === $a['theme'] && 'dark' !== $a['palette'] ) {
 			$c[] = 'cmp--dark';
 		}
+		if ( 'normal' !== $a['density'] ) {
+			$c[] = 'cmp--density-' . $a['density'];
+		}
 		return $c;
 	}
 
@@ -324,6 +350,9 @@ class CMP_Appearance {
 			if ( 'auto' === $a['theme'] ) {
 				$css .= '@media (prefers-color-scheme:dark){.cmp--theme-auto{' . $dvars . '}}';
 			}
+		}
+		if ( isset( self::DENSITY_CSS[ $a['density'] ] ) ) {
+			$css .= self::DENSITY_CSS[ $a['density'] ];
 		}
 		return $css;
 	}
@@ -663,6 +692,7 @@ class CMP_Appearance {
 			'buttons'  => self::BUTTONS,
 			'anim'     => self::ANIMS,
 			'reopen'   => self::REOPEN,
+			'density'  => self::DENSITIES,
 		);
 		if ( isset( $enums[ $k ] ) ) {
 			return is_scalar( $v ) && in_array( (string) $v, $enums[ $k ], true ) ? (string) $v : $fallback;

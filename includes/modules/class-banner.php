@@ -114,6 +114,8 @@ class CMP_Banner {
 				self::excluded_now( self::appearance( $cmp_settings ), CMP_Scanner::isolated() )
 			),
 			'reloadOnDecision' => ! empty( $cmp_settings['reload_on_decision'] ),
+			// Global Privacy Control: auto-refusal without the banner (Settings, default on).
+			'respectGPC' => self::respect_gpc( $cmp_settings ),
 			'svcNames'   => (object) $svc_names,
 			'cookieDays' => CMP_Sanitizer::cap_cookie_days( isset( $cmp_settings['cookie_days'] ) ? $cmp_settings['cookie_days'] : 180 ),
 		);
@@ -263,6 +265,11 @@ class CMP_Banner {
 		return '<button type="button" class="cmp-reopen cmp-reopen--text" data-cmp-reopen hidden>'
 			. ( 'both' === $shape ? self::REOPEN_ICON : '' )
 			. '<span class="cmp-reopen__label">' . esc_html( $label ) . '</span></button>';
+	}
+
+	/** Pure: honour Global Privacy Control? Not stored (saved before the option) = on, as before. */
+	public static function respect_gpc( array $settings ) {
+		return ! array_key_exists( 'respect_gpc', $settings ) || ! empty( $settings['respect_gpc'] );
 	}
 
 	/** Pure: CMP_DATA.appearance (what the JS needs: delay, theme, its selector, no auto-open). */

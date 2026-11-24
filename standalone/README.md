@@ -97,7 +97,7 @@ window.CMP_CONFIG = {
 
 The same options as the WordPress "Aspect" screen. They give the banner the same
 classes and CSS variables as the plugin: the script adds the classes and a small
-`<style id="cmp-appearance-css">` (only what differs from the Brand style; none for
+`<style id="cmp-appearance-css">` (only what differs from the Brand style at normal density; none for
 Brand) at the end of `<head>`, after `cmp.css`. Every value is validated; an unknown
 or out-of-range value falls back to the default or is clamped. Without `appearance`
 nothing changes (`preset` / `position` as before). With it, `position` is ignored
@@ -119,6 +119,7 @@ and `palette` replaces `preset` (default: `preset` when it is a palette name).
 | `shadow` | `"none"`, `"small"`, `"medium"`, `"large"` | the style's |
 | `maxw` | 360–960 (px, banner width) | the style's (640 / 720 / 680) |
 | `gap` | 0–40 (px, distance from the screen edge) | 24 |
+| `density` | `"compact"` (about a third less spacing inside the banner, same text size), `"normal"`, `"comfortable"` (about a third more spacing, body text 1px larger); all formats, phones included; the buttons stay equal and at least 24×24 px | `"normal"` |
 | `buttons` | `"solid"`, `"outline"`, `"text"` (one look for both decision buttons) | the style's |
 | `anim` | `"none"`, `"fade"`, `"slide"` (none with reduced motion) | the style's |
 | `font` | `"system"`, `"inherit"` (the page's font) | `"system"` |

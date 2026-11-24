@@ -235,6 +235,7 @@ $apc_vary    = array(
 	'buttons'  => CMP_Appearance::BUTTONS,
 	'anim'     => CMP_Appearance::ANIMS,
 	'backdrop' => CMP_Appearance::BACKDROPS,
+	'density'  => CMP_Appearance::DENSITIES,
 );
 foreach ( array( 'pro', 'light' ) as $apc_mode ) {
 	foreach ( $apc_vary as $apc_k => $apc_vals ) {
@@ -261,6 +262,10 @@ $apc_js = array( 'cmp--theme-site', 'cmp--theme-dark' );
 // Centred window: .cmp itself centres (align-items:center), so the class needs no rule
 // (fix wave budget reclaim: the redundant rule was removed, computed value identical).
 $apc_js[] = 'cmp--pos-middle-center';
+// Density: styled by the inline appearance block (CMP_Appearance::DENSITY_CSS, only on the
+// sites that pick it), so banner.css stays as it is (gzip budget); tested in test-density.php.
+$apc_js[] = 'cmp--density-compact';
+$apc_js[] = 'cmp--density-comfortable';
 foreach ( CMP_Appearance::PALETTES as $apc_p ) {
 	$apc_cl = CMP_Appearance::container_classes( array_merge( CMP_Appearance::defaults( 'brand' ), array( 'theme' => 'dark', 'palette' => $apc_p ) ), 'pro' );
 	cmp_assert( in_array( 'cmp--dark', $apc_cl, true ), "appearance css: theme dark + {$apc_p} carries .cmp--dark" );

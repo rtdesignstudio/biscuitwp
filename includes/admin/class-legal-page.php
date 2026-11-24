@@ -34,7 +34,7 @@ class CMP_Legal_Page {
 	/**
 	 * Pure: template variables from the plugin settings: register retention,
 	 * consent duration in days, and the mode flags for {{#pro}} / {{#light}} /
-	 * {{#blocking}} blocks ('1' or ''). "blocking" is Pro with block_scripts on;
+	 * {{#blocking}} / {{#gpc}} blocks ('1' or ''). "blocking" is Pro with block_scripts on;
 	 * Light always blocks but has its own texts, so it is never "blocking".
 	 */
 	public static function settings_vars( array $settings ) {
@@ -47,6 +47,8 @@ class CMP_Legal_Page {
 			'pro'              => $light ? '' : '1',
 			'light'            => $light ? '1' : '',
 			'blocking'         => ! $light && ! empty( $settings['block_scripts'] ) ? '1' : '',
+			// The GPC paragraph of the cookie policy: Pro, with the "Respect GPC" option on (default).
+			'gpc'              => ! $light && ( ! array_key_exists( 'respect_gpc', $settings ) || ! empty( $settings['respect_gpc'] ) ) ? '1' : '',
 		);
 	}
 

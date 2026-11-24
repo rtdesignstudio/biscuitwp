@@ -743,6 +743,11 @@
 	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10] };
 	var AP_DARK_SEL = '.dark, [data-theme="dark"], .is-dark-theme';
 	var AP_SCOPE = '.cmp,.cmp-light,.cmp-reopen,.cmp-embed';
+	// Density rules (CMP_Appearance::DENSITY_CSS): only for compact / comfortable; normal = none.
+	var AP_DENSITY = {
+		compact: '@media (min-width:576px){.cmp--density-compact .cmp__modal{padding:19px 21px}.cmp--density-compact.cmp--fmt-bar .cmp__modal{padding-inline:max(21px,calc(50% - 600px))}.cmp--density-compact .cmp__title{margin-bottom:8px}.cmp--density-compact .cmp__main .cmp__text{margin-bottom:16px}.cmp--density-compact .cmp__actions,.cmp--density-compact .cmp__prefs-actions,.cmp--density-compact .cmp__choices{gap:8px}.cmp--density-compact .cmp__btn{padding:8px 15px}}@media (max-width:575px){.cmp--density-compact .cmp__modal{padding:16px 14px}.cmp--density-compact .cmp__actions{gap:5px 8px}.cmp--density-compact .cmp__choices{gap:5px}.cmp--density-compact .cmp__choices .cmp__btn{min-height:36px;padding:7px 8px}}.cmp--density-compact .cmp__prefs-header{gap:11px;margin-bottom:13px}.cmp--density-compact .cmp__cats{padding:5px 16px;margin-bottom:13px}.cmp--density-compact .cmp__cat{gap:11px;padding:11px 0}.cmp-light.cmp--density-compact{gap:9px;padding:12px 13px}.cmp--density-compact .cmp-light__btn{padding:7px 17px}',
+		comfortable: '@media (min-width:576px){.cmp--density-comfortable .cmp__modal{padding:37px 43px}.cmp--density-comfortable.cmp--fmt-bar .cmp__modal{padding-inline:max(43px,calc(50% - 600px))}.cmp--density-comfortable .cmp__title{margin-bottom:16px}.cmp--density-comfortable .cmp__main .cmp__text{margin-bottom:32px}.cmp--density-comfortable .cmp__actions,.cmp--density-comfortable .cmp__prefs-actions,.cmp--density-comfortable .cmp__choices{gap:16px}.cmp--density-comfortable .cmp__btn{padding:16px 29px}}@media (max-width:575px){.cmp--density-comfortable .cmp__modal{padding:32px 27px}.cmp--density-comfortable .cmp__actions{gap:11px 16px}.cmp--density-comfortable .cmp__choices{gap:11px}.cmp--density-comfortable .cmp__choices .cmp__btn{min-height:48px;padding:13px 16px}}.cmp--density-comfortable .cmp__text{font-size:15px}.cmp--density-comfortable .cmp__cat-desc{font-size:14px}.cmp--density-comfortable .cmp__prefs-header{gap:21px;margin-bottom:27px}.cmp--density-comfortable .cmp__cats{padding:11px 32px;margin-bottom:27px}.cmp--density-comfortable .cmp__cat{gap:21px;padding:21px 0}.cmp-light.cmp--density-comfortable{gap:19px;padding:24px 27px;font-size:15px}.cmp--density-comfortable .cmp-light__btn{padding:13px 35px}'
+	};
 
 	function apPick(v, list, d) { return list.indexOf(v) !== -1 ? v : d; }
 	function apNum(v, k, d) {
@@ -781,6 +786,7 @@
 			shadow: Object.prototype.hasOwnProperty.call(AP_SHADOWS, raw.shadow) ? raw.shadow : sd[1],
 			maxw: apNum(raw.maxw, 'maxw', sd[4]),
 			gap: apNum(raw.gap, 'gap', 24),
+			density: apPick(raw.density, ['compact', 'normal', 'comfortable'], 'normal'),
 			buttons: apPick(raw.buttons, ['solid', 'outline', 'text'], sd[2]),
 			anim: apPick(raw.anim, ['none', 'fade', 'slide'], sd[3]),
 			delay: delay > 0 ? Math.round(Math.min(delay, 2) * 10) / 10 : 0,
@@ -795,6 +801,7 @@
 		c.push('cmp--anim-' + a.anim, 'cmp--theme-' + a.theme);
 		if (pro) { c.push('cmp--backdrop-' + a.backdrop); }
 		if (a.theme === 'dark' && a.palette !== 'dark') { c.push('cmp--dark'); }
+		if (a.density !== 'normal') { c.push('cmp--density-' + a.density); }
 		return c;
 	}
 
@@ -865,6 +872,7 @@
 			css += '.cmp--dark{' + dv + '}';
 			if (a.theme === 'auto') { css += '@media (prefers-color-scheme:dark){.cmp--theme-auto{' + dv + '}}'; }
 		}
+		if (Object.prototype.hasOwnProperty.call(AP_DENSITY, a.density)) { css += AP_DENSITY[a.density]; }
 		return css;
 	}
 

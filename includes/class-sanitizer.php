@@ -19,6 +19,18 @@ class CMP_Sanitizer {
 	}
 
 	/**
+	 * Pure: "Respectă semnalul GPC", on by default. The form posts a hidden "0"
+	 * before the checkbox: "1" = on, "0" / "" = off. Not posted: the stored
+	 * value, else on (sites saved before the option keep today's behaviour).
+	 */
+	public static function respect_gpc( array $input, array $old ) {
+		if ( array_key_exists( 'respect_gpc', $input ) && is_scalar( $input['respect_gpc'] ) ) {
+			return ! empty( $input['respect_gpc'] );
+		}
+		return ! array_key_exists( 'respect_gpc', $old ) || ! empty( $old['respect_gpc'] );
+	}
+
+	/**
 	 * @param array $input Posted settings.
 	 * @param array $old   Stored cmp_settings: a posted appearance is merged over the
 	 *                     stored one (CMP_Appearance::from_settings), so fields not
@@ -64,6 +76,7 @@ class CMP_Sanitizer {
 			'reopen_button'    => ! empty( $input['reopen_button'] ),
 			'delete_data_on_uninstall' => ! empty( $input['delete_data_on_uninstall'] ),
 			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
+			'respect_gpc'      => self::respect_gpc( $input, $old ),
 			'texts'            => $texts,
 		);
 		// B6: the appearance array, only when posted (the "Aspect" screen). Without it the

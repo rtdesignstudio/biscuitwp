@@ -1127,6 +1127,12 @@
 		save: save
 	}, apiSubs));
 
+	// GPC option: missing (a page cached before the option) = on; wp_localize_script
+	// sends false as "" and true as "1".
+	function gpcHonoured(d) {
+		return !Object.prototype.hasOwnProperty.call(d, 'respectGPC') || !!d.respectGPC;
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		pushWpInit();
 		bindEmbeds();
@@ -1166,10 +1172,11 @@
 			showReopen();
 			return;
 		}
-		if (navigator.globalPrivacyControl === true && !D.check) {
+		if (gpcHonoured(D) && navigator.globalPrivacyControl === true && !D.check) {
 			// Global Privacy Control: record refusal without prompting. Read in the
 			// browser, not from request headers in PHP: a cached page would otherwise
 			// replay the first visitor's signal to everyone. DNT is ignored.
+			// Per-site option (Settings, default on); off = the banner as for anyone.
 			save(requiredSlugs(), 'rejected_all');
 		} else {
 			firstDecision = true;
