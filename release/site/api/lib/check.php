@@ -4,7 +4,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 	exit;
 }
 /**
- * Consent Manager Pro, "Verifică-ți site-ul" (consent.rt.md): the page analysis.
+ * BiscuitWP, "Verifică-ți site-ul" (biscuitwp.rt.md): the page analysis.
  *
  * Pure functions: the homepage HTML and its response headers go in, findings
  * come out. No network, no output, no files except cmp_check_load_services().
@@ -862,7 +862,7 @@ function cmp_check_detect_cmp( string $html, array $parsed, string $home ) {
 		if ( $own && 1 === preg_match( '#(?:^|/)cmp(?:\.min)?\.js$#i', $path ) ) {
 			return array(
 				'slug' => 'consent-manager-pro',
-				'name' => 'Consent Manager Pro',
+				'name' => 'BiscuitWP',
 			);
 		}
 	}
@@ -1068,14 +1068,14 @@ function cmp_check_text( string $key, string $lang, array $vars = array() ): arr
 			'ru' => array( 'Сайт использует {name}', 'Мы нашли баннер {name}. Баннер помогает, только если держит трекеры выключенными до согласия.' ),
 		),
 		'ours'             => array(
-			'ro' => array( 'Folosești deja Consent Manager Pro', 'Pluginul nostru e pe pagină. Mulțumim că îl folosești!' ),
-			'en' => array( 'You already use Consent Manager Pro', 'Our plugin is on the page. Thank you for using it!' ),
-			'ru' => array( 'Вы уже используете Consent Manager Pro', 'Наш плагин есть на странице. Спасибо, что пользуетесь им!' ),
+			'ro' => array( 'Folosești deja BiscuitWP', 'Pluginul nostru e pe pagină. Mulțumim că îl folosești!' ),
+			'en' => array( 'You already use BiscuitWP', 'Our plugin is on the page. Thank you for using it!' ),
+			'ru' => array( 'Вы уже используете BiscuitWP', 'Наш плагин есть на странице. Спасибо, что пользуетесь им!' ),
 		),
 		'ours-attention'   => array(
-			'ro' => array( 'Folosești deja Consent Manager Pro', 'Pluginul nostru e pe pagină, dar ceva tot pornește înainte de acord. Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.' ),
-			'en' => array( 'You already use Consent Manager Pro', 'Our plugin is on the page, but something still starts before consent. Check script blocking and the service list in its settings, then update the plugin to the latest version.' ),
-			'ru' => array( 'Вы уже используете Consent Manager Pro', 'Наш плагин есть на странице, но что-то всё равно запускается до согласия. Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.' ),
+			'ro' => array( 'Folosești deja BiscuitWP', 'Pluginul nostru e pe pagină, dar ceva tot pornește înainte de acord. Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.' ),
+			'en' => array( 'You already use BiscuitWP', 'Our plugin is on the page, but something still starts before consent. Check script blocking and the service list in its settings, then update the plugin to the latest version.' ),
+			'ru' => array( 'Вы уже используете BiscuitWP', 'Наш плагин есть на странице, но что-то всё равно запускается до согласия. Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.' ),
 		),
 		'empty'            => array(
 			'ro' => array( 'Pagina e goală', 'Serverul a răspuns, dar fără conținut, așa că nu avem ce verifica.' ),
@@ -1118,45 +1118,45 @@ function cmp_check_text( string $key, string $lang, array $vars = array() ): arr
 
 /**
  * How to fix a finding: 'fix' (the generic action) and 'cmp_fix' (what
- * Consent Manager Pro does for it, only features the plugin has: README.md,
+ * BiscuitWP does for it, only features the plugin has: README.md,
  * CHANGELOG.md 1.0.0). {placeholders} as in cmp_check_text().
  */
 function cmp_check_fix( string $key, string $lang, array $vars = array() ): array {
 	$check = array(
-		'ro' => 'Ecranul Verificare din Consent Manager Pro testează în browserul tău ce se încarcă înainte și după acord.',
-		'en' => 'The Check screen in Consent Manager Pro tests in your browser what loads before and after consent.',
-		'ru' => 'Экран «Проверка» в Consent Manager Pro проверяет в вашем браузере, что загружается до и после согласия.',
+		'ro' => 'Ecranul Verificare din BiscuitWP testează în browserul tău ce se încarcă înainte și după acord.',
+		'en' => 'The Check screen in BiscuitWP tests in your browser what loads before and after consent.',
+		'ru' => 'Экран «Проверка» в BiscuitWP проверяет в вашем браузере, что загружается до и после согласия.',
 	);
 	$t     = array(
 		'tracker'         => array(
-			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro recunoaște {name} și îl blochează până la acord, fără cod în plus.' ),
-			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Consent Manager Pro recognises {name} and blocks it until consent, with no extra code.' ),
-			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'Consent Manager Pro распознаёт {name} и блокирует его до согласия, без дополнительного кода.' ),
+			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'BiscuitWP recunoaște {name} și îl blochează până la acord, fără cod în plus.' ),
+			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'BiscuitWP recognises {name} and blocks it until consent, with no extra code.' ),
+			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'BiscuitWP распознаёт {name} и блокирует его до согласия, без дополнительного кода.' ),
 		),
 		'tracker-custom'  => array(
-			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Adaugă {name} în Consent Manager Pro ca serviciu personalizat, cu domeniile lui, și pluginul îl blochează până la acord.' ),
-			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Add {name} to Consent Manager Pro as a custom service, with its hosts, and the plugin blocks it until consent.' ),
-			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'Добавьте {name} в Consent Manager Pro как пользовательский сервис, с его доменами, и плагин заблокирует его до согласия.' ),
+			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Adaugă {name} în BiscuitWP ca serviciu personalizat, cu domeniile lui, și pluginul îl blochează până la acord.' ),
+			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Add {name} to BiscuitWP as a custom service, with its hosts, and the plugin blocks it until consent.' ),
+			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'Добавьте {name} в BiscuitWP как пользовательский сервис, с его доменами, и плагин заблокирует его до согласия.' ),
 		),
 		'tracker-pixel'   => array(
-			'ro' => array( 'Pornește pixelul {name} doar după ce vizitatorul acceptă în banner.', 'Consent Manager Pro nu blochează pixelii puși ca imagine. Mută pixelul în fragmentul JavaScript al serviciului, pe care pluginul îl blochează până la acord, sau afișează-l doar când cmp_is_allowed(\'{category}\') e adevărat.' ),
-			'en' => array( 'Fire the {name} pixel only after the visitor accepts in the banner.', 'Consent Manager Pro does not block pixels added as images. Move the pixel into the service\'s JavaScript snippet, which the plugin blocks until consent, or output it only when cmp_is_allowed(\'{category}\') is true.' ),
-			'ru' => array( 'Запускайте пиксель {name} только после того, как посетитель согласится в баннере.', 'Consent Manager Pro не блокирует пиксели, добавленные как изображение. Перенесите пиксель во фрагмент JavaScript сервиса, который плагин блокирует до согласия, или выводите его, только когда cmp_is_allowed(\'{category}\') возвращает true.' ),
+			'ro' => array( 'Pornește pixelul {name} doar după ce vizitatorul acceptă în banner.', 'BiscuitWP nu blochează pixelii puși ca imagine. Mută pixelul în fragmentul JavaScript al serviciului, pe care pluginul îl blochează până la acord, sau afișează-l doar când cmp_is_allowed(\'{category}\') e adevărat.' ),
+			'en' => array( 'Fire the {name} pixel only after the visitor accepts in the banner.', 'BiscuitWP does not block pixels added as images. Move the pixel into the service\'s JavaScript snippet, which the plugin blocks until consent, or output it only when cmp_is_allowed(\'{category}\') is true.' ),
+			'ru' => array( 'Запускайте пиксель {name} только после того, как посетитель согласится в баннере.', 'BiscuitWP не блокирует пиксели, добавленные как изображение. Перенесите пиксель во фрагмент JavaScript сервиса, который плагин блокирует до согласия, или выводите его, только когда cmp_is_allowed(\'{category}\') возвращает true.' ),
 		),
 		'embed'           => array(
-			'ro' => array( 'Înlocuiește {name} cu o previzualizare statică și încarcă playerul sau harta abia după ce vizitatorul acceptă.', 'Consent Manager Pro afișează în locul lui {name} un înlocuitor, care îl încarcă doar după acord.' ),
-			'en' => array( 'Replace {name} with a static preview and load the player or map only once the visitor accepts.', 'Consent Manager Pro shows a placeholder instead of {name} and loads it only after consent.' ),
-			'ru' => array( 'Замените {name} статичным превью и загружайте плеер или карту, только когда посетитель согласится.', 'Consent Manager Pro показывает вместо {name} заглушку, которая загружает его только после согласия.' ),
+			'ro' => array( 'Înlocuiește {name} cu o previzualizare statică și încarcă playerul sau harta abia după ce vizitatorul acceptă.', 'BiscuitWP afișează în locul lui {name} un înlocuitor, care îl încarcă doar după acord.' ),
+			'en' => array( 'Replace {name} with a static preview and load the player or map only once the visitor accepts.', 'BiscuitWP shows a placeholder instead of {name} and loads it only after consent.' ),
+			'ru' => array( 'Замените {name} статичным превью и загружайте плеер или карту, только когда посетитель согласится.', 'BiscuitWP показывает вместо {name} заглушку, которая загружает его только после согласия.' ),
 		),
 		'cookieless'      => array(
-			'ro' => array( 'Pomenește {name} în politica de confidențialitate.', 'Consent Manager Pro îl scutește implicit de acord, ca instrument fără cookie-uri, și îți generează politica de confidențialitate.' ),
-			'en' => array( 'Mention {name} in your privacy policy.', 'Consent Manager Pro exempts it from consent by default, as a cookieless tool, and generates your privacy policy.' ),
-			'ru' => array( 'Упомяните {name} в политике конфиденциальности.', 'Consent Manager Pro по умолчанию освобождает его от согласия как инструмент без cookie и создаёт для вас политику конфиденциальности.' ),
+			'ro' => array( 'Pomenește {name} în politica de confidențialitate.', 'BiscuitWP îl scutește implicit de acord, ca instrument fără cookie-uri, și îți generează politica de confidențialitate.' ),
+			'en' => array( 'Mention {name} in your privacy policy.', 'BiscuitWP exempts it from consent by default, as a cookieless tool, and generates your privacy policy.' ),
+			'ru' => array( 'Упомяните {name} в политике конфиденциальности.', 'BiscuitWP по умолчанию освобождает его от согласия как инструмент без cookie и создаёт для вас политику конфиденциальности.' ),
 		),
 		'loader-gtm'      => array(
-			'ro' => array( 'În Google Tag Manager, pornește fiecare tag doar cu acord, prin Consent Mode.', 'Consent Manager Pro trimite semnalele Google Consent Mode v2 înainte ca GTM să pornească tagurile. Ce încarcă GTM controlezi din GTM.' ),
-			'en' => array( 'In Google Tag Manager, fire each tag only with consent, through Consent Mode.', 'Consent Manager Pro sends the Google Consent Mode v2 signals before GTM fires its tags. What GTM loads, you control in GTM.' ),
-			'ru' => array( 'В Google Tag Manager запускайте каждый тег только при согласии, через Consent Mode.', 'Consent Manager Pro передаёт сигналы Google Consent Mode v2 до того, как GTM запустит теги. Что загружает GTM, вы контролируете в GTM.' ),
+			'ro' => array( 'În Google Tag Manager, pornește fiecare tag doar cu acord, prin Consent Mode.', 'BiscuitWP trimite semnalele Google Consent Mode v2 înainte ca GTM să pornească tagurile. Ce încarcă GTM controlezi din GTM.' ),
+			'en' => array( 'In Google Tag Manager, fire each tag only with consent, through Consent Mode.', 'BiscuitWP sends the Google Consent Mode v2 signals before GTM fires its tags. What GTM loads, you control in GTM.' ),
+			'ru' => array( 'В Google Tag Manager запускайте каждый тег только при согласии, через Consent Mode.', 'BiscuitWP передаёт сигналы Google Consent Mode v2 до того, как GTM запустит теги. Что загружает GTM, вы контролируете в GTM.' ),
 		),
 		'loader'          => array(
 			'ro' => array( 'Află ce scripturi aduce {name} și pornește-le doar după acord.', $check['ro'] ),
@@ -1164,29 +1164,29 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 			'ru' => array( 'Выясните, какие скрипты приносит {name}, и запускайте их только после согласия.', $check['ru'] ),
 		),
 		'resource-google-fonts' => array(
-			'ro' => array( 'Găzduiește fonturile pe serverul tău.', 'În modul Pro, Consent Manager Pro are o opțiune care descarcă o dată fonturile încărcate printr-un tag link și le servește de pe serverul tău. Fonturile aduse prin @import sau prin JavaScript trebuie mutate de mână.' ),
-			'en' => array( 'Host the fonts on your own server.', 'In Pro mode, Consent Manager Pro has an option that downloads, once, the fonts loaded through a link tag and serves them from your own server. Fonts brought in by @import or by JavaScript have to be moved by hand.' ),
-			'ru' => array( 'Разместите шрифты на своём сервере.', 'В режиме Pro в Consent Manager Pro есть опция, которая один раз скачивает шрифты, загружаемые через тег link, и отдаёт их с вашего сервера. Шрифты, подключённые через @import или через JavaScript, нужно перенести вручную.' ),
+			'ro' => array( 'Găzduiește fonturile pe serverul tău.', 'În modul Pro, BiscuitWP are o opțiune care descarcă o dată fonturile încărcate printr-un tag link și le servește de pe serverul tău. Fonturile aduse prin @import sau prin JavaScript trebuie mutate de mână.' ),
+			'en' => array( 'Host the fonts on your own server.', 'In Pro mode, BiscuitWP has an option that downloads, once, the fonts loaded through a link tag and serves them from your own server. Fonts brought in by @import or by JavaScript have to be moved by hand.' ),
+			'ru' => array( 'Разместите шрифты на своём сервере.', 'В режиме Pro в BiscuitWP есть опция, которая один раз скачивает шрифты, загружаемые через тег link, и отдаёт их с вашего сервера. Шрифты, подключённые через @import или через JavaScript, нужно перенести вручную.' ),
 		),
 		'resource-emoji'  => array(
-			'ro' => array( 'Oprește emoji-urile WordPress sau servește-le de pe serverul tău.', 'Consent Manager Pro are un comutator care oprește emoji-urile WordPress.' ),
-			'en' => array( 'Turn off WordPress emoji or serve them from your own server.', 'Consent Manager Pro has a switch that turns off WordPress emoji.' ),
-			'ru' => array( 'Отключите эмодзи WordPress или отдавайте их со своего сервера.', 'В Consent Manager Pro есть переключатель, который отключает эмодзи WordPress.' ),
+			'ro' => array( 'Oprește emoji-urile WordPress sau servește-le de pe serverul tău.', 'BiscuitWP are un comutator care oprește emoji-urile WordPress.' ),
+			'en' => array( 'Turn off WordPress emoji or serve them from your own server.', 'BiscuitWP has a switch that turns off WordPress emoji.' ),
+			'ru' => array( 'Отключите эмодзи WordPress или отдавайте их со своего сервера.', 'В BiscuitWP есть переключатель, который отключает эмодзи WordPress.' ),
 		),
 		'resource-gravatar' => array(
-			'ro' => array( 'Folosește avatare locale în locul Gravatar.', 'Consent Manager Pro are un comutator care înlocuiește Gravatar cu un avatar local.' ),
-			'en' => array( 'Use local avatars instead of Gravatar.', 'Consent Manager Pro has a switch that replaces Gravatar with a local avatar.' ),
-			'ru' => array( 'Используйте локальные аватары вместо Gravatar.', 'В Consent Manager Pro есть переключатель, который заменяет Gravatar локальным аватаром.' ),
+			'ro' => array( 'Folosește avatare locale în locul Gravatar.', 'BiscuitWP are un comutator care înlocuiește Gravatar cu un avatar local.' ),
+			'en' => array( 'Use local avatars instead of Gravatar.', 'BiscuitWP has a switch that replaces Gravatar with a local avatar.' ),
+			'ru' => array( 'Используйте локальные аватары вместо Gravatar.', 'В BiscuitWP есть переключатель, который заменяет Gravatar локальным аватаром.' ),
 		),
 		'resource'        => array(
-			'ro' => array( 'Găzduiește fișierele pe serverul tău sau renunță la ele.', 'Scanarea din Consent Manager Pro îți arată pe ce pagini se încarcă {what}, ca să știi ce muți pe serverul tău.' ),
-			'en' => array( 'Host the files on your own server or drop them.', 'The Consent Manager Pro scan shows you which pages load {what}, so you know what to move to your own server.' ),
-			'ru' => array( 'Разместите файлы на своём сервере или откажитесь от них.', 'Сканирование в Consent Manager Pro показывает, на каких страницах загружаются {what}, чтобы вы знали, что перенести на свой сервер.' ),
+			'ro' => array( 'Găzduiește fișierele pe serverul tău sau renunță la ele.', 'Scanarea din BiscuitWP îți arată pe ce pagini se încarcă {what}, ca să știi ce muți pe serverul tău.' ),
+			'en' => array( 'Host the files on your own server or drop them.', 'The BiscuitWP scan shows you which pages load {what}, so you know what to move to your own server.' ),
+			'ru' => array( 'Разместите файлы на своём сервере или откажитесь от них.', 'Сканирование в BiscuitWP показывает, на каких страницах загружаются {what}, чтобы вы знали, что перенести на свой сервер.' ),
 		),
 		'held-attribute'  => array(
-			'ro' => array( 'Fă scriptul inert până la acord (type="text/plain") sau pornește blocarea automată a bannerului.', 'Consent Manager Pro rescrie pe server scripturile cunoscute ca inerte până la acord, fără să depindă de un mod de blocare automată.' ),
-			'en' => array( 'Make the script inert until consent (type="text/plain") or turn on the banner\'s automatic blocking.', 'Consent Manager Pro rewrites known scripts on the server as inert until consent, without relying on an automatic blocking mode.' ),
-			'ru' => array( 'Сделайте скрипт неактивным до согласия (type="text/plain") или включите автоматическую блокировку баннера.', 'Consent Manager Pro на сервере переписывает известные скрипты в неактивные до согласия, не завися от режима автоматической блокировки.' ),
+			'ro' => array( 'Fă scriptul inert până la acord (type="text/plain") sau pornește blocarea automată a bannerului.', 'BiscuitWP rescrie pe server scripturile cunoscute ca inerte până la acord, fără să depindă de un mod de blocare automată.' ),
+			'en' => array( 'Make the script inert until consent (type="text/plain") or turn on the banner\'s automatic blocking.', 'BiscuitWP rewrites known scripts on the server as inert until consent, without relying on an automatic blocking mode.' ),
+			'ru' => array( 'Сделайте скрипт неактивным до согласия (type="text/plain") или включите автоматическую блокировку баннера.', 'BiscuitWP на сервере переписывает известные скрипты в неактивные до согласия, не завися от режима автоматической блокировки.' ),
 		),
 		'held-unknown'    => array(
 			'ro' => array( 'Verifică în DevTools ce se încarcă înainte de acord și ține trackerele oprite până atunci.', $check['ro'] ),
@@ -1194,29 +1194,29 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 			'ru' => array( 'Проверьте в DevTools, что загружается до согласия, и держите трекеры выключенными до этого момента.', $check['ru'] ),
 		),
 		'consent-mode'    => array(
-			'ro' => array( 'Pentru siguranță deplină, încarcă {name} doar după acord.', 'Consent Manager Pro are două moduri de măsurare: Strict încarcă Google Analytics doar după acord, Advanced îl pornește în Consent Mode.' ),
-			'en' => array( 'To be fully safe, load {name} only after consent.', 'Consent Manager Pro has two measurement modes: Strict loads Google Analytics only after consent, Advanced starts it in Consent Mode.' ),
-			'ru' => array( 'Для полной уверенности загружайте {name} только после согласия.', 'В Consent Manager Pro есть два режима измерения: Strict загружает Google Analytics только после согласия, Advanced запускает его в Consent Mode.' ),
+			'ro' => array( 'Pentru siguranță deplină, încarcă {name} doar după acord.', 'BiscuitWP are două moduri de măsurare: Strict încarcă Google Analytics doar după acord, Advanced îl pornește în Consent Mode.' ),
+			'en' => array( 'To be fully safe, load {name} only after consent.', 'BiscuitWP has two measurement modes: Strict loads Google Analytics only after consent, Advanced starts it in Consent Mode.' ),
+			'ru' => array( 'Для полной уверенности загружайте {name} только после согласия.', 'В BiscuitWP есть два режима измерения: Strict загружает Google Analytics только после согласия, Advanced запускает его в Consent Mode.' ),
 		),
 		'cookie'          => array(
-			'ro' => array( 'Pune cookie-ul {cookie} doar după acord: pornește {name} abia după ce vizitatorul acceptă.', 'Consent Manager Pro blochează serviciile cunoscute până la acord. Dacă serverul tău pune cookie-ul, întreabă întâi pluginul, cu cmp_is_allowed().' ),
-			'en' => array( 'Set the {cookie} cookie only after consent: start {name} only once the visitor accepts.', 'Consent Manager Pro blocks known services until consent. If your server sets the cookie, ask the plugin first, with cmp_is_allowed().' ),
-			'ru' => array( 'Устанавливайте cookie {cookie} только после согласия: запускайте {name}, только когда посетитель согласится.', 'Consent Manager Pro блокирует известные сервисы до согласия. Если cookie устанавливает ваш сервер, сначала спросите плагин, через cmp_is_allowed().' ),
+			'ro' => array( 'Pune cookie-ul {cookie} doar după acord: pornește {name} abia după ce vizitatorul acceptă.', 'BiscuitWP blochează serviciile cunoscute până la acord. Dacă serverul tău pune cookie-ul, întreabă întâi pluginul, cu cmp_is_allowed().' ),
+			'en' => array( 'Set the {cookie} cookie only after consent: start {name} only once the visitor accepts.', 'BiscuitWP blocks known services until consent. If your server sets the cookie, ask the plugin first, with cmp_is_allowed().' ),
+			'ru' => array( 'Устанавливайте cookie {cookie} только после согласия: запускайте {name}, только когда посетитель согласится.', 'BiscuitWP блокирует известные сервисы до согласия. Если cookie устанавливает ваш сервер, сначала спросите плагин, через cmp_is_allowed().' ),
 		),
 		'cookies-other'   => array(
-			'ro' => array( 'Află ce face fiecare cookie. Cele care urmăresc vizitatorul se pun doar după acord.', 'În Consent Manager Pro le poți trece în categorii, cu furnizor, durată și scop, iar ele apar în tabelul de cookie-uri.' ),
-			'en' => array( 'Find out what each cookie does. The ones that track the visitor are set only after consent.', 'In Consent Manager Pro you can list them under categories, with provider, duration and purpose, and they show up in the cookie table.' ),
-			'ru' => array( 'Выясните, что делает каждый cookie. Те, что отслеживают посетителя, устанавливаются только после согласия.', 'В Consent Manager Pro их можно распределить по категориям, с поставщиком, сроком и целью, и они появятся в таблице cookie.' ),
+			'ro' => array( 'Află ce face fiecare cookie. Cele care urmăresc vizitatorul se pun doar după acord.', 'În BiscuitWP le poți trece în categorii, cu furnizor, durată și scop, iar ele apar în tabelul de cookie-uri.' ),
+			'en' => array( 'Find out what each cookie does. The ones that track the visitor are set only after consent.', 'In BiscuitWP you can list them under categories, with provider, duration and purpose, and they show up in the cookie table.' ),
+			'ru' => array( 'Выясните, что делает каждый cookie. Те, что отслеживают посетителя, устанавливаются только после согласия.', 'В BiscuitWP их можно распределить по категориям, с поставщиком, сроком и целью, и они появятся в таблице cookie.' ),
 		),
 		'policy'          => array(
-			'ro' => array( 'Pune pe fiecare pagină, de obicei în subsol, un link spre politica de confidențialitate și de cookie-uri.', 'Consent Manager Pro generează politica de confidențialitate și pe cea de cookie-uri (RO, RU, EN), iar shortcode-ul [cmp_privacy_link] pune linkul.' ),
-			'en' => array( 'Put a link to your privacy and cookie policy on every page, usually in the footer.', 'Consent Manager Pro generates the privacy and cookie policies (RO, RU, EN), and the [cmp_privacy_link] shortcode adds the link.' ),
-			'ru' => array( 'Разместите на каждой странице, обычно в подвале, ссылку на политику конфиденциальности и политику cookie.', 'Consent Manager Pro создаёт политику конфиденциальности и политику cookie (RO, RU, EN), а шорткод [cmp_privacy_link] добавляет ссылку.' ),
+			'ro' => array( 'Pune pe fiecare pagină, de obicei în subsol, un link spre politica de confidențialitate și de cookie-uri.', 'BiscuitWP generează politica de confidențialitate și pe cea de cookie-uri (RO, RU, EN), iar shortcode-ul [cmp_privacy_link] pune linkul.' ),
+			'en' => array( 'Put a link to your privacy and cookie policy on every page, usually in the footer.', 'BiscuitWP generates the privacy and cookie policies (RO, RU, EN), and the [cmp_privacy_link] shortcode adds the link.' ),
+			'ru' => array( 'Разместите на каждой странице, обычно в подвале, ссылку на политику конфиденциальности и политику cookie.', 'BiscuitWP создаёт политику конфиденциальности и политику cookie (RO, RU, EN), а шорткод [cmp_privacy_link] добавляет ссылку.' ),
 		),
 		'cmp'             => array(
-			'ro' => array( 'Verifică dacă bannerul ține trackerele oprite până la acord.', 'Consent Manager Pro blochează scripturile și embed-urile cunoscute până la acord și e gratuit.' ),
-			'en' => array( 'Check that the banner keeps trackers off until consent.', 'Consent Manager Pro blocks known scripts and embeds until consent, and it is free.' ),
-			'ru' => array( 'Проверьте, держит ли баннер трекеры выключенными до согласия.', 'Consent Manager Pro блокирует известные скрипты и встраивания до согласия, и он бесплатный.' ),
+			'ro' => array( 'Verifică dacă bannerul ține trackerele oprite până la acord.', 'BiscuitWP blochează scripturile și embed-urile cunoscute până la acord și e gratuit.' ),
+			'en' => array( 'Check that the banner keeps trackers off until consent.', 'BiscuitWP blocks known scripts and embeds until consent, and it is free.' ),
+			'ru' => array( 'Проверьте, держит ли баннер трекеры выключенными до согласия.', 'BiscuitWP блокирует известные скрипты и встраивания до согласия, и он бесплатный.' ),
 		),
 		'ours'            => array(
 			'ro' => array( 'Ține pluginul la ultima versiune.', $check['ro'] ),
@@ -1254,9 +1254,9 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 			'ru' => array( 'Откройте страницы, которые не удалось прочитать, и проверьте их сами в браузере.', $check['ru'] ),
 		),
 		'transport'       => array(
-			'ro' => array( 'Instalează un certificat TLS (de exemplu Let\'s Encrypt) și trimite tot traficul pe https.', 'Consent Manager Pro nu configurează HTTPS: asta se face la găzduire.' ),
-			'en' => array( 'Install a TLS certificate (for example Let\'s Encrypt) and send all traffic to https.', 'Consent Manager Pro does not set up HTTPS: that is done at your hosting.' ),
-			'ru' => array( 'Установите сертификат TLS (например, Let\'s Encrypt) и переведите весь трафик на https.', 'Consent Manager Pro не настраивает HTTPS: это делается на хостинге.' ),
+			'ro' => array( 'Instalează un certificat TLS (de exemplu Let\'s Encrypt) și trimite tot traficul pe https.', 'BiscuitWP nu configurează HTTPS: asta se face la găzduire.' ),
+			'en' => array( 'Install a TLS certificate (for example Let\'s Encrypt) and send all traffic to https.', 'BiscuitWP does not set up HTTPS: that is done at your hosting.' ),
+			'ru' => array( 'Установите сертификат TLS (например, Let\'s Encrypt) и переведите весь трафик на https.', 'BiscuitWP не настраивает HTTPS: это делается на хостинге.' ),
 		),
 	);
 	$lang  = cmp_check_lang( $lang );

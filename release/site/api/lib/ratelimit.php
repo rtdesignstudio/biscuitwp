@@ -5,7 +5,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 }
 
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": limits that protect the hosting
+ * BiscuitWP, "Verifică-ți site-ul": limits that protect the hosting
  * account the check runs on.
  *
  * - Per visitor: at most 5 checks in any 60 seconds and 50 in any 24 hours

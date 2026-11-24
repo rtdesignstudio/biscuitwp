@@ -5,7 +5,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 }
 
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": which pages of the site to check
+ * BiscuitWP, "Verifică-ți site-ul": which pages of the site to check
  * (up to 10, the homepage first).
  *
  * Sources, in order: the Sitemap: lines of robots.txt, then /sitemap.xml,

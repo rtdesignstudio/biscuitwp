@@ -5,7 +5,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 }
 
 /**
- * Consent Manager Pro, "Verifică-ți site-ul": fetching a visitor-given URL
+ * BiscuitWP, "Verifică-ți site-ul": fetching a visitor-given URL
  * without letting it reach anything but the public internet (SSRF).
  *
  * - Only http/https, only ports 80 and 443, no user:password@, no IP literals
@@ -36,7 +36,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 
 /** User-agent sent with every request. */
 function cmp_check_user_agent(): string {
-	return 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)';
+	return 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)';
 }
 
 /** Hard limits of a fetch. */
