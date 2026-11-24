@@ -2,42 +2,42 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: BiscuitWP 1.0.0\n"
+"Project-Id-Version: BiscuitWP 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-pro-public\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-24T07:45:38+00:00\n"
+"POT-Creation-Date: 2026-11-24T11:07:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: consent-manager-pro\n"
+"X-Domain: biscuitwp\n"
 
 #. Plugin Name of the plugin
-#: consent-manager-pro.php
+#: biscuitwp.php
 #: includes/admin/class-admin.php:86
 #: includes/admin/class-admin.php:87
 msgid "BiscuitWP"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: consent-manager-pro.php
-msgid "https://consent.rt.md/"
+#: biscuitwp.php
+msgid "https://biscuitwp.rt.md/"
 msgstr ""
 
 #. Description of the plugin
-#: consent-manager-pro.php
+#: biscuitwp.php
 msgid "Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN)."
 msgstr ""
 
 #. Author of the plugin
-#: consent-manager-pro.php
+#: biscuitwp.php
 msgid "RT.md"
 msgstr ""
 
 #. Author URI of the plugin
-#: consent-manager-pro.php
+#: biscuitwp.php
 msgid "https://rt.md"
 msgstr ""
 
@@ -118,7 +118,7 @@ msgstr ""
 
 #: includes/admin/class-admin.php:154
 #: includes/admin/class-services-page.php:426
-#: includes/modules/class-updater.php:621
+#: includes/modules/class-updater.php:829
 msgid "BiscuitWP:"
 msgstr ""
 
@@ -1943,6 +1943,77 @@ msgstr ""
 msgid "Regenerează paginile legale."
 msgstr ""
 
+#: includes/class-migrate-folder.php:158
+#: includes/class-migrate-folder.php:166
+#: includes/class-migrate-folder.php:175
+#: includes/class-migrate-folder.php:199
+msgid "Mută pluginul în folderul biscuitwp"
+msgstr ""
+
+#: includes/class-migrate-folder.php:185
+msgid "Rezultatul mutării nu e încă disponibil. Reîncarcă pagina peste câteva secunde."
+msgstr ""
+
+#: includes/class-migrate-folder.php:190
+msgid "Bifează confirmarea ca să muți pluginul."
+msgstr ""
+
+#: includes/class-migrate-folder.php:193
+msgid "Pluginul rulează încă din folderul vechi, plugins/consent-manager-pro. Butonul de mai jos îl mută în plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile legale rămân la fel. După mutare, golește cache-ul paginilor și verifică bannerul pe site."
+msgstr ""
+
+#: includes/class-migrate-folder.php:198
+msgid "Am înțeles: pluginul își mută folderul din plugins/consent-manager-pro în plugins/biscuitwp, fără să se dezactiveze."
+msgstr ""
+
+#: includes/class-migrate-folder.php:202
+msgid "Pluginul nu rulează din folderul plugins/consent-manager-pro. Nu e nimic de mutat."
+msgstr ""
+
+#: includes/class-migrate-folder.php:215
+msgid "BiscuitWP rulează acum din folderul plugins/biscuitwp. Golește cache-ul paginilor (pluginul de cache, serverul sau CDN-ul), apoi deschide prima pagină a site-ului și verifică dacă apare bannerul:"
+msgstr ""
+
+#: includes/class-migrate-folder.php:219
+msgid "Mutarea a întâmpinat o eroare la scrierea setărilor, iar revenirea la folderul vechi nu a fost posibilă, așa că setările au fost îndreptate spre folderul nou. Verifică pe ecranul Plugins că BiscuitWP e activ."
+msgstr ""
+
+#. translators: %s: the reason
+#: includes/class-migrate-folder.php:224
+#, php-format
+msgid "BiscuitWP nu și-a putut muta folderul și merge în continuare din cel vechi. Motiv: %s"
+msgstr ""
+
+#: includes/class-migrate-folder.php:232
+msgid "există deja un folder plugins/biscuitwp. Șterge-l sau redenumește-l, apoi încearcă din nou."
+msgstr ""
+
+#: includes/class-migrate-folder.php:234
+msgid "serverul nu permite scrierea în folderul plugins. Cere-i celui care administrează serverul să o permită, apoi încearcă din nou."
+msgstr ""
+
+#: includes/class-migrate-folder.php:236
+msgid "chiar acum rulează un update sau o altă mutare. Încearcă din nou peste câteva minute."
+msgstr ""
+
+#: includes/class-migrate-folder.php:239
+msgid "rețeaua are prea multe site-uri sau mai multe rețele, iar mutarea nu le poate acoperi pe toate în siguranță."
+msgstr ""
+
+#: includes/class-migrate-folder.php:241
+msgid "pluginul nu e activ din folderul vechi pe niciun site."
+msgstr ""
+
+#. translators: %s: internal error code
+#: includes/class-migrate-folder.php:244
+#, php-format
+msgid "o eroare la mutare (cod: %s). Nimic nu s-a pierdut; încearcă din nou mai târziu."
+msgstr ""
+
+#: includes/class-migrate-folder.php:268
+msgid "Nu ai voie să muți pluginul."
+msgstr ""
+
 #: includes/modules/class-legal.php:302
 msgid "Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile utilizate:"
 msgstr ""
@@ -1971,46 +2042,50 @@ msgstr ""
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr ""
 
-#: includes/modules/class-updater.php:563
+#: includes/modules/class-updater.php:771
 msgid "Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu."
 msgstr ""
 
-#: includes/modules/class-updater.php:620
+#: includes/modules/class-updater.php:828
 msgid "Despre siguranța actualizărilor"
 msgstr ""
 
 #. translators: %s — installed plugin version
-#: includes/modules/class-updater.php:628
+#: includes/modules/class-updater.php:836
 #, php-format
 msgid "Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată."
 msgstr ""
 
-#: includes/modules/class-updater.php:631
+#: includes/modules/class-updater.php:839
 msgid "Actualizează acum"
 msgstr ""
 
-#: includes/modules/class-updater.php:635
+#: includes/modules/class-updater.php:843
 msgid "Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne."
 msgstr ""
 
-#: includes/modules/class-updater.php:640
+#: includes/modules/class-updater.php:848
 msgid "Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP sodium."
 msgstr ""
 
-#: includes/modules/class-updater.php:662
+#: includes/modules/class-updater.php:870
 msgid "Pachetul de update nu corespunde manifestului semnat și a fost refuzat. Apasă din nou „Caută actualizări” și reîncearcă."
 msgstr ""
 
-#: includes/modules/class-updater.php:673
+#: includes/modules/class-updater.php:881
 msgid "Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost șters."
 msgstr ""
 
-#: includes/modules/class-updater.php:690
+#: includes/modules/class-updater.php:898
 msgid "Nu am putut descărca pachetul de update."
 msgstr ""
 
-#: includes/modules/class-updater.php:694
+#: includes/modules/class-updater.php:902
 msgid "Pachetul de update depășește dimensiunea maximă permisă."
+msgstr ""
+
+#: includes/modules/class-updater.php:937
+msgid "Update-ul BiscuitWP a fost oprit: folderul pachetului nu a putut fi redenumit în folderul pluginului instalat. Pluginul instalat a rămas neatins. Încearcă din nou."
 msgstr ""
 
 #: templates/admin/guide.php:32
@@ -2637,153 +2712,157 @@ msgstr ""
 msgid "Dacă %1$sPagini legale%2$s spune că șabloanele au fost actualizate, regenerează fiecare document. Mesajul dispare după ce le regenerezi pe toate trei."
 msgstr ""
 
-#: templates/admin/guide.php:265
-msgid "Re-consimțământul"
+#: templates/admin/guide.php:264
+msgid "Din versiunea 1.1.0, pluginul se poate muta din folderul plugins/consent-manager-pro în plugins/biscuitwp. Pe site-urile instalate înainte nu se mută nimic singur: pluginul merge la fel de bine din folderul vechi și primește update-uri. Când vrei, deschide ecranul Plugins și apasă „Mută pluginul în folderul biscuitwp” pe rândul BiscuitWP (pe multisite, din administrarea rețelei), apoi confirmă. Pluginul nu se dezactivează: setările, registrul și paginile legale rămân la fel. După mutare, golește cache-ul paginilor (pluginul de cache, serverul sau CDN-ul) și verifică bannerul pe prima pagină a site-ului. Dacă mutarea nu reușește, de exemplu pentru că serverul nu permite scrierea în folderul plugins sau există deja un folder plugins/biscuitwp, ecranul îți arată motivul, iar pluginul rămâne în folderul vechi."
 msgstr ""
 
 #: templates/admin/guide.php:266
+msgid "Re-consimțământul"
+msgstr ""
+
+#: templates/admin/guide.php:267
 msgid "Când pe site apare un serviciu nou, într-o categorie pe care vizitatorul a acceptat-o deja, pluginul nu îl încarcă pe baza acordului vechi. La următoarea pagină pe care o deschide, bannerul se arată direct la preferințe, cu serviciile noi marcate, până când vizitatorul decide. Până atunci, categoria e tratată ca refuzată."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:267
+#: templates/admin/guide.php:268
 #, php-format
 msgid "Pluginul ține minte toate serviciile găsite vreodată pe site. Dacă ai scos un serviciu și vrei ca lista să conțină doar ce e acum pe site, apasă „Resetează lista serviciilor văzute” în %1$sServicii%2$s."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:268
+#: templates/admin/guide.php:269
 #, php-format
 msgid "Vrei să întrebi din nou toți vizitatorii, de exemplu după o schimbare mare în politică? Mărește „Versiune politică” în %1$sSetări%2$s."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Registru consimțăminte screen
-#: templates/admin/guide.php:274
+#: templates/admin/guide.php:275
 #, php-format
 msgid "%1$sRegistru consimțăminte%2$s păstrează dovada alegerilor făcute de vizitatori, cerută de Legea 195/2024. Registrul există doar în modul Pro: în Light nu se cere acord."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Registru consimțăminte screen
-#: templates/admin/guide.php:275
+#: templates/admin/guide.php:276
 msgid "La fiecare alegere se păstrează: data, ID-ul consimțământului, decizia, categoriile și serviciile, limba, versiunea politicii și adresa paginii. IP-ul și browserul se păstrează doar ca hash, nu în clar."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:276
+#: templates/admin/guide.php:277
 #, php-format
 msgid "Înregistrările se șterg automat după numărul de luni din „Retenție log (luni)”, în %1$sSetări%2$s. Implicit: 13 luni."
 msgstr ""
 
-#: templates/admin/guide.php:278
+#: templates/admin/guide.php:279
 msgid "Căutarea după ID"
 msgstr ""
 
-#: templates/admin/guide.php:279
+#: templates/admin/guide.php:280
 msgid "Vizitatorul își vede ID-ul în fereastra „Setări cookie”, sub preferințe. Dacă îți scrie cu o cerere, pune ID-ul în câmpul „ID consimțământ” și apasă „Filtrează”. Vezi tot istoricul alegerilor lui."
 msgstr ""
 
-#: templates/admin/guide.php:281
+#: templates/admin/guide.php:282
 msgid "Exportul"
 msgstr ""
 
-#: templates/admin/guide.php:282
+#: templates/admin/guide.php:283
 msgid "„Export CSV” și „Export JSON” descarcă tot registrul. Păstrează fișierul în siguranță: e o dovadă legală."
 msgstr ""
 
-#: templates/admin/guide.php:283
+#: templates/admin/guide.php:284
 msgid "„Golește registrul” șterge definitiv toate înregistrările. Folosește-l doar dacă știi sigur că nu mai ai nevoie de ele."
 msgstr ""
 
-#: templates/admin/guide.php:285
+#: templates/admin/guide.php:286
 msgid "Dezinstalarea"
 msgstr ""
 
-#: templates/admin/guide.php:286
+#: templates/admin/guide.php:287
 msgid "La dezinstalare, pluginul șterge mereu datele lui de lucru: rezultatele scanărilor, raportul verificării, imaginile video și fonturile localizate."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:287
+#: templates/admin/guide.php:288
 #, php-format
 msgid "Setările, categoriile, serviciile configurate și registrul se șterg doar dacă ai bifat „Șterge toate datele la dezinstalare”, în %1$sSetări%2$s. Registrul e dovada legală a alegerilor: păstrează-l (sau un export al lui) cât cere legea înainte să bifezi."
 msgstr ""
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:288
+#: templates/admin/guide.php:289
 msgid "Paginile legale generate rămân pe site. Le ștergi tu, din Pagini, dacă nu mai ai nevoie de ele."
 msgstr ""
 
-#: templates/admin/guide.php:294
+#: templates/admin/guide.php:295
 msgid "Pluginul are un API JavaScript și o funcție PHP, ca să legi codul tău de acordul vizitatorului."
 msgstr ""
 
 #. translators: 1: window.CMP, 2: the script handle, 3: DOMContentLoaded
-#: templates/admin/guide.php:295
+#: templates/admin/guide.php:296
 #, php-format
 msgid "În JavaScript, %1$s există după ce se încarcă scriptul bannerului (handle-ul %2$s, în footer). Încarcă scriptul tău cu el ca dependență sau așteaptă %3$s."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:297
+#: templates/admin/guide.php:298
 #, php-format
 msgid "%s: dacă o categorie e permisă acum."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:298
+#: templates/admin/guide.php:299
 #, php-format
 msgid "%s: decizia salvată, sau null dacă vizitatorul nu a decis."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:299
+#: templates/admin/guide.php:300
 #, php-format
 msgid "%s: deschide preferințele."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:300
+#: templates/admin/guide.php:301
 #, php-format
 msgid "%s: apelează funcția la fiecare decizie, și imediat dacă vizitatorul a decis deja."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:301
+#: templates/admin/guide.php:302
 #, php-format
 msgid "%s: apelează funcția o singură dată, când categoria e permisă."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:302
+#: templates/admin/guide.php:303
 #, php-format
 msgid "%s: adaugă o categorie la acord. Merge doar dintr-un clic real al vizitatorului, de exemplu pe butonul tău „Încarcă harta”."
 msgstr ""
 
 #. translators: %s: method name
-#: templates/admin/guide.php:303
+#: templates/admin/guide.php:304
 #, php-format
 msgid "%s: scoate o categorie din acord."
 msgstr ""
 
 #. translators: %s: event name
-#: templates/admin/guide.php:304
+#: templates/admin/guide.php:305
 #, php-format
 msgid "%s: eveniment pe document, după fiecare decizie pe categorii."
 msgstr ""
 
 #. translators: %s: the PHP function
-#: templates/admin/guide.php:307
+#: templates/admin/guide.php:308
 #, php-format
 msgid "În PHP, %s spune dacă vizitatorul a permis o categorie. Nu o folosi pe pagini puse complet în cache: cookie-ul diferă de la un vizitator la altul."
 msgstr ""
 
 #. translators: 1-3: category slugs
-#: templates/admin/guide.php:309
+#: templates/admin/guide.php:310
 #, php-format
 msgid "Categoriile se identifică prin slug: %1$s (mereu permisă), %2$s, %3$s și cele create de tine în Categorii."
 msgstr ""
 
 #. translators: 1-3: category slugs
-#: templates/admin/guide.php:310
+#: templates/admin/guide.php:311
 msgid "În modul Light nu există decizie: allowCategory și denyCategory nu fac nimic, iar onConsent și whenAllowed nu apelează funcția pentru categoriile opționale."
 msgstr ""

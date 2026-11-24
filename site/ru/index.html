@@ -252,7 +252,7 @@
 <div class="sh"><p class="n">07 · Доверие</p>
 <h2 id="incredere-titlu">Все можно проверить</h2></div>
 <ul class="checks">
-<li><strong>Открытый код.</strong> Весь код на <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, под лицензией GPL-2.0-or-later.</li>
+<li><strong>Открытый код.</strong> Весь код на <a href="https://github.com/rtdesignstudio/biscuitwp">GitHub</a>, под лицензией GPL-2.0-or-later.</li>
 <li><strong>Подписанные обновления.</strong> Открытые ключи и команды для ручной проверки пакета есть на странице <a href="/ru/security/">Безопасность</a>.</li>
 <li><strong>Без телеметрии.</strong> Плагин ничего не передает нам о ваших посетителях, а запрос обновления не содержит адреса сайта или других данных о нем. Что и кому передается, описано в разделе <a href="/ru/privacy/">Конфиденциальность</a>.</li>
 <li><strong>Открытая история.</strong> Каждая версия есть в <a href="/changelog/">Changelog</a>, с RSS-лентой.</li>
@@ -265,14 +265,14 @@
 <div class="sh"><p class="n">08 · Установка</p>
 <h2 id="instalare-titlu">Работает через 5 минут</h2></div>
 <ol class="steps">
-<li><a data-download href="<!-- DOWNLOAD_URL -->">Скачайте</a> <code>consent-manager-pro.zip</code>. В WordPress, в разделе «Плагины», загрузите zip-файл и активируйте плагин.</li>
+<li><a data-download href="<!-- DOWNLOAD_URL -->">Скачайте</a> <code>biscuitwp.zip</code>. В WordPress, в разделе «Плагины», загрузите zip-файл и активируйте плагин.</li>
 <li><strong>Настройки:</strong> оставьте режим Pro (баннер с согласием по категориям). Оставьте отмеченным «Блокировать скрипты отслеживания до согласия» и режим измерения Strict.</li>
 <li><strong>Сервисы:</strong> посмотрите список «Найдено на сайте». Плагин сканирует сам. Проверьте, что в нем есть все, что, как вы знаете, использует сайт.</li>
 <li><strong>Юридические страницы:</strong> заполните данные оператора и нажмите «Сгенерировать» для каждого документа. Прочитайте страницы и опубликуйте их.</li>
 <li><strong>Ссылка «Настройки cookie»</strong> в футере, с шорткодом <code>[cmp_cookie_settings_link]</code>. Через нее посетитель меняет или отзывает согласие.</li>
 <li><strong>Проверка:</strong> нажмите «Проверить в браузере». Ни одна страница не должна быть красной.</li>
 </ol>
-<p>Полное руководство есть в плагине: BiscuitWP, «Руководство». Сайт не на WordPress? Используйте <a data-standalone href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">автономную версию (standalone)</a>.</p>
+<p>Полное руководство есть в плагине: BiscuitWP, «Руководство». Сайт не на WordPress? Используйте <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">автономную версию (standalone)</a>.</p>
 </div>
 </section>
 
@@ -281,8 +281,8 @@
 <div class="sh"><p class="n">09 · Вопросы</p>
 <h2 id="intrebari-titlu">Частые вопросы</h2></div>
 <details><summary>Почему это бесплатно?</summary><p>Потому что мы хотим, чтобы любой сайт в Молдове мог правильно запрашивать согласие, не платя за это. Код открыт, под лицензией GPL. Нет ни лицензионного ключа, ни подписки, ни скрытых функций.</p></details>
-<details><summary>Работает без WordPress?</summary><p>Да. Для статических сайтов есть <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">автономная версия</a>: два файла, <code>cmp.js</code> и <code>cmp.css</code>. Скрипты, которые должны ждать согласия, вы помечаете сами. Журнала согласий в ней нет.</p></details>
-<details><summary>Какие данные получает RT?</summary><p>От плагина только запрос обновления: ваш сайт скачивает статический манифест с <code>consent.rt.md</code>, без адреса сайта и без данных о посетителях. От проверки на этой странице: адрес, который вы вводите; он используется только для проверки и не сохраняется. Все подробности в разделе <a href="/ru/privacy/">Конфиденциальность</a>.</p></details>
+<details><summary>Работает без WordPress?</summary><p>Да. Для статических сайтов есть <a href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">автономная версия</a>: два файла, <code>cmp.js</code> и <code>cmp.css</code>. Скрипты, которые должны ждать согласия, вы помечаете сами. Журнала согласий в ней нет.</p></details>
+<details><summary>Какие данные получает RT?</summary><p>От плагина только запрос обновления: ваш сайт скачивает статический манифест с <code>biscuitwp.rt.md</code>, без адреса сайта и без данных о посетителях. От проверки на этой странице: адрес, который вы вводите; он используется только для проверки и не сохраняется. Все подробности в разделе <a href="/ru/privacy/">Конфиденциальность</a>.</p></details>
 <details><summary>Достаточно ли плагина, чтобы сайт соответствовал закону?</summary><p>Одного плагина недостаточно. Плагин дает баннер, блокировку, журнал и базовые тексты. За вами остаются: реестр операций по обработке, ответственный за защиту данных (если он нужен), передача данных за рубеж и окончательная редакция юридических текстов. По этим вопросам посоветуйтесь с юристом.</p></details>
 <details><summary>А как быть с Google Tag Manager?</summary><p>Плагин блокирует то, что есть в коде страницы. В режиме Strict Tag Manager запускается только после согласия. То, что Tag Manager загружает после запуска, управляется в самом Tag Manager через Google Consent Mode, сигналы которого передает плагин.</p></details>
 <details><summary>С какими версиями работает?</summary><p>WordPress 6.0 или новее и PHP 7.4 или новее. Работает и в multisite.</p></details>

@@ -274,11 +274,11 @@ class CMP_Legal {
 	}
 
 	public static function sc_privacy() {
-		return self::page_link( 'privacy_page_id', __( 'Politica de confidențialitate', 'consent-manager-pro' ) );
+		return self::page_link( 'privacy_page_id', __( 'Politica de confidențialitate', 'biscuitwp' ) );
 	}
 
 	public static function sc_terms() {
-		return self::page_link( 'terms_page_id', __( 'Termeni și condiții', 'consent-manager-pro' ) );
+		return self::page_link( 'terms_page_id', __( 'Termeni și condiții', 'biscuitwp' ) );
 	}
 
 	public static function sc_cookie_settings() {
@@ -299,7 +299,7 @@ class CMP_Legal {
 		$table = self::current_table_html( 'ro' );
 		wp_add_privacy_policy_content(
 			'BiscuitWP',
-			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile utilizate:', 'consent-manager-pro' ) . '</p>' . $table )
+			wp_kses_post( '<p>' . __( 'Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile utilizate:', 'biscuitwp' ) . '</p>' . $table )
 		);
 	}
 

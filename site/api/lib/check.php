@@ -4,7 +4,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 	exit;
 }
 /**
- * BiscuitWP, "Verifică-ți site-ul" (consent.rt.md): the page analysis.
+ * BiscuitWP, "Verifică-ți site-ul" (biscuitwp.rt.md): the page analysis.
  *
  * Pure functions: the homepage HTML and its response headers go in, findings
  * come out. No network, no output, no files except cmp_check_load_services().

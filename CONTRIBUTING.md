@@ -65,7 +65,7 @@ bin/release.sh --revoke X.Y.Z      # never offer X.Y.Z again
 bin/release.sh --resign            # re-sign both manifests (monthly; they expire after 60 days)
 ```
 
-Every one of them also regenerates the public pages of consent.rt.md (`site/` plus the changelog, the keys and the revoked list) into `release/site/`, which is committed with the new state. After the release, upload `release/site/` together with the manifests (the script prints the `scp` commands). A release (`X.Y.Z`) also writes a CycloneDX SBOM, `dist/consent-manager-pro-X.Y.Z.cdx.json`, and attaches it to the GitHub release. Before releasing, bump the `Stable tag` in `readme.txt` along with the header `Version` and `CMP_VERSION`.
+Every one of them also regenerates the public pages of biscuitwp.rt.md (`site/` plus the changelog, the keys and the revoked list) into `release/site/`, which is committed with the new state. After the release, upload `release/site/` together with the manifests (the script prints the `scp` commands). A release (`X.Y.Z`) also writes a CycloneDX SBOM, `dist/consent-manager-pro-X.Y.Z.cdx.json`, and attaches it to the GitHub release. Before releasing, bump the `Stable tag` in `readme.txt` along with the header `Version` and `CMP_VERSION`.
 
 Add `--dry-run` to any of them to rehearse: it writes only to `dist/` (the pages go to `dist/site/`; no gh, push or commit) and nothing it produces may be uploaded. The signing keys are kept offline by the maintainers; new manifest or rescue keys are created with `bin/keygen.sh manifest|rescue [--out <path>]`, which prints only the public key. Secret keys are never printed or committed.
 

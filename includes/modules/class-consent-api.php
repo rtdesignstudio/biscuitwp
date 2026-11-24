@@ -42,7 +42,7 @@ class CMP_Consent_API {
 		if ( ! self::active() ) {
 			return;
 		}
-		$basename = plugin_basename( CMP_PATH . 'consent-manager-pro.php' );
+		$basename = CMP_Plugin::basename();
 		add_filter( "wp_consent_api_registered_{$basename}", '__return_true' );
 		add_filter( 'wp_get_consent_type', array( __CLASS__, 'consent_type' ) );
 	}

@@ -20,7 +20,7 @@
 <h2 id="raportare">Raportează o vulnerabilitate</h2>
 <p>Nu deschide un issue public. Folosește unul din cele două canale private:</p>
 <ol>
-<li><strong>Raportarea privată pe GitHub</strong> (preferată): <a href="https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new">deschide un raport</a>.</li>
+<li><strong>Raportarea privată pe GitHub</strong> (preferată): <a href="https://github.com/rtdesignstudio/biscuitwp/security/advisories/new">deschide un raport</a>.</li>
 <li><strong>E-mail:</strong> <a href="mailto:security@rt.md">security@rt.md</a>.</li>
 </ol>
 
@@ -46,7 +46,7 @@
 <h2 id="update-uri">Cum sunt protejate update-urile</h2>
 <p>Pluginul nu ia update-uri de pe wordpress.org. Le ia așa:</p>
 <ul>
-<li><strong>Manifest semnat.</strong> Pe consent.rt.md stă câte un manifest pentru fiecare canal (stable și beta), cu o semnătură Ed25519 separată. Manifestul spune ce versiune e disponibilă, de unde se descarcă și ce amprentă SHA-256 are pachetul. Pluginul îl folosește doar dacă semnătura e validă.</li>
+<li><strong>Manifest semnat.</strong> Pe biscuitwp.rt.md stă câte un manifest pentru fiecare canal (stable și beta), cu o semnătură Ed25519 separată. Manifestul spune ce versiune e disponibilă, de unde se descarcă și ce amprentă SHA-256 are pachetul. Pluginul îl folosește doar dacă semnătura e validă.</li>
 <li><strong>Pachet semnat.</strong> Zip-ul vine din GitHub Releases. Înainte de instalare, pluginul verifică amprenta SHA-256 și semnătura Ed25519 a zip-ului. Acceptă doar adresa exactă din manifestul verificat. Dacă ceva nu se potrivește, pachetul e șters și update-ul e refuzat.</li>
 <li><strong>Anti-rollback.</strong> Pluginul ține minte cel mai nou manifest văzut pe fiecare canal și refuză unul mai vechi. Așa, nimeni nu-ți poate servi un manifest vechi, dar valid, ca să te țină pe o versiune vulnerabilă.</li>
 <li><strong>Expirare.</strong> Un manifest e valabil cel mult 60 de zile. Îl semnăm din nou în fiecare lună. Un manifest expirat nu mai oferă update-uri, iar în admin apare un avertisment.</li>
@@ -60,12 +60,13 @@
 
 <h2 id="verificare">Verifică manual un zip</h2>
 <ol>
-<li>Descarcă din <a href="https://github.com/rtdesignstudio/consent-manager-pro/releases">GitHub Releases</a> fișierele <code>consent-manager-pro.zip</code> și <code>consent-manager-pro.zip.sig</code>, din aceeași versiune.</li>
+<li>Descarcă din <a href="https://github.com/rtdesignstudio/biscuitwp/releases">GitHub Releases</a> fișierele <code>consent-manager-pro.zip</code> și <code>consent-manager-pro.zip.sig</code>, din aceeași versiune.</li>
 <li>Calculează amprenta zip-ului și compar-o cu câmpul <code>sha256</code> din <a href="../manifest-stable.json">manifest-stable.json</a> (pentru versiunea din manifest):
 <pre><code>shasum -a 256 consent-manager-pro.zip</code></pre></li>
 <li>Verifică semnătura cu cheia de release. Comanda trebuie să afișeze <code>OK</code>:
 <pre><code>php -r '$k = base64_decode("{{SIGN_PUBLIC_KEY}}"); $s = base64_decode(trim(file_get_contents("consent-manager-pro.zip.sig"))); $z = file_get_contents("consent-manager-pro.zip"); echo sodium_crypto_sign_verify_detached($s, $z, $k) ? "OK\n" : "INVALID\n";'</code></pre></li>
 </ol>
+<p>Pentru <code>biscuitwp.zip</code> (instalarea nouă) folosește în pasul 3 <code>biscuitwp.zip</code> și <code>biscuitwp.zip.sig</code>; pasul 2 se aplică doar <code>consent-manager-pro.zip</code> (pachetul de update), a cărui amprentă e în manifest.</p>
 <p>Dacă vezi o eroare, fișierul .sig lipsește sau e greșit.</p>
 <p>Dacă un release a fost semnat cu cheia de rezervă, pune cheia de rezervă în comandă. Dacă verificarea nu trece, nu instala zip-ul și scrie-ne.</p>
 

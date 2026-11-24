@@ -87,7 +87,7 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'rate_limited'       => 'Ai făcut multe verificări într-un timp scurt. Mai încearcă peste un minut.',
 			'unavailable'        => 'Verificarea nu e disponibilă acum. Încearcă din nou mai târziu.',
 			'busy'               => 'Sunt foarte multe verificări în acest moment. Încearcă din nou peste câteva minute.',
-			'forbidden'          => 'Verificarea se pornește doar din pagina consent.rt.md.',
+			'forbidden'          => 'Verificarea se pornește doar din pagina biscuitwp.rt.md.',
 		),
 		'en' => array(
 			'method_not_allowed' => 'Start the check from the form on the page.',
@@ -104,7 +104,7 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'rate_limited'       => 'You have run many checks in a short time. Try again in a minute.',
 			'unavailable'        => 'The check is not available right now. Try again later.',
 			'busy'               => 'There are a lot of checks right now. Try again in a few minutes.',
-			'forbidden'          => 'The check can only be started from the consent.rt.md page.',
+			'forbidden'          => 'The check can only be started from the biscuitwp.rt.md page.',
 		),
 		'ru' => array(
 			'method_not_allowed' => 'Проверка запускается из формы на странице.',
@@ -121,7 +121,7 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'rate_limited'       => 'Вы сделали много проверок за короткое время. Попробуйте ещё раз через минуту.',
 			'unavailable'        => 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
 			'busy'               => 'Сейчас идёт очень много проверок. Попробуйте ещё раз через несколько минут.',
-			'forbidden'          => 'Проверку можно запустить только со страницы consent.rt.md.',
+			'forbidden'          => 'Проверку можно запустить только со страницы biscuitwp.rt.md.',
 		),
 	);
 	$lang = cmp_check_lang( $lang );
@@ -185,7 +185,7 @@ function cmp_check_read_request( string $content_type, string $raw, array $post 
 
 /** Origins allowed to call the endpoint from a browser. */
 function cmp_check_allowed_origins(): array {
-	return array( 'https://consent.rt.md' );
+	return array( 'https://biscuitwp.rt.md' );
 }
 
 /**

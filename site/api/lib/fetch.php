@@ -36,7 +36,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
 
 /** User-agent sent with every request. */
 function cmp_check_user_agent(): string {
-	return 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)';
+	return 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)';
 }
 
 /** Hard limits of a fetch. */

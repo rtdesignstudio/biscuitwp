@@ -17,9 +17,9 @@ class CMP_Categories_Page {
 		$cats = CMP_Consent::get_categories();
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'BiscuitWP — Categorii', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Categorii', 'biscuitwp' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Categorii salvate.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Categorii salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="cmp_save_categories">
@@ -29,8 +29,8 @@ class CMP_Categories_Page {
 						<?php self::row( (int) $i, $cat ); ?>
 					<?php endforeach; ?>
 				</div>
-				<p><button type="button" class="button" data-cmp-add-cat><?php esc_html_e( '+ Adaugă categorie', 'consent-manager-pro' ); ?></button></p>
-				<?php submit_button( __( 'Salvează categoriile', 'consent-manager-pro' ) ); ?>
+				<p><button type="button" class="button" data-cmp-add-cat><?php esc_html_e( '+ Adaugă categorie', 'biscuitwp' ); ?></button></p>
+				<?php submit_button( __( 'Salvează categoriile', 'biscuitwp' ) ); ?>
 			</form>
 
 			<script type="text/template" id="cmp-cat-template"><?php self::row( 0, array(), true ); ?></script>
@@ -50,36 +50,36 @@ class CMP_Categories_Page {
 		?>
 		<div class="cmp-cat-row" data-cmp-cat-row>
 			<div class="cmp-cat-row__head">
-				<strong><?php esc_html_e( 'Categorie', 'consent-manager-pro' ); ?></strong>
-				<button type="button" class="button-link button-link-delete" data-cmp-del-cat><?php esc_html_e( 'Șterge', 'consent-manager-pro' ); ?></button>
+				<strong><?php esc_html_e( 'Categorie', 'biscuitwp' ); ?></strong>
+				<button type="button" class="button-link button-link-delete" data-cmp-del-cat><?php esc_html_e( 'Șterge', 'biscuitwp' ); ?></button>
 			</div>
 			<p class="cmp-cat-row__names">
-				<label class="cmp-cat-row__label"><?php esc_html_e( 'Etichetă', 'consent-manager-pro' ); ?><br>
+				<label class="cmp-cat-row__label"><?php esc_html_e( 'Etichetă', 'biscuitwp' ); ?><br>
 					<input type="text" name="<?php echo esc_attr( $n ); ?>[label]" value="<?php echo esc_attr( $label ); ?>"></label>
-				<label class="cmp-cat-row__slug"><?php esc_html_e( 'Slug', 'consent-manager-pro' ); ?><br>
+				<label class="cmp-cat-row__slug"><?php esc_html_e( 'Slug', 'biscuitwp' ); ?><br>
 					<input type="text" name="<?php echo esc_attr( $n ); ?>[slug]" value="<?php echo esc_attr( $slug ); ?>" required></label>
 			</p>
 			<p>
-				<label><?php esc_html_e( 'Descriere', 'consent-manager-pro' ); ?><br>
+				<label><?php esc_html_e( 'Descriere', 'biscuitwp' ); ?><br>
 					<textarea class="large-text" rows="2" name="<?php echo esc_attr( $n ); ?>[description]"><?php echo esc_textarea( $desc ); ?></textarea></label>
 			</p>
 			<p>
-				<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[required]" value="1" <?php checked( $required ); ?>> <?php esc_html_e( 'Obligatorie (mereu activă)', 'consent-manager-pro' ); ?></label>
+				<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[required]" value="1" <?php checked( $required ); ?>> <?php esc_html_e( 'Obligatorie (mereu activă)', 'biscuitwp' ); ?></label>
 			</p>
 			<div class="cmp-signals">
-				<strong><?php esc_html_e( 'Google Consent Mode signals', 'consent-manager-pro' ); ?></strong><br>
+				<strong><?php esc_html_e( 'Google Consent Mode signals', 'biscuitwp' ); ?></strong><br>
 				<?php foreach ( self::SIGNALS as $sig ) : ?>
 					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[gtag_signals][]" value="<?php echo esc_attr( $sig ); ?>" <?php checked( in_array( $sig, $signals, true ) ); ?>> <?php echo esc_html( $sig ); ?></label>
 				<?php endforeach; ?>
 			</div>
 			<div class="cmp-cookies">
-				<strong><?php esc_html_e( 'Cookies', 'consent-manager-pro' ); ?></strong>
+				<strong><?php esc_html_e( 'Cookies', 'biscuitwp' ); ?></strong>
 				<table data-cmp-cookies>
 					<thead><tr>
-						<th><?php esc_html_e( 'Nume', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Furnizor', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Durată', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Scop', 'consent-manager-pro' ); ?></th>
+						<th><?php esc_html_e( 'Nume', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Furnizor', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Durată', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Scop', 'biscuitwp' ); ?></th>
 						<th></th>
 					</tr></thead>
 					<tbody data-cmp-cookies-body>
@@ -88,7 +88,7 @@ class CMP_Categories_Page {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p><button type="button" class="button" data-cmp-add-cookie><?php esc_html_e( '+ Adaugă cookie', 'consent-manager-pro' ); ?></button></p>
+				<p><button type="button" class="button" data-cmp-add-cookie><?php esc_html_e( '+ Adaugă cookie', 'biscuitwp' ); ?></button></p>
 			</div>
 		</div>
 		<?php
@@ -109,7 +109,7 @@ class CMP_Categories_Page {
 
 	public static function save() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_save_categories' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$raw   = isset( $_POST['cmp_cats'] ) && is_array( $_POST['cmp_cats'] ) ? wp_unslash( $_POST['cmp_cats'] ) : array();
 		$clean = CMP_Sanitizer::categories( array_values( $raw ) );

@@ -4,7 +4,28 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
 
 ## 1.1.0 – TBD
 
-- Pluginul se numește acum BiscuitWP (fost Consent Manager Pro). Se schimbă doar numele afișat: setările, datele, cookie-urile, shortcode-urile și API-ul rămân aceleași.
+- Pluginul se numește acum BiscuitWP (fost Consent Manager Pro).
+- Setările, datele, cookie-urile, shortcode-urile și API-ul rămân aceleași.
+- Site nou: biscuitwp.rt.md. Codul e pe github.com/rtdesignstudio/biscuitwp.
+- Update-urile vin acum de pe biscuitwp.rt.md.
+- Vechea adresă, consent.rt.md, duce la biscuitwp.rt.md.
+- Opțiune nouă în Setări: „Respectă semnalul Global Privacy Control (GPC)”.
+  E pornită implicit, deci totul merge ca până acum.
+- Densitatea bannerului, în Aspect: Compact, Normal sau Extins.
+  Normal arată exact ca înainte.
+- Buton nou: „Mută pluginul în folderul biscuitwp”.
+- Mutarea e opțională. Nimic nu se mută singur.
+- Pluginul merge la fel de bine din folderul vechi, consent-manager-pro.
+- Cum muți: Plugins, rândul BiscuitWP, „Mută pluginul în folderul biscuitwp”.
+  Bifezi confirmarea și apeși butonul. Pe multisite, din administrarea rețelei.
+- Pluginul nu se dezactivează. Setările, registrul și paginile legale rămân.
+- După mutare, golește cache-ul paginilor și verifică bannerul pe site.
+- Text domain nou: `biscuitwp`.
+- Traducerile proprii din wp-content/languages/plugins/consent-manager-pro-*.mo
+  nu se mai aplică. Redenumește-le în biscuitwp-*.mo (și .po).
+- Două arhive: consent-manager-pro.zip pentru update-uri,
+  biscuitwp.zip pentru instalări noi.
+- Ai deja pluginul? Actualizează-l. Nu instala biscuitwp.zip alături.
 
 ## 1.0.0 – 2026-11-20
 

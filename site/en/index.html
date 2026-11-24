@@ -252,7 +252,7 @@
 <div class="sh"><p class="n">07 · Trust</p>
 <h2 id="incredere-titlu">You can check everything</h2></div>
 <ul class="checks">
-<li><strong>Open-source.</strong> All the code is on <a href="https://github.com/rtdesignstudio/consent-manager-pro">GitHub</a>, under GPL-2.0-or-later.</li>
+<li><strong>Open-source.</strong> All the code is on <a href="https://github.com/rtdesignstudio/biscuitwp">GitHub</a>, under GPL-2.0-or-later.</li>
 <li><strong>Signed updates.</strong> The public keys and the commands to verify a package by hand are on the <a href="/en/security/">Security</a> page.</li>
 <li><strong>No telemetry.</strong> The plugin sends us nothing about your visitors, and the update check carries neither your site's address nor other data about it. What it sends, and to whom, is in <a href="/en/privacy/">Privacy</a>.</li>
 <li><strong>Public history.</strong> Every version is in the <a href="/changelog/" hreflang="ro">Changelog</a> (in Romanian), with an RSS feed.</li>
@@ -265,14 +265,14 @@
 <div class="sh"><p class="n">08 · Install</p>
 <h2 id="instalare-titlu">Running in 5 minutes</h2></div>
 <ol class="steps">
-<li><a data-download href="<!-- DOWNLOAD_URL -->">Download</a> <code>consent-manager-pro.zip</code>. In WordPress, under Plugins, upload the zip file and activate the plugin.</li>
+<li><a data-download href="<!-- DOWNLOAD_URL -->">Download</a> <code>biscuitwp.zip</code>. In WordPress, under Plugins, upload the zip file and activate the plugin.</li>
 <li><strong>Settings:</strong> keep Pro mode (the banner with consent per category). Keep "Block tracking scripts until consent" ticked and the measurement mode on Strict.</li>
 <li><strong>Services:</strong> look at the "Found on the site" list. The plugin scans on its own. Make sure nothing you know the site uses is missing.</li>
 <li><strong>Legal pages:</strong> fill in the operator's details and click "Generate" for each document. Read the pages and publish them.</li>
 <li><strong>The "Cookie settings" link</strong> in the footer, with the <code>[cmp_cookie_settings_link]</code> shortcode. Visitors use it to change or withdraw consent.</li>
 <li><strong>Check:</strong> click "Check in browser". No page should come out red.</li>
 </ol>
-<p>The full guide is inside the plugin, under BiscuitWP, "Guide". Not on WordPress? Use the <a data-standalone href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>.</p>
+<p>The full guide is inside the plugin, under BiscuitWP, "Guide". Not on WordPress? Use the <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">standalone version</a>.</p>
 </div>
 </section>
 
@@ -281,8 +281,8 @@
 <div class="sh"><p class="n">09 · Questions</p>
 <h2 id="intrebari-titlu">Frequently asked questions</h2></div>
 <details><summary>Why is it free?</summary><p>Because we want every site in Moldova to be able to ask for consent properly without paying for it. The code is public, under the GPL. There is no licence key, no subscription and no hidden features.</p></details>
-<details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>
-<details><summary>What data reaches RT?</summary><p>From the plugin, only the update check: your site downloads a static manifest from <code>consent.rt.md</code>, without the site's address and without visitor data. From the check on this page: the address you type, used only for the check and not kept. It is all in <a href="/en/privacy/">Privacy</a>.</p></details>
+<details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>
+<details><summary>What data reaches RT?</summary><p>From the plugin, only the update check: your site downloads a static manifest from <code>biscuitwp.rt.md</code>, without the site's address and without visitor data. From the check on this page: the address you type, used only for the check and not kept. It is all in <a href="/en/privacy/">Privacy</a>.</p></details>
 <details><summary>Is the plugin enough to make my site follow the law?</summary><p>Not on its own. The plugin does the banner, the blocking, the consent log and starting texts. Still up to you: the record of processing activities, a data protection officer where required, data transfers abroad and the final wording of the legal texts. Ask a lawyer about those.</p></details>
 <details><summary>What about Google Tag Manager?</summary><p>The plugin blocks what is in the page code. In Strict mode, Tag Manager starts only after consent. What Tag Manager loads after it starts is controlled from Tag Manager, through Google Consent Mode, which the plugin sends.</p></details>
 <details><summary>Which versions does it support?</summary><p>WordPress 6.0 or later and PHP 7.4 or later. It also works on multisite.</p></details>

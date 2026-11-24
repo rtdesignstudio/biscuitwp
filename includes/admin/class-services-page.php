@@ -17,19 +17,19 @@ class CMP_Services_Page {
 			}
 		}
 		if ( ! isset( $out['necessary'] ) ) {
-			$out = array( 'necessary' => __( 'Necesare', 'consent-manager-pro' ) ) + $out;
+			$out = array( 'necessary' => __( 'Necesare', 'biscuitwp' ) ) + $out;
 		}
 		return $out;
 	}
 
 	private static function status_label( $svc ) {
 		if ( isset( $svc['category'] ) && 'necessary' === $svc['category'] ) {
-			return __( 'neblocat (necesar)', 'consent-manager-pro' );
+			return __( 'neblocat (necesar)', 'biscuitwp' );
 		}
 		if ( ! empty( $svc['exempt'] ) ) {
-			return __( 'excepție', 'consent-manager-pro' );
+			return __( 'excepție', 'biscuitwp' );
 		}
-		return __( 'blocat până la acord', 'consent-manager-pro' );
+		return __( 'blocat până la acord', 'biscuitwp' );
 	}
 
 	/** One library service row with its controls. */
@@ -45,7 +45,7 @@ class CMP_Services_Page {
 			<td class="cmp-svc-name"><strong><?php echo esc_html( $svc['name'] ); ?></strong>
 				<?php if ( ! empty( $svc['provider'] ) ) : ?><br><span class="description"><?php echo esc_html( $svc['provider'] ); ?></span><?php endif; ?>
 				<?php if ( 'recaptcha' === $id ) : ?>
-					<p class="description"><?php esc_html_e( 'Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat ca să nu se strice formularele. Îl poți bloca dintr-un click.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat ca să nu se strice formularele. Îl poți bloca dintr-un click.', 'biscuitwp' ); ?></p>
 				<?php endif; ?>
 			</td>
 			<td>
@@ -59,11 +59,11 @@ class CMP_Services_Page {
 				<?php if ( 'necessary' === $cat ) : ?>
 					<input type="hidden" name="<?php echo esc_attr( $n ); ?>[exempt]" value="<?php echo ! empty( $svc['exempt'] ) ? '1' : '0'; ?>">
 				<?php elseif ( ! empty( $svc['mode_exempt'] ) ) : ?>
-					<label><input type="checkbox" value="1" checked disabled> <?php esc_html_e( 'nu bloca (excepție)', 'consent-manager-pro' ); ?></label>
-					<p class="description"><?php esc_html_e( 'În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat».', 'consent-manager-pro' ); ?></p>
-					<p class="description"><?php echo esc_html( CMP_Services::consent_exempt( $svc ) ? __( 'Setarea ta: nu bloca (se aplică și în Strict).', 'consent-manager-pro' ) : __( 'Setarea ta: blocat până la acord (se aplică în Strict).', 'consent-manager-pro' ) ); ?></p>
+					<label><input type="checkbox" value="1" checked disabled> <?php esc_html_e( 'nu bloca (excepție)', 'biscuitwp' ); ?></label>
+					<p class="description"><?php esc_html_e( 'În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat».', 'biscuitwp' ); ?></p>
+					<p class="description"><?php echo esc_html( CMP_Services::consent_exempt( $svc ) ? __( 'Setarea ta: nu bloca (se aplică și în Strict).', 'biscuitwp' ) : __( 'Setarea ta: blocat până la acord (se aplică în Strict).', 'biscuitwp' ) ); ?></p>
 				<?php else : ?>
-					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[exempt]" value="1" <?php checked( ! empty( $svc['exempt'] ) ); ?>> <?php esc_html_e( 'nu bloca (excepție)', 'consent-manager-pro' ); ?></label>
+					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[exempt]" value="1" <?php checked( ! empty( $svc['exempt'] ) ); ?>> <?php esc_html_e( 'nu bloca (excepție)', 'biscuitwp' ); ?></label>
 				<?php endif; ?>
 			</td>
 			<td class="cmp-svc-status"><?php echo esc_html( self::status_label( $svc ) ); ?></td>
@@ -86,16 +86,16 @@ class CMP_Services_Page {
 		?>
 		<div class="cmp-cat-row cmp-custom-row" data-cmp-custom-row>
 			<div class="cmp-cat-row__head">
-				<strong><?php esc_html_e( 'Serviciu personalizat', 'consent-manager-pro' ); ?></strong>
-				<button type="button" class="button-link button-link-delete" data-cmp-del-custom><?php esc_html_e( 'Șterge', 'consent-manager-pro' ); ?></button>
+				<strong><?php esc_html_e( 'Serviciu personalizat', 'biscuitwp' ); ?></strong>
+				<button type="button" class="button-link button-link-delete" data-cmp-del-custom><?php esc_html_e( 'Șterge', 'biscuitwp' ); ?></button>
 			</div>
 			<?php if ( ! empty( $c['id'] ) ) : ?>
 				<input type="hidden" name="<?php echo esc_attr( $n ); ?>[id]" value="<?php echo esc_attr( $c['id'] ); ?>">
 			<?php endif; ?>
 			<p class="cmp-cat-row__names">
-				<label><?php esc_html_e( 'Nume', 'consent-manager-pro' ); ?><br>
+				<label><?php esc_html_e( 'Nume', 'biscuitwp' ); ?><br>
 					<input type="text" name="<?php echo esc_attr( $n ); ?>[name]" value="<?php echo esc_attr( $name ); ?>"></label>
-				<label><?php esc_html_e( 'Categorie', 'consent-manager-pro' ); ?><br>
+				<label><?php esc_html_e( 'Categorie', 'biscuitwp' ); ?><br>
 					<select name="<?php echo esc_attr( $n ); ?>[category]"<?php echo $dis; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 						<?php foreach ( $cats as $slug => $label ) : ?>
 							<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $cat, $slug ); ?>><?php echo esc_html( $label ); ?></option>
@@ -103,17 +103,17 @@ class CMP_Services_Page {
 					</select></label>
 			</p>
 			<p>
-				<label><?php esc_html_e( 'Domenii (unul pe rând)', 'consent-manager-pro' ); ?><br>
+				<label><?php esc_html_e( 'Domenii (unul pe rând)', 'biscuitwp' ); ?><br>
 					<textarea class="large-text code" rows="3" name="<?php echo esc_attr( $n ); ?>[hosts]"<?php echo $dis; // phpcs:ignore WordPress.Security.EscapeOutput ?>><?php echo esc_textarea( $hosts ); ?></textarea></label>
-				<span class="description"><?php esc_html_e( 'Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe aceste domenii.', 'consent-manager-pro' ); ?></span>
+				<span class="description"><?php esc_html_e( 'Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe aceste domenii.', 'biscuitwp' ); ?></span>
 			</p>
 			<div class="cmp-cookies" data-cmp-ck-prefix="<?php echo esc_attr( $n ); ?>[cookies]">
-				<strong><?php esc_html_e( 'Cookie-uri', 'consent-manager-pro' ); ?></strong>
+				<strong><?php esc_html_e( 'Cookie-uri', 'biscuitwp' ); ?></strong>
 				<table>
 					<thead><tr>
-						<th><?php esc_html_e( 'Nume', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Durată', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Scop', 'consent-manager-pro' ); ?></th>
+						<th><?php esc_html_e( 'Nume', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Durată', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Scop', 'biscuitwp' ); ?></th>
 						<th></th>
 					</tr></thead>
 					<tbody data-cmp-svc-cookies-body>
@@ -127,15 +127,15 @@ class CMP_Services_Page {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p><button type="button" class="button" data-cmp-add-svc-cookie><?php esc_html_e( '+ Adaugă cookie', 'consent-manager-pro' ); ?></button></p>
+				<p><button type="button" class="button" data-cmp-add-svc-cookie><?php esc_html_e( '+ Adaugă cookie', 'biscuitwp' ); ?></button></p>
 			</div>
 			<?php if ( $can_script ) : ?>
 				<p>
-					<label><?php esc_html_e( 'Script (opțional, rulează doar după acord)', 'consent-manager-pro' ); ?><br>
+					<label><?php esc_html_e( 'Script (opțional, rulează doar după acord)', 'biscuitwp' ); ?><br>
 						<textarea class="large-text code" rows="4" name="<?php echo esc_attr( $n ); ?>[script]"><?php echo esc_textarea( $script ); ?></textarea></label>
 				</p>
 			<?php elseif ( $locked ) : ?>
-				<p class="description"><?php esc_html_e( 'Are script (doar un administrator cu drept de cod îl poate modifica)', 'consent-manager-pro' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Are script (doar un administrator cu drept de cod îl poate modifica)', 'biscuitwp' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -176,27 +176,27 @@ class CMP_Services_Page {
 		}
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'BiscuitWP — Servicii', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Servicii', 'biscuitwp' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_reset'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista a fost resetată.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista a fost resetată.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_noscript'] ) ) : ?>
-				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_ownhost'] ) ) : ?>
-				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar bloca scripturile site-ului). L-am scos din listă.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar bloca scripturile site-ului). L-am scos din listă.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php foreach ( CMP_Services::errors() as $err ) : ?>
-				<div class="notice notice-error"><p><?php echo esc_html( sprintf( /* translators: %s: error text */ __( 'Biblioteca de servicii: %s', 'consent-manager-pro' ), $err ) ); ?></p></div>
+				<div class="notice notice-error"><p><?php echo esc_html( sprintf( /* translators: %s: error text */ __( 'Biblioteca de servicii: %s', 'biscuitwp' ), $err ) ); ?></p></div>
 			<?php endforeach; ?>
 			<?php if ( class_exists( 'WooCommerce' ) && ! CMP_Consent_API::active() ) : ?>
 				<div class="notice notice-info"><p>
-					<?php esc_html_e( 'WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului.', 'consent-manager-pro' ); ?>
+					<?php esc_html_e( 'WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului.', 'biscuitwp' ); ?>
 					<?php if ( current_user_can( 'install_plugins' ) ) : ?>
-						<a href="<?php echo esc_url( admin_url( 'plugin-install.php?s=wp-consent-api&tab=search&type=term' ) ); ?>"><?php esc_html_e( 'Instalează WP Consent API', 'consent-manager-pro' ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'plugin-install.php?s=wp-consent-api&tab=search&type=term' ) ); ?>"><?php esc_html_e( 'Instalează WP Consent API', 'biscuitwp' ); ?></a>
 					<?php endif; ?>
 				</p></div>
 			<?php endif; ?>
@@ -206,29 +206,29 @@ class CMP_Services_Page {
 				<?php wp_nonce_field( 'cmp_save_services' ); ?>
 
 				<h2>
-					<?php esc_html_e( 'Găsite pe site', 'consent-manager-pro' ); ?>
+					<?php esc_html_e( 'Găsite pe site', 'biscuitwp' ); ?>
 					<?php if ( is_array( $scan ) && ! empty( $scan['time'] ) ) : ?>
 						<?php $cmp_np = isset( $scan['pages'] ) ? (int) $scan['pages'] : 1; ?>
-						<span class="description">(<?php echo esc_html( sprintf( /* translators: 1: number of pages, 2: time span like "12 minute" */ _n( '%1$d pagină, acum %2$s', '%1$d pagini, acum %2$s', $cmp_np, 'consent-manager-pro' ), $cmp_np, human_time_diff( (int) $scan['time'] ) ) ); ?>)</span>
+						<span class="description">(<?php echo esc_html( sprintf( /* translators: 1: number of pages, 2: time span like "12 minute" */ _n( '%1$d pagină, acum %2$s', '%1$d pagini, acum %2$s', $cmp_np, 'biscuitwp' ), $cmp_np, human_time_diff( (int) $scan['time'] ) ) ); ?>)</span>
 					<?php endif; ?>
 					<?php if ( null !== $progress ) : ?>
 						<span class="description"><?php echo esc_html( CMP_Scanner::progress_text( $progress ) ); ?></span>
 					<?php endif; ?>
-					<button type="submit" class="button" form="cmp-rescan-form"><?php esc_html_e( 'Rescanează', 'consent-manager-pro' ); ?></button>
+					<button type="submit" class="button" form="cmp-rescan-form"><?php esc_html_e( 'Rescanează', 'biscuitwp' ); ?></button>
 				</h2>
 				<?php if ( null === $scan && null !== $progress ) : ?>
-					<p class="description"><?php esc_html_e( 'Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu.', 'biscuitwp' ); ?></p>
 				<?php elseif ( null === $scan ) : ?>
-					<p class="description"><?php esc_html_e( 'Paginile site-ului nu au putut fi citite. Încearcă „Rescanează”.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Paginile site-ului nu au putut fi citite. Încearcă „Rescanează”.', 'biscuitwp' ); ?></p>
 				<?php elseif ( ! isset( $scan['services'] ) ) : ?>
-					<p class="description"><?php esc_html_e( 'Apasă „Rescanează” ca să afli ce servicii încarcă site-ul.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Apasă „Rescanează” ca să afli ce servicii încarcă site-ul.', 'biscuitwp' ); ?></p>
 				<?php elseif ( ! $found ) : ?>
-					<p class="description"><?php esc_html_e( 'Nu am găsit pe site servicii care să aștepte acordul.', 'consent-manager-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Nu am găsit pe site servicii care să aștepte acordul.', 'biscuitwp' ); ?></p>
 				<?php else : ?>
 					<table class="widefat striped cmp-svc-table"><tbody>
 						<?php foreach ( $found as $s ) : ?>
 							<?php if ( isset( $s['source'] ) && 'custom' === $s['source'] ) : ?>
-								<tr class="cmp-svc-row"><td class="cmp-svc-name"><strong><?php echo esc_html( $s['name'] ); ?></strong></td><td class="description"><?php esc_html_e( 'configurat mai jos', 'consent-manager-pro' ); ?></td><td></td><td class="cmp-svc-status"><?php echo esc_html( self::status_label( $s ) ); ?></td></tr>
+								<tr class="cmp-svc-row"><td class="cmp-svc-name"><strong><?php echo esc_html( $s['name'] ); ?></strong></td><td class="description"><?php esc_html_e( 'configurat mai jos', 'biscuitwp' ); ?></td><td></td><td class="cmp-svc-status"><?php echo esc_html( self::status_label( $s ) ); ?></td></tr>
 							<?php else : ?>
 								<?php self::library_row( $s, $cats ); ?>
 							<?php endif; ?>
@@ -237,11 +237,11 @@ class CMP_Services_Page {
 				<?php endif; ?>
 
 				<details class="cmp-svc-library">
-					<summary><h2 style="display:inline"><?php echo esc_html( sprintf( /* translators: %d: number of services */ __( 'Toată biblioteca (%d)', 'consent-manager-pro' ), count( $library ) ) ); ?></h2></summary>
+					<summary><h2 style="display:inline"><?php echo esc_html( sprintf( /* translators: %d: number of services */ __( 'Toată biblioteca (%d)', 'biscuitwp' ), count( $library ) ) ); ?></h2></summary>
 					<table class="widefat striped cmp-svc-table"><tbody>
 						<?php foreach ( $library as $s ) : ?>
 							<?php if ( isset( $found[ $s['id'] ] ) ) : ?>
-								<tr class="cmp-svc-row"><td class="cmp-svc-name"><strong><?php echo esc_html( $s['name'] ); ?></strong></td><td colspan="3" class="description"><?php esc_html_e( 'găsit pe site, se setează mai sus', 'consent-manager-pro' ); ?></td></tr>
+								<tr class="cmp-svc-row"><td class="cmp-svc-name"><strong><?php echo esc_html( $s['name'] ); ?></strong></td><td colspan="3" class="description"><?php esc_html_e( 'găsit pe site, se setează mai sus', 'biscuitwp' ); ?></td></tr>
 							<?php else : ?>
 								<?php self::library_row( $s, $cats ); ?>
 							<?php endif; ?>
@@ -249,17 +249,17 @@ class CMP_Services_Page {
 					</tbody></table>
 				</details>
 
-				<h2><?php esc_html_e( 'Servicii personalizate', 'consent-manager-pro' ); ?></h2>
+				<h2><?php esc_html_e( 'Servicii personalizate', 'biscuitwp' ); ?></h2>
 				<div data-cmp-customs>
 					<?php foreach ( $custom as $i => $c ) : ?>
 						<?php self::custom_row( $c, $cats, $can_script, 'c' . (int) $i ); ?>
 					<?php endforeach; ?>
 				</div>
-				<p><button type="button" class="button" data-cmp-add-custom><?php esc_html_e( '+ Adaugă serviciu', 'consent-manager-pro' ); ?></button></p>
+				<p><button type="button" class="button" data-cmp-add-custom><?php esc_html_e( '+ Adaugă serviciu', 'biscuitwp' ); ?></button></p>
 
-				<p class="description"><span class="dashicons dashicons-info"></span> <?php esc_html_e( 'Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt JavaScript ulterior trebuie controlat din GTM (Consent Mode).', 'consent-manager-pro' ); ?></p>
+				<p class="description"><span class="dashicons dashicons-info"></span> <?php esc_html_e( 'Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt JavaScript ulterior trebuie controlat din GTM (Consent Mode).', 'biscuitwp' ); ?></p>
 
-				<?php submit_button( __( 'Salvează serviciile', 'consent-manager-pro' ) ); ?>
+				<?php submit_button( __( 'Salvează serviciile', 'biscuitwp' ) ); ?>
 			</form>
 
 			<form id="cmp-rescan-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -267,11 +267,11 @@ class CMP_Services_Page {
 				<?php wp_nonce_field( 'cmp_rescan_services' ); ?>
 			</form>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?', 'consent-manager-pro' ) ); ?>');">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?', 'biscuitwp' ) ); ?>');">
 				<input type="hidden" name="action" value="cmp_reset_seen">
 				<?php wp_nonce_field( 'cmp_reset_seen' ); ?>
-				<p><button type="submit" class="button"><?php esc_html_e( 'Resetează lista serviciilor văzute', 'consent-manager-pro' ); ?></button>
-				<span class="description"><?php esc_html_e( 'Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) până o resetezi.', 'consent-manager-pro' ); ?></span></p>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Resetează lista serviciilor văzute', 'biscuitwp' ); ?></button>
+				<span class="description"><?php esc_html_e( 'Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) până o resetezi.', 'biscuitwp' ); ?></span></p>
 			</form>
 
 			<script type="text/template" id="cmp-custom-template"><?php self::custom_row( array(), $cats, $can_script, '__i__' ); ?></script>
@@ -281,7 +281,7 @@ class CMP_Services_Page {
 
 	public static function save() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_save_services' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$raw        = isset( $_POST['cmp_services'] ) && is_array( $_POST['cmp_services'] ) ? wp_unslash( $_POST['cmp_services'] ) : array();
 		$can_script = current_user_can( 'unfiltered_html' );
@@ -361,7 +361,7 @@ class CMP_Services_Page {
 
 	public static function rescan() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_rescan_services' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		CMP_Blocker::scan_homepage( true ); // queues every page; the screen shows "Scanare în curs (X/Y)"
 		// The "Verificare" screen posts here too and gets back to itself.
@@ -372,7 +372,7 @@ class CMP_Services_Page {
 
 	public static function reset_seen() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_reset_seen' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$found = get_option( 'cmp_services_found', array() );
 		update_option( 'cmp_services_history', CMP_Services::merge_seen( array(), is_array( $found ) ? $found : array() ), true );
@@ -392,7 +392,7 @@ class CMP_Services_Page {
 
 	public static function dismiss() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_services_notice' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		self::mark_seen();
 		$back = wp_get_referer();
@@ -423,13 +423,13 @@ class CMP_Services_Page {
 		}
 		$url     = admin_url( 'admin.php?page=' . self::SLUG );
 		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_services_notice' ), 'cmp_dismiss_services_notice' );
-		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> ';
+		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'BiscuitWP:', 'biscuitwp' ) . '</strong> ';
 		if ( $names ) {
-			echo esc_html( sprintf( /* translators: %s: service names */ __( 'Am început să blocăm până la acord: %s —', 'consent-manager-pro' ), implode( ', ', $names ) ) );
+			echo esc_html( sprintf( /* translators: %s: service names */ __( 'Am început să blocăm până la acord: %s —', 'biscuitwp' ), implode( ', ', $names ) ) );
 		} else {
-			echo esc_html__( 'Unele servicii de pe site așteaptă acum acordul vizitatorului —', 'consent-manager-pro' );
+			echo esc_html__( 'Unele servicii de pe site așteaptă acum acordul vizitatorului —', 'biscuitwp' );
 		}
-		echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'verifică în „Servicii”', 'consent-manager-pro' ) . '</a>'
-			. ' · <a href="' . esc_url( $dismiss ) . '">' . esc_html__( 'Închide', 'consent-manager-pro' ) . '</a></p></div>';
+		echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'verifică în „Servicii”', 'biscuitwp' ) . '</a>'
+			. ' · <a href="' . esc_url( $dismiss ) . '">' . esc_html__( 'Închide', 'biscuitwp' ) . '</a></p></div>';
 	}
 }

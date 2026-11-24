@@ -1,4 +1,4 @@
-/* BiscuitWP, consent.rt.md: the "Verifică-ți site-ul" tool, its confetti
+/* BiscuitWP, biscuitwp.rt.md: the "Verifică-ți site-ul" tool, its confetti
    and the demo style switch. No libraries, nothing loaded from other sites.
    Everything that comes from the server (titles, explanations, the checked address)
    is written with textContent only, never parsed as HTML. */
@@ -74,7 +74,7 @@
 		copied: 'Report copied. Paste it into an email or a message.',
 		copyFailed: 'Could not copy the report. Use “Save as PDF” instead.',
 		months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-		printHead: function (d) { return 'Report from “Check your site” on consent.rt.md, ' + d; },
+		printHead: function (d) { return 'Report from “Check your site” on biscuitwp.rt.md, ' + d; },
 		copyFoot: function (d, url) { return 'Report made with “Check your site”, ' + url + ', ' + d + '.'; },
 		foundKinds: { 'tracker': 'Tracker started before consent', 'google-fonts': 'Google Fonts loaded from Google', 'ip-resources': 'Other resources that send the visitor\'s IP', 'no-banner': 'Trackers with no cookie banner at all', 'no-policy': 'No link to the privacy policy' },
 		foundNote: function (n) { return 'From ' + group(n, ',') + ' checks made with the tool. A site checked several times counts each time.'; },
@@ -168,7 +168,7 @@
 		copied: 'Мы скопировали отчёт. Вставьте его в письмо или сообщение.',
 		copyFailed: 'Не удалось скопировать отчёт. Используйте «Сохранить как PDF».',
 		months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
-		printHead: function (d) { return 'Отчёт «Проверьте свой сайт» с consent.rt.md, ' + d; },
+		printHead: function (d) { return 'Отчёт «Проверьте свой сайт» с biscuitwp.rt.md, ' + d; },
 		copyFoot: function (d, url) { return 'Отчёт сделан с помощью «Проверьте свой сайт», ' + url + ', ' + d + '.'; },
 		foundKinds: { 'tracker': 'Трекер запущен до согласия', 'google-fonts': 'Google Fonts загружаются с Google', 'ip-resources': 'Другие ресурсы, передающие IP-адрес посетителя', 'no-banner': 'Трекеры вообще без баннера cookie', 'no-policy': 'Нет ссылки на политику конфиденциальности' },
 		foundNote: function (n) { return 'Из ' + group(n, ' ') + ' ' + ru(n, 'проверки, сделанной', 'проверок, сделанных', 'проверок, сделанных') + ' с помощью инструмента. Сайт, проверенный несколько раз, учитывается каждый раз.'; },
@@ -262,7 +262,7 @@
 		copied: 'Am copiat raportul. Lipește-l într-un email sau mesaj.',
 		copyFailed: 'Nu am putut copia raportul. Folosește „Salvează ca PDF”.',
 		months: ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'],
-		printHead: function (d) { return 'Raport „Verifică-ți site-ul” de pe consent.rt.md, ' + d; },
+		printHead: function (d) { return 'Raport „Verifică-ți site-ul” de pe biscuitwp.rt.md, ' + d; },
 		copyFoot: function (d, url) { return 'Raport făcut cu „Verifică-ți site-ul”, ' + url + ', ' + d + '.'; },
 		foundKinds: { 'tracker': 'Tracker pornit înainte de acord', 'google-fonts': 'Google Fonts încărcate de la Google', 'ip-resources': 'Alte resurse care trimit IP-ul vizitatorului', 'no-banner': 'Trackere fără niciun banner de cookie-uri', 'no-policy': 'Niciun link spre politica de confidențialitate' },
 		foundNote: function (n) { return 'Din ' + group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute cu instrumentul. Un site verificat de mai multe ori se numără de fiecare dată.'; },
@@ -565,7 +565,7 @@
 			window.print();
 		});
 		cp.addEventListener('click', function () {
-			var origin = window.location && window.location.origin ? window.location.origin + '/' : 'consent.rt.md';
+			var origin = window.location && window.location.origin ? window.location.origin + '/' : 'biscuitwp.rt.md';
 			copyText(reportText(r.box) + '\n\n' + T.copyFoot(date, origin), function (ok) {
 				msg.textContent = ok ? T.copied : T.copyFailed;
 			});

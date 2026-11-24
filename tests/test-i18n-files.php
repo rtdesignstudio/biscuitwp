@@ -252,7 +252,7 @@ if ( ! function_exists( 'cmp_i18n_po_parse' ) ) {
 						return is_array( $a ) && T_CONSTANT_ENCAPSED_STRING === $a[0] ? cmp_i18n_php_literal( $a[1] ) : null;
 					};
 					list( $ti, $pi, $ci, $di ) = $fns[ $t[1] ];
-					if ( 'consent-manager-pro' !== $lit( $di ) ) {
+					if ( 'biscuitwp' !== $lit( $di ) ) {
 						continue;
 					}
 					$text = $lit( $ti );
@@ -271,9 +271,9 @@ if ( ! function_exists( 'cmp_i18n_po_parse' ) ) {
 
 $cmp_i18n_root = dirname( __DIR__ );
 $cmp_i18n_dir  = $cmp_i18n_root . '/languages';
-$cmp_i18n_pot  = $cmp_i18n_dir . '/consent-manager-pro.pot';
+$cmp_i18n_pot  = $cmp_i18n_dir . '/biscuitwp.pot';
 
-cmp_assert( is_file( $cmp_i18n_pot ), 'i18n: languages/consent-manager-pro.pot exists' );
+cmp_assert( is_file( $cmp_i18n_pot ), 'i18n: languages/biscuitwp.pot exists' );
 $cmp_i18n_pot_entries = is_file( $cmp_i18n_pot ) ? cmp_i18n_po_parse( $cmp_i18n_pot ) : array();
 unset( $cmp_i18n_pot_entries[''] );
 cmp_assert( count( $cmp_i18n_pot_entries ) > 100, 'i18n: the .pot lists the admin texts (' . count( $cmp_i18n_pot_entries ) . ')' );
@@ -299,7 +299,7 @@ $cmp_i18n_tmp = sys_get_temp_dir() . '/cmp-i18n-scan-' . getmypid();
 @mkdir( $cmp_i18n_tmp );
 file_put_contents(
 	$cmp_i18n_tmp . '/x.php',
-	"<?php\n__( 'Unu', 'consent-manager-pro' );\nesc_html_e( 'Doi \\'trei\\'', 'consent-manager-pro' );\n_n( '%d pagină', '%d pagini', \$n, 'consent-manager-pro' );\n_x( 'Post', 'noun', 'consent-manager-pro' );\n__( 'Alt domeniu', 'other' );\n__( \$var, 'consent-manager-pro' );\n\$o->__( 'Metodă', 'consent-manager-pro' );\n"
+	"<?php\n__( 'Unu', 'biscuitwp' );\nesc_html_e( 'Doi \\'trei\\'', 'biscuitwp' );\n_n( '%d pagină', '%d pagini', \$n, 'biscuitwp' );\n_x( 'Post', 'noun', 'biscuitwp' );\n__( 'Alt domeniu', 'other' );\n__( \$var, 'biscuitwp' );\n\$o->__( 'Metodă', 'biscuitwp' );\n"
 );
 $cmp_i18n_fx = cmp_i18n_source_texts( array( $cmp_i18n_tmp ) );
 @unlink( $cmp_i18n_tmp . '/x.php' );
@@ -315,8 +315,8 @@ cmp_assert_eq( $cmp_i18n_fx['%d pagină'][1], '%d pagini', 'i18n: the source sca
 cmp_assert_eq( cmp_i18n_placeholders( 'A %1$d din %2$d, 100%% %s' ), array( '%1$d', '%2$d', '%s' ), 'i18n: placeholders are read as a multiset (%% ignored)' );
 
 foreach ( array( 'en_US', 'ru_RU' ) as $cmp_loc ) {
-	$cmp_po = $cmp_i18n_dir . '/consent-manager-pro-' . $cmp_loc . '.po';
-	$cmp_mo = $cmp_i18n_dir . '/consent-manager-pro-' . $cmp_loc . '.mo';
+	$cmp_po = $cmp_i18n_dir . '/biscuitwp-' . $cmp_loc . '.po';
+	$cmp_mo = $cmp_i18n_dir . '/biscuitwp-' . $cmp_loc . '.mo';
 	cmp_assert( is_file( $cmp_po ), "i18n {$cmp_loc}: .po exists" );
 	cmp_assert( is_file( $cmp_mo ), "i18n {$cmp_loc}: .mo exists" );
 	if ( ! is_file( $cmp_po ) ) {
@@ -390,5 +390,47 @@ foreach ( array( 'en_US', 'ru_RU' ) as $cmp_loc ) {
 // The translations must load from <plugin folder>/languages, via plugin_basename() of the
 // main file (handles a symlinked plugin folder; dirname() of the folder name alone was ".").
 $cmp_plugin_src = file_get_contents( dirname( __DIR__ ) . '/includes/class-plugin.php' );
-cmp_assert( false !== strpos( $cmp_plugin_src, "load_plugin_textdomain( 'consent-manager-pro', false, dirname( plugin_basename( CMP_PATH . 'consent-manager-pro.php' ) ) . '/languages' )" ), 'textdomain loads from <plugin folder>/languages (plugin_basename of the main file)' );
-cmp_assert( 'consent-manager-pro/languages' === dirname( 'consent-manager-pro/consent-manager-pro.php' ) . '/languages', 'dirname() of the main file\'s plugin_basename is the folder name' );
+cmp_assert( false !== strpos( $cmp_plugin_src, "load_plugin_textdomain( 'biscuitwp', false, dirname( CMP_Plugin::basename() ) . '/languages' )" ), 'textdomain loads from <plugin folder>/languages (basename of the loaded entry file)' );
+cmp_assert( 'biscuitwp/languages' === dirname( 'biscuitwp/biscuitwp.php' ) . '/languages', 'dirname() of the main file\'s plugin_basename is the folder name' );
+
+// Text domain switch (biscuitwp): no gettext call in the plugin code uses the old domain.
+// Only literal calls with an explicit domain are checked; the WordPress-core _n() without a
+// domain (CMP_Updater::dedupe_update_data) is not one.
+$cmp_old_domain_hits = array();
+$cmp_old_files       = array( $cmp_i18n_root . '/biscuitwp.php', $cmp_i18n_root . '/uninstall.php', $cmp_i18n_root . '/consent-manager-pro.php' );
+foreach ( array( 'includes', 'templates' ) as $cmp_d ) {
+	foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $cmp_i18n_root . '/' . $cmp_d, FilesystemIterator::SKIP_DOTS ) ) as $cmp_f ) {
+		if ( 'php' === strtolower( pathinfo( (string) $cmp_f, PATHINFO_EXTENSION ) ) ) {
+			$cmp_old_files[] = (string) $cmp_f;
+		}
+	}
+}
+foreach ( $cmp_old_files as $cmp_f ) {
+	if ( ! is_file( $cmp_f ) ) {
+		continue;
+	}
+	if ( preg_match_all( '/\b(?:__|_e|_x|_n|_nx|esc_html__|esc_html_e|esc_attr__|esc_attr_e|esc_html_x|esc_attr_x)\s*\([^;]*?[\'"]consent-manager-pro[\'"]\s*\)/s', file_get_contents( $cmp_f ), $cmp_m ) ) {
+		$cmp_old_domain_hits[] = basename( $cmp_f ) . ' (' . count( $cmp_m[0] ) . ')';
+	}
+}
+cmp_assert( ! $cmp_old_domain_hits, 'i18n: no gettext call uses the old text domain consent-manager-pro' . ( $cmp_old_domain_hits ? ': ' . implode( ', ', $cmp_old_domain_hits ) : '' ) );
+cmp_assert( 0 === count( glob( $cmp_i18n_dir . '/consent-manager-pro*' ) ), 'i18n: no languages/consent-manager-pro* file remains' );
+cmp_assert( false !== strpos( file_get_contents( $cmp_i18n_root . '/biscuitwp.php' ), 'Text Domain: biscuitwp' ) && false !== strpos( file_get_contents( $cmp_i18n_root . '/biscuitwp.php' ), 'Domain Path: /languages' ), 'i18n: the plugin header declares Text Domain biscuitwp and Domain Path /languages (Plugins-screen name and description translate)' );
+
+// A known string translates through the compiled .mo files.
+foreach ( array( 'ru_RU' => 'Файлы cookie', 'en_US' => 'Cookies' ) as $cmp_loc => $cmp_want ) {
+	$cmp_map = cmp_i18n_mo_parse( $cmp_i18n_dir . '/biscuitwp-' . $cmp_loc . '.mo' );
+	cmp_assert( is_array( $cmp_map ) && isset( $cmp_map['Cookie-uri'] ) && $cmp_want === $cmp_map['Cookie-uri'], "i18n {$cmp_loc}: biscuitwp-{$cmp_loc}.mo translates \"Cookie-uri\"" );
+}
+
+// M2 (final review): the 1.1.0 folder-move strings carry no em dash in any language (.mo checked, so a stale compile fails too).
+foreach ( array( 'ru_RU', 'en_US' ) as $cmp_loc ) {
+	$cmp_map  = cmp_i18n_mo_parse( $cmp_i18n_dir . '/biscuitwp-' . $cmp_loc . '.mo' );
+	$cmp_dash = array();
+	foreach ( (array) $cmp_map as $cmp_id => $cmp_str ) {
+		if ( false !== strpos( (string) $cmp_id, 'folderul biscuitwp' ) && false !== strpos( (string) $cmp_str, "\u{2014}" ) ) {
+			$cmp_dash[] = substr( (string) $cmp_id, 0, 60 );
+		}
+	}
+	cmp_assert_eq( $cmp_dash, array(), "i18n {$cmp_loc}: folder-move strings have no em dash" );
+}

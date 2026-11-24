@@ -17,16 +17,16 @@ class CMP_Guide {
 	/** Section titles, keyed by anchor. */
 	public static function titles() {
 		return array(
-			'start'      => __( 'Pornire în 5 minute', 'consent-manager-pro' ),
-			'modes'      => __( 'Ce mod alegi', 'consent-manager-pro' ),
-			'appearance' => __( 'Aspectul bannerului', 'consent-manager-pro' ),
-			'services'   => __( 'Servicii', 'consent-manager-pro' ),
-			'examples'   => __( 'Exemple', 'consent-manager-pro' ),
-			'verify'     => __( 'Cum verifici blocarea', 'consent-manager-pro' ),
-			'legal'      => __( 'Pagini legale', 'consent-manager-pro' ),
-			'update'     => __( 'După un update', 'consent-manager-pro' ),
-			'register'   => __( 'Registru și date', 'consent-manager-pro' ),
-			'developers' => __( 'Pentru developeri', 'consent-manager-pro' ),
+			'start'      => __( 'Pornire în 5 minute', 'biscuitwp' ),
+			'modes'      => __( 'Ce mod alegi', 'biscuitwp' ),
+			'appearance' => __( 'Aspectul bannerului', 'biscuitwp' ),
+			'services'   => __( 'Servicii', 'biscuitwp' ),
+			'examples'   => __( 'Exemple', 'biscuitwp' ),
+			'verify'     => __( 'Cum verifici blocarea', 'biscuitwp' ),
+			'legal'      => __( 'Pagini legale', 'biscuitwp' ),
+			'update'     => __( 'După un update', 'biscuitwp' ),
+			'register'   => __( 'Registru și date', 'biscuitwp' ),
+			'developers' => __( 'Pentru developeri', 'biscuitwp' ),
 		);
 	}
 
@@ -39,21 +39,21 @@ class CMP_Guide {
 	 */
 	public static function variables() {
 		return array(
-			'--cmp-primary'       => __( 'culoarea principală: fundalul butoanelor „Accept” și „Refuz”, linkurile', 'consent-manager-pro' ),
-			'--cmp-primary-hover' => __( 'culoarea principală la trecerea mouse-ului', 'consent-manager-pro' ),
-			'--cmp-primary-text'  => __( 'textul de pe butoanele principale', 'consent-manager-pro' ),
-			'--cmp-bg'            => __( 'fundalul bannerului', 'consent-manager-pro' ),
-			'--cmp-dark'          => __( 'culoarea textului', 'consent-manager-pro' ),
-			'--cmp-muted'         => __( 'textul secundar', 'consent-manager-pro' ),
-			'--cmp-border'        => __( 'liniile și chenarele', 'consent-manager-pro' ),
-			'--cmp-panel'         => __( 'fundalul blocurilor din preferințe', 'consent-manager-pro' ),
-			'--cmp-radius'        => __( 'rotunjirea colțurilor (px)', 'consent-manager-pro' ),
-			'--cmp-shadow'        => __( 'umbra ferestrei (box-shadow)', 'consent-manager-pro' ),
-			'--cmp-maxw'          => __( 'lățimea maximă a ferestrei (px)', 'consent-manager-pro' ),
-			'--cmp-gap'           => __( 'distanța față de marginea ecranului (px)', 'consent-manager-pro' ),
-			'--cmp-dim'           => __( 'intensitatea întunecării fundalului paginii, de la 0 la 0.8', 'consent-manager-pro' ),
-			'--cmp-blur'          => __( 'blurul fundalului paginii (px)', 'consent-manager-pro' ),
-			'--cmp-font'          => __( 'fontul (font-family)', 'consent-manager-pro' ),
+			'--cmp-primary'       => __( 'culoarea principală: fundalul butoanelor „Accept” și „Refuz”, linkurile', 'biscuitwp' ),
+			'--cmp-primary-hover' => __( 'culoarea principală la trecerea mouse-ului', 'biscuitwp' ),
+			'--cmp-primary-text'  => __( 'textul de pe butoanele principale', 'biscuitwp' ),
+			'--cmp-bg'            => __( 'fundalul bannerului', 'biscuitwp' ),
+			'--cmp-dark'          => __( 'culoarea textului', 'biscuitwp' ),
+			'--cmp-muted'         => __( 'textul secundar', 'biscuitwp' ),
+			'--cmp-border'        => __( 'liniile și chenarele', 'biscuitwp' ),
+			'--cmp-panel'         => __( 'fundalul blocurilor din preferințe', 'biscuitwp' ),
+			'--cmp-radius'        => __( 'rotunjirea colțurilor (px)', 'biscuitwp' ),
+			'--cmp-shadow'        => __( 'umbra ferestrei (box-shadow)', 'biscuitwp' ),
+			'--cmp-maxw'          => __( 'lățimea maximă a ferestrei (px)', 'biscuitwp' ),
+			'--cmp-gap'           => __( 'distanța față de marginea ecranului (px)', 'biscuitwp' ),
+			'--cmp-dim'           => __( 'intensitatea întunecării fundalului paginii, de la 0 la 0.8', 'biscuitwp' ),
+			'--cmp-blur'          => __( 'blurul fundalului paginii (px)', 'biscuitwp' ),
+			'--cmp-font'          => __( 'fontul (font-family)', 'biscuitwp' ),
 		);
 	}
 
@@ -68,7 +68,7 @@ class CMP_Guide {
 	 * gives the link to the top of the guide.
 	 */
 	public static function link( $anchor ) {
-		return '<a class="page-title-action cmp-guide-link" href="' . esc_url( self::url( (string) $anchor ) ) . '">' . esc_html__( 'Ghid', 'consent-manager-pro' ) . '</a>';
+		return '<a class="page-title-action cmp-guide-link" href="' . esc_url( self::url( (string) $anchor ) ) . '">' . esc_html__( 'Ghid', 'biscuitwp' ) . '</a>';
 	}
 
 	/** URL of a plugin screen (admin.php?page=<slug>). */

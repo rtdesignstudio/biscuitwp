@@ -1,4 +1,4 @@
-/* BiscuitWP, consent.rt.md: the rt.md phone menu and motion, ported from
+/* BiscuitWP, biscuitwp.rt.md: the rt.md phone menu and motion, ported from
    rt.md (rt.js). No libraries, nothing loaded from other sites, no statistics.
    Without JavaScript every page is complete: the nav stays inline and nothing is
    hidden. This file adds html.js; the CSS hides things only under that class.

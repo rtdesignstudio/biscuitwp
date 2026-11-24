@@ -393,7 +393,7 @@ standalone bundle blocks only what you mark.
 
 ## Where to load the files from
 
-The files can be loaded from RT's copy at https://rt.md/cmp/. Then RT's server sees your visitors' IP addresses, like any CDN does. The recommended way is to self-host: copy `cmp.min.js` and `cmp.min.css` to your own server and load them from there. What the plugin and the bundle do with data is described at https://consent.rt.md/en/privacy/.
+The files can be loaded from RT's copy at https://rt.md/cmp/. Then RT's server sees your visitors' IP addresses, like any CDN does. The recommended way is to self-host: copy `cmp.min.js` and `cmp.min.css` to your own server and load them from there. What the plugin and the bundle do with data is described at https://biscuitwp.rt.md/en/privacy/.
 
 ---
 

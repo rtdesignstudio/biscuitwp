@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Self-hosted updates from signed static manifests on consent.rt.md (no
+ * Self-hosted updates from signed static manifests on biscuitwp.rt.md (no
  * application server, no token, no site-identifying data). The manifest is
  * Ed25519-signed and carries the package's sha256 and detached signature, so
  * nothing unsigned is ever offered or installed. Native WP update flow; no
@@ -13,16 +13,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CMP_Updater {
 
 	const SLUG = 'consent-manager-pro';
+	/** The active path on sites installed before 1.1.0; its file name is the second entry file. */
+	const LEGACY_BASENAME = 'consent-manager-pro/consent-manager-pro.php';
 
 	/**
-	 * The plugin's basename ("<folder>/consent-manager-pro.php"), computed from
-	 * where the plugin actually lives so updates work no matter what the install
-	 * folder is named. Falls back to the slug default when WordPress isn't loaded
+	 * The plugin's active basename (CMP_Plugin::basename(): the entry file
+	 * WordPress loaded), so updates work no matter what the install folder is
+	 * named. Falls back to the slug default when WordPress isn't loaded
 	 * (standalone tests).
 	 */
 	public static function file() {
-		if ( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) ) {
-			return plugin_basename( CMP_PATH . 'consent-manager-pro.php' );
+		if ( isset( self::$seam['file'] ) ) {
+			return (string) self::$seam['file'];
+		}
+		if ( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) && class_exists( 'CMP_Plugin' ) ) {
+			return CMP_Plugin::basename();
 		}
 		return self::SLUG . '/consent-manager-pro.php';
 	}
@@ -31,9 +36,18 @@ class CMP_Updater {
 	const MAX_DOWNLOAD = 26214400; // 25 MB — defensive cap on the update package size.
 
 	/** Static manifest host (manifest-<channel>.json + .json.sig). */
-	const BASE = 'https://consent.rt.md/';
-	/** Every package URL in a manifest must start with this. */
+	const BASE = 'https://biscuitwp.rt.md/';
+	/** The package prefix manifests use today (the repo's old path; GitHub redirects it). 1.0.0 sites accept only this one. */
 	const PACKAGE_PREFIX = 'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/';
+	/**
+	 * Every package URL in a manifest must start with one of these (same host,
+	 * exact path start): the old repo path and the renamed repo, so a later
+	 * release can move the manifests to rtdesignstudio/biscuitwp.
+	 */
+	const PACKAGE_PREFIXES = array(
+		'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/',
+		'https://github.com/rtdesignstudio/biscuitwp/releases/download/',
+	);
 	/** A manifest is valid for this many days after `issued` (informative; `expires` is authoritative). */
 	const EXPIRY_DAYS = 60;
 	/** Manifests larger than this are rejected unread. */
@@ -58,7 +72,7 @@ class CMP_Updater {
 	/** Option: state behind the admin notices (expired, revoked_installed, no_sodium). */
 	const STATE_OPTION = 'cmp_update_state';
 	/** Public page explaining update security, linked from the notices. */
-	const SECURITY_URL = 'https://consent.rt.md/securitate/';
+	const SECURITY_URL = 'https://biscuitwp.rt.md/securitate/';
 	/** Cache lifetimes: 6 hours after a usable manifest, 1 hour after a failure. */
 	const CACHE_TTL_OK   = 21600;
 	const CACHE_TTL_FAIL = 3600;
@@ -67,7 +81,8 @@ class CMP_Updater {
 
 	/**
 	 * Test-only seam, set exclusively through Reflection by tests/test-updater.php:
-	 * manifest_keys / package_keys (arrays), sodium (bool), now (int). Always
+	 * manifest_keys / package_keys (arrays), sodium (bool), now (int), file
+	 * (string, the active basename), core_check (bool). Always
 	 * empty in production; there is no constant, option or filter that fills it.
 	 *
 	 * @var array
@@ -75,10 +90,203 @@ class CMP_Updater {
 	private static $seam = array();
 
 	public static function register() {
-		add_filter( 'update_plugins_consent.rt.md', array( __CLASS__, 'update_check' ), 10, 4 );
+		add_filter( 'update_plugins_biscuitwp.rt.md', array( __CLASS__, 'update_check' ), 10, 4 );
 		add_filter( 'plugins_api', array( __CLASS__, 'plugin_info' ), 20, 3 );
 		add_filter( 'upgrader_pre_download', array( __CLASS__, 'verified_download' ), 10, 4 );
 		add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_source_dir' ), 10, 4 );
+		// Both entry files carry the plugin header, so WordPress lists both and files
+		// an update under each: only the active one is auto-updated and counted.
+		add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_duplicate_auto_update' ), PHP_INT_MAX, 2 );
+		add_filter( 'wp_get_update_data', array( __CLASS__, 'filter_update_data' ), 10, 2 );
+		// One "BiscuitWP" update offered (Dashboard > Updates, WP-CLI, remote managers):
+		// the inactive sibling's entry is dropped on read, so nobody updates through it
+		// (no maintenance mode for a file that is not active).
+		add_filter( 'site_transient_update_plugins', array( __CLASS__, 'filter_update_transient' ) );
+	}
+
+	/**
+	 * update_plugins as read: the inactive sibling's response / no_update entry is
+	 * dropped; when the active file has no entry in that list, the sibling's moves
+	 * to it (with `plugin` pointing there). Every other entry and `checked` stay.
+	 * Works on a clone. Pure.
+	 *
+	 * @param mixed  $value  The update_plugins site transient.
+	 * @param string $active The active basename.
+	 * @return mixed
+	 */
+	public static function single_entry( $value, $active ) {
+		$sib = self::sibling( $active );
+		if ( '' === $sib || ! is_object( $value ) ) {
+			return $value;
+		}
+		$value = clone $value;
+		foreach ( array( 'response', 'no_update' ) as $list ) {
+			if ( ! isset( $value->$list ) || ! is_array( $value->$list ) || ! array_key_exists( $sib, $value->$list ) ) {
+				continue;
+			}
+			$l = $value->$list;
+			if ( ! array_key_exists( $active, $l ) ) {
+				$entry = $l[ $sib ];
+				if ( is_object( $entry ) ) {
+					$entry         = clone $entry;
+					$entry->plugin = $active;
+				} elseif ( is_array( $entry ) ) {
+					$entry['plugin'] = $active;
+				}
+				$out = array();
+				foreach ( $l as $k => $e ) {
+					$out[ $k === $sib ? $active : $k ] = $k === $sib ? $entry : $e;
+				}
+				$l = $out;
+			} else {
+				unset( $l[ $sib ] );
+			}
+			$value->$list = $l;
+		}
+		return $value;
+	}
+
+	/**
+	 * Is WordPress core's own plugin update check running (wp_update_plugins()
+	 * hooked on these actions)? It then reads the transient as stored.
+	 */
+	public static function in_core_update_check() {
+		if ( isset( self::$seam['core_check'] ) ) {
+			return (bool) self::$seam['core_check'];
+		}
+		if ( ! function_exists( 'doing_action' ) ) {
+			return false;
+		}
+		foreach ( array( 'load-plugins.php', 'load-update.php', 'load-update-core.php', 'wp_update_plugins' ) as $hook ) {
+			if ( doing_action( $hook ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** site_transient_update_plugins filter: see single_entry(); skipped during core's own check. */
+	public static function filter_update_transient( $value ) {
+		if ( self::in_core_update_check() ) {
+			return $value;
+		}
+		return self::single_entry( $value, self::file() );
+	}
+
+	/**
+	 * The other entry file in the same folder: <folder>/biscuitwp.php and
+	 * <folder>/consent-manager-pro.php are siblings (same header, same plugin).
+	 * '' for any other file name. Pure.
+	 */
+	public static function sibling( $plugin_file ) {
+		if ( ! is_string( $plugin_file ) || false === strpos( $plugin_file, '/' ) ) {
+			return '';
+		}
+		$dir  = dirname( $plugin_file );
+		$base = basename( $plugin_file );
+		if ( 'biscuitwp.php' === $base ) {
+			return $dir . '/consent-manager-pro.php';
+		}
+		if ( basename( self::LEGACY_BASENAME ) === $base ) {
+			return $dir . '/biscuitwp.php';
+		}
+		return '';
+	}
+
+	/**
+	 * Does $url start with one of PACKAGE_PREFIXES (byte-exact, case-sensitive)?
+	 * Refused first: percent-escapes (WordPress' HTTP layer decodes %2e%2e and
+	 * removes dot segments, escaping the repo path), query, fragment, backslash,
+	 * whitespace and control characters. Our asset URLs never contain them.
+	 */
+	public static function is_package_url( $url ) {
+		if ( ! is_string( $url ) || preg_match( '/[?#%\\\\\s\x00-\x1f\x7f]/', $url ) ) {
+			return false;
+		}
+		foreach ( self::PACKAGE_PREFIXES as $prefix ) {
+			if ( 0 === strpos( $url, $prefix ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Is $plugin_file this plugin? The active basename or its sibling in the same
+	 * folder: get_plugins() lists both (both carry the header), so WordPress may
+	 * ask about, or install through, either name.
+	 */
+	public static function owns( $plugin_file ) {
+		$file = self::file();
+		if ( $file === $plugin_file ) {
+			return true;
+		}
+		$sib = self::sibling( $file );
+		return '' !== $sib && $sib === $plugin_file;
+	}
+
+	/**
+	 * auto_update_plugin filter (PHP_INT_MAX): never auto-update the sibling that
+	 * is not the active file (no rollback check on it, and a second install of
+	 * the same folder). The active file and every other plugin keep the incoming
+	 * decision.
+	 */
+	public static function skip_duplicate_auto_update( $update, $item ) {
+		$plugin = null;
+		if ( is_object( $item ) && isset( $item->plugin ) ) {
+			$plugin = $item->plugin;
+		} elseif ( is_array( $item ) && isset( $item['plugin'] ) ) {
+			$plugin = $item['plugin'];
+		}
+		$sib = self::sibling( self::file() );
+		if ( is_string( $plugin ) && '' !== $sib && $sib === $plugin ) {
+			return false;
+		}
+		return $update;
+	}
+
+	/**
+	 * Count our plugin once in wp_get_update_data() when both of our keys are in
+	 * the update list: plugins and total minus 1 (never below 0), and the plugins
+	 * part of the title rebuilt with WordPress's own string.
+	 *
+	 * @param array $data      wp_get_update_data() result: counts + title.
+	 * @param array $titles    The per-type titles core built the title from.
+	 * @param bool  $duplicate Both of our keys are in the update list.
+	 * @return array
+	 */
+	public static function dedupe_update_data( $data, $titles, $duplicate ) {
+		if ( ! $duplicate || ! is_array( $data ) || ! isset( $data['counts']['plugins'] ) || (int) $data['counts']['plugins'] < 1 ) {
+			return $data;
+		}
+		$n                         = (int) $data['counts']['plugins'] - 1;
+		$data['counts']['plugins'] = $n;
+		if ( isset( $data['counts']['total'] ) ) {
+			$data['counts']['total'] = max( 0, (int) $data['counts']['total'] - 1 );
+		}
+		$titles = is_array( $titles ) ? $titles : array();
+		if ( $n > 0 ) {
+			// phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own string, as in wp_get_update_data().
+			$fmt               = function_exists( '_n' ) ? _n( '%d Plugin Update', '%d Plugin Updates', $n ) : ( 1 === $n ? '%d Plugin Update' : '%d Plugin Updates' );
+			$titles['plugins'] = sprintf( $fmt, $n );
+		} else {
+			unset( $titles['plugins'] );
+		}
+		$title         = implode( ', ', $titles );
+		$data['title'] = function_exists( 'esc_attr' ) ? esc_attr( $title ) : htmlspecialchars( $title, ENT_QUOTES );
+		return $data;
+	}
+
+	/** wp_get_update_data filter: our plugin counted once when both siblings have an update. */
+	public static function filter_update_data( $data, $titles = array() ) {
+		if ( ! function_exists( 'get_site_transient' ) ) {
+			return $data;
+		}
+		$file = self::file();
+		$sib  = self::sibling( $file );
+		$t    = get_site_transient( 'update_plugins' );
+		$both = '' !== $sib && is_object( $t ) && isset( $t->response ) && is_array( $t->response ) && isset( $t->response[ $sib ], $t->response[ $file ] );
+		return self::dedupe_update_data( $data, $titles, $both );
 	}
 
 	/** Pure: is the remote tag (with or without a leading "v") newer? */
@@ -103,7 +311,7 @@ class CMP_Updater {
 
 	/**
 	 * Pure: the manifest host. CMP_UPDATE_BASE (staging) is honoured only when it
-	 * is a non-empty https:// URL; it never changes keys or PACKAGE_PREFIX, so a
+	 * is a non-empty https:// URL; it never changes keys or PACKAGE_PREFIXES, so a
 	 * staging host still has to serve manifests signed with the real keys.
 	 */
 	private static function base( $override ) {
@@ -223,7 +431,7 @@ class CMP_Updater {
 		if ( ! isset( $m['channel'] ) || ! is_string( $channel ) || $channel !== $m['channel'] ) {
 			return $invalid;
 		}
-		if ( ! isset( $m['package'] ) || ! is_string( $m['package'] ) || 0 !== strpos( $m['package'], self::PACKAGE_PREFIX ) ) {
+		if ( ! isset( $m['package'] ) || ! is_string( $m['package'] ) || ! self::is_package_url( $m['package'] ) ) {
 			return $invalid;
 		}
 		if ( false !== strpos( $m['package'], '..' ) || preg_match( '/[?#\\\\\s]/', $m['package'] ) ) {
@@ -512,7 +720,7 @@ class CMP_Updater {
 	}
 
 	/**
-	 * Filter update_plugins_consent.rt.md (WordPress 5.8+, via the Update URI
+	 * Filter update_plugins_biscuitwp.rt.md (WordPress 5.8+, via the Update URI
 	 * header). Foreign plugin files are returned untouched.
 	 *
 	 * wp_update_plugins() files the returned entry under `response` when its
@@ -523,7 +731,7 @@ class CMP_Updater {
 	 * Invalid, expired or unavailable manifest: false (nothing recorded).
 	 */
 	public static function update_check( $update, $plugin_data, $plugin_file, $locales ) {
-		if ( self::file() !== $plugin_file ) {
+		if ( ! self::owns( $plugin_file ) ) {
 			return $update;
 		}
 		$r = self::fetch_manifest();
@@ -533,7 +741,7 @@ class CMP_Updater {
 		$m     = $r['manifest'];
 		$offer = ! empty( $r['offer'] );
 		return array(
-			'id'           => 'consent.rt.md/' . self::SLUG,
+			'id'           => 'biscuitwp.rt.md/' . self::SLUG,
 			'slug'         => self::SLUG,
 			'version'      => $offer ? $m['version'] : ( defined( 'CMP_VERSION' ) ? CMP_VERSION : '' ),
 			'url'          => self::BASE,
@@ -560,7 +768,7 @@ class CMP_Updater {
 		}
 		$r = self::fetch_manifest();
 		if ( ! is_array( $r['manifest'] ) ) {
-			return new WP_Error( 'cmp_no_update_info', __( 'Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu.', 'consent-manager-pro' ) );
+			return new WP_Error( 'cmp_no_update_info', __( 'Detaliile actualizării nu sunt disponibile acum. Încearcă din nou mai târziu.', 'biscuitwp' ) );
 		}
 		$m    = $r['manifest'];
 		$info = new stdClass();
@@ -617,27 +825,27 @@ class CMP_Updater {
 		$hook       = (string) $hook;
 		$on_plugins = ( 'plugins.php' === $hook );
 		$on_ours    = ( false !== strpos( $hook, 'cmp-' ) );
-		$security   = '<a href="' . esc_url( self::SECURITY_URL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Despre siguranța actualizărilor', 'consent-manager-pro' ) . '</a>';
-		$prefix     = '<strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> ';
+		$security   = '<a href="' . esc_url( self::SECURITY_URL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Despre siguranța actualizărilor', 'biscuitwp' ) . '</a>';
+		$prefix     = '<strong>' . esc_html__( 'BiscuitWP:', 'biscuitwp' ) . '</strong> ';
 		$out        = array();
 
 		if ( ! empty( $state['revoked_installed'] ) ) {
 			$out[] = '<div class="notice notice-error"><p>' . $prefix . esc_html(
 				sprintf(
 					/* translators: %s — installed plugin version */
-					__( 'Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată.', 'consent-manager-pro' ),
+					__( 'Versiunea %s a fost retrasă din motive de siguranță și trebuie actualizată.', 'biscuitwp' ),
 					defined( 'CMP_VERSION' ) ? CMP_VERSION : ''
 				)
-			) . ' <a href="' . esc_url( $updates_url ) . '">' . esc_html__( 'Actualizează acum', 'consent-manager-pro' ) . '</a> · ' . $security . '</p></div>';
+			) . ' <a href="' . esc_url( $updates_url ) . '">' . esc_html__( 'Actualizează acum', 'biscuitwp' ) . '</a> · ' . $security . '</p></div>';
 		}
 		if ( ! empty( $state['expired'] ) && ( $on_plugins || $on_ours ) ) {
 			$out[] = '<div class="notice notice-warning"><p>' . $prefix
-				. esc_html__( 'Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne.', 'consent-manager-pro' )
+				. esc_html__( 'Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne.', 'biscuitwp' )
 				. ' ' . $security . '</p></div>';
 		}
 		if ( ! empty( $state['no_sodium'] ) && $on_plugins ) {
 			$out[] = '<div class="notice notice-warning"><p>' . $prefix
-				. esc_html__( 'Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP sodium.', 'consent-manager-pro' )
+				. esc_html__( 'Update-urile nu pot fi verificate pe acest server: lipsește extensia PHP sodium.', 'biscuitwp' )
 				. ' ' . $security . '</p></div>';
 		}
 		return $out;
@@ -651,15 +859,15 @@ class CMP_Updater {
 	 * plugins pass through untouched.
 	 */
 	public static function verified_download( $reply, $package, $upgrader = null, $hook_extra = array() ) {
-		$by_hook = is_array( $hook_extra ) && isset( $hook_extra['plugin'] ) && self::file() === $hook_extra['plugin'];
-		$by_url  = is_string( $package ) && 0 === strpos( $package, self::PACKAGE_PREFIX );
+		$by_hook = is_array( $hook_extra ) && isset( $hook_extra['plugin'] ) && self::owns( $hook_extra['plugin'] );
+		$by_url  = self::is_package_url( $package );
 		if ( ! $by_hook && ! $by_url ) {
 			return $reply;
 		}
 
 		$r = self::fetch_manifest();
 		if ( 'ok' !== $r['status'] || ! $r['offer'] || ! is_array( $r['manifest'] ) || ! is_string( $package ) || $package !== $r['manifest']['package'] ) {
-			return new WP_Error( 'cmp_package_refused', __( 'Pachetul de update nu corespunde manifestului semnat și a fost refuzat. Apasă din nou „Caută actualizări” și reîncearcă.', 'consent-manager-pro' ) );
+			return new WP_Error( 'cmp_package_refused', __( 'Pachetul de update nu corespunde manifestului semnat și a fost refuzat. Apasă din nou „Caută actualizări” și reîncearcă.', 'biscuitwp' ) );
 		}
 
 		$tmp = self::download_to_temp( $package );
@@ -670,7 +878,7 @@ class CMP_Updater {
 			if ( file_exists( $tmp ) ) {
 				unlink( $tmp );
 			}
-			return new WP_Error( 'cmp_package_unverified', __( 'Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost șters.', 'consent-manager-pro' ) );
+			return new WP_Error( 'cmp_package_unverified', __( 'Pachetul de update nu a trecut verificarea (sha256 sau semnătură) și a fost șters.', 'biscuitwp' ) );
 		}
 		return $tmp;
 	}
@@ -687,11 +895,11 @@ class CMP_Updater {
 			if ( file_exists( $tmp ) ) {
 				unlink( $tmp );
 			}
-			return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update.', 'consent-manager-pro' ) );
+			return new WP_Error( 'cmp_download_failed', __( 'Nu am putut descărca pachetul de update.', 'biscuitwp' ) );
 		}
 		if ( filesize( $tmp ) >= self::MAX_DOWNLOAD ) { // At the cap = truncated by limit_response_size.
 			unlink( $tmp );
-			return new WP_Error( 'cmp_download_too_large', __( 'Pachetul de update depășește dimensiunea maximă permisă.', 'consent-manager-pro' ) );
+			return new WP_Error( 'cmp_download_too_large', __( 'Pachetul de update depășește dimensiunea maximă permisă.', 'biscuitwp' ) );
 		}
 		return $tmp;
 	}
@@ -702,7 +910,9 @@ class CMP_Updater {
 			return $source;
 		}
 		$plugin = isset( $hook_extra['plugin'] ) ? $hook_extra['plugin'] : '';
-		if ( self::file() !== $plugin ) {
+		// Either entry file of this plugin (both live in the same
+		// folder), so the install always lands in place in the existing folder.
+		if ( ! self::owns( $plugin ) ) {
 			return $source;
 		}
 
@@ -721,6 +931,9 @@ class CMP_Updater {
 		if ( $wp_filesystem && $wp_filesystem->move( untrailingslashit( $source ), untrailingslashit( $new_source ) ) ) {
 			return $new_source;
 		}
-		return $source;
+		// The rename failed: returning the source unrenamed would make core remove the
+		// installed folder and install into another one (the plugin would be lost). An
+		// error here makes core stop before it touches the installed plugin.
+		return new WP_Error( 'cmp_source_dir', __( 'Update-ul BiscuitWP a fost oprit: folderul pachetului nu a putut fi redenumit în folderul pluginului instalat. Pluginul instalat a rămas neatins. Încearcă din nou.', 'biscuitwp' ) );
 	}
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Release BiscuitWP (B8a: signed static manifests on consent.rt.md,
-# zips on GitHub Releases).
+# Release BiscuitWP (B8a: signed static manifests on biscuitwp.rt.md, mirrored
+# for 1.0.0 installs to the old document root of consent.rt.md; zips on GitHub Releases).
 #
 #   bin/release.sh X.Y.Z [--dry-run [--skip-checks]]   build, sign, GitHub prerelease, manifest-beta.json
 #   bin/release.sh --promote X.Y.Z [--dry-run]         beta X.Y.Z -> manifest-stable.json, GitHub "latest"
@@ -18,11 +18,12 @@
 #   key (32 bytes, distinct from the other two), verifies with the keys baked
 #   into includes/modules/class-updater.php and commits the new release/ state
 #   ("chore(release): ..."); the files to upload are the committed release/
-#   manifest-*.json + .json.sig. CMP_RELEASE_PREFLIGHT_ONLY=1 stops right after
+#   manifest-*.json + .json.sig, to SERVER_DIR (biscuitwp.rt.md) and to MIRROR_DIR
+#   (consent.rt.md, read by 1.0.0 installs). CMP_RELEASE_PREFLIGHT_ONLY=1 stops right after
 #   the key preflight (tests; only then is CMP_TEST_RESCUE_KEY honoured).
 # Public pages (B8b): after the state is saved, bin/build-site.sh builds the
-#   static pages of consent.rt.md: release/site on the real path (committed with
-#   the state, uploaded with scp -r), dist/site in --dry-run (never uploaded). A
+#   static pages of biscuitwp.rt.md: release/site on the real path (committed with
+#   the state, uploaded with scp -r to SERVER_DIR only; the old host redirects), dist/site in --dry-run (never uploaded). A
 #   release (X.Y.Z) also writes the CycloneDX SBOM dist/consent-manager-pro-X.Y.Z.cdx.json
 #   and attaches it to the GitHub release.
 #   Before the tag/push/gh step a preflight site build (dist/site-preflight, not
@@ -46,14 +47,39 @@
 #   after committing the state by hand as above.
 set -euo pipefail
 
-REPO="rtdesignstudio/consent-manager-pro"
+# GitHub repo (renamed from rtdesignstudio/consent-manager-pro) for gh release.
+REPO="rtdesignstudio/biscuitwp"
+# Asset + manifest slug: unchanged (relay, manifests and the updater depend on it).
 SLUG="consent-manager-pro"
+# Folder inside the update zip ($SLUG.zip, the asset the manifests and the relay
+# point at): consent-manager-pro/, the folder every installed site already has, so
+# no updater (0.4.x / 1.0.0 included) ever renames the extracted folder. The new
+# folder name comes only from the on-demand move (CMP_Migrate_Folder).
+PKG_DIR="consent-manager-pro"
+# Second, signed asset for new installs (linked from the site): same files, folder biscuitwp/.
+NEW_ASSET="biscuitwp"
+NEW_PKG_DIR="biscuitwp"
+# The plugin file holding the header + CMP_VERSION (consent-manager-pro.php is the
+# legacy entry file, same header, shipped alongside; both are in both zips).
+MAIN_FILE="biscuitwp.php"
+# Legacy entry file: carries the very same plugin header (WordPress deactivates an
+# active plugin file without one), so the two headers must never drift apart.
+LEGACY_FILE="consent-manager-pro.php"
+# Manifest package URL base: kept on the old repo path (GitHub redirects it), the
+# only prefix 1.0.0 sites accept; 1.1.0+ also accept rtdesignstudio/biscuitwp
+# (CMP_Updater::PACKAGE_PREFIXES), so a later release can switch it.
+PACKAGE_BASE="https://github.com/rtdesignstudio/consent-manager-pro/releases/download"
 TESTED_WP="6.9"
 REQUIRES_WP="6.0"
 REQUIRES_PHP="7.4"
-# SSH host and directory on consent.rt.md that serves manifest-*.json (fill in; not assumed).
+# Where the printed scp commands upload (nothing is uploaded by this script).
+# SSH host: fill in (not assumed). The defaults stay quoted so ~ is the server's home.
 SERVER_HOST="${CMP_SERVER_HOST:-<HOST-SSH>}"
-SERVER_DIR="${CMP_SERVER_DIR:-<DIRECTOR-CONSENT.RT.MD>}"
+# Document root of https://biscuitwp.rt.md/: the public pages + manifest-*.json(.sig).
+SERVER_DIR="${CMP_SERVER_DIR:-~/domains/biscuitwp.rt.md/public_html}"
+# Old document root of consent.rt.md: mirror of manifest-*.json(.sig) only, for the
+# 1.0.0 installs (Update URI https://consent.rt.md/); every other path there 301s.
+MIRROR_DIR="${CMP_MIRROR_DIR:-~/public_html/consent}"
 
 usage() {
 	echo "Usage: bin/release.sh X.Y.Z [--dry-run [--skip-checks]]" >&2
@@ -298,10 +324,11 @@ if ( "sbom" === $op ) { // sbom <version> <zip> <standalone cmp.js> <services.js
 			"timestamp" => gmdate( "Y-m-d\TH:i:s\Z" ),
 			"component" => array(
 				"type"     => "application",
+				// name = asset/manifest slug (unchanged); purl = the renamed GitHub repo. Revisit when the product name goes into the SBOM.
 				"name"     => "consent-manager-pro",
 				"version"  => $a[2],
 				"licenses" => array( array( "license" => array( "id" => "GPL-2.0-or-later" ) ) ),
-				"purl"     => "pkg:github/rtdesignstudio/consent-manager-pro@v" . $a[2],
+				"purl"     => "pkg:github/rtdesignstudio/biscuitwp@v" . $a[2],
 				"hashes"   => $hash( $a[3] ),
 			),
 		),
@@ -426,10 +453,17 @@ fi
 
 # ---- Release: checks, build, sign -------------------------------------------
 if [ "$CMD" = "release" ]; then
+	# The manifest package URL must start with CMP_Updater::PACKAGE_PREFIX, the one
+	# prefix every deployed version (1.0.0 included) accepts; 1.1.0+ also accept the
+	# renamed repo (PACKAGE_PREFIXES), but switching needs a planned release.
+	# Checked before anything is built or signed.
+	php -r 'require $argv[1]; exit( $argv[2] === CMP_Updater::PACKAGE_PREFIX ? 0 : 1 );' "$UPDATER" "$PACKAGE_BASE/" \
+		|| die "PACKAGE_BASE must be CMP_Updater::PACKAGE_PREFIX in $UPDATER (the prefix 1.0.0 sites accept), got '$PACKAGE_BASE/'."
 	if [ "$SKIP" = 0 ]; then
-		HEADER_VERSION="$(grep -m1 '^ \* Version:' "$SLUG.php" | awk '{print $3}')"
+		HEADER_VERSION="$(grep -m1 '^ \* Version:' "$MAIN_FILE" | awk '{print $3}')"
 		[ "$HEADER_VERSION" = "$VERSION" ] || die "plugin header Version is '$HEADER_VERSION', expected '$VERSION'. Bump it (and CMP_VERSION) first."
-		grep -q "define( 'CMP_VERSION', '$VERSION' )" "$SLUG.php" || die "CMP_VERSION constant does not match '$VERSION'."
+		[ "$(sed -n '2,/\*\//p' "$MAIN_FILE")" = "$(sed -n '2,/\*\//p' "$LEGACY_FILE")" ] || die "plugin headers of $MAIN_FILE and $LEGACY_FILE differ. Copy the header block of $MAIN_FILE into $LEGACY_FILE."
+		grep -q "define( 'CMP_VERSION', '$VERSION' )" "$MAIN_FILE" || die "CMP_VERSION constant does not match '$VERSION'."
 		STABLE_TAG="$(grep -m1 '^Stable tag:' readme.txt | sed 's/^Stable tag:[[:space:]]*//' | tr -d '[:space:]')"
 		[ "$STABLE_TAG" = "$VERSION" ] || die "readme.txt Stable tag is '$STABLE_TAG', expected '$VERSION'. Update it first."
 	fi
@@ -453,24 +487,33 @@ if [ "$CMD" = "release" ]; then
 		bash bin/e2e.sh || die "E2E failed: a tracker loads before consent (see report above)"
 	fi
 
-	# Clean zip (runtime files only; release/ state excluded, CHANGELOG.md included).
-	rm -rf "dist/$SLUG" "dist/$SLUG.zip" "dist/$SLUG.zip.sig"
-	mkdir -p "dist/$SLUG"
-	rsync -a --exclude 'docs' --exclude 'tests' --exclude 'bin' --exclude 'dist' --exclude '/release' \
-		--exclude 'proxy' --exclude 'package.json' --exclude 'package-lock.json' --exclude 'node_modules' --exclude '.superpowers' --exclude '.git*' --exclude '.DS_Store' \
-		./ "dist/$SLUG/"
-	( cd dist && zip -qr "$SLUG.zip" "$SLUG" )
-	echo "Built dist/$SLUG.zip"
+	# Clean zip: an allow-list of runtime paths only. Everything else stays out,
+	# notably site/ (the public site and its check API), standalone/, docs,
+	# tests, bin, proxy, release/ state and every dotfile.
+	RUNTIME_PATHS="biscuitwp.php consent-manager-pro.php uninstall.php readme.txt LICENSE CHANGELOG.md README.md includes assets templates languages data"
+	rm -rf "dist/$PKG_DIR" "dist/$NEW_PKG_DIR" "dist/$SLUG" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" "dist/$NEW_ASSET.zip" "dist/$NEW_ASSET.zip.sig"
+	for dir in "$PKG_DIR" "$NEW_PKG_DIR"; do
+		mkdir -p "dist/$dir"
+		for p in $RUNTIME_PATHS; do
+			[ -e "$p" ] || die "runtime path '$p' is missing; cannot build the zip."
+			rsync -a --exclude '.*' "$p" "dist/$dir/"
+		done
+	done
+	( cd dist && zip -qr "$SLUG.zip" "$PKG_DIR" )
+	( cd dist && zip -qr "$NEW_ASSET.zip" "$NEW_PKG_DIR" )
+	echo "Built dist/$SLUG.zip ($PKG_DIR/ inside, updates) and dist/$NEW_ASSET.zip ($NEW_PKG_DIR/ inside, new installs)"
 
-	# Detached Ed25519 signature of the zip with the release key (also uploaded
-	# as consent-manager-pro.zip.sig, which the old relay still needs).
+	# Detached Ed25519 signatures of both zips with the release key (uploaded as
+	# <asset>.zip.sig; the old relay still needs consent-manager-pro.zip.sig).
 	php -r '
-		$sk  = base64_decode( trim( file_get_contents( $argv[1] ) ), true );
-		$zip = file_get_contents( $argv[2] );
+		$sk = base64_decode( trim( file_get_contents( $argv[1] ) ), true );
 		if ( false === $sk || 64 !== strlen( $sk ) ) { fwrite( STDERR, "ERROR: invalid signing key\n" ); exit( 1 ); }
-		if ( false === file_put_contents( $argv[2] . ".sig", base64_encode( sodium_crypto_sign_detached( $zip, $sk ) ) . "\n" ) ) { fwrite( STDERR, "ERROR: could not write the zip signature\n" ); exit( 1 ); }
-	' "$SIGNING_KEY" "dist/$SLUG.zip"
-	echo "Signed dist/$SLUG.zip.sig"
+		foreach ( array_slice( $argv, 2 ) as $f ) {
+			$zip = file_get_contents( $f );
+			if ( false === $zip || false === file_put_contents( $f . ".sig", base64_encode( sodium_crypto_sign_detached( $zip, $sk ) ) . "\n" ) ) { fwrite( STDERR, "ERROR: could not write the signature of $f\n" ); exit( 1 ); }
+		}
+	' "$SIGNING_KEY" "dist/$SLUG.zip" "dist/$NEW_ASSET.zip"
+	echo "Signed dist/$SLUG.zip.sig and dist/$NEW_ASSET.zip.sig"
 
 	# CycloneDX SBOM (hashes of the zip, standalone/cmp.js and the services library).
 	SBOM="dist/$SLUG-$VERSION.cdx.json"
@@ -484,7 +527,7 @@ case "$CMD" in
 	release)
 		mtool release "$STATE" "$UPLOAD" "$MANIFEST_KEY" "$CHANGELOG" "$STRICT_DATE" "$VERSION" \
 			"dist/$SLUG.zip" "dist/$SLUG.zip.sig" \
-			"https://github.com/$REPO/releases/download/v$VERSION/$SLUG.zip" \
+			"$PACKAGE_BASE/v$VERSION/$SLUG.zip" \
 			"$REQUIRES_WP" "$REQUIRES_PHP" "$TESTED_WP"
 		mtool verify "$UPDATER" "$UPLOAD" "$MANIFEST_PUB" "$SIGN_PUB" "dist/$SLUG.zip" beta ;;
 	promote)
@@ -518,6 +561,8 @@ print_upload() {
 	echo "Rulează pe Mac:"
 	echo "  scp$FILES $SERVER_HOST:$SERVER_DIR/"
 	echo "  scp -r release/site/. $SERVER_HOST:$SERVER_DIR/"
+	echo "  # mirror for 1.0.0 installs (consent.rt.md): the same manifests + .sig"
+	echo "  scp$FILES $SERVER_HOST:$MIRROR_DIR/"
 }
 
 # Public pages. Real path: release/site from the committed state (CHANGELOG.md).
@@ -555,7 +600,7 @@ case "$CMD" in
 			git tag "v$VERSION"
 		fi
 		git push -q origin main --tags
-		gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" "dist/$SLUG-$VERSION.cdx.json" --repo "$REPO" \
+		gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" "dist/$NEW_ASSET.zip" "dist/$NEW_ASSET.zip.sig" "dist/$SLUG-$VERSION.cdx.json" --repo "$REPO" \
 			--title "v$VERSION" --generate-notes --prerelease
 		MSG="chore(release): v$VERSION (beta)" ;;
 	promote)

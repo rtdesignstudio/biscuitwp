@@ -350,3 +350,47 @@ cmp_assert_eq( CMP_Plugin::drop_tables( array( 'wp_9_posts' ), 9 ), array( 'wp_9
 $src = file_get_contents( __DIR__ . '/../includes/class-plugin.php' );
 cmp_assert( false !== strpos( $src, "'wp_initialize_site', array( __CLASS__, 'on_new_site' ), 20" ) && false !== strpos( $src, "'wpmu_drop_tables'" ), 'hooks registered in boot' );
 $GLOBALS['cmp_ms']['on'] = false;
+
+// --- M5 (final review): uninstall removes the folder-move stub, and only when it
+// holds exactly our stub files (plugins/consent-manager-pro and the hidden build folder).
+if ( ! class_exists( 'CMP_Migrate_Folder' ) ) {
+	require_once __DIR__ . '/../includes/class-migrate-folder.php';
+}
+$t_sd   = sys_get_temp_dir() . '/cmp-un-stub-' . getmypid() . '-' . mt_rand();
+$t_stub = CMP_Migrate_Folder::stub_source();
+$t_mk   = function ( $dir, array $files ) {
+	@mkdir( $dir, 0777, true );
+	foreach ( $files as $n => $c ) {
+		file_put_contents( $dir . '/' . $n, $c );
+	}
+};
+$t_mk( $t_sd . '/consent-manager-pro', array( 'consent-manager-pro.php' => $t_stub, 'biscuitwp.php' => $t_stub ) );
+$t_mk( $t_sd . '/.biscuitwp-move-stub', array( 'consent-manager-pro.php' => $t_stub, 'biscuitwp.php' => $t_stub ) );
+$t_mk( $t_sd . '/biscuitwp', array( 'biscuitwp.php' => '<?php // real plugin' ) );
+cmp_assert( method_exists( 'CMP_Uninstaller', 'remove_move_stub' ), 'uninstall (M5): CMP_Uninstaller::remove_move_stub() exists' );
+if ( method_exists( 'CMP_Uninstaller', 'remove_move_stub' ) ) {
+	CMP_Uninstaller::remove_move_stub( $t_sd );
+	clearstatcache();
+	cmp_assert( ! file_exists( $t_sd . '/consent-manager-pro' ), 'uninstall (M5): our stub folder plugins/consent-manager-pro removed' );
+	cmp_assert( ! file_exists( $t_sd . '/.biscuitwp-move-stub' ), 'uninstall (M5): the hidden stub build folder removed' );
+	cmp_assert( is_file( $t_sd . '/biscuitwp/biscuitwp.php' ), 'uninstall (M5): plugins/biscuitwp left to WordPress' );
+	// Not exactly our stub: a real copy, an extra file, a changed stub. Never touched.
+	$t_mk( $t_sd . '/consent-manager-pro', array( 'consent-manager-pro.php' => $t_stub, 'biscuitwp.php' => $t_stub, 'readme.txt' => 'x' ) );
+	CMP_Uninstaller::remove_move_stub( $t_sd );
+	clearstatcache();
+	cmp_assert( is_file( $t_sd . '/consent-manager-pro/readme.txt' ) && is_file( $t_sd . '/consent-manager-pro/consent-manager-pro.php' ), 'uninstall (M5): a folder with any other file is kept whole' );
+	@unlink( $t_sd . '/consent-manager-pro/readme.txt' );
+	file_put_contents( $t_sd . '/consent-manager-pro/biscuitwp.php', $t_stub . "// edited\n" );
+	CMP_Uninstaller::remove_move_stub( $t_sd );
+	clearstatcache();
+	cmp_assert( is_file( $t_sd . '/consent-manager-pro/biscuitwp.php' ), 'uninstall (M5): a changed stub file is kept' );
+	CMP_Uninstaller::remove_move_stub( $t_sd . '/missing' ); // No folder: no error.
+}
+$t_un_src2 = (string) file_get_contents( __DIR__ . '/../includes/class-uninstaller.php' );
+cmp_assert( 2 === substr_count( $t_un_src2, 'self::remove_move_stub( WP_PLUGIN_DIR )' ), 'uninstall (M5): run() removes the stub on single site and multisite' );
+foreach ( array( '/consent-manager-pro/readme.txt', '/consent-manager-pro/biscuitwp.php', '/consent-manager-pro/consent-manager-pro.php', '/biscuitwp/biscuitwp.php' ) as $t_f ) {
+	@unlink( $t_sd . $t_f );
+}
+@rmdir( $t_sd . '/consent-manager-pro' );
+@rmdir( $t_sd . '/biscuitwp' );
+@rmdir( $t_sd );

@@ -3,7 +3,7 @@ Tags: cookie consent, gdpr, consent mode, privacy policy, cookie banner
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,19 +21,19 @@ BiscuitWP (formerly Consent Manager Pro) is free and open-source software made b
 * Romanian, Russian and English; works with WPML and Polylang
 * No jQuery. The banner itself makes no external requests
 
-Updates are signed (Ed25519) and delivered from https://consent.rt.md/ with no telemetry; the update check sends no site data.
+Updates are signed (Ed25519) and delivered from https://biscuitwp.rt.md/ with no telemetry; the update check sends no site data.
 
-Install from GitHub Releases: https://github.com/rtdesignstudio/consent-manager-pro/releases
+Install from GitHub Releases: https://github.com/rtdesignstudio/biscuitwp/releases
 
-Security: https://consent.rt.md/en/security/
-Privacy: https://consent.rt.md/en/privacy/
+Security: https://biscuitwp.rt.md/en/security/
+Privacy: https://biscuitwp.rt.md/en/privacy/
 
 == Installation ==
 
-1. Download the latest zip from GitHub Releases.
+1. Download `biscuitwp.zip` from GitHub Releases (latest stable: https://github.com/rtdesignstudio/biscuitwp/releases/latest/download/biscuitwp.zip).
 2. In WordPress, go to Plugins > Add New > Upload Plugin and upload the zip, or unzip it into `wp-content/plugins/`.
 3. Activate the plugin and configure it under BiscuitWP.
 
 == Changelog ==
 
-See https://consent.rt.md/changelog/
+See https://biscuitwp.rt.md/changelog/

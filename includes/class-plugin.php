@@ -5,6 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CMP_Plugin {
 
+	/** The active path on sites installed before 1.1.0 (not yet moved to biscuitwp/). */
+	const LEGACY_BASENAME = 'consent-manager-pro/consent-manager-pro.php';
+
 	/** @var CMP_Plugin|null */
 	private static $instance = null;
 
@@ -14,6 +17,96 @@ class CMP_Plugin {
 			self::$instance->boot();
 		}
 		return self::$instance;
+	}
+
+	/**
+	 * Absolute path of the entry file WordPress loaded: biscuitwp.php, or the
+	 * legacy loader consent-manager-pro.php on a site not yet moved (CMP_ENTRY,
+	 * defined by that file). Falls back to biscuitwp.php outside WordPress.
+	 */
+	public static function main_file() {
+		if ( defined( 'CMP_ENTRY' ) ) {
+			return CMP_ENTRY;
+		}
+		return CMP_PATH . 'biscuitwp.php';
+	}
+
+	/** The active plugin basename: biscuitwp/biscuitwp.php or consent-manager-pro/consent-manager-pro.php. */
+	public static function basename() {
+		return plugin_basename( self::main_file() );
+	}
+
+	/**
+	 * Plugins screen: every folder of ours holds two entry files with the same
+	 * header (biscuitwp.php and consent-manager-pro.php), so WordPress lists both.
+	 * Only one row per folder is kept: the active entry file (the loaded one when
+	 * both are active). When neither is active, the row is the path the options
+	 * already name: consent-manager-pro/consent-manager-pro.php in an unmoved
+	 * consent-manager-pro/ folder holding both files (the historical active path,
+	 * kept in auto_update_plugins and uninstall_plugins), else <folder>/biscuitwp.php.
+	 * A folder holding only an inactive consent-manager-pro.php (the stub the folder
+	 * move leaves while it runs) shows nothing. Only rows with our text domain are
+	 * touched; the kept row stays in place. Pure.
+	 *
+	 * Folders holding exactly the folder-move stub ($stub_folders) count as the same
+	 * plugin as biscuitwp/: one row for both together (the active one, else
+	 * biscuitwp/biscuitwp.php), so the stub never shows as a second plugin and the
+	 * real folder is never offered as an inactive row while the stub is active.
+	 *
+	 * @param array  $plugins      get_plugins() shape: basename => header data.
+	 * @param array  $active       Active basenames (site and network-wide).
+	 * @param string $loaded       The entry file this request loaded (CMP_Plugin::basename()).
+	 * @param array  $stub_folders Folders recognised as our stub (CMP_Migrate_Folder::is_our_stub_dir()).
+	 * @return array
+	 */
+	public static function fix_plugin_rows( array $plugins, array $active, $loaded = '', array $stub_folders = array() ) {
+		$ours = array(); // folder => array( basename, ... )
+		foreach ( $plugins as $key => $data ) {
+			$base = basename( (string) $key );
+			if ( false === strpos( (string) $key, '/' ) || ! in_array( $base, array( 'biscuitwp.php', basename( self::LEGACY_BASENAME ) ), true ) ) {
+				continue;
+			}
+			if ( ! is_array( $data ) || ! isset( $data['TextDomain'] ) || 'biscuitwp' !== $data['TextDomain'] ) {
+				continue;
+			}
+			$group            = in_array( dirname( $key ), $stub_folders, true ) ? 'biscuitwp' : dirname( $key );
+			$ours[ $group ][] = $key;
+		}
+		$hide = array();
+		foreach ( $ours as $folder => $keys ) {
+			$on = array_values( array_intersect( $keys, $active ) );
+			if ( count( $on ) > 1 ) {
+				$keep = in_array( $loaded, $on, true ) ? $loaded : $folder . '/biscuitwp.php';
+			} elseif ( 1 === count( $on ) ) {
+				$keep = $on[0];
+			} elseif ( dirname( self::LEGACY_BASENAME ) === $folder && in_array( self::LEGACY_BASENAME, $keys, true ) && in_array( $folder . '/biscuitwp.php', $keys, true ) ) {
+				$keep = self::LEGACY_BASENAME;
+			} else {
+				$keep = $folder . '/biscuitwp.php';
+			}
+			foreach ( $keys as $key ) {
+				if ( $key !== $keep ) {
+					$hide[ $key ] = true;
+				}
+			}
+		}
+		return $hide ? array_diff_key( $plugins, $hide ) : $plugins;
+	}
+
+	/** all_plugins filter (admin, site and network): see fix_plugin_rows(). */
+	public static function filter_plugin_rows( $plugins ) {
+		if ( ! is_array( $plugins ) ) {
+			return $plugins;
+		}
+		$active = (array) get_option( 'active_plugins', array() );
+		if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+			$active = array_merge( $active, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		}
+		$stubs = array();
+		if ( defined( 'WP_PLUGIN_DIR' ) && class_exists( 'CMP_Migrate_Folder' ) && CMP_Migrate_Folder::is_our_stub_dir( WP_PLUGIN_DIR . '/' . CMP_Migrate_Folder::OLD_DIR ) ) {
+			$stubs[] = CMP_Migrate_Folder::OLD_DIR;
+		}
+		return self::fix_plugin_rows( $plugins, $active, self::basename(), $stubs );
 	}
 
 	private function boot() {
@@ -28,9 +121,9 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
 		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
-		// <plugin folder>/languages, relative to WP_PLUGIN_DIR. plugin_basename() of the main
-		// file maps a symlinked plugin folder back to its name under WP_PLUGIN_DIR.
-		load_plugin_textdomain( 'consent-manager-pro', false, dirname( plugin_basename( CMP_PATH . 'consent-manager-pro.php' ) ) . '/languages' );
+		// <plugin folder>/languages, relative to WP_PLUGIN_DIR. plugin_basename() of the loaded
+		// entry file maps a symlinked plugin folder back to its name under WP_PLUGIN_DIR.
+		load_plugin_textdomain( 'biscuitwp', false, dirname( CMP_Plugin::basename() ) . '/languages' );
 
 		new CMP_Banner();
 		CMP_Audit::register();
@@ -59,6 +152,22 @@ class CMP_Plugin {
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
+		}
+		// Two entry files with the same header per folder: one Plugins row, the active one.
+		if ( is_admin() ) {
+			add_filter( 'all_plugins', array( __CLASS__, 'filter_plugin_rows' ) );
+		}
+		// Folder move, on demand only (spec: varianta B): the move screen and the
+		// Plugins row link in admin; the stub left in the old folder is removed later
+		// by a load through biscuitwp/ (admin or cron).
+		if ( is_admin() || wp_doing_cron() ) {
+			require_once CMP_PATH . 'includes/class-migrate-folder.php';
+			if ( is_admin() ) {
+				CMP_Migrate_Folder::register_admin();
+			}
+			if ( defined( 'WP_PLUGIN_DIR' ) && is_dir( WP_PLUGIN_DIR . '/consent-manager-pro' ) && ! CMP_Migrate_Folder::runs_from_old_folder() ) {
+				CMP_Migrate_Folder::register_cleanup();
+			}
 		}
 
 		// Multisite: new sites get installed, deleted sites lose the consent log table.
@@ -109,7 +218,7 @@ class CMP_Plugin {
 			}
 		}
 		// 0.4.1: sites no longer use a GitHub token (updates now come from the
-		// signed manifest on consent.rt.md), so drop any token still stored on
+		// signed manifest on biscuitwp.rt.md), so drop any token still stored on
 		// the site (and the unused "layout" setting).
 		if ( false === $old || version_compare( $old, '0.4.1', '<' ) ) {
 			$settings = get_option( 'cmp_settings', array() );
@@ -221,7 +330,7 @@ class CMP_Plugin {
 		if ( ! function_exists( 'is_plugin_active_for_network' ) && defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		if ( ! function_exists( 'is_plugin_active_for_network' ) || ! is_plugin_active_for_network( plugin_basename( CMP_PATH . 'consent-manager-pro.php' ) ) ) {
+		if ( ! function_exists( 'is_plugin_active_for_network' ) || ! is_plugin_active_for_network( CMP_Plugin::basename() ) ) {
 			return;
 		}
 		switch_to_blog( (int) $new_site->blog_id );

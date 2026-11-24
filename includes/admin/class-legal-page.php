@@ -7,9 +7,9 @@ class CMP_Legal_Page {
 
 	public static function labels() {
 		return array(
-			'privacy' => __( 'Politica de confidențialitate', 'consent-manager-pro' ),
-			'terms'   => __( 'Termeni și condiții', 'consent-manager-pro' ),
-			'cookie'  => __( 'Politica de cookie-uri', 'consent-manager-pro' ),
+			'privacy' => __( 'Politica de confidențialitate', 'biscuitwp' ),
+			'terms'   => __( 'Termeni și condiții', 'biscuitwp' ),
+			'cookie'  => __( 'Politica de cookie-uri', 'biscuitwp' ),
 		);
 	}
 
@@ -119,7 +119,7 @@ class CMP_Legal_Page {
 			}
 			if ( '' !== $mode && $mode !== $current ) {
 				/* translators: %s: page title */
-				$out[] = sprintf( __( '„%s” a fost generată pentru alt mod de măsurare. Regenerează pagina.', 'consent-manager-pro' ), isset( $p['title'] ) ? (string) $p['title'] : '' );
+				$out[] = sprintf( __( '„%s” a fost generată pentru alt mod de măsurare. Regenerează pagina.', 'biscuitwp' ), isset( $p['title'] ) ? (string) $p['title'] : '' );
 			}
 		}
 		return $out;
@@ -242,21 +242,21 @@ class CMP_Legal_Page {
 	 */
 	public static function operator_note_html( $open = false ) {
 		$does = array(
-			__( 'bannerul de cookie-uri', 'consent-manager-pro' ),
-			__( 'blocarea serviciilor până la acord', 'consent-manager-pro' ),
-			__( 'registrul de consimțăminte', 'consent-manager-pro' ),
-			__( 'șabloanele paginilor legale', 'consent-manager-pro' ),
-			__( 'tabelul de cookie-uri', 'consent-manager-pro' ),
-			__( 're-consimțământul la servicii noi', 'consent-manager-pro' ),
+			__( 'bannerul de cookie-uri', 'biscuitwp' ),
+			__( 'blocarea serviciilor până la acord', 'biscuitwp' ),
+			__( 'registrul de consimțăminte', 'biscuitwp' ),
+			__( 'șabloanele paginilor legale', 'biscuitwp' ),
+			__( 'tabelul de cookie-uri', 'biscuitwp' ),
+			__( 're-consimțământul la servicii noi', 'biscuitwp' ),
 		);
 		$stays = array(
-			__( 'registrul activităților de prelucrare', 'consent-manager-pro' ),
-			__( 'numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu', 'consent-manager-pro' ),
-			__( 'temeiul legal pentru transferurile de date în afara țării', 'consent-manager-pro' ),
-			__( 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'consent-manager-pro' ),
-			__( 'verificarea textelor de către un jurist', 'consent-manager-pro' ),
-			__( 'notificarea CNPDCP, unde e cazul', 'consent-manager-pro' ),
-			__( 'serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)', 'consent-manager-pro' ),
+			__( 'registrul activităților de prelucrare', 'biscuitwp' ),
+			__( 'numirea unui responsabil cu protecția datelor (DPO), dacă e obligatoriu', 'biscuitwp' ),
+			__( 'temeiul legal pentru transferurile de date în afara țării', 'biscuitwp' ),
+			__( 'informarea pentru alte prelucrări (formulare, newsletter, magazin)', 'biscuitwp' ),
+			__( 'verificarea textelor de către un jurist', 'biscuitwp' ),
+			__( 'notificarea CNPDCP, unde e cazul', 'biscuitwp' ),
+			__( 'serviciile pe care pluginul nu le recunoaște (adaugă-le în „Servicii”)', 'biscuitwp' ),
 		);
 		$li = function ( $items ) {
 			$out = '';
@@ -267,10 +267,10 @@ class CMP_Legal_Page {
 		};
 		$url = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_operator_note' ), 'cmp_dismiss_operator_note' );
 		return '<details class="cmp-operator-note"' . ( $open ? ' open' : '' ) . '>'
-			. '<summary>' . esc_html( __( 'Ce face pluginul și ce rămâne la tine', 'consent-manager-pro' ) ) . '</summary>'
-			. '<h3>' . esc_html( __( 'Ce face pluginul', 'consent-manager-pro' ) ) . '</h3><ul>' . $li( $does ) . '</ul>'
-			. '<h3>' . esc_html( __( 'Ce rămâne la tine', 'consent-manager-pro' ) ) . '</h3><ul>' . $li( $stays ) . '</ul>'
-			. '<p><a href="' . esc_url( $url ) . '">' . esc_html( __( 'Am înțeles, restrânge', 'consent-manager-pro' ) ) . '</a></p>'
+			. '<summary>' . esc_html( __( 'Ce face pluginul și ce rămâne la tine', 'biscuitwp' ) ) . '</summary>'
+			. '<h3>' . esc_html( __( 'Ce face pluginul', 'biscuitwp' ) ) . '</h3><ul>' . $li( $does ) . '</ul>'
+			. '<h3>' . esc_html( __( 'Ce rămâne la tine', 'biscuitwp' ) ) . '</h3><ul>' . $li( $stays ) . '</ul>'
+			. '<p><a href="' . esc_url( $url ) . '">' . esc_html( __( 'Am înțeles, restrânge', 'biscuitwp' ) ) . '</a></p>'
 			. '</details>';
 	}
 
@@ -295,28 +295,28 @@ class CMP_Legal_Page {
 		$current_settings = CMP_Consent::get_settings();
 		$mode_notices     = self::mode_notices( $linked, self::page_mode( is_array( $current_settings ) ? $current_settings : array(), self::services_history() ) );
 		$badges = array(
-			'published' => array( __( 'Publicată', 'consent-manager-pro' ), '#00a32a' ),
-			'draft'     => array( __( 'Ciornă (nu e vizibilă vizitatorilor)', 'consent-manager-pro' ), '#dba617' ),
-			'missing'   => array( __( 'Lipsește', 'consent-manager-pro' ), '#d63638' ),
+			'published' => array( __( 'Publicată', 'biscuitwp' ), '#00a32a' ),
+			'draft'     => array( __( 'Ciornă (nu e vizibilă vizitatorilor)', 'biscuitwp' ), '#dba617' ),
+			'missing'   => array( __( 'Lipsește', 'biscuitwp' ), '#d63638' ),
 		);
 		?>
 		<div class="wrap cmp-admin">
-			<h1><?php esc_html_e( 'BiscuitWP — Pagini legale', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'legal' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Pagini legale', 'biscuitwp' ); ?> <?php echo CMP_Guide::link( 'legal' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( get_option( 'cmp_templates_notice' ) ) : ?>
-				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi.', 'consent-manager-pro' ); ?>
-					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_templates_notice' ), 'cmp_dismiss_templates_notice' ) ); ?>"><?php esc_html_e( 'Închide', 'consent-manager-pro' ); ?></a></p></div>
+				<div class="notice notice-info"><p><?php esc_html_e( 'Șabloanele au fost actualizate (texte noi pentru Moldova, în RO/RU/EN). Regenerează fiecare document ca să le preiei; traducerile create de plugin se actualizează odată cu el. Mesajul dispare după ce regenerezi toate cele trei documente sau când îl închizi.', 'biscuitwp' ); ?>
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_templates_notice' ), 'cmp_dismiss_templates_notice' ) ); ?>"><?php esc_html_e( 'Închide', 'biscuitwp' ); ?></a></p></div>
 			<?php endif; ?>
 			<?php foreach ( $mode_notices as $mode_notice ) : ?>
 				<div class="notice notice-warning"><p><?php echo esc_html( $mode_notice ); ?></p></div>
 			<?php endforeach; ?>
 			<?php if ( isset( $_GET['generated'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Pagina a fost generată. Dacă e nouă, e salvată ca ciornă: verific-o și public-o din editor.', 'biscuitwp' ); ?></p></div>
 			<?php elseif ( isset( $_GET['saved'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Salvat.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Salvat.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 
-			<div class="notice notice-warning inline"><p><?php esc_html_e( 'Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare.', 'consent-manager-pro' ); ?></p></div>
-			<div class="notice notice-info inline"><p><?php esc_html_e( 'Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale.', 'consent-manager-pro' ); ?> <?php esc_html_e( 'După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale.', 'consent-manager-pro' ); ?></p></div>
+			<div class="notice notice-warning inline"><p><?php esc_html_e( 'Șabloanele sunt un punct de plecare informativ, NU consultanță juridică. Revizuiește textul cu un specialist înainte de publicare.', 'biscuitwp' ); ?></p></div>
+			<div class="notice notice-info inline"><p><?php esc_html_e( 'Textele depind de modul ales în Setări (Pro sau Light) și de blocarea scripturilor. După ce schimbi modul sau blocarea, regenerează paginile legale.', 'biscuitwp' ); ?> <?php esc_html_e( 'După ce schimbi durata acordului sau a registrului în Setări, regenerează paginile legale.', 'biscuitwp' ); ?></p></div>
 
 			<?php echo self::operator_note_html( ! get_option( 'cmp_operator_note_seen' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
@@ -324,29 +324,29 @@ class CMP_Legal_Page {
 				<input type="hidden" name="action" value="cmp_legal">
 				<?php wp_nonce_field( 'cmp_legal' ); ?>
 
-				<h2><?php esc_html_e( 'Datele operatorului', 'consent-manager-pro' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'Apar în paginile generate. Se salvează, nu trebuie completate din nou.', 'consent-manager-pro' ); ?></p>
+				<h2><?php esc_html_e( 'Datele operatorului', 'biscuitwp' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Apar în paginile generate. Se salvează, nu trebuie completate din nou.', 'biscuitwp' ); ?></p>
 				<table class="form-table" role="presentation">
-					<tr><th scope="row"><label for="cmp-company"><?php esc_html_e( 'Denumire operator', 'consent-manager-pro' ); ?></label></th>
+					<tr><th scope="row"><label for="cmp-company"><?php esc_html_e( 'Denumire operator', 'biscuitwp' ); ?></label></th>
 						<td><input type="text" id="cmp-company" name="meta[company]" class="regular-text" value="<?php echo esc_attr( $meta['company'] ); ?>"></td></tr>
-					<tr><th scope="row"><label for="cmp-email"><?php esc_html_e( 'Email contact', 'consent-manager-pro' ); ?></label></th>
+					<tr><th scope="row"><label for="cmp-email"><?php esc_html_e( 'Email contact', 'biscuitwp' ); ?></label></th>
 						<td><input type="email" id="cmp-email" name="meta[contact_email]" class="regular-text" value="<?php echo esc_attr( $meta['contact_email'] ); ?>"></td></tr>
-					<tr><th scope="row"><label for="cmp-dpo"><?php esc_html_e( 'Responsabil date (DPO)', 'consent-manager-pro' ); ?></label></th>
+					<tr><th scope="row"><label for="cmp-dpo"><?php esc_html_e( 'Responsabil date (DPO)', 'biscuitwp' ); ?></label></th>
 						<td><input type="text" id="cmp-dpo" name="meta[dpo]" class="regular-text" value="<?php echo esc_attr( $meta['dpo'] ); ?>"></td></tr>
-					<tr><th scope="row"><label for="cmp-jur"><?php esc_html_e( 'Jurisdicție', 'consent-manager-pro' ); ?></label></th>
+					<tr><th scope="row"><label for="cmp-jur"><?php esc_html_e( 'Jurisdicție', 'biscuitwp' ); ?></label></th>
 						<td><input type="text" id="cmp-jur" name="meta[jurisdiction]" class="regular-text" value="<?php echo esc_attr( $meta['jurisdiction'] ); ?>"></td></tr>
-					<tr><th scope="row"><label for="cmp-address"><?php esc_html_e( 'Adresa (opțional, recomandat pentru firme)', 'consent-manager-pro' ); ?></label></th>
+					<tr><th scope="row"><label for="cmp-address"><?php esc_html_e( 'Adresa (opțional, recomandat pentru firme)', 'biscuitwp' ); ?></label></th>
 						<td><input type="text" id="cmp-address" name="meta[address]" class="regular-text" maxlength="200" value="<?php echo esc_attr( $meta['address'] ); ?>"></td></tr>
 				</table>
 
-				<h2><?php esc_html_e( 'Documente', 'consent-manager-pro' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. Linkul „Politica de confidențialitate” din banner apare doar când pagina e publicată.', 'consent-manager-pro' ); ?></p>
+				<h2><?php esc_html_e( 'Documente', 'biscuitwp' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Alege o pagină existentă (inclusiv ciorne) sau generează una din șablon. Linkul „Politica de confidențialitate” din banner apare doar când pagina e publicată.', 'biscuitwp' ); ?></p>
 				<table class="widefat striped" style="max-width:1100px;margin-top:12px">
 					<thead><tr>
-						<th><?php esc_html_e( 'Document', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Pagina', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Stare', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Șablon', 'consent-manager-pro' ); ?></th>
+						<th><?php esc_html_e( 'Document', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Pagina', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Stare', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Șablon', 'biscuitwp' ); ?></th>
 					</tr></thead>
 					<tbody>
 					<?php foreach ( $docs as $type => $doc ) :
@@ -360,30 +360,30 @@ class CMP_Legal_Page {
 									'name'              => 'page[' . $type . ']',
 									'id'                => 'cmp-page-' . $type,
 									'selected'          => $doc['id'],
-									'show_option_none'  => __( '— niciuna —', 'consent-manager-pro' ),
+									'show_option_none'  => __( '— niciuna —', 'biscuitwp' ),
 									'option_none_value' => 0,
 									'post_status'       => array( 'publish', 'draft', 'pending', 'private' ),
 								) );
 								?>
 								<?php if ( $doc['suggested'] ) : ?>
-									<p class="description"><?php esc_html_e( 'Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești.', 'consent-manager-pro' ); ?></p>
+									<p class="description"><?php esc_html_e( 'Propusă: pagina de confidențialitate a WordPress. Salvează ca s-o folosești.', 'biscuitwp' ); ?></p>
 								<?php endif; ?>
 								<?php if ( 'privacy' === $type ) : ?>
-									<p><label><input type="checkbox" name="wp_privacy" value="1" <?php checked( ! $wp_pid || $wp_pid === (int) $doc['id'] ); ?>> <?php esc_html_e( 'Folosește și ca pagina de confidențialitate a WordPress', 'consent-manager-pro' ); ?></label></p>
+									<p><label><input type="checkbox" name="wp_privacy" value="1" <?php checked( ! $wp_pid || $wp_pid === (int) $doc['id'] ); ?>> <?php esc_html_e( 'Folosește și ca pagina de confidențialitate a WordPress', 'biscuitwp' ); ?></label></p>
 								<?php endif; ?>
 							</td>
 							<td>
 								<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:<?php echo esc_attr( $color ); ?>;margin-right:6px"></span><?php echo esc_html( $badge ); ?>
 								<?php if ( $doc['id'] && ! $doc['suggested'] ) : ?>
-									<br><a href="<?php echo esc_url( (string) get_edit_post_link( $doc['id'] ) ); ?>"><?php esc_html_e( 'Editează', 'consent-manager-pro' ); ?></a>
-									· <a href="<?php echo esc_url( (string) get_permalink( $doc['id'] ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Vezi', 'consent-manager-pro' ); ?></a>
+									<br><a href="<?php echo esc_url( (string) get_edit_post_link( $doc['id'] ) ); ?>"><?php esc_html_e( 'Editează', 'biscuitwp' ); ?></a>
+									· <a href="<?php echo esc_url( (string) get_permalink( $doc['id'] ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Vezi', 'biscuitwp' ); ?></a>
 								<?php endif; ?>
 							</td>
 							<td>
 								<?php if ( $doc['id'] && ! $doc['suggested'] ) : ?>
-									<button type="submit" name="generate" value="<?php echo esc_attr( $type ); ?>" class="button" onclick="return confirm('<?php echo esc_js( __( 'Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în pagină se pierd. Continui?', 'consent-manager-pro' ) ); ?>');"><?php esc_html_e( 'Regenerează', 'consent-manager-pro' ); ?></button>
+									<button type="submit" name="generate" value="<?php echo esc_attr( $type ); ?>" class="button" onclick="return confirm('<?php echo esc_js( __( 'Textul paginii va fi înlocuit cu șablonul. Modificările făcute de mână în pagină se pierd. Continui?', 'biscuitwp' ) ); ?>');"><?php esc_html_e( 'Regenerează', 'biscuitwp' ); ?></button>
 								<?php else : ?>
-									<button type="submit" name="generate" value="<?php echo esc_attr( $type ); ?>" class="button"><?php esc_html_e( 'Generează', 'consent-manager-pro' ); ?></button>
+									<button type="submit" name="generate" value="<?php echo esc_attr( $type ); ?>" class="button"><?php esc_html_e( 'Generează', 'biscuitwp' ); ?></button>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -391,8 +391,8 @@ class CMP_Legal_Page {
 					</tbody>
 				</table>
 
-				<p class="description"><?php esc_html_e( 'Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: cele marcate de plugin și cele care încep cu rândul „Document generat automat de BiscuitWP” sau, înainte de redenumire, „Document generat automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte traduceri nu sunt atinse.', 'consent-manager-pro' ); ?></p>
-				<?php submit_button( __( 'Salvează', 'consent-manager-pro' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Regenerarea suprascrie și traducerile legate pe care le-a creat pluginul: cele marcate de plugin și cele care încep cu rândul „Document generat automat de BiscuitWP” sau, înainte de redenumire, „Document generat automat de Consent Manager Pro” (copiile făcute de versiunile 0.4.x). Celelalte traduceri nu sunt atinse.', 'biscuitwp' ); ?></p>
+				<?php submit_button( __( 'Salvează', 'biscuitwp' ) ); ?>
 			</form>
 		</div>
 		<?php
@@ -405,7 +405,7 @@ class CMP_Legal_Page {
 	 */
 	public static function handle() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_legal' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$settings = CMP_Consent::get_settings();
 		$settings = is_array( $settings ) ? $settings : array();
@@ -442,7 +442,7 @@ class CMP_Legal_Page {
 				update_option( 'cmp_operator_note_seen', 1 );
 			}
 			if ( is_wp_error( $post_id ) ) {
-				wp_die( esc_html__( 'Nu am putut crea pagina.', 'consent-manager-pro' ) );
+				wp_die( esc_html__( 'Nu am putut crea pagina.', 'biscuitwp' ) );
 			}
 			$settings[ self::settings_key( $type ) ] = (int) $post_id;
 			if ( 'privacy' === $type && ! empty( $_POST['wp_privacy'] ) ) {
@@ -458,7 +458,7 @@ class CMP_Legal_Page {
 
 	public static function dismiss_templates_notice() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_templates_notice' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		delete_option( 'cmp_templates_notice' );
 		delete_option( 'cmp_templates_regenerated' );
@@ -468,7 +468,7 @@ class CMP_Legal_Page {
 
 	public static function dismiss_operator_note() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_operator_note' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		update_option( 'cmp_operator_note_seen', 1 );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'cmp-legal' ), admin_url( 'admin.php' ) ) );

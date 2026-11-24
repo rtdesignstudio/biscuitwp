@@ -9,11 +9,12 @@ cmp_assert_eq( CMP_Updater::is_newer( 'v0.0.9', '0.1.0' ), false, 'older tag => 
 
 // file(): without WordPress loaded, falls back to the slug default.
 // Without WordPress: the slug default. With the plugin_basename stub some earlier
-// test defines: the checkout's own folder name (a clone may be named anything).
+// test defines (and no CMP_ENTRY): the checkout's own folder name (a clone may be
+// named anything) and the real main file biscuitwp.php.
 cmp_assert_eq(
 	CMP_Updater::file(),
-	( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) ? basename( rtrim( CMP_PATH, '/' ) ) : 'consent-manager-pro' ) . '/consent-manager-pro.php',
-	'file(): slug default without WP, real folder name with plugin_basename'
+	( function_exists( 'plugin_basename' ) && defined( 'CMP_PATH' ) && class_exists( 'CMP_Plugin' ) ? basename( rtrim( CMP_PATH, '/' ) ) . '/biscuitwp.php' : 'consent-manager-pro/consent-manager-pro.php' ),
+	'file(): slug default without WP, the active basename (CMP_Plugin::basename()) with it'
 );
 
 // 0.4.1: the direct GitHub path (token on the site) is gone.
@@ -50,7 +51,7 @@ cmp_assert_eq( strlen( base64_decode( CMP_Updater::SIGN_PUBLIC_KEY ) ), 32, 'bak
 // ---------------------------------------------------------------------------
 
 // Constants.
-cmp_assert_eq( CMP_Updater::BASE, 'https://consent.rt.md/', 'BASE is the static manifest host' );
+cmp_assert_eq( CMP_Updater::BASE, 'https://biscuitwp.rt.md/', 'BASE is the static manifest host' );
 cmp_assert_eq( CMP_Updater::PACKAGE_PREFIX, 'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/', 'PACKAGE_PREFIX is the public GitHub releases path' );
 cmp_assert_eq( CMP_Updater::EXPIRY_DAYS, 60, 'EXPIRY_DAYS = 60' );
 cmp_assert_eq( CMP_Updater::MAX_MANIFEST, 65536, 'MAX_MANIFEST = 64 KB' );
@@ -58,9 +59,9 @@ cmp_assert_eq( strlen( (string) base64_decode( CMP_Updater::RESCUE_PUBLIC_KEY, t
 cmp_assert( CMP_Updater::RESCUE_PUBLIC_KEY !== CMP_Updater::SIGN_PUBLIC_KEY && CMP_Updater::RESCUE_PUBLIC_KEY !== CMP_Updater::MANIFEST_PUBLIC_KEY, 'RESCUE_PUBLIC_KEY differs from the release and manifest keys' );
 
 // Manifest URLs.
-cmp_assert_eq( CMP_Updater::manifest_url( 'stable' ), 'https://consent.rt.md/manifest-stable.json', 'manifest_url: stable' );
-cmp_assert_eq( CMP_Updater::manifest_url( 'beta' ), 'https://consent.rt.md/manifest-beta.json', 'manifest_url: beta' );
-cmp_assert_eq( CMP_Updater::manifest_url( '../x' ), 'https://consent.rt.md/manifest-stable.json', 'manifest_url: unknown channel -> stable' );
+cmp_assert_eq( CMP_Updater::manifest_url( 'stable' ), 'https://biscuitwp.rt.md/manifest-stable.json', 'manifest_url: stable' );
+cmp_assert_eq( CMP_Updater::manifest_url( 'beta' ), 'https://biscuitwp.rt.md/manifest-beta.json', 'manifest_url: beta' );
+cmp_assert_eq( CMP_Updater::manifest_url( '../x' ), 'https://biscuitwp.rt.md/manifest-stable.json', 'manifest_url: unknown channel -> stable' );
 
 // Temp keys: M (manifest), R (rescue), X (foreign). Secrets never leave this process.
 $cmp_kp_m = sodium_crypto_sign_keypair();
@@ -211,6 +212,65 @@ foreach ( array(
 ) as $t_what => $t_url ) {
 	cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_url ) ) )['status'], 'invalid', "package URL containing {$t_what} -> invalid" );
 }
+
+// Two accepted package prefixes (fix round 1): the old repo path (what the
+// manifests use today; 1.0.0 sites only know it) and the renamed repo, so a
+// later release can switch the manifest without stranding 1.1.0+ sites.
+// Same host, exact path start; nothing else loosened.
+$t_old_pre = 'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/';
+$t_new_pre = 'https://github.com/rtdesignstudio/biscuitwp/releases/download/';
+cmp_assert_eq( defined( 'CMP_Updater::PACKAGE_PREFIXES' ) ? CMP_Updater::PACKAGE_PREFIXES : null, array( $t_old_pre, $t_new_pre ), 'PACKAGE_PREFIXES: old repo path first, renamed repo second, nothing else' );
+cmp_assert_eq( CMP_Updater::PACKAGE_PREFIX, $t_old_pre, 'PACKAGE_PREFIX stays the old repo path (what manifests use)' );
+cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_old_pre . 'v1.0.0/consent-manager-pro.zip' ) ) )['status'], 'ok', 'package on the old repo path -> ok' );
+cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_new_pre . 'v1.0.0/consent-manager-pro.zip' ) ) )['status'], 'ok', 'package on the renamed repo path -> ok' );
+foreach ( array(
+	'other owner'          => 'https://github.com/evil/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+	'other owner (old)'    => 'https://github.com/evil/consent-manager-pro/releases/download/v1.0.0/consent-manager-pro.zip',
+	'other repo'           => 'https://github.com/rtdesignstudio/biscuitwp-fork/releases/download/v1.0.0/consent-manager-pro.zip',
+	'repo name as prefix'  => 'https://github.com/rtdesignstudio/biscuitwpx/releases/download/v1.0.0/consent-manager-pro.zip',
+	'other host'           => 'https://github.com.evil.example/rtdesignstudio/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+	'cdn host'             => 'https://objects.githubusercontent.com/rtdesignstudio/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+	'http'                 => 'http://github.com/rtdesignstudio/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+	'case variant'         => 'https://GitHub.com/rtdesignstudio/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+	'not releases/download'=> 'https://github.com/rtdesignstudio/biscuitwp/archive/v1.0.0.zip',
+	'userinfo'             => 'https://github.com@evil.example/rtdesignstudio/biscuitwp/releases/download/v1.0.0/consent-manager-pro.zip',
+) as $t_what => $t_url ) {
+	cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_url ) ) )['status'], 'invalid', "package URL ({$t_what}) -> invalid" );
+}
+foreach ( array(
+	'..'        => $t_new_pre . 'v1.0.0/../../x.zip',
+	'?'         => $t_new_pre . 'v1.0.0/x.zip?a=1',
+	'#'         => $t_new_pre . 'v1.0.0/x.zip#frag',
+	'backslash' => $t_new_pre . 'v1.0.0\\x.zip',
+	'space'     => $t_new_pre . 'v1.0.0/x y.zip',
+) as $t_what => $t_url ) {
+	cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_url ) ) )['status'], 'invalid', "renamed-repo package URL containing {$t_what} -> invalid" );
+}
+// Fix round 2: percent-escapes (dot segments Requests would decode and remove),
+// query, fragment, backslash, whitespace and control characters are refused
+// by is_package_url itself, before the prefix comparison, for both prefixes.
+foreach ( array( $t_old_pre, $t_new_pre ) as $t_p ) {
+	foreach ( array(
+		'%2e%2e/'   => $t_p . '%2e%2e/%2e%2e/%2e%2e/%2e%2e/evil/repo/releases/download/v1/x.zip',
+		'%2E%2E/'   => $t_p . '%2E%2E/%2E%2E/%2E%2E/%2E%2E/evil/repo/releases/download/v1/x.zip',
+		'%2f'       => $t_p . 'v1.0.0%2f..%2fx.zip',
+		'%'         => $t_p . 'v1.0.0/consent-manager-pro%20.zip',
+		'NUL'       => $t_p . "v1.0.0/consent-manager-pro.zip\x00",
+		'DEL'       => $t_p . "v1.0.0/consent-manager-pro.zip\x7f",
+		'?'         => $t_p . 'v1.0.0/consent-manager-pro.zip?x=1',
+		'#'         => $t_p . 'v1.0.0/consent-manager-pro.zip#x',
+		'backslash' => $t_p . 'v1.0.0\\consent-manager-pro.zip',
+		'tab'       => $t_p . "v1.0.0/\tconsent-manager-pro.zip",
+	) as $t_what => $t_url ) {
+		cmp_assert( method_exists( 'CMP_Updater', 'is_package_url' ) && ! CMP_Updater::is_package_url( $t_url ), "is_package_url: {$t_what} refused ({$t_p})" );
+		cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_url ) ) )['status'], 'invalid', "package URL with {$t_what} -> invalid ({$t_p})" );
+	}
+	cmp_assert( method_exists( 'CMP_Updater', 'is_package_url' ) && CMP_Updater::is_package_url( $t_p . 'v1.1.0/consent-manager-pro.zip' ), "is_package_url: normal vX.Y.Z/consent-manager-pro.zip tail accepted ({$t_p})" );
+	cmp_assert_eq( cmp_t_eval( cmp_t_manifest( array( 'package' => $t_p . 'v1.1.0/consent-manager-pro.zip' ) ) )['status'], 'ok', "package URL with a normal tail -> ok ({$t_p})" );
+}
+$t_e = CMP_Updater::verified_download( false, $t_new_pre . '%2e%2e/%2e%2e/%2e%2e/%2e%2e/evil/repo/releases/download/v1/x.zip', null, array() );
+cmp_assert_eq( $t_e, false, 'verified_download: an encoded-dot URL is not ours by URL (passes through, never downloaded by us)' );
+cmp_assert( method_exists( 'CMP_Updater', 'is_package_url' ) && CMP_Updater::is_package_url( $t_new_pre . 'v1/x.zip' ) && CMP_Updater::is_package_url( $t_old_pre . 'v1/x.zip' ) && ! CMP_Updater::is_package_url( 'https://github.com/evil/biscuitwp/releases/download/v1/x.zip' ) && ! CMP_Updater::is_package_url( null ), 'is_package_url: either prefix, nothing else' );
 
 // Default keys (null): placeholders only -> nothing verifies, no exception.
 cmp_assert_eq( CMP_Updater::evaluate_manifest( $j, cmp_t_sign( $j, $cmp_kp_m ), 'stable', cmp_t_env() )['status'], 'invalid', 'default keys are placeholders -> invalid' );
@@ -382,13 +442,13 @@ cmp_t_seam( $cmp_seam );
 $cmp_pkg_url = CMP_Updater::PACKAGE_PREFIX . 'v1.0.0/consent-manager-pro.zip';
 
 // Header.
-$t_main = file_get_contents( __DIR__ . '/../consent-manager-pro.php' );
-cmp_assert( 1 === preg_match( '/^ \* Update URI: https:\/\/consent\.rt\.md\/$/m', $t_main ), 'header: Update URI: https://consent.rt.md/' );
-cmp_assert( 1 === preg_match( '/^ \* Plugin URI: https:\/\/consent\.rt\.md\/$/m', $t_main ), 'header: Plugin URI: https://consent.rt.md/' );
+$t_main = file_get_contents( __DIR__ . '/../biscuitwp.php' );
+cmp_assert( 1 === preg_match( '/^ \* Update URI: https:\/\/biscuitwp\.rt\.md\/$/m', $t_main ), 'header: Update URI: https://biscuitwp.rt.md/' );
+cmp_assert( 1 === preg_match( '/^ \* Plugin URI: https:\/\/biscuitwp\.rt\.md\/$/m', $t_main ), 'header: Plugin URI: https://biscuitwp.rt.md/' );
 
 // register(): the filters.
 $t_src = file_get_contents( __DIR__ . '/../includes/modules/class-updater.php' );
-cmp_assert( false !== strpos( $t_src, "'update_plugins_consent.rt.md'" ), 'register: update_plugins_consent.rt.md filter' );
+cmp_assert( false !== strpos( $t_src, "'update_plugins_biscuitwp.rt.md'" ), 'register: update_plugins_biscuitwp.rt.md filter' );
 cmp_assert( false !== strpos( $t_src, "'plugins_api'" ), 'register: plugins_api filter' );
 cmp_assert( false === strpos( $t_src, 'pre_set_site_transient_update_plugins' ), 'register: no pre_set_site_transient_update_plugins filter' );
 
@@ -401,7 +461,7 @@ $t_headers = isset( $t_args['headers'] ) ? array_change_key_case( (array) $t_arg
 cmp_assert( ! isset( $t_headers['referer'] ), 'request_args: no Referer header' );
 
 // manifest_url: CMP_UPDATE_BASE overrides the base (https only).
-cmp_assert_eq( CMP_Updater::manifest_url( 'beta' ), 'https://consent.rt.md/manifest-beta.json', 'manifest_url: default base without CMP_UPDATE_BASE' );
+cmp_assert_eq( CMP_Updater::manifest_url( 'beta' ), 'https://biscuitwp.rt.md/manifest-beta.json', 'manifest_url: default base without CMP_UPDATE_BASE' );
 
 // fetch_manifest from the network: limits, anti-rollback counter, state.
 cmp_t_reset_wp( array( 'cmp_update_state' => array( 'expired' => true, 'revoked_installed' => false, 'no_sodium' => false ) ) );
@@ -418,10 +478,10 @@ $t_issued = $cmp_now - 86400;
 $t_json   = cmp_t_manifest( array( 'channel' => 'beta', 'revoked' => array( CMP_VERSION ) ) );
 cmp_t_reset_wp( array( 'cmp_manifest_issued' => array( 'stable' => 5, 'beta' => $t_issued - 10 ) ) );
 $GLOBALS['cmp_upd_http']['handler'] = function ( $url, $args ) use ( $t_json ) {
-	if ( 'https://consent.rt.md/manifest-beta.json' === $url ) {
+	if ( 'https://biscuitwp.rt.md/manifest-beta.json' === $url ) {
 		return array( 'response' => array( 'code' => 200 ), 'body' => $t_json );
 	}
-	if ( 'https://consent.rt.md/manifest-beta.json.sig' === $url ) {
+	if ( 'https://biscuitwp.rt.md/manifest-beta.json.sig' === $url ) {
 		return array( 'response' => array( 'code' => 200 ), 'body' => cmp_t_sign( $t_json, $GLOBALS['cmp_kp_m'] ) . "\n" );
 	}
 	return array( 'response' => array( 'code' => 404 ), 'body' => '' );
@@ -429,7 +489,7 @@ $GLOBALS['cmp_upd_http']['handler'] = function ( $url, $args ) use ( $t_json ) {
 $r = CMP_Updater::fetch_manifest();
 cmp_assert_eq( $r['status'], 'ok', 'fetch_manifest: signed manifest from the network -> ok' );
 $t_urls = array_column( $GLOBALS['cmp_upd_http']['calls'], 'url' );
-cmp_assert_eq( $t_urls, array( 'https://consent.rt.md/manifest-beta.json', 'https://consent.rt.md/manifest-beta.json.sig' ), 'fetch_manifest: GET manifest + .sig of the channel, no query string' );
+cmp_assert_eq( $t_urls, array( 'https://biscuitwp.rt.md/manifest-beta.json', 'https://biscuitwp.rt.md/manifest-beta.json.sig' ), 'fetch_manifest: GET manifest + .sig of the channel, no query string' );
 foreach ( $GLOBALS['cmp_upd_http']['calls'] as $t_c ) {
 	cmp_assert_eq( isset( $t_c['args']['limit_response_size'] ) ? $t_c['args']['limit_response_size'] : null, CMP_Updater::MAX_MANIFEST, 'fetch_manifest: limit_response_size = MAX_MANIFEST on ' . basename( $t_c['url'] ) );
 	cmp_assert_eq( $t_c['args']['user-agent'], 'Consent-Manager-Pro/' . CMP_VERSION, 'fetch_manifest: anonymous user-agent on ' . basename( $t_c['url'] ) );
@@ -469,7 +529,7 @@ cmp_assert_eq( get_site_option( 'cmp_manifest_issued' ), array( 'beta' => $t_iss
 cmp_t_reset_wp();
 set_site_transient( CMP_Updater::CACHE_KEY, array( 'channel' => 'stable', 'json' => 'x', 'sig' => 'y' ), 21600 );
 CMP_Updater::fetch_manifest();
-cmp_assert_eq( array_column( $GLOBALS['cmp_upd_http']['calls'], 'url' ), array( 'https://consent.rt.md/manifest-beta.json' ), 'fetch_manifest: cache of another channel -> refetched (manifest failed, so no .sig request)' );
+cmp_assert_eq( array_column( $GLOBALS['cmp_upd_http']['calls'], 'url' ), array( 'https://biscuitwp.rt.md/manifest-beta.json' ), 'fetch_manifest: cache of another channel -> refetched (manifest failed, so no .sig request)' );
 
 // No sodium -> no_sodium saved, no request.
 cmp_t_reset_wp( array( 'cmp_update_state' => array( 'expired' => true, 'revoked_installed' => true, 'no_sodium' => false ) ) );
@@ -595,6 +655,244 @@ cmp_assert_eq( $u['requires_php'], '7.4', 'update_check: requires_php' );
 cmp_assert_eq( $u['tested'], '6.9', 'update_check: tested (from tested_wp)' );
 cmp_assert_eq( $u['requires'], '6.0', 'update_check: requires (from requires_wp)' );
 cmp_assert( isset( $u['id'], $u['url'] ), 'update_check: id and url present' );
+cmp_assert_eq( $u['id'], 'biscuitwp.rt.md/consent-manager-pro', 'update_check: id on the update host' );
+cmp_assert_eq( $u['url'], 'https://biscuitwp.rt.md/', 'update_check: url is the public site' );
+cmp_assert_eq( CMP_Updater::SECURITY_URL, 'https://biscuitwp.rt.md/securitate/', 'SECURITY_URL on the new site' );
+
+// Two entry files with the same header in one folder (<folder>/biscuitwp.php and
+// <folder>/consent-manager-pro.php): get_plugins() lists both, so wp_update_plugins()
+// asks about each and the upgrader may install through either. Both are ours, in
+// either folder, whichever one is active; nothing else is.
+$t_legacy_file = 'consent-manager-pro/consent-manager-pro.php';
+$t_legacy_sib  = 'consent-manager-pro/biscuitwp.php';
+cmp_assert_eq( CMP_Updater::sibling( 'consent-manager-pro/consent-manager-pro.php' ), 'consent-manager-pro/biscuitwp.php', 'sibling: consent-manager-pro.php -> biscuitwp.php in the same folder' );
+cmp_assert_eq( CMP_Updater::sibling( 'consent-manager-pro/biscuitwp.php' ), 'consent-manager-pro/consent-manager-pro.php', 'sibling: biscuitwp.php -> consent-manager-pro.php (old folder)' );
+cmp_assert_eq( CMP_Updater::sibling( 'biscuitwp/biscuitwp.php' ), 'biscuitwp/consent-manager-pro.php', 'sibling: biscuitwp/biscuitwp.php -> biscuitwp/consent-manager-pro.php' );
+cmp_assert_eq( CMP_Updater::sibling( 'biscuitwp/consent-manager-pro.php' ), 'biscuitwp/biscuitwp.php', 'sibling: biscuitwp/consent-manager-pro.php -> biscuitwp/biscuitwp.php' );
+cmp_assert_eq( CMP_Updater::sibling( 'akismet/akismet.php' ), '', 'sibling: any other file name has none' );
+cmp_assert_eq( CMP_Updater::sibling( 'biscuitwp.php' ), '', 'sibling: a file without a folder has none' );
+foreach ( array( $t_legacy_file, $t_legacy_sib, 'biscuitwp/biscuitwp.php', 'biscuitwp/consent-manager-pro.php' ) as $t_active ) {
+	cmp_t_seam( array( 'file' => $t_active ) + $cmp_seam );
+	$t_sib = CMP_Updater::sibling( $t_active );
+	cmp_assert( CMP_Updater::owns( $t_active ) && CMP_Updater::owns( $t_sib ), "owns ($t_active active): the active file and its sibling" );
+	cmp_assert( ! CMP_Updater::owns( 'akismet/akismet.php' ) && ! CMP_Updater::owns( '' ) && ! CMP_Updater::owns( null ), "owns ($t_active active): not other plugins" );
+	$t_other_dir = 0 === strpos( $t_active, 'biscuitwp/' ) ? 'consent-manager-pro' : 'biscuitwp';
+	cmp_assert( ! CMP_Updater::owns( $t_other_dir . '/biscuitwp.php' ) && ! CMP_Updater::owns( $t_other_dir . '/consent-manager-pro.php' ), "owns ($t_active active): not the entry files of another folder" );
+	$u1 = CMP_Updater::update_check( false, array(), $t_active, array() );
+	$u2 = CMP_Updater::update_check( false, array(), $t_sib, array() );
+	cmp_assert( is_array( $u1 ) && is_array( $u2 ) && '1.0.0' === $u1['version'] && $u1 === $u2, "update_check ($t_active active): the active file and its sibling get the same update" );
+	cmp_assert_eq( CMP_Updater::update_check( false, array(), $t_other_dir . '/biscuitwp.php', array() ), false, "update_check ($t_active active): an entry file in another folder is not ours" );
+}
+cmp_t_seam( array( 'file' => $t_legacy_file ) + $cmp_seam );
+cmp_assert_eq( CMP_Updater::file(), $t_legacy_file, 'not moved: file() is the active legacy path' );
+
+// One update entry offered: the inactive sibling's entry is dropped on read
+// (WordPress files one under each sibling), so nobody updates through it.
+$t_src_upd = file_get_contents( __DIR__ . '/../includes/modules/class-updater.php' );
+cmp_assert( false !== strpos( $t_src_upd, "add_filter( 'site_transient_update_plugins', array( __CLASS__, 'filter_update_transient' ) );" ) && false === strpos( $t_src_upd, 'rekey_update_transient' ), 'register: update_plugins read filter (single entry), no manual copy' );
+$t_ut_mk = function ( array $resp, array $nu = array() ) {
+	$t            = new stdClass();
+	$t->checked   = array( 'consent-manager-pro/consent-manager-pro.php' => '1.1.0', 'consent-manager-pro/biscuitwp.php' => '1.1.0', 'akismet/akismet.php' => '5.0' );
+	$t->response  = array();
+	$t->no_update = array();
+	foreach ( $resp as $k ) {
+		$t->response[ $k ] = (object) array( 'plugin' => $k, 'new_version' => '1.2.0' );
+	}
+	foreach ( $nu as $k ) {
+		$t->no_update[ $k ] = (object) array( 'plugin' => $k, 'new_version' => '1.1.0' );
+	}
+	return $t;
+};
+foreach ( array( $t_legacy_file, $t_legacy_sib, 'biscuitwp/biscuitwp.php', 'biscuitwp/consent-manager-pro.php' ) as $t_active ) {
+	$t_sib = CMP_Updater::sibling( $t_active );
+	$t_in  = $t_ut_mk( array( 'akismet/akismet.php', $t_sib, $t_active ), array( $t_sib, $t_active ) );
+	$t_out = CMP_Updater::single_entry( $t_in, $t_active );
+	cmp_assert_eq( array_keys( $t_out->response ), array( 'akismet/akismet.php', $t_active ), "update entries ($t_active active): the sibling's response entry dropped, others kept" );
+	cmp_assert_eq( array_keys( $t_out->no_update ), array( $t_active ), "update entries ($t_active active): the sibling's no_update entry dropped" );
+	cmp_assert( isset( $t_in->response[ $t_sib ] ) && $t_out->checked === $t_in->checked, "update entries ($t_active active): input object untouched, checked kept" );
+	$t_out = CMP_Updater::single_entry( $t_ut_mk( array( 'akismet/akismet.php', $t_sib, 'hello.php' ) ), $t_active );
+	cmp_assert( array( 'akismet/akismet.php', $t_active, 'hello.php' ) === array_keys( $t_out->response ) && $t_active === $t_out->response[ $t_active ]->plugin && '1.2.0' === $t_out->response[ $t_active ]->new_version, "update entries ($t_active active): only the sibling has one -> moved to the active key, in place" );
+}
+$t_arr                                   = $t_ut_mk( array() );
+$t_arr->response[ $t_legacy_sib ]        = array( 'plugin' => $t_legacy_sib, 'new_version' => '1.2.0' );
+$t_out                                   = CMP_Updater::single_entry( $t_arr, $t_legacy_file );
+cmp_assert( isset( $t_out->response[ $t_legacy_file ]['plugin'] ) && $t_legacy_file === $t_out->response[ $t_legacy_file ]['plugin'] && ! isset( $t_out->response[ $t_legacy_sib ] ), 'update entries: array-shaped entry moved too' );
+cmp_assert_eq( CMP_Updater::single_entry( false, $t_legacy_file ), false, 'update entries: no transient passes through' );
+$t_plain = $t_ut_mk( array( 'akismet/akismet.php' ) );
+cmp_assert( CMP_Updater::single_entry( $t_plain, $t_legacy_file ) == $t_plain && CMP_Updater::single_entry( $t_plain, 'weird.php' ) == $t_plain, 'update entries: nothing of ours, or no sibling name -> unchanged' );
+cmp_t_seam( array( 'file' => $t_legacy_file, 'core_check' => true ) + $cmp_seam );
+$t_both = $t_ut_mk( array( $t_legacy_file, $t_legacy_sib ) );
+cmp_assert( CMP_Updater::filter_update_transient( $t_both ) == $t_both, 'filter: inside core update check, the transient is read as stored' );
+cmp_t_seam( array( 'file' => $t_legacy_file, 'core_check' => false ) + $cmp_seam );
+cmp_assert_eq( array_keys( CMP_Updater::filter_update_transient( $t_both )->response ), array( $t_legacy_file ), 'filter: elsewhere, one entry (the active file)' );
+cmp_t_seam( $cmp_seam );
+cmp_assert_eq( CMP_Updater::in_core_update_check(), false, 'in_core_update_check: false outside WordPress actions' );
+foreach ( array( 'load-plugins.php', 'load-update.php', 'load-update-core.php', 'wp_update_plugins' ) as $t_hook ) {
+	cmp_assert( false !== strpos( $t_src_upd, "'" . $t_hook . "'" ), "in_core_update_check: covers {$t_hook}" );
+}
+cmp_assert( false === strpos( $t_src_upd, 'is_legacy' ) && false === strpos( $t_src_upd, 'CMP_LEGACY_LOAD' ), 'updater: nothing depends on how the plugin was loaded' );
+
+// fix_source_dir: hook_extra['plugin'] is either entry file; the extracted
+// biscuitwp/ (Task 3 zip) is renamed to the plugin's existing folder.
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $s ) { return rtrim( $s, '/\\' ) . '/'; }
+}
+if ( ! function_exists( 'untrailingslashit' ) ) {
+	function untrailingslashit( $s ) { return rtrim( $s, '/\\' ); }
+}
+$t_fs_prev = isset( $GLOBALS['wp_filesystem'] ) ? $GLOBALS['wp_filesystem'] : null;
+$GLOBALS['wp_filesystem'] = new class() {
+	public function exists( $p ) { return file_exists( $p ); }
+	public function delete( $p, $r = false ) { return false; }
+	public function move( $a, $b ) { return rename( $a, $b ); }
+};
+$t_fsd = function ( $seam, $plugin ) use ( $cmp_seam ) {
+	$dir = realpath( sys_get_temp_dir() ) . '/cmp-fsd-' . getmypid() . '-' . mt_rand();
+	@mkdir( $dir . '/upgrade/biscuitwp', 0777, true );
+	file_put_contents( $dir . '/upgrade/biscuitwp/biscuitwp.php', '<?php' );
+	cmp_t_seam( $seam + $cmp_seam );
+	$ret   = CMP_Updater::fix_source_dir( $dir . '/upgrade/biscuitwp/', $dir . '/upgrade', null, array( 'plugin' => $plugin ) );
+	$moved = is_file( $dir . '/upgrade/consent-manager-pro/biscuitwp.php' ) && ! is_dir( $dir . '/upgrade/biscuitwp' );
+	$ret   = str_replace( $dir, '<dir>', (string) $ret );
+	foreach ( array( 'consent-manager-pro', 'biscuitwp' ) as $d ) {
+		@unlink( $dir . '/upgrade/' . $d . '/biscuitwp.php' );
+		@rmdir( $dir . '/upgrade/' . $d );
+	}
+	@rmdir( $dir . '/upgrade' );
+	@rmdir( $dir );
+	return array( $ret, $moved );
+};
+$t_legacy_seam = array( 'file' => $t_legacy_file );
+list( $t_r, $t_m ) = $t_fsd( $t_legacy_seam, $t_legacy_file );
+cmp_assert( '<dir>/upgrade/consent-manager-pro/' === $t_r && $t_m, 'fix_source_dir (not moved, active key): extracted biscuitwp/ becomes consent-manager-pro/' );
+list( $t_r, $t_m ) = $t_fsd( $t_legacy_seam, $t_legacy_sib );
+cmp_assert( '<dir>/upgrade/consent-manager-pro/' === $t_r && $t_m, 'fix_source_dir (not moved, sibling key): extracted biscuitwp/ becomes consent-manager-pro/' );
+list( $t_r, $t_m ) = $t_fsd( array( 'file' => $t_legacy_sib ), $t_legacy_file );
+cmp_assert( '<dir>/upgrade/consent-manager-pro/' === $t_r && $t_m, 'fix_source_dir (biscuitwp.php active in the old folder, sibling key): installs in place' );
+list( $t_r, $t_m ) = $t_fsd( $t_legacy_seam, 'akismet/akismet.php' );
+cmp_assert( '<dir>/upgrade/biscuitwp/' === $t_r && ! $t_m, 'fix_source_dir: a plugin we do not own is ignored' );
+list( $t_r, $t_m ) = $t_fsd( $t_legacy_seam, 'biscuitwp/biscuitwp.php' );
+cmp_assert( '<dir>/upgrade/biscuitwp/' === $t_r && ! $t_m, 'fix_source_dir (not moved): biscuitwp.php in another folder is not ours' );
+// Moved site (biscuitwp/biscuitwp.php active): an extracted folder with any
+// other name (e.g. a GitHub source zip consent-manager-pro-1.1.0/) becomes biscuitwp/,
+// through either entry file.
+foreach ( array( 'biscuitwp/biscuitwp.php', 'biscuitwp/consent-manager-pro.php' ) as $t_key ) {
+	$t_dir = realpath( sys_get_temp_dir() ) . '/cmp-fsd2-' . getmypid() . '-' . mt_rand();
+	@mkdir( $t_dir . '/upgrade/consent-manager-pro-1.1.0', 0777, true );
+	file_put_contents( $t_dir . '/upgrade/consent-manager-pro-1.1.0/biscuitwp.php', '<?php' );
+	cmp_t_seam( array( 'file' => 'biscuitwp/biscuitwp.php' ) + $cmp_seam );
+	$t_r = str_replace( $t_dir, '<dir>', (string) CMP_Updater::fix_source_dir( $t_dir . '/upgrade/consent-manager-pro-1.1.0/', $t_dir . '/upgrade', null, array( 'plugin' => $t_key ) ) );
+	$t_m = is_file( $t_dir . '/upgrade/biscuitwp/biscuitwp.php' ) && ! is_dir( $t_dir . '/upgrade/consent-manager-pro-1.1.0' );
+	cmp_assert( '<dir>/upgrade/biscuitwp/' === $t_r && $t_m, "fix_source_dir (moved site, $t_key): extracted consent-manager-pro-1.1.0/ becomes biscuitwp/" );
+	$t_r = str_replace( $t_dir, '<dir>', (string) CMP_Updater::fix_source_dir( $t_dir . '/upgrade/biscuitwp/', $t_dir . '/upgrade', null, array( 'plugin' => $t_key ) ) );
+	cmp_assert( '<dir>/upgrade/biscuitwp/' === $t_r && is_file( $t_dir . '/upgrade/biscuitwp/biscuitwp.php' ), "fix_source_dir (moved site, $t_key): extracted biscuitwp/ is already in place" );
+	foreach ( array( 'consent-manager-pro-1.1.0', 'biscuitwp' ) as $t_d ) {
+		@unlink( $t_dir . '/upgrade/' . $t_d . '/biscuitwp.php' );
+		@rmdir( $t_dir . '/upgrade/' . $t_d );
+	}
+	@rmdir( $t_dir . '/upgrade' );
+	@rmdir( $t_dir );
+}
+// R1-I1: the rename to the installed folder fails (or there is no filesystem):
+// our plugin gets a WP_Error, so core aborts before touching the installed plugin.
+$t_fsfail = function ( $fs, $plugin, $active = 'biscuitwp/biscuitwp.php' ) use ( $cmp_seam ) {
+	$dir = realpath( sys_get_temp_dir() ) . '/cmp-fsd3-' . getmypid() . '-' . mt_rand();
+	@mkdir( $dir . '/upgrade/consent-manager-pro', 0777, true );
+	file_put_contents( $dir . '/upgrade/consent-manager-pro/biscuitwp.php', '<?php' );
+	$GLOBALS['wp_filesystem'] = $fs;
+	cmp_t_seam( array( 'file' => $active ) + $cmp_seam );
+	$ret = CMP_Updater::fix_source_dir( $dir . '/upgrade/consent-manager-pro/', $dir . '/upgrade', null, array( 'plugin' => $plugin ) );
+	$kept = is_file( $dir . '/upgrade/consent-manager-pro/biscuitwp.php' );
+	@unlink( $dir . '/upgrade/consent-manager-pro/biscuitwp.php' );
+	@rmdir( $dir . '/upgrade/consent-manager-pro' );
+	@rmdir( $dir . '/upgrade' );
+	@rmdir( $dir );
+	return array( is_string( $ret ) ? str_replace( $dir, '<dir>', $ret ) : $ret, $kept );
+};
+$t_nomove = new class() {
+	public function exists( $p ) { return false; }
+	public function delete( $p, $r = false ) { return false; }
+	public function move( $a, $b ) { return false; }
+};
+foreach ( array( 'biscuitwp/biscuitwp.php', 'biscuitwp/consent-manager-pro.php' ) as $t_key ) {
+	list( $t_r, $t_k ) = $t_fsfail( $t_nomove, $t_key );
+	cmp_assert( is_wp_error( $t_r ) && 'cmp_source_dir' === $t_r->get_error_code() && $t_k, "fix_source_dir (R1-I1, $t_key): rename fails -> WP_Error cmp_source_dir, extracted folder left alone" );
+}
+list( $t_r, $t_k ) = $t_fsfail( null, 'biscuitwp/biscuitwp.php' );
+cmp_assert( is_wp_error( $t_r ), 'fix_source_dir (R1-I1): no filesystem object -> WP_Error' );
+list( $t_r, $t_k ) = $t_fsfail( $t_nomove, 'akismet/akismet.php' );
+cmp_assert( '<dir>/upgrade/consent-manager-pro/' === $t_r, 'fix_source_dir (R1-I1): another plugin is returned untouched even when a move would fail' );
+list( $t_r, $t_k ) = $t_fsfail( $t_nomove, 'consent-manager-pro/consent-manager-pro.php', 'consent-manager-pro/consent-manager-pro.php' );
+cmp_assert( '<dir>/upgrade/consent-manager-pro/' === $t_r, 'fix_source_dir (R1-I1): no rename needed (folder already matches) -> source returned, no error' );
+$GLOBALS['wp_filesystem'] = $t_fs_prev;
+
+// verified_download: both entry files count as ours ($by_hook): a foreign URL is
+// refused for either, a plugin we do not own is left alone.
+foreach ( array( $t_legacy_file, 'biscuitwp/biscuitwp.php' ) as $t_active ) {
+	cmp_t_seam( array( 'file' => $t_active ) + $cmp_seam );
+	cmp_assert( is_wp_error( CMP_Updater::verified_download( false, 'https://evil.example/x.zip', null, array( 'plugin' => CMP_Updater::sibling( $t_active ) ) ) ), "verified_download ($t_active active): the sibling is ours, foreign URL refused" );
+	cmp_assert( is_wp_error( CMP_Updater::verified_download( false, 'https://evil.example/x.zip', null, array( 'plugin' => $t_active ) ) ), "verified_download ($t_active active): the active file is ours, foreign URL refused" );
+	cmp_assert_eq( CMP_Updater::verified_download( false, 'https://example.com/a.zip', null, array( 'plugin' => 'akismet/akismet.php' ) ), false, "verified_download ($t_active active): a plugin we do not own is left alone" );
+}
+
+// auto_update_plugin (PHP_INT_MAX): the sibling that is not active is never
+// auto-updated; the active file and every other plugin keep the decision.
+foreach ( array( $t_legacy_file, $t_legacy_sib, 'biscuitwp/biscuitwp.php', 'biscuitwp/consent-manager-pro.php' ) as $t_active ) {
+	cmp_t_seam( array( 'file' => $t_active ) + $cmp_seam );
+	$t_sib = CMP_Updater::sibling( $t_active );
+	cmp_assert( false === CMP_Updater::skip_duplicate_auto_update( true, (object) array( 'plugin' => $t_sib ) ) && false === CMP_Updater::skip_duplicate_auto_update( null, array( 'plugin' => $t_sib ) ), "auto_update_plugin ($t_active active): the inactive sibling -> false (object and array items)" );
+	cmp_assert( true === CMP_Updater::skip_duplicate_auto_update( true, (object) array( 'plugin' => $t_active ) ) && false === CMP_Updater::skip_duplicate_auto_update( false, (object) array( 'plugin' => $t_active ) ) && null === CMP_Updater::skip_duplicate_auto_update( null, (object) array( 'plugin' => $t_active ) ), "auto_update_plugin ($t_active active): the active file passes the decision through" );
+}
+cmp_t_seam( array( 'file' => $t_legacy_file ) + $cmp_seam );
+cmp_assert_eq( CMP_Updater::skip_duplicate_auto_update( true, (object) array( 'plugin' => 'akismet/akismet.php' ) ), true, 'auto_update_plugin: other plugin passes through' );
+cmp_assert_eq( CMP_Updater::skip_duplicate_auto_update( true, (object) array( 'plugin' => 'biscuitwp/biscuitwp.php' ) ), true, 'auto_update_plugin: biscuitwp.php in another folder passes through' );
+cmp_assert_eq( CMP_Updater::skip_duplicate_auto_update( true, (object) array() ), true, 'auto_update_plugin: item without plugin passes through' );
+cmp_t_seam( $cmp_seam );
+cmp_assert( false !== strpos( $t_src_upd, "add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_duplicate_auto_update' ), PHP_INT_MAX, 2 );" ) && false !== strpos( $t_src_upd, "add_filter( 'wp_get_update_data', array( __CLASS__, 'filter_update_data' ), 10, 2 );" ), 'register: auto_update_plugin (PHP_INT_MAX) and wp_get_update_data filters, on every load' );
+cmp_assert_eq( substr_count( $t_src_upd, "'auto_update_plugin'" ), 1, 'register: auto_update_plugin registered in one place' );
+
+// wp_get_update_data: our plugin counted once.
+$t_ud = array(
+	'counts' => array( 'plugins' => 3, 'themes' => 1, 'wordpress' => 0, 'translations' => 0, 'total' => 4 ),
+	'title'  => '3 Plugin Updates, 1 Theme Update',
+);
+$t_ut = array( 'plugins' => '3 Plugin Updates', 'themes' => '1 Theme Update' );
+$t_dd = CMP_Updater::dedupe_update_data( $t_ud, $t_ut, true );
+cmp_assert( 2 === $t_dd['counts']['plugins'] && 3 === $t_dd['counts']['total'] && 1 === $t_dd['counts']['themes'], 'update data (duplicate): plugins and total minus 1, others kept' );
+cmp_assert_eq( $t_dd['title'], '2 Plugin Updates, 1 Theme Update', 'update data (duplicate): title rebuilt with the new plugin count' );
+cmp_assert_eq( CMP_Updater::dedupe_update_data( $t_ud, $t_ut, false ), $t_ud, 'update data (no duplicate): unchanged' );
+$t_ud1 = array( 'counts' => array( 'plugins' => 2, 'themes' => 0, 'wordpress' => 0, 'translations' => 0, 'total' => 2 ), 'title' => '2 Plugin Updates' );
+$t_dd  = CMP_Updater::dedupe_update_data( $t_ud1, array( 'plugins' => '2 Plugin Updates' ), true );
+cmp_assert( 1 === $t_dd['counts']['plugins'] && 1 === $t_dd['counts']['total'] && '1 Plugin Update' === $t_dd['title'], 'update data (duplicate): 2 -> 1, singular title' );
+$t_ud0 = array( 'counts' => array( 'plugins' => 0, 'themes' => 0, 'wordpress' => 0, 'translations' => 0, 'total' => 0 ), 'title' => '' );
+cmp_assert_eq( CMP_Updater::dedupe_update_data( $t_ud0, array(), true ), $t_ud0, 'update data (duplicate claimed, counts already 0): never below 0, unchanged' );
+cmp_assert_eq( CMP_Updater::dedupe_update_data( array( 'title' => 'x' ), array(), true ), array( 'title' => 'x' ), 'update data: malformed input passes through' );
+
+// filter_update_data reads the update_plugins transient: both siblings -> counted once.
+$t_mk = function ( array $keys ) {
+	$t           = new stdClass();
+	$t->checked  = array();
+	$t->response = array( 'akismet/akismet.php' => (object) array( 'plugin' => 'akismet/akismet.php' ) );
+	foreach ( $keys as $k ) {
+		$t->response[ $k ] = (object) array( 'plugin' => $k, 'new_version' => '1.1.0' );
+	}
+	return $t;
+};
+$t_un_prev = $GLOBALS['cmp_un'];
+foreach ( array( $t_legacy_file, 'biscuitwp/biscuitwp.php' ) as $t_active ) {
+	cmp_t_seam( array( 'file' => $t_active ) + $cmp_seam );
+	$t_sib = CMP_Updater::sibling( $t_active );
+	$GLOBALS['cmp_un']['site']['_site_transient_update_plugins'] = $t_mk( array( $t_active, $t_sib ) );
+	$t_dd = CMP_Updater::filter_update_data( $t_ud, $t_ut );
+	cmp_assert( 2 === $t_dd['counts']['plugins'] && 3 === $t_dd['counts']['total'], "filter_update_data ($t_active active, both siblings pending): counted once" );
+	$GLOBALS['cmp_un']['site']['_site_transient_update_plugins'] = $t_mk( array( $t_active ) );
+	cmp_assert_eq( CMP_Updater::filter_update_data( $t_ud, $t_ut ), $t_ud, "filter_update_data ($t_active active, one key only): unchanged" );
+	$GLOBALS['cmp_un']['site']['_site_transient_update_plugins'] = $t_mk( array() );
+	cmp_assert_eq( CMP_Updater::filter_update_data( $t_ud, $t_ut ), $t_ud, "filter_update_data ($t_active active, no update of ours): unchanged" );
+}
+cmp_t_seam( $cmp_seam );
+$GLOBALS['cmp_un'] = $t_un_prev;
+cmp_t_seam( $cmp_seam );
 cmp_t_reset_wp();
 cmp_t_cache_manifest( array( 'version' => CMP_VERSION ) );
 // ok without an offer: an entry WordPress files under no_update (enables the auto-update toggle).
@@ -635,7 +933,7 @@ cmp_assert( is_object( $t_info ), 'plugin_info: our slug -> object' );
 cmp_assert_eq( $t_info->slug, 'consent-manager-pro', 'plugin_info: slug' );
 cmp_assert_eq( $t_info->version, '1.0.0', 'plugin_info: version' );
 cmp_assert_eq( $t_info->name, 'BiscuitWP', 'plugin_info: name' );
-cmp_assert_eq( $t_info->homepage, 'https://consent.rt.md/', 'plugin_info: homepage' );
+cmp_assert_eq( $t_info->homepage, 'https://biscuitwp.rt.md/', 'plugin_info: homepage' );
 cmp_assert_eq( $t_info->requires, '6.0', 'plugin_info: requires' );
 cmp_assert_eq( $t_info->requires_php, '7.4', 'plugin_info: requires_php' );
 cmp_assert_eq( $t_info->tested, '6.9', 'plugin_info: tested' );
@@ -673,6 +971,8 @@ $t_e = CMP_Updater::verified_download( false, 'https://evil.example/consent-mana
 cmp_assert( is_wp_error( $t_e ), 'verified_download: our plugin (hook_extra) with a foreign URL -> WP_Error' );
 $t_e = CMP_Updater::verified_download( '/tmp/someone-else.zip', CMP_Updater::PACKAGE_PREFIX . 'v0.0.1/x.zip', null, array() );
 cmp_assert( is_wp_error( $t_e ), 'verified_download: our prefix, $reply already set by someone else -> still WP_Error' );
+$t_e = CMP_Updater::verified_download( false, 'https://github.com/rtdesignstudio/biscuitwp/releases/download/v0.0.1/consent-manager-pro.zip', null, array() );
+cmp_assert( is_wp_error( $t_e ), 'verified_download: renamed-repo prefix is ours too (by URL) but not the manifest package -> WP_Error' );
 cmp_assert_eq( count( $GLOBALS['cmp_upd_http']['calls'] ), 0, 'verified_download: refused packages are never downloaded' );
 
 $t_zip_bytes = 'PK good zip';
@@ -712,11 +1012,11 @@ cmp_assert_eq( CMP_Updater::notices( $t_none, 'plugins.php', $t_up ), array(), '
 $t_n = CMP_Updater::notices( array( 'revoked_installed' => true ) + $t_none, 'index.php', $t_up );
 cmp_assert_eq( count( $t_n ), 1, 'notices: revoked shows on every admin screen (dashboard)' );
 cmp_assert( false !== strpos( $t_n[0], 'Versiunea ' . CMP_VERSION . ' a fost retrasă din motive de siguranță și trebuie actualizată.' ), 'notices: revoked text names the installed version' );
-cmp_assert( false !== strpos( $t_n[0], 'https://consent.rt.md/securitate/' ) && false !== strpos( $t_n[0], $t_up ), 'notices: revoked links to updates and the security page' );
+cmp_assert( false !== strpos( $t_n[0], 'https://biscuitwp.rt.md/securitate/' ) && false !== strpos( $t_n[0], $t_up ), 'notices: revoked links to updates and the security page' );
 cmp_assert( false !== strpos( $t_n[0], 'notice-error' ), 'notices: revoked is an error notice' );
 cmp_assert_eq( CMP_Updater::notices( array( 'expired' => true ) + $t_none, 'index.php', $t_up ), array(), 'notices: expired hidden on the dashboard' );
 $t_n = CMP_Updater::notices( array( 'expired' => true ) + $t_none, 'plugins.php', $t_up );
-cmp_assert( 1 === count( $t_n ) && false !== strpos( $t_n[0], 'Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne.' ) && false !== strpos( $t_n[0], 'https://consent.rt.md/securitate/' ), 'notices: expired on plugins.php with the security link' );
+cmp_assert( 1 === count( $t_n ) && false !== strpos( $t_n[0], 'Update-urile nu pot fi verificate acum. Dacă mesajul persistă câteva zile, scrie-ne.' ) && false !== strpos( $t_n[0], 'https://biscuitwp.rt.md/securitate/' ), 'notices: expired on plugins.php with the security link' );
 cmp_assert_eq( count( CMP_Updater::notices( array( 'expired' => true ) + $t_none, 'consent-manager_page_cmp-services', $t_up ) ), 1, 'notices: expired on the plugin screens (hook contains cmp-)' );
 cmp_assert_eq( count( CMP_Updater::notices( array( 'expired' => true ) + $t_none, 'toplevel_page_cmp-settings', $t_up ) ), 1, 'notices: expired on the settings screen' );
 cmp_assert_eq( CMP_Updater::notices( array( 'no_sodium' => true ) + $t_none, 'consent-manager_page_cmp-services', $t_up ), array(), 'notices: no_sodium hidden outside plugins.php' );
@@ -744,14 +1044,14 @@ cmp_assert_eq( CMP_Updater::manifest_url( 'stable' ), 'https://staging.example/c
 cmp_assert_eq( CMP_Updater::PACKAGE_PREFIX, 'https://github.com/rtdesignstudio/consent-manager-pro/releases/download/', 'CMP_UPDATE_BASE does not change PACKAGE_PREFIX' );
 $t_base = new ReflectionMethod( 'CMP_Updater', 'base' );
 $t_base->setAccessible( true );
-cmp_assert_eq( $t_base->invoke( null, 'http://staging.example/' ), 'https://consent.rt.md/', 'base: http override ignored' );
-cmp_assert_eq( $t_base->invoke( null, '' ), 'https://consent.rt.md/', 'base: empty override ignored' );
-cmp_assert_eq( $t_base->invoke( null, array( 'https://x/' ) ), 'https://consent.rt.md/', 'base: non-string override ignored' );
+cmp_assert_eq( $t_base->invoke( null, 'http://staging.example/' ), 'https://biscuitwp.rt.md/', 'base: http override ignored' );
+cmp_assert_eq( $t_base->invoke( null, '' ), 'https://biscuitwp.rt.md/', 'base: empty override ignored' );
+cmp_assert_eq( $t_base->invoke( null, array( 'https://x/' ) ), 'https://biscuitwp.rt.md/', 'base: non-string override ignored' );
 cmp_assert_eq( $t_base->invoke( null, 'https://staging.example/a/' ), 'https://staging.example/a/', 'base: https override kept (one trailing slash)' );
 
 // Multisite: "Caută actualizări" on the network Plugins screen, and back to it.
 $t_admin = file_get_contents( __DIR__ . '/../includes/admin/class-admin.php' );
-cmp_assert( false !== strpos( $t_admin, "add_filter( 'network_admin_plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( \$this, 'network_action_links' ) )" ), 'admin: check-updates link on the network Plugins screen' );
+cmp_assert( false !== strpos( $t_admin, "add_filter( 'network_admin_plugin_action_links_' . CMP_Plugin::basename(), array( \$this, 'network_action_links' ) )" ), 'admin: check-updates link on the network Plugins screen' );
 cmp_assert( 1 === preg_match( '/function network_action_links\( \$links \) \{.*cmp_check_updates.*\}/sU', $t_admin ), 'admin: network_action_links adds the check link' );
 cmp_assert( false !== strpos( $t_admin, "network_admin_url( 'plugins.php' )" ) && false !== strpos( $t_admin, "'/wp-admin/network/'" ), 'admin: check_updates returns to the network Plugins screen when started there' );
 cmp_assert( false !== strpos( $t_admin, "add_action( 'network_admin_notices', array( \$this, 'update_check_notice' ) )" ), 'admin: update_check_notice also on network_admin_notices' );

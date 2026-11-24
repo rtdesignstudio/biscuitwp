@@ -124,7 +124,7 @@ class CMP_Fonts {
 	 */
 	public static function localize() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_localize_fonts' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 
 		$home  = self::fetch( home_url( '/' ) );
@@ -183,7 +183,7 @@ class CMP_Fonts {
 	/** Admin action: delete the localized files and clear the map. */
 	public static function clear() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_clear_fonts' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$dir = self::dir();
 		if ( is_dir( $dir ) ) {

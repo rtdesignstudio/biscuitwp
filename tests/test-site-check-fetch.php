@@ -332,7 +332,7 @@ if ( $cmp_cf_port > 0 ) {
 	cmp_assert( isset( $r['headers']['set-cookie'] ) && is_array( $r['headers']['set-cookie'] ) && 2 === count( $r['headers']['set-cookie'] ), 'fetch: both Set-Cookie headers kept' );
 	cmp_assert( isset( $r['headers']['content-type'] ) && 0 === strpos( $r['headers']['content-type'], 'text/html' ), 'fetch: Content-Type kept' );
 	$seen = preg_match( '#<pre id="seen">(.*?)</pre>#s', $r['body'], $m ) ? json_decode( html_entity_decode( $m[1] ), true ) : null;
-	cmp_assert( is_array( $seen ) && 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)' === $seen['ua'], 'fetch: sends our user-agent' );
+	cmp_assert( is_array( $seen ) && 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)' === $seen['ua'], 'fetch: sends our user-agent' );
 	cmp_assert( is_array( $seen ) && '' === $seen['cookie'], 'fetch: sends no cookies' );
 	cmp_assert( is_array( $seen ) && 0 === strpos( $seen['accept'], 'text/html' ), 'fetch: Accept text/html' );
 	cmp_assert( is_array( $seen ) && 0 === strpos( $seen['lang'], 'ro' ) && false !== strpos( $seen['lang'], 'en' ), 'fetch: Accept-Language ro, en' );
@@ -665,15 +665,17 @@ foreach ( array(
 	'same-site Sec-Fetch-Site'    => array( 'sec_fetch_site' => 'same-site' ),
 	'none Sec-Fetch-Site'         => array( 'sec_fetch_site' => 'none' ),
 	'foreign Origin'              => array( 'origin' => 'https://evil.example' ),
-	'http Origin'                 => array( 'origin' => 'http://consent.rt.md' ),
+	'http Origin'                 => array( 'origin' => 'http://biscuitwp.rt.md' ),
+	'old host Origin'             => array( 'origin' => 'https://consent.rt.md', 'sec_fetch_site' => 'same-origin' ),
 	'null Origin'                 => array( 'origin' => 'null' ),
 ) as $label => $over ) {
 	$r = cmp_check_handle( $cmp_cf_hreq( $over ), $cmp_cf_hd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
 	cmp_assert( 403 === $r['code'] && 'forbidden' === $r['body']['code'], "handle: {$label} -> 403" );
 }
 cmp_assert( ! file_exists( $cmp_cf_hd . '/global.cnt' ), 'handle: invalid URLs and refused cross-site requests are not counted globally' );
-$r = cmp_check_handle( $cmp_cf_hreq( array( 'origin' => 'https://consent.rt.md', 'sec_fetch_site' => 'same-origin' ) ), $cmp_cf_hd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
-cmp_assert( 200 === $r['code'], 'handle: same-origin request from https://consent.rt.md accepted' );
+$r = cmp_check_handle( $cmp_cf_hreq( array( 'origin' => 'https://biscuitwp.rt.md', 'sec_fetch_site' => 'same-origin' ) ), $cmp_cf_hd, $cmp_cf_svc, 1700000000, $cmp_cf_ok_fetch );
+cmp_assert( 200 === $r['code'], 'handle: same-origin request from https://biscuitwp.rt.md accepted' );
+cmp_assert_eq( cmp_check_allowed_origins(), array( 'https://biscuitwp.rt.md' ), 'handle: the only allowed origin is https://biscuitwp.rt.md' );
 $r = cmp_check_handle( $cmp_cf_hreq( array( 'origin' => 'http://127.0.0.1:8000' ) ), $cmp_cf_hd, $cmp_cf_svc, 1700000001, $cmp_cf_ok_fetch, array( 'http://127.0.0.1:8000' ) );
 cmp_assert( 200 === $r['code'], 'handle: the allowed origins can be injected (tests)' );
 cmp_assert_eq( $cmp_cf_hexcnt( $cmp_cf_hd ), 1, 'handle: one valid IPv4 request -> one per-IP file' );

@@ -1,32 +1,39 @@
 <?php
 /**
  * Plugin Name: BiscuitWP
- * Plugin URI: https://consent.rt.md/
+ * Plugin URI: https://biscuitwp.rt.md/
  * Description: Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN).
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires PHP: 7.4
  * Author: RT.md
  * Author URI: https://rt.md
  * License: GPL-2.0-or-later
- * Text Domain: consent-manager-pro
- * Update URI: https://consent.rt.md/
+ * Text Domain: biscuitwp
+ * Domain Path: /languages
+ * Update URI: https://biscuitwp.rt.md/
+ */
+
+/*
+ * Legacy entry file. Sites installed before BiscuitWP 1.1.0 have
+ * consent-manager-pro/consent-manager-pro.php as the active plugin path, so
+ * WordPress keeps loading this file until the folder move (CMP_Migrate_Folder)
+ * makes biscuitwp/biscuitwp.php the active one. It carries exactly the same
+ * plugin header as biscuitwp.php: WordPress deactivates an active plugin file
+ * without one (validate_active_plugins() on the Plugins screen). The Plugins
+ * list shows only the active one of the two (CMP_Plugin::fix_plugin_rows()).
+ * Stays in the package for good.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Release step: lot B (services library) must ship as >= 0.5.0, otherwise the
-// one-time "services now wait for consent" notice never fires (see
-// CMP_Plugin::maybe_upgrade). The DB schema does not depend on this value
-// (CMP_Installer::SCHEMA / cmp_db_schema).
-define( 'CMP_VERSION', '1.0.0' );
-define( 'CMP_PATH', plugin_dir_path( __FILE__ ) );
-define( 'CMP_URL', plugin_dir_url( __FILE__ ) );
+// Already loaded through biscuitwp.php in this request (e.g. multisite: one
+// path network-active, the other site-active): do nothing.
+if ( defined( 'CMP_VERSION' ) ) {
+	return;
+}
 
-require_once CMP_PATH . 'includes/class-plugin.php';
+define( 'CMP_ENTRY', __FILE__ );
 
-register_activation_hook( __FILE__, array( 'CMP_Plugin', 'activate' ) );
-register_deactivation_hook( __FILE__, array( 'CMP_Plugin', 'deactivate' ) );
-
-add_action( 'plugins_loaded', array( 'CMP_Plugin', 'instance' ) );
+require_once __DIR__ . '/biscuitwp.php';

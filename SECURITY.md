@@ -6,7 +6,7 @@ BiscuitWP handles consent records for site visitors, so we take security reports
 
 Please do not open a public issue for a security problem. Use one of two private channels:
 
-1. **GitHub private report (preferred):** <https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new>
+1. **GitHub private report (preferred):** <https://github.com/rtdesignstudio/biscuitwp/security/advisories/new>
 2. **Email:** [security@rt.md](mailto:security@rt.md)
 
 Include the plugin version, WordPress and PHP versions, what you found, how to reproduce it, and the impact you expect. A proof of concept helps. Please do not access data that is not yours and do not test on sites you do not own.
@@ -23,4 +23,4 @@ Security fixes ship in the **newest release**, which sites receive as an automat
 
 ## Updates and verification
 
-Releases are signed (Ed25519) and delivered from <https://consent.rt.md/> through a signed manifest. The public keys and how to verify a download by hand are on the security page: <https://consent.rt.md/en/security/> (Romanian: <https://consent.rt.md/securitate/>).
+Releases are signed (Ed25519) and delivered from <https://biscuitwp.rt.md/> through a signed manifest. The public keys and how to verify a download by hand are on the security page: <https://biscuitwp.rt.md/en/security/> (Romanian: <https://biscuitwp.rt.md/securitate/>).

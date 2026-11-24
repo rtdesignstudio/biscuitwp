@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the static public pages of consent.rt.md (B8b) from site/.
+# Build the static public pages of biscuitwp.rt.md (B8b) from site/.
 #
 #   bin/build-site.sh [--out <dir>]      default: release/site
 #
@@ -14,9 +14,10 @@
 #   api/services.json      a copy of data/services.json, for api/verifica.php;
 #   demo/cmp.min.{js,css}  copies of standalone/cmp.min.{js,css}, for the live demo;
 #   every page      <!-- DOWNLOAD_URL --> (any number of times): the download link,
-#                   https://github.com/rtdesignstudio/consent-manager-pro/releases/latest
-#                   when a stable manifest exists, else releases/tag/v<version> of the
-#                   beta manifest, else the releases page;
+#                   https://github.com/rtdesignstudio/biscuitwp/releases/latest/download/biscuitwp.zip
+#                   (the new-install zip of the latest stable release) when a stable
+#                   manifest of 1.1.0 or later exists (an older one: releases/latest), else releases/tag/v<version> of the beta manifest,
+#                   else the releases page;
 #   every page      <!-- HEADER page=<key> ro=<url> en=<url> ru=<url> --> and <!-- FOOTER -->
 #                   are replaced by site/partials/{header,footer}.<lang>.html (lang = the
 #                   page's <html lang>: ro, en or ru); page = the current nav item (home,
@@ -218,7 +219,7 @@ function fill( $html, $marker, $with, $file ) {
 
 list( , $dir, $changelog, $manifest, $now, $updater, $beta ) = $argv;
 $now  = (int) $now;
-$base = "https://consent.rt.md/";
+$base = "https://biscuitwp.rt.md/";
 
 // ---- Keys (from the plugin) ---------------------------------------------------
 $src  = rd( $updater );
@@ -371,9 +372,13 @@ wr( $dir . "/.well-known/security.txt", fill( rd( $tpl ), "{{EXPIRES}}", gmdate(
 if ( ! unlink( $tpl ) ) { fail( "could not remove " . $tpl ); }
 
 // ---- Download link ("Lămuriri" 5 of the landing spec) ----------------------------------
-$releases = "https://github.com/rtdesignstudio/consent-manager-pro/releases";
+$releases = "https://github.com/rtdesignstudio/biscuitwp/releases";
 if ( is_file( $manifest ) ) {
-	$download = $releases . "/latest"; // Validated above (revoked list).
+	// The new-install zip (folder biscuitwp/), attached to releases from 1.1.0 on; an
+	// older stable release has none, so it gets the latest release page. Manifest
+	// validated above (revoked list).
+	$sv       = isset( $m["version"] ) && is_string( $m["version"] ) ? $m["version"] : "";
+	$download = ( "" !== $sv && version_compare( $sv, "1.1.0-dev", ">=" ) ) ? $releases . "/latest/download/biscuitwp.zip" : $releases . "/latest";
 } elseif ( is_file( $beta ) ) {
 	$bm = json_decode( rd( $beta ), true );
 	if ( ! is_array( $bm ) || ! isset( $bm["version"] ) || ! is_string( $bm["version"] ) || ! preg_match( "/^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$/", $bm["version"] ) ) {

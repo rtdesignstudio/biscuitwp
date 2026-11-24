@@ -36,19 +36,19 @@ class CMP_Check_Page {
 	private static function state_label( $state ) {
 		switch ( $state ) {
 			case 'blocked':
-				return __( 'blocat până la acord', 'consent-manager-pro' );
+				return __( 'blocat până la acord', 'biscuitwp' );
 			case 'blocked_light':
-				return __( 'blocat permanent (modul Light)', 'consent-manager-pro' );
+				return __( 'blocat permanent (modul Light)', 'biscuitwp' );
 			case 'necessary':
-				return __( 'neblocat (necesar)', 'consent-manager-pro' );
+				return __( 'neblocat (necesar)', 'biscuitwp' );
 			case 'exempt':
-				return __( 'excepție, se încarcă fără acord', 'consent-manager-pro' );
+				return __( 'excepție, se încarcă fără acord', 'biscuitwp' );
 			case 'advanced':
-				return __( 'Advanced: se încarcă cu Consent Mode „refuzat”', 'consent-manager-pro' );
+				return __( 'Advanced: se încarcă cu Consent Mode „refuzat”', 'biscuitwp' );
 			case 'unblocked_off':
-				return __( 'neblocat (blocarea scripturilor e oprită)', 'consent-manager-pro' );
+				return __( 'neblocat (blocarea scripturilor e oprită)', 'biscuitwp' );
 			default:
-				return __( 'neblocat', 'consent-manager-pro' );
+				return __( 'neblocat', 'biscuitwp' );
 		}
 	}
 
@@ -72,20 +72,20 @@ class CMP_Check_Page {
 					}
 				}
 				/* translators: %s: plugin name */
-				return sprintf( __( 'plugin: %s', 'consent-manager-pro' ), isset( $plugins[ $slug ] ) ? $plugins[ $slug ] : $slug );
+				return sprintf( __( 'plugin: %s', 'biscuitwp' ), isset( $plugins[ $slug ] ) ? $plugins[ $slug ] : $slug );
 			case 'theme':
 				$t = wp_get_theme( $slug );
 				/* translators: %s: theme name */
-				return sprintf( __( 'temă: %s', 'consent-manager-pro' ), $t->exists() ? $t->get( 'Name' ) : $slug );
+				return sprintf( __( 'temă: %s', 'biscuitwp' ), $t->exists() ? $t->get( 'Name' ) : $slug );
 			case 'core':
-				return __( 'WordPress', 'consent-manager-pro' );
+				return __( 'WordPress', 'biscuitwp' );
 			case 'site':
-				return __( 'fișier de pe site (mu-plugins, uploads sau alt folder din afara pluginurilor și temelor)', 'consent-manager-pro' );
+				return __( 'fișier de pe site (mu-plugins, uploads sau alt folder din afara pluginurilor și temelor)', 'biscuitwp' );
 			case 'external':
 				/* translators: %s: host */
-				return sprintf( __( 'extern: %s', 'consent-manager-pro' ), $slug );
+				return sprintf( __( 'extern: %s', 'biscuitwp' ), $slug );
 			case 'inline':
-				return __( 'cod în pagină (temă, plugin sau conținut)', 'consent-manager-pro' );
+				return __( 'cod în pagină (temă, plugin sau conținut)', 'biscuitwp' );
 		}
 		return '';
 	}
@@ -116,35 +116,35 @@ class CMP_Check_Page {
 	/** Translatable names of the IP-leaking resource types (CMP_Scanner::IP_LABELS stays pure). */
 	private static function ip_labels() {
 		return array(
-			'google_fonts' => __( 'Google Fonts', 'consent-manager-pro' ),
-			'adobe_fonts'  => __( 'Adobe Fonts', 'consent-manager-pro' ),
-			'font_awesome' => __( 'Font Awesome', 'consent-manager-pro' ),
-			'cdn'          => __( 'CDN', 'consent-manager-pro' ),
-			'gravatar'     => __( 'Gravatar', 'consent-manager-pro' ),
-			'emoji'        => __( 'emoji WordPress', 'consent-manager-pro' ),
+			'google_fonts' => __( 'Google Fonts', 'biscuitwp' ),
+			'adobe_fonts'  => __( 'Adobe Fonts', 'biscuitwp' ),
+			'font_awesome' => __( 'Font Awesome', 'biscuitwp' ),
+			'cdn'          => __( 'CDN', 'biscuitwp' ),
+			'gravatar'     => __( 'Gravatar', 'biscuitwp' ),
+			'emoji'        => __( 'emoji WordPress', 'biscuitwp' ),
 		);
 	}
 
 	private static function status_text( $status ) {
 		$map = array(
-			'red'    => __( 'roșu', 'consent-manager-pro' ),
-			'yellow' => __( 'galben', 'consent-manager-pro' ),
-			'green'  => __( 'verde', 'consent-manager-pro' ),
+			'red'    => __( 'roșu', 'biscuitwp' ),
+			'yellow' => __( 'galben', 'biscuitwp' ),
+			'green'  => __( 'verde', 'biscuitwp' ),
 		);
-		return isset( $map[ $status ] ) ? $map[ $status ] : __( 'nu s-a putut verifica', 'consent-manager-pro' );
+		return isset( $map[ $status ] ) ? $map[ $status ] : __( 'nu s-a putut verifica', 'biscuitwp' );
 	}
 
 	private static function reason_text( $reason ) {
 		if ( 'nobanner' === $reason ) {
-			return __( 'nu s-a putut verifica (bannerul lipsește pe pagină)', 'consent-manager-pro' );
+			return __( 'nu s-a putut verifica (bannerul lipsește pe pagină)', 'biscuitwp' );
 		}
 		if ( 'origin' === $reason ) {
-			return __( 'nu s-a putut verifica (altă origine decât adminul: subdomeniu, www sau http/https)', 'consent-manager-pro' );
+			return __( 'nu s-a putut verifica (altă origine decât adminul: subdomeniu, www sau http/https)', 'biscuitwp' );
 		}
 		if ( 'nodata' === $reason ) {
-			return __( 'nu s-a putut verifica (pagina nu a trimis date)', 'consent-manager-pro' );
+			return __( 'nu s-a putut verifica (pagina nu a trimis date)', 'biscuitwp' );
 		}
-		return __( 'nu s-a putut verifica (pagina nu a răspuns în 20 s sau nu permite încărcarea într-un cadru)', 'consent-manager-pro' );
+		return __( 'nu s-a putut verifica (pagina nu a răspuns în 20 s sau nu permite încărcarea într-un cadru)', 'biscuitwp' );
 	}
 
 	/** One classify() item as text. $after: listed after "Acceptă tot" (informational). */
@@ -157,25 +157,25 @@ class CMP_Check_Page {
 		}
 		if ( '' === $label && 'preexisting' === $level ) {
 			/* translators: %s: cookie name */
-			$text = sprintf( __( 'cookie: %s', 'consent-manager-pro' ), $value );
+			$text = sprintf( __( 'cookie: %s', 'biscuitwp' ), $value );
 		} elseif ( '' === $label ) {
 			$text = 'red' === $level
 				/* translators: %s: host */
-				? sprintf( __( 'domeniu terț necunoscut: %s', 'consent-manager-pro' ), $value )
+				? sprintf( __( 'domeniu terț necunoscut: %s', 'biscuitwp' ), $value )
 				/* translators: %s: cookie name */
-				: sprintf( __( 'cookie necunoscut, verifică sursa: %s', 'consent-manager-pro' ), $value );
+				: sprintf( __( 'cookie necunoscut, verifică sursa: %s', 'biscuitwp' ), $value );
 		} else {
 			$text = $label . ' — ' . $value;
 		}
 		if ( ! $after ) {
 			$notes = array(
-				'red'       => __( 'încărcat înainte de acord', 'consent-manager-pro' ),
-				'yellow'    => '' === $label ? '' : __( 'trimite IP-ul vizitatorului', 'consent-manager-pro' ),
-				'exempt'    => __( 'excepție, se încarcă fără acord', 'consent-manager-pro' ),
-				'necessary' => __( 'necesar', 'consent-manager-pro' ),
-				'advanced'    => __( 'Advanced: se încarcă cu Consent Mode „refuzat”', 'consent-manager-pro' ),
-				'consentmode' => __( 'cookie pus înainte de acord: verifică Consent Mode', 'consent-manager-pro' ),
-				'preexisting' => __( 'era deja în browserul tău înainte de verificare', 'consent-manager-pro' ),
+				'red'       => __( 'încărcat înainte de acord', 'biscuitwp' ),
+				'yellow'    => '' === $label ? '' : __( 'trimite IP-ul vizitatorului', 'biscuitwp' ),
+				'exempt'    => __( 'excepție, se încarcă fără acord', 'biscuitwp' ),
+				'necessary' => __( 'necesar', 'biscuitwp' ),
+				'advanced'    => __( 'Advanced: se încarcă cu Consent Mode „refuzat”', 'biscuitwp' ),
+				'consentmode' => __( 'cookie pus înainte de acord: verifică Consent Mode', 'biscuitwp' ),
+				'preexisting' => __( 'era deja în browserul tău înainte de verificare', 'biscuitwp' ),
 			);
 			if ( ! empty( $notes[ $level ] ) ) {
 				$text .= ' (' . $notes[ $level ] . ')';
@@ -185,7 +185,7 @@ class CMP_Check_Page {
 			$st = self::sources_text( $agg_sources[ $source ] );
 			if ( '' !== $st ) {
 				/* translators: %s: where the script comes from */
-				$text .= ' — ' . sprintf( __( 'sursa: %s', 'consent-manager-pro' ), $st );
+				$text .= ' — ' . sprintf( __( 'sursa: %s', 'biscuitwp' ), $st );
 			}
 		}
 		return $text;
@@ -233,22 +233,22 @@ class CMP_Check_Page {
 		$cmp_off  = self::blocking_off();
 		?>
 		<div class="wrap cmp-admin cmp-check">
-			<h1><?php esc_html_e( 'BiscuitWP — Verificare', 'consent-manager-pro' ); ?> <?php echo CMP_Guide::link( 'verify' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<h1><?php esc_html_e( 'BiscuitWP — Verificare', 'biscuitwp' ); ?> <?php echo CMP_Guide::link( 'verify' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
 			<?php if ( isset( $_GET['cmp_urls'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista de pagini a fost salvată. Scanarea pornește din nou.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista de pagini a fost salvată. Scanarea pornește din nou.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( ! empty( $_GET['cmp_rejected'] ) ) : ?>
-				<div class="notice notice-warning is-dismissible"><p><?php $cmp_nr = (int) $_GET['cmp_rejected']; echo esc_html( sprintf( /* translators: %d: number of addresses */ _n( 'Am respins o adresă: doar paginile de pe domeniul site-ului pot fi verificate.', 'Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate.', $cmp_nr, 'consent-manager-pro' ), $cmp_nr ) ); ?></p></div>
+				<div class="notice notice-warning is-dismissible"><p><?php $cmp_nr = (int) $_GET['cmp_rejected']; echo esc_html( sprintf( /* translators: %d: number of addresses */ _n( 'Am respins o adresă: doar paginile de pe domeniul site-ului pot fi verificate.', 'Am respins %d adrese: doar paginile de pe domeniul site-ului pot fi verificate.', $cmp_nr, 'biscuitwp' ), $cmp_nr ) ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_fonts'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( /* translators: %d — count */ __( 'Localizate %d fonturi.', 'consent-manager-pro' ), (int) $_GET['cmp_fonts'] ) ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( /* translators: %d — count */ __( 'Localizate %d fonturi.', 'biscuitwp' ), (int) $_GET['cmp_fonts'] ) ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_checked'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Verificarea în browser s-a încheiat. Raportul e mai jos.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Verificarea în browser s-a încheiat. Raportul e mai jos.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Pagini verificate', 'consent-manager-pro' ); ?></h2>
-			<p class="description"><?php echo esc_html( sprintf( /* translators: %d: max pages */ __( 'Cel mult %d pagini de pe domeniul site-ului: pagina principală, paginile legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul.', 'consent-manager-pro' ), CMP_Scanner::MAX_PAGES ) ); ?></p>
+			<h2><?php esc_html_e( 'Pagini verificate', 'biscuitwp' ); ?></h2>
+			<p class="description"><?php echo esc_html( sprintf( /* translators: %d: max pages */ __( 'Cel mult %d pagini de pe domeniul site-ului: pagina principală, paginile legale, ultima pagină publicată de fiecare tip, adresele tale și sitemap-ul.', 'biscuitwp' ), CMP_Scanner::MAX_PAGES ) ); ?></p>
 			<?php if ( $list ) : ?>
 				<ol class="cmp-check-list">
 					<?php foreach ( $list as $u ) : ?>
@@ -260,39 +260,39 @@ class CMP_Check_Page {
 				<input type="hidden" name="action" value="cmp_scan_urls">
 				<?php wp_nonce_field( 'cmp_scan_urls' ); ?>
 				<p class="cmp-cat-row__names">
-					<label><?php esc_html_e( 'Adaugă pagini (una pe rând)', 'consent-manager-pro' ); ?><br>
+					<label><?php esc_html_e( 'Adaugă pagini (una pe rând)', 'biscuitwp' ); ?><br>
 						<textarea class="large-text code" rows="4" name="cmp_scan_urls[add]"><?php echo esc_textarea( implode( "\n", $manual['add'] ) ); ?></textarea></label>
-					<label><?php esc_html_e( 'Exclude pagini (una pe rând)', 'consent-manager-pro' ); ?><br>
+					<label><?php esc_html_e( 'Exclude pagini (una pe rând)', 'biscuitwp' ); ?><br>
 						<textarea class="large-text code" rows="4" name="cmp_scan_urls[exclude]"><?php echo esc_textarea( implode( "\n", $manual['exclude'] ) ); ?></textarea></label>
 				</p>
-				<p class="description"><?php esc_html_e( 'Doar adrese de pe domeniul site-ului (cu sau fără www, plus subdomeniile). Poți scrie și doar calea, de exemplu /contact/.', 'consent-manager-pro' ); ?></p>
-				<?php submit_button( __( 'Salvează lista', 'consent-manager-pro' ), 'secondary' ); ?>
+				<p class="description"><?php esc_html_e( 'Doar adrese de pe domeniul site-ului (cu sau fără www, plus subdomeniile). Poți scrie și doar calea, de exemplu /contact/.', 'biscuitwp' ); ?></p>
+				<?php submit_button( __( 'Salvează lista', 'biscuitwp' ), 'secondary' ); ?>
 			</form>
 
 			<h2>
-				<?php esc_html_e( 'Scanarea pe server', 'consent-manager-pro' ); ?>
+				<?php esc_html_e( 'Scanarea pe server', 'biscuitwp' ); ?>
 				<?php if ( null !== $progress ) : ?>
 					<span class="description"><?php echo esc_html( CMP_Scanner::progress_text( $progress ) ); ?></span>
 				<?php elseif ( $agg && ! empty( $agg['time'] ) ) : ?>
 					<?php $cmp_np = isset( $agg['pages'] ) ? (int) $agg['pages'] : 0; ?>
-					<span class="description">(<?php echo esc_html( sprintf( /* translators: 1: number of pages, 2: time span like "12 minute" */ _n( '%1$d pagină, acum %2$s', '%1$d pagini, acum %2$s', $cmp_np, 'consent-manager-pro' ), $cmp_np, human_time_diff( (int) $agg['time'] ) ) ); ?>)</span>
+					<span class="description">(<?php echo esc_html( sprintf( /* translators: 1: number of pages, 2: time span like "12 minute" */ _n( '%1$d pagină, acum %2$s', '%1$d pagini, acum %2$s', $cmp_np, 'biscuitwp' ), $cmp_np, human_time_diff( (int) $agg['time'] ) ) ); ?>)</span>
 				<?php endif; ?>
-				<button type="submit" class="button" form="cmp-check-rescan"><?php esc_html_e( 'Rescanează', 'consent-manager-pro' ); ?></button>
+				<button type="submit" class="button" form="cmp-check-rescan"><?php esc_html_e( 'Rescanează', 'biscuitwp' ); ?></button>
 			</h2>
 			<form id="cmp-check-rescan" method="post" action="<?php echo esc_url( $post_url ); ?>">
 				<input type="hidden" name="action" value="cmp_rescan_services">
 				<input type="hidden" name="cmp_back" value="<?php echo esc_attr( self::SLUG ); ?>">
 				<?php wp_nonce_field( 'cmp_rescan_services' ); ?>
 			</form>
-			<p class="description"><?php esc_html_e( 'Serverul citește HTML-ul paginilor, ca un vizitator fără cookie-uri. Vede ce e în pagină, nu ce adaugă JavaScript-ul ulterior.', 'consent-manager-pro' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Serverul citește HTML-ul paginilor, ca un vizitator fără cookie-uri. Vede ce e în pagină, nu ce adaugă JavaScript-ul ulterior.', 'biscuitwp' ); ?></p>
 			<?php if ( ! $pages ) : ?>
-				<p><?php echo null !== $progress ? esc_html__( 'Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu.', 'consent-manager-pro' ) : esc_html__( 'Nicio pagină scanată încă. Apasă „Rescanează”.', 'consent-manager-pro' ); ?></p>
+				<p><?php echo null !== $progress ? esc_html__( 'Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu.', 'biscuitwp' ) : esc_html__( 'Nicio pagină scanată încă. Apasă „Rescanează”.', 'biscuitwp' ); ?></p>
 			<?php else : ?>
 				<table class="widefat striped cmp-check-table">
 					<thead><tr>
-						<th><?php esc_html_e( 'Pagina', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Servicii și sursa lor', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Resurse care trimit IP-ul', 'consent-manager-pro' ); ?></th>
+						<th><?php esc_html_e( 'Pagina', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Servicii și sursa lor', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Resurse care trimit IP-ul', 'biscuitwp' ); ?></th>
 					</tr></thead>
 					<tbody>
 					<?php foreach ( $pages as $u => $p ) : ?>
@@ -300,9 +300,9 @@ class CMP_Check_Page {
 						<tr>
 							<td class="cmp-check-url"><?php echo esc_html( isset( $p['url'] ) ? $p['url'] : $u ); ?>
 								<?php if ( isset( $p['status'] ) && 'ok' !== $p['status'] ) : ?>
-									<br><span class="cmp-check-badge cmp-check-badge--none"><?php echo esc_html( sprintf( /* translators: %s: HTTP code or "error" */ __( 'nu s-a putut citi (%s)', 'consent-manager-pro' ), $p['status'] ) ); ?></span>
+									<br><span class="cmp-check-badge cmp-check-badge--none"><?php echo esc_html( sprintf( /* translators: %s: HTTP code or "error" */ __( 'nu s-a putut citi (%s)', 'biscuitwp' ), $p['status'] ) ); ?></span>
 								<?php elseif ( ! empty( $p['stale'] ) ) : ?>
-									<br><span class="description"><?php esc_html_e( 'ultima citire a eșuat; se arată rezultatul anterior', 'consent-manager-pro' ); ?></span>
+									<br><span class="description"><?php esc_html_e( 'ultima citire a eșuat; se arată rezultatul anterior', 'biscuitwp' ); ?></span>
 								<?php endif; ?>
 							</td>
 							<td>
@@ -310,7 +310,7 @@ class CMP_Check_Page {
 								$cmp_found = isset( $p['services']['found'] ) ? (array) $p['services']['found'] : array();
 								$cmp_ps    = isset( $p['services'] ) && is_array( $p['services'] ) ? $p['services'] : array();
 								if ( ! $cmp_found ) {
-									echo '<span class="description">' . esc_html__( 'niciun serviciu', 'consent-manager-pro' ) . '</span>';
+									echo '<span class="description">' . esc_html__( 'niciun serviciu', 'biscuitwp' ) . '</span>';
 								}
 								echo '<ul>';
 								foreach ( $cmp_found as $cmp_id ) {
@@ -327,7 +327,7 @@ class CMP_Check_Page {
 								<?php
 								$cmp_res = isset( $p['resources'] ) ? (array) $p['resources'] : array();
 								if ( ! $cmp_res ) {
-									echo '<span class="description">' . esc_html__( 'niciuna', 'consent-manager-pro' ) . '</span>';
+									echo '<span class="description">' . esc_html__( 'niciuna', 'biscuitwp' ) . '</span>';
 								}
 								echo '<ul>';
 								foreach ( $cmp_res as $r ) {
@@ -350,78 +350,78 @@ class CMP_Check_Page {
 			<?php endif; ?>
 			<?php if ( $has_gf ) : ?>
 				<div class="cmp-check-fonts">
-					<p><?php esc_html_e( 'Google Fonts trimite IP-ul vizitatorului la Google. Fonturile se pot servi de pe site, adunate din toate paginile scanate.', 'consent-manager-pro' ); ?></p>
+					<p><?php esc_html_e( 'Google Fonts trimite IP-ul vizitatorului la Google. Fonturile se pot servi de pe site, adunate din toate paginile scanate.', 'biscuitwp' ); ?></p>
 					<?php if ( $fonts_on ) : ?>
 						<form method="post" action="<?php echo esc_url( $post_url ); ?>">
 							<input type="hidden" name="action" value="cmp_localize_fonts">
 							<input type="hidden" name="cmp_back" value="<?php echo esc_attr( self::SLUG ); ?>">
 							<?php wp_nonce_field( 'cmp_localize_fonts' ); ?>
-							<button type="submit" class="button"><?php esc_html_e( 'Localizează', 'consent-manager-pro' ); ?></button>
+							<button type="submit" class="button"><?php esc_html_e( 'Localizează', 'biscuitwp' ); ?></button>
 						</form>
 					<?php else : ?>
-						<p class="description"><?php esc_html_e( 'Pornește întâi „Localizare Google Fonts” în Setări (doar în modul Pro), apoi revino aici.', 'consent-manager-pro' ); ?>
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . CMP_Admin::SLUG ) ); ?>"><?php esc_html_e( 'Setări', 'consent-manager-pro' ); ?></a></p>
+						<p class="description"><?php esc_html_e( 'Pornește întâi „Localizare Google Fonts” în Setări (doar în modul Pro), apoi revino aici.', 'biscuitwp' ); ?>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . CMP_Admin::SLUG ) ); ?>"><?php esc_html_e( 'Setări', 'biscuitwp' ); ?></a></p>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
-			<p class="description"><?php esc_html_e( 'Adobe Fonts, Font Awesome și CDN-urile (jsDelivr, unpkg, cdnjs) trimit și ele IP-ul vizitatorului la un terț. Le poți găzdui pe site ca să nu mai fie nevoie de ele.', 'consent-manager-pro' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Adobe Fonts, Font Awesome și CDN-urile (jsDelivr, unpkg, cdnjs) trimit și ele IP-ul vizitatorului la un terț. Le poți găzdui pe site ca să nu mai fie nevoie de ele.', 'biscuitwp' ); ?></p>
 
-			<h2><?php esc_html_e( 'Verificare în browser', 'consent-manager-pro' ); ?></h2>
+			<h2><?php esc_html_e( 'Verificare în browser', 'biscuitwp' ); ?></h2>
 			<?php if ( 'light' === $mode ) : ?>
-				<div class="notice notice-info inline"><p><?php esc_html_e( 'Modul Light nu cere acord: verificarea măsoară doar ce se încarcă înainte de acord.', 'consent-manager-pro' ); ?></p></div>
+				<div class="notice notice-info inline"><p><?php esc_html_e( 'Modul Light nu cere acord: verificarea măsoară doar ce se încarcă înainte de acord.', 'biscuitwp' ); ?></p></div>
 			<?php elseif ( self::blocking_off() ) : ?>
-				<div class="notice notice-warning inline"><p><strong><?php esc_html_e( 'Blocarea scripturilor e oprită: serviciile se încarcă fără acord', 'consent-manager-pro' ); ?></strong></p></div>
+				<div class="notice notice-warning inline"><p><strong><?php esc_html_e( 'Blocarea scripturilor e oprită: serviciile se încarcă fără acord', 'biscuitwp' ); ?></strong></p></div>
 			<?php endif; ?>
-			<p><?php esc_html_e( 'Încarcă pe rând, invizibil, paginile de mai sus și notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă tot” simulat.', 'consent-manager-pro' ); ?></p>
+			<p><?php esc_html_e( 'Încarcă pe rând, invizibil, paginile de mai sus și notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă tot” simulat.', 'biscuitwp' ); ?></p>
 			<div class="cmp-check-limits">
-				<strong><?php esc_html_e( 'Limitele verificării', 'consent-manager-pro' ); ?></strong>
+				<strong><?php esc_html_e( 'Limitele verificării', 'biscuitwp' ); ?></strong>
 				<ul>
-					<li><?php esc_html_e( 'Rulează în browserul tău, ca administrator logat. Pluginurile care schimbă pagina pentru utilizatorii logați pot da alt rezultat decât pentru vizitatori.', 'consent-manager-pro' ); ?></li>
-					<li><?php esc_html_e( 'Paginile care nu permit încărcarea într-un cadru (X-Frame-Options sau CSP frame-ancestors) nu pot fi verificate: rândul lor apare „nu s-a putut verifica”, nu verde.', 'consent-manager-pro' ); ?></li>
-					<li><?php esc_html_e( 'Cookie-urile puse de terți pe domeniile lor nu pot fi citite; se văd doar domeniile contactate.', 'consent-manager-pro' ); ?></li>
-					<li><?php esc_html_e( 'Cookie-urile care erau deja în browserul tău înainte de verificare (de la un acord real sau de la o verificare anterioară) sunt arătate separat și nu schimbă rezultatul: pentru ele contează domeniile contactate. Pentru o verificare completă a cookie-urilor, folosește o fereastră privată în care te autentifici.', 'consent-manager-pro' ); ?></li>
-					<li><?php esc_html_e( 'Se pot verifica doar paginile cu aceeași origine ca adminul (același www și http/https). Paginile de pe subdomenii apar „nu s-a putut verifica”.', 'consent-manager-pro' ); ?></li>
-					<li><?php esc_html_e( 'Ce apare doar după interacțiune (clic, scroll) nu e prins.', 'consent-manager-pro' ); ?></li>
+					<li><?php esc_html_e( 'Rulează în browserul tău, ca administrator logat. Pluginurile care schimbă pagina pentru utilizatorii logați pot da alt rezultat decât pentru vizitatori.', 'biscuitwp' ); ?></li>
+					<li><?php esc_html_e( 'Paginile care nu permit încărcarea într-un cadru (X-Frame-Options sau CSP frame-ancestors) nu pot fi verificate: rândul lor apare „nu s-a putut verifica”, nu verde.', 'biscuitwp' ); ?></li>
+					<li><?php esc_html_e( 'Cookie-urile puse de terți pe domeniile lor nu pot fi citite; se văd doar domeniile contactate.', 'biscuitwp' ); ?></li>
+					<li><?php esc_html_e( 'Cookie-urile care erau deja în browserul tău înainte de verificare (de la un acord real sau de la o verificare anterioară) sunt arătate separat și nu schimbă rezultatul: pentru ele contează domeniile contactate. Pentru o verificare completă a cookie-urilor, folosește o fereastră privată în care te autentifici.', 'biscuitwp' ); ?></li>
+					<li><?php esc_html_e( 'Se pot verifica doar paginile cu aceeași origine ca adminul (același www și http/https). Paginile de pe subdomenii apar „nu s-a putut verifica”.', 'biscuitwp' ); ?></li>
+					<li><?php esc_html_e( 'Ce apare doar după interacțiune (clic, scroll) nu e prins.', 'biscuitwp' ); ?></li>
 					<?php if ( 'light' !== $mode ) : ?>
-						<li><?php esc_html_e( '„Acceptă tot” se apasă în browserul tău. Acordul tău real nu se schimbă, dar cookie-urile puse de servicii (de exemplu _ga) rămân în browser după verificare, chiar dacă alegerea ta e „refuz”.', 'consent-manager-pro' ); ?></li>
-						<li><?php esc_html_e( 'După acord, fiecare pagină verificată poate apărea ca o vizită în statisticile tale (Google Analytics și altele).', 'consent-manager-pro' ); ?></li>
+						<li><?php esc_html_e( '„Acceptă tot” se apasă în browserul tău. Acordul tău real nu se schimbă, dar cookie-urile puse de servicii (de exemplu _ga) rămân în browser după verificare, chiar dacă alegerea ta e „refuz”.', 'biscuitwp' ); ?></li>
+						<li><?php esc_html_e( 'După acord, fiecare pagină verificată poate apărea ca o vizită în statisticile tale (Google Analytics și altele).', 'biscuitwp' ); ?></li>
 					<?php endif; ?>
 				</ul>
 			</div>
 			<p>
-				<button type="button" class="button button-primary" data-cmp-check-start <?php disabled( empty( $list ) ); ?>><?php esc_html_e( 'Verifică în browser', 'consent-manager-pro' ); ?></button>
+				<button type="button" class="button button-primary" data-cmp-check-start <?php disabled( empty( $list ) ); ?>><?php esc_html_e( 'Verifică în browser', 'biscuitwp' ); ?></button>
 				<span class="cmp-check-status" data-cmp-check-status aria-live="polite"></span>
 			</p>
 
 			<?php if ( ! empty( $report['pages'] ) && is_array( $report['pages'] ) ) : ?>
 				<h3>
-					<?php esc_html_e( 'Raport', 'consent-manager-pro' ); ?>
+					<?php esc_html_e( 'Raport', 'biscuitwp' ); ?>
 					<?php if ( ! empty( $report['time'] ) ) : ?>
-						<span class="description">(<?php echo esc_html( sprintf( /* translators: %s: time span */ __( 'acum %s', 'consent-manager-pro' ), human_time_diff( (int) $report['time'] ) ) ); ?>)</span>
+						<span class="description">(<?php echo esc_html( sprintf( /* translators: %s: time span */ __( 'acum %s', 'biscuitwp' ), human_time_diff( (int) $report['time'] ) ) ); ?>)</span>
 					<?php endif; ?>
 				</h3>
 				<?php $cmp_stale = isset( $report['mode'] ) && $report['mode'] !== $mode; ?>
 				<?php if ( $cmp_stale ) : ?>
-					<div class="notice notice-warning inline"><p><?php esc_html_e( 'Raportul e făcut într-un alt mod decât cel de acum, așa că rezultatele nu mai sunt valabile. Verifică din nou.', 'consent-manager-pro' ); ?></p></div>
+					<div class="notice notice-warning inline"><p><?php esc_html_e( 'Raportul e făcut într-un alt mod decât cel de acum, așa că rezultatele nu mai sunt valabile. Verifică din nou.', 'biscuitwp' ); ?></p></div>
 				<?php endif; ?>
 				<table class="widefat striped cmp-check-table">
 					<thead><tr>
-						<th><?php esc_html_e( 'Pagina', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Rezultat', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'Înainte de acord', 'consent-manager-pro' ); ?></th>
-						<th><?php esc_html_e( 'După „Acceptă tot”', 'consent-manager-pro' ); ?></th>
+						<th><?php esc_html_e( 'Pagina', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Rezultat', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'Înainte de acord', 'biscuitwp' ); ?></th>
+						<th><?php esc_html_e( 'După „Acceptă tot”', 'biscuitwp' ); ?></th>
 					</tr></thead>
 					<tbody>
 					<?php foreach ( $report['pages'] as $rp ) : ?>
 						<?php if ( ! is_array( $rp ) || empty( $rp['url'] ) ) { continue; } ?>
 						<tr class="cmp-check-row cmp-check-row--<?php echo esc_attr( $cmp_stale ? 'stale' : ( isset( $rp['status'] ) ? $rp['status'] : 'none' ) ); ?>">
 							<td class="cmp-check-url"><?php echo esc_html( $rp['url'] ); ?></td>
-							<td><?php echo $cmp_stale ? '<span class="description">' . esc_html__( 'verifică din nou', 'consent-manager-pro' ) . '</span>' : self::badge( isset( $rp['status'] ) ? $rp['status'] : 'none' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge() ?></td>
+							<td><?php echo $cmp_stale ? '<span class="description">' . esc_html__( 'verifică din nou', 'biscuitwp' ) . '</span>' : self::badge( isset( $rp['status'] ) ? $rp['status'] : 'none' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge() ?></td>
 							<td>
 								<?php if ( ! isset( $rp['status'] ) || 'none' === $rp['status'] ) : ?>
 									<?php echo esc_html( self::reason_text( isset( $rp['reason'] ) ? $rp['reason'] : '' ) ); ?>
 								<?php elseif ( empty( $rp['items'] ) ) : ?>
-									<span class="description"><?php esc_html_e( 'nimic de la terți, niciun cookie de urmărire', 'consent-manager-pro' ); ?></span>
+									<span class="description"><?php esc_html_e( 'nimic de la terți, niciun cookie de urmărire', 'biscuitwp' ); ?></span>
 								<?php else : ?>
 									<ul>
 									<?php foreach ( (array) $rp['items'] as $it ) : ?>
@@ -434,13 +434,13 @@ class CMP_Check_Page {
 							</td>
 							<td>
 								<?php if ( ! empty( $rp['light'] ) ) : ?>
-									<span class="description"><?php esc_html_e( 'modul Light: nu există acord', 'consent-manager-pro' ); ?></span>
+									<span class="description"><?php esc_html_e( 'modul Light: nu există acord', 'biscuitwp' ); ?></span>
 								<?php elseif ( ! isset( $rp['status'] ) || 'none' === $rp['status'] ) : ?>
 									—
 								<?php elseif ( null === $rp['after'] ) : ?>
-									<span class="description"><?php esc_html_e( 'nu s-a primit rezultatul după acord', 'consent-manager-pro' ); ?></span>
+									<span class="description"><?php esc_html_e( 'nu s-a primit rezultatul după acord', 'biscuitwp' ); ?></span>
 								<?php elseif ( empty( $rp['after'] ) ) : ?>
-									<span class="description"><?php esc_html_e( 'nimic în plus', 'consent-manager-pro' ); ?></span>
+									<span class="description"><?php esc_html_e( 'nimic în plus', 'biscuitwp' ); ?></span>
 								<?php else : ?>
 									<ul>
 									<?php foreach ( (array) $rp['after'] as $it ) : ?>
@@ -455,7 +455,7 @@ class CMP_Check_Page {
 					<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p class="description"><?php esc_html_e( 'Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a încărcat înainte de acord. Galben: resurse care trimit IP-ul vizitatorului sau cookie-uri necunoscute. Excepțiile, serviciile necesare și, în Advanced, Google Analytics / Tag Manager apar separat și nu schimbă rezultatul. După acord, serviciile acceptate se încarcă normal: coloana e doar informativă.', 'consent-manager-pro' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a încărcat înainte de acord. Galben: resurse care trimit IP-ul vizitatorului sau cookie-uri necunoscute. Excepțiile, serviciile necesare și, în Advanced, Google Analytics / Tag Manager apar separat și nu schimbă rezultatul. După acord, serviciile acceptate se încarcă normal: coloana e doar informativă.', 'biscuitwp' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -472,10 +472,10 @@ class CMP_Check_Page {
 			'doneUrl'    => add_query_arg( array( 'page' => self::SLUG, 'cmp_checked' => 1 ), admin_url( 'admin.php' ) ),
 			'i18n'       => array(
 				/* translators: 1: page number, 2: total pages */
-				'progress' => __( 'Verific pagina %1$d din %2$d…', 'consent-manager-pro' ),
-				'saving'   => __( 'Salvez raportul…', 'consent-manager-pro' ),
-				'done'     => __( 'Gata.', 'consent-manager-pro' ),
-				'error'    => __( 'Raportul nu a putut fi salvat. Încearcă din nou.', 'consent-manager-pro' ),
+				'progress' => __( 'Verific pagina %1$d din %2$d…', 'biscuitwp' ),
+				'saving'   => __( 'Salvez raportul…', 'biscuitwp' ),
+				'done'     => __( 'Gata.', 'biscuitwp' ),
+				'error'    => __( 'Raportul nu a putut fi salvat. Încearcă din nou.', 'biscuitwp' ),
 			),
 		);
 	}
@@ -483,7 +483,7 @@ class CMP_Check_Page {
 	/** admin_post_cmp_scan_urls: save the manual additions and exclusions (own domain only). */
 	public static function save_urls() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_scan_urls' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		$raw = isset( $_POST['cmp_scan_urls'] ) && is_array( $_POST['cmp_scan_urls'] ) ? wp_unslash( $_POST['cmp_scan_urls'] ) : array();
 		$add = isset( $raw['add'] ) && is_string( $raw['add'] ) ? $raw['add'] : '';

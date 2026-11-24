@@ -360,7 +360,7 @@ $cmp_ru_own = function ( $text, $fixture ) {
 			$strings[] = ( isset( $p['path'] ) ? $p['path'] : '/' ) . ( isset( $p['query'] ) ? '?' . $p['query'] : '' );
 		}
 	}
-	$strings = array_merge( $strings, array( 'BiscuitWP', 'Google Fonts', 'consent.rt.md', 'https://consent.rt.md/', 'PDF', 'DevTools', 'HTTPS', 'HTTP', 'WordPress', 'standalone' ) );
+	$strings = array_merge( $strings, array( 'BiscuitWP', 'Google Fonts', 'biscuitwp.rt.md', 'https://biscuitwp.rt.md/', 'PDF', 'DevTools', 'HTTPS', 'HTTP', 'WordPress', 'standalone' ) );
 	usort(
 		$strings,
 		function ( $a, $b ) {
@@ -401,8 +401,8 @@ foreach ( array( 'Мы нашли 3 проблемы', 'С чего начать
 cmp_assert_eq( isset( $r['facts'] ) ? $r['facts'] : '', '3|проблемы,1|нужно проверить,4|в порядке', 'render (ru): the counters with Russian plurals' );
 cmp_assert_eq( isset( $r['buttons'] ) ? $r['buttons'] : array(), array( 'Сохранить как PDF', 'Скопировать отчёт' ), 'render (ru): the share buttons' );
 cmp_assert( isset( $r['counter']['text'] ) && "1\xc2\xa0240 проверок с момента запуска" === $r['counter']['text'], 'render (ru): the counter groups thousands with a no-break space and uses the genitive plural' );
-cmp_assert( 1 === preg_match( '/Отчёт «Проверьте свой сайт» с consent\.rt\.md, \d{1,2} ' . $months . ' \d{4}/u', $text ), 'render (ru): the print header with a Russian date' );
-cmp_assert( isset( $r['copied'] ) && 1 === preg_match( '/Отчёт сделан с помощью «Проверьте свой сайт», https:\/\/consent\.rt\.md\/, \d{1,2} ' . $months . ' \d{4}\.$/u', (string) $r['copied'] ), 'render (ru): the copied report ends with the Russian footer' );
+cmp_assert( 1 === preg_match( '/Отчёт «Проверьте свой сайт» с biscuitwp\.rt\.md, \d{1,2} ' . $months . ' \d{4}/u', $text ), 'render (ru): the print header with a Russian date' );
+cmp_assert( isset( $r['copied'] ) && 1 === preg_match( '/Отчёт сделан с помощью «Проверьте свой сайт», https:\/\/biscuitwp\.rt\.md\/, \d{1,2} ' . $months . ' \d{4}\.$/u', (string) $r['copied'] ), 'render (ru): the copied report ends with the Russian footer' );
 cmp_assert( isset( $r['shareStatus'] ) && 'Мы скопировали отчёт. Вставьте его в письмо или сообщение.' === $r['shareStatus'], 'render (ru): the copy status' );
 cmp_assert_eq( $cmp_ru_ui_leftovers( $cmp_ru_own( $text, 'issues-sitemap' ) ), array(), 'render (ru): issues-sitemap has no Romanian or English UI text' );
 cmp_assert_eq( $cmp_ru_ui_leftovers( $cmp_ru_own( isset( $r['copied'] ) ? $r['copied'] : '', 'issues-sitemap' ) ), array(), 'render (ru): the copied report has no Romanian or English UI text' );

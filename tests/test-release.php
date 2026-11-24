@@ -148,22 +148,78 @@ cmp_assert_eq( strtotime( $cmp_rel_m['expires'] ) - strtotime( $cmp_rel_m['issue
 cmp_assert( is_file( $cmp_rel_tmp . '/state/manifest-beta.json' ), 'release --dry-run: state written to CMP_RELEASE_STATE' );
 cmp_assert( false !== strpos( $out, 'DRY RUN' ) && false !== strpos( $out, 'nu urca' ), 'release --dry-run: says DRY RUN, do not upload' );
 cmp_assert( false === strpos( $out, 'scp ' ) && false === strpos( $out, 'Rulează pe Mac' ), 'release --dry-run: prints no upload command' );
-$cmp_rel_zip = new ZipArchive();
-if ( true === $cmp_rel_zip->open( $cmp_rel_root . '/dist/consent-manager-pro.zip' ) ) {
-	cmp_assert( false !== $cmp_rel_zip->locateName( 'consent-manager-pro/CHANGELOG.md' ), 'zip: CHANGELOG.md included' );
-	cmp_assert( false !== $cmp_rel_zip->locateName( 'consent-manager-pro/consent-manager-pro.php' ), 'zip: plugin main file included' );
-	$cmp_rel_bad = array();
+// Two signed assets, same files: consent-manager-pro.zip (updates; top folder
+// consent-manager-pro/, so no updater renames the extracted folder) and
+// biscuitwp.zip (new installs; top folder biscuitwp/). Both carry both entry files.
+foreach ( array( 'consent-manager-pro' => 'consent-manager-pro', 'biscuitwp' => 'biscuitwp' ) as $cmp_rel_asset => $cmp_rel_top ) {
+	$cmp_rel_zf  = $cmp_rel_root . '/dist/' . $cmp_rel_asset . '.zip';
+	$cmp_rel_zip = new ZipArchive();
+	if ( true !== $cmp_rel_zip->open( $cmp_rel_zf ) ) {
+		cmp_assert( false, "zip ($cmp_rel_asset.zip): opens" );
+		continue;
+	}
+	cmp_assert( false !== $cmp_rel_zip->locateName( $cmp_rel_top . '/CHANGELOG.md' ), "zip ($cmp_rel_asset.zip): CHANGELOG.md included" );
+	cmp_assert( false !== $cmp_rel_zip->locateName( $cmp_rel_top . '/biscuitwp.php' ) && false !== $cmp_rel_zip->locateName( $cmp_rel_top . '/consent-manager-pro.php' ), "zip ($cmp_rel_asset.zip): both entry files in $cmp_rel_top/" );
+	cmp_assert( false !== $cmp_rel_zip->locateName( $cmp_rel_top . '/includes/class-migrate-folder.php' ), "zip ($cmp_rel_asset.zip): includes/ shipped" );
+	$cmp_rel_bad   = array();
+	$cmp_rel_outer = array();
 	for ( $i = 0; $i < $cmp_rel_zip->numFiles; $i++ ) {
 		$n = $cmp_rel_zip->getNameIndex( $i );
-		if ( preg_match( '#^consent-manager-pro/(release|tests|bin|proxy|docs|dist|\.superpowers|\.git)(/|$)#', $n ) ) {
+		if ( preg_match( '#^[^/]+/(release|tests|bin|proxy|docs|dist|\.superpowers|\.git)(/|$)#', $n ) ) {
 			$cmp_rel_bad[] = $n;
 		}
+		if ( 0 !== strpos( $n, $cmp_rel_top . '/' ) ) {
+			$cmp_rel_outer[] = $n;
+		}
 	}
-	cmp_assert_eq( $cmp_rel_bad, array(), 'zip: release/, tests, bin, proxy, docs excluded' );
+	cmp_assert_eq( $cmp_rel_bad, array(), "zip ($cmp_rel_asset.zip): release/, tests, bin, proxy, docs excluded" );
+	// C1 (1.1.0): allow-list of runtime paths. The public site (site/, with its
+	// check API), the standalone build, repo docs and dotfiles never ship.
+	$cmp_rel_allowed = array( 'biscuitwp.php', 'consent-manager-pro.php', 'uninstall.php', 'readme.txt', 'LICENSE', 'CHANGELOG.md', 'README.md', 'includes', 'assets', 'templates', 'languages', 'data' );
+	$cmp_rel_top_seen = array();
+	$cmp_rel_forbid   = array();
+	$cmp_rel_dot      = array();
+	for ( $i = 0; $i < $cmp_rel_zip->numFiles; $i++ ) {
+		$n     = $cmp_rel_zip->getNameIndex( $i );
+		$parts = explode( '/', rtrim( $n, '/' ) );
+		if ( count( $parts ) > 1 ) {
+			$cmp_rel_top_seen[ $parts[1] ] = true;
+		}
+		if ( preg_match( '#^[^/]+/(site|tests|bin|docs|proxy|dist|release|standalone|node_modules)(/|$)#', $n ) ) {
+			$cmp_rel_forbid[] = $n;
+		}
+		foreach ( $parts as $p ) {
+			if ( '' !== $p && '.' === $p[0] ) {
+				$cmp_rel_dot[] = $n;
+				break;
+			}
+		}
+	}
+	cmp_assert_eq( array_slice( $cmp_rel_forbid, 0, 5 ), array(), "zip ($cmp_rel_asset.zip): no site/, tests/, bin/, docs/, proxy/, dist/, release/, standalone/ entries" );
+	cmp_assert_eq( array_slice( $cmp_rel_dot, 0, 5 ), array(), "zip ($cmp_rel_asset.zip): no dotfiles or dot folders" );
+	$cmp_rel_extra = array_values( array_diff( array_keys( $cmp_rel_top_seen ), $cmp_rel_allowed ) );
+	cmp_assert_eq( $cmp_rel_extra, array(), "zip ($cmp_rel_asset.zip): only allow-listed runtime paths at the top level" );
+	foreach ( array( 'uninstall.php', 'readme.txt', 'LICENSE', 'languages/biscuitwp.pot', 'data/services.json', 'templates/banner-bottom.php', 'assets/js/banner.js' ) as $cmp_rel_need ) {
+		cmp_assert( false !== $cmp_rel_zip->locateName( $cmp_rel_top . '/' . $cmp_rel_need ), "zip ($cmp_rel_asset.zip): runtime file $cmp_rel_need shipped" );
+	}
+	// array_slice only shortens the failure message; any entry outside the top folder fails.
+	cmp_assert_eq( array_slice( $cmp_rel_outer, 0, 5 ), array(), "zip ($cmp_rel_asset.zip): every entry is inside the single top folder $cmp_rel_top/" );
 	$cmp_rel_zip->close();
-} else {
-	cmp_assert( false, 'zip: opens' );
+	cmp_assert( CMP_Updater::verify_signature( $cmp_rel_zf, (string) @file_get_contents( $cmp_rel_zf . '.sig' ), $cmp_rel_spk ), "zip ($cmp_rel_asset.zip): .sig verifies with the release key" );
 }
+$cmp_rel_list = function ( $f ) {
+	$z = new ZipArchive();
+	$o = array();
+	if ( true === $z->open( $f ) ) {
+		for ( $i = 0; $i < $z->numFiles; $i++ ) {
+			$o[] = preg_replace( '#^[^/]+/#', '', $z->getNameIndex( $i ) );
+		}
+		$z->close();
+	}
+	sort( $o );
+	return $o;
+};
+cmp_assert( array() !== $cmp_rel_list( $cmp_rel_root . '/dist/consent-manager-pro.zip' ) && $cmp_rel_list( $cmp_rel_root . '/dist/consent-manager-pro.zip' ) === $cmp_rel_list( $cmp_rel_root . '/dist/biscuitwp.zip' ), 'zip: both assets hold the same files' );
 
 // B8b: the dry run also builds the public pages into dist/site (never uploaded) and the SBOM.
 cmp_assert( is_file( $cmp_rel_root . '/dist/site/.well-known/security.txt' ), 'release --dry-run: dist/site/.well-known/security.txt built' );
@@ -285,17 +341,38 @@ cmp_assert( false === strpos( $out, 'Dry run:' ), '--real-keys + --skip-checks: 
 list( $rc, $out ) = cmp_rel_run( 'bash bin/release.sh 9.9.13 --real-keys --dry-run --skip-checks', array( 'CMP_MANIFEST_KEY' => null, 'CMP_SIGNING_KEY' => null, 'HOME' => $cmp_rel_tmp . '/home' ) + $cmp_rel_env );
 cmp_assert( 0 !== $rc && false !== strpos( $out, '--skip-checks' ), '--real-keys + --skip-checks refused in any argument order' );
 
+// Package layout and names: asset/manifest slug stays consent-manager-pro, the
+// folder inside the zip is biscuitwp/, Version/CMP_VERSION come from biscuitwp.php,
+// gh talks to the renamed repo while the manifest package URL keeps the prefix
+// installed sites verify (CMP_Updater::PACKAGE_PREFIX; GitHub redirects it).
+$cmp_rel_src0 = (string) file_get_contents( $cmp_rel_root . '/bin/release.sh' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "\nSLUG=\"consent-manager-pro\"\n" ), 'release.sh: SLUG stays consent-manager-pro (asset + manifest slug)' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "\nPKG_DIR=\"consent-manager-pro\"\n" ) && false !== strpos( $cmp_rel_src0, "\nNEW_ASSET=\"biscuitwp\"\n" ) && false !== strpos( $cmp_rel_src0, "\nNEW_PKG_DIR=\"biscuitwp\"\n" ), 'release.sh: update zip folder consent-manager-pro/, new-install asset biscuitwp.zip with folder biscuitwp/' );
+cmp_assert( false !== strpos( $cmp_rel_src0, '( cd dist && zip -qr "$SLUG.zip" "$PKG_DIR" )' ) && false !== strpos( $cmp_rel_src0, '( cd dist && zip -qr "$NEW_ASSET.zip" "$NEW_PKG_DIR" )' ) && false !== strpos( $cmp_rel_src0, '"$SIGNING_KEY" "dist/$SLUG.zip" "dist/$NEW_ASSET.zip"' ), 'release.sh: both zips built and signed with the release key' );
+cmp_assert( false !== strpos( $cmp_rel_src0, 'gh release create "v$VERSION" "dist/$SLUG.zip" "dist/$SLUG.zip.sig" "dist/$NEW_ASSET.zip" "dist/$NEW_ASSET.zip.sig"' ), 'release.sh: the GitHub release uploads both zips and both signatures' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "\nMAIN_FILE=\"biscuitwp.php\"\n" ) && false !== strpos( $cmp_rel_src0, "grep -m1 '^ \\* Version:' \"\$MAIN_FILE\"" ) && false !== strpos( $cmp_rel_src0, "grep -q \"define( 'CMP_VERSION', '\$VERSION' )\" \"\$MAIN_FILE\"" ), 'release.sh: Version header and CMP_VERSION read from biscuitwp.php' );
+cmp_assert( false === strpos( $cmp_rel_src0, '"$SLUG.php"' ), 'release.sh: version not read from consent-manager-pro.php (biscuitwp.php is the source; the legacy header is only compared)' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "\nREPO=\"rtdesignstudio/biscuitwp\"\n" ) && false !== strpos( $cmp_rel_src0, '--repo "$REPO"' ), 'release.sh: gh release uses the renamed repo rtdesignstudio/biscuitwp' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "\nPACKAGE_BASE=\"" . rtrim( CMP_Updater::PACKAGE_PREFIX, '/' ) . "\"\n" ) && false !== strpos( $cmp_rel_src0, '"$PACKAGE_BASE/v$VERSION/$SLUG.zip"' ), 'release.sh: manifest package URL stays on the old repo path (1.0.0 sites accept only it)' );
+cmp_assert( 1 === preg_match( '/\nPACKAGE_BASE="([^"]+)"\n/', $cmp_rel_src0, $cmp_rel_pb ) && defined( 'CMP_Updater::PACKAGE_PREFIXES' ) && in_array( $cmp_rel_pb[1] . '/', CMP_Updater::PACKAGE_PREFIXES, true ), 'release.sh: PACKAGE_BASE is one of the prefixes the shipped updater accepts' );
+cmp_assert( false !== strpos( $cmp_rel_src0, "exit( \$argv[2] === CMP_Updater::PACKAGE_PREFIX ? 0 : 1 );" ) && false !== strpos( $cmp_rel_src0, 'PACKAGE_BASE must be CMP_Updater::PACKAGE_PREFIX' ), 'release.sh: refuses (before building) a PACKAGE_BASE other than CMP_Updater::PACKAGE_PREFIX (the prefix 1.0.0 sites accept)' );
+cmp_assert( false !== strpos( $cmp_rel_src0, 'pkg:github/rtdesignstudio/biscuitwp@v' ), 'release.sh: SBOM purl names the renamed repo' );
+
 // The printed upload command: SSH host and server directory are both overridable placeholders.
 $cmp_rel_src = (string) file_get_contents( $cmp_rel_root . '/bin/release.sh' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'SERVER_HOST="${CMP_SERVER_HOST:-<HOST-SSH>}"' ), 'release.sh: SERVER_HOST from CMP_SERVER_HOST, placeholder <HOST-SSH>' );
-cmp_assert( false !== strpos( $cmp_rel_src, 'SERVER_DIR="${CMP_SERVER_DIR:-<DIRECTOR-CONSENT.RT.MD>}"' ), 'release.sh: SERVER_DIR from CMP_SERVER_DIR, placeholder kept' );
+cmp_assert( false !== strpos( $cmp_rel_src, 'SERVER_DIR="${CMP_SERVER_DIR:-~/domains/biscuitwp.rt.md/public_html}"' ), 'release.sh: SERVER_DIR from CMP_SERVER_DIR, default the biscuitwp.rt.md document root (quoted: ~ is the server home)' );
+cmp_assert( false !== strpos( $cmp_rel_src, 'MIRROR_DIR="${CMP_MIRROR_DIR:-~/public_html/consent}"' ), 'release.sh: MIRROR_DIR from CMP_MIRROR_DIR, default the old consent.rt.md document root' );
+cmp_assert( false === strpos( $cmp_rel_src, '<DIRECTOR-CONSENT.RT.MD>' ), 'release.sh: the old directory placeholder is gone' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'scp$FILES $SERVER_HOST:$SERVER_DIR/' ), 'release.sh: scp uses $SERVER_HOST:$SERVER_DIR' );
+cmp_assert( false !== strpos( $cmp_rel_src, 'scp$FILES $SERVER_HOST:$MIRROR_DIR/' ), 'release.sh: the same manifests + .sig are mirrored to $MIRROR_DIR (1.0.0 installs read consent.rt.md)' );
+cmp_assert( false === strpos( $cmp_rel_src, 'release/site/. $SERVER_HOST:$MIRROR_DIR' ), 'release.sh: the site is not uploaded to the mirror (it redirects)' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'git add release && git commit -m "chore(release): vX.Y.Z (beta)" && git push' ), 'release.sh: recovery note for a failed chore(release) commit/push' );
 
 // B8b: real path builds release/site after save_state and uploads it; SBOM attached to the release.
 cmp_assert( 1 === preg_match( '#CMP_STABLE_MANIFEST=release/manifest-stable\.json bin/build-site\.sh --out release/site#', $cmp_rel_src ), 'release.sh: real path builds release/site with the committed stable manifest' );
 cmp_assert( false !== strpos( $cmp_rel_src, 'scp -r release/site/. $SERVER_HOST:$SERVER_DIR/' ), 'release.sh: upload command includes release/site/' );
-cmp_assert( 1 === preg_match( '#gh release create .*dist/\$SLUG\.zip\.sig" "dist/\$SLUG-\$VERSION\.cdx\.json"#', $cmp_rel_src ), 'release.sh: SBOM attached to gh release create' );
+cmp_assert( 1 === preg_match( '#gh release create .*dist/\$NEW_ASSET\.zip\.sig" "dist/\$SLUG-\$VERSION\.cdx\.json"#', $cmp_rel_src ), 'release.sh: SBOM attached to gh release create' );
 cmp_assert( 1 === preg_match( '#\nsave_state\nbuild_site\ngit add "\$STATE"#', $cmp_rel_src ), 'release.sh: site built right after save_state, before git add' );
 // Preflight: the site is built (into dist/site-preflight) before the first irreversible step.
 $cmp_rel_pre = strpos( $cmp_rel_src, 'bin/build-site.sh --out dist/site-preflight' );

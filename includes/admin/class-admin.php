@@ -50,8 +50,8 @@ class CMP_Admin {
 		add_action( 'admin_notices', array( $this, 'update_state_notices' ) );
 		add_action( 'network_admin_notices', array( $this, 'update_state_notices' ) );
 
-		add_filter( 'plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'action_links' ) );
-		add_filter( 'network_admin_plugin_action_links_' . plugin_basename( CMP_PATH . 'consent-manager-pro.php' ), array( $this, 'network_action_links' ) );
+		add_filter( 'plugin_action_links_' . CMP_Plugin::basename(), array( $this, 'action_links' ) );
+		add_filter( 'network_admin_plugin_action_links_' . CMP_Plugin::basename(), array( $this, 'network_action_links' ) );
 	}
 
 	/**
@@ -61,9 +61,9 @@ class CMP_Admin {
 	 * @return array
 	 */
 	public function action_links( $links ) {
-		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ) . '">' . esc_html__( 'Setări', 'consent-manager-pro' ) . '</a>';
+		$settings = '<a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ) . '">' . esc_html__( 'Setări', 'biscuitwp' ) . '</a>';
 		array_unshift( $links, $settings );
-		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'consent-manager-pro' ) . '</a>';
+		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'biscuitwp' ) . '</a>';
 		array_splice( $links, 1, 0, array( $check ) );
 		return $links;
 	}
@@ -76,29 +76,29 @@ class CMP_Admin {
 	 * @return array
 	 */
 	public function network_action_links( $links ) {
-		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'consent-manager-pro' ) . '</a>';
+		$check = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cmp_check_updates' ), 'cmp_check_updates' ) ) . '">' . esc_html__( 'Caută actualizări', 'biscuitwp' ) . '</a>';
 		array_unshift( $links, $check );
 		return $links;
 	}
 
 	public function menu() {
 		add_menu_page(
-			__( 'BiscuitWP', 'consent-manager-pro' ),
-			__( 'BiscuitWP', 'consent-manager-pro' ),
+			__( 'BiscuitWP', 'biscuitwp' ),
+			__( 'BiscuitWP', 'biscuitwp' ),
 			'manage_options',
 			self::SLUG,
 			array( 'CMP_Settings_Page', 'render' ),
 			'dashicons-shield',
 			80
 		);
-		add_submenu_page( self::SLUG, __( 'Setări', 'consent-manager-pro' ), __( 'Setări', 'consent-manager-pro' ), 'manage_options', self::SLUG, array( 'CMP_Settings_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Aspect', 'consent-manager-pro' ), __( 'Aspect', 'consent-manager-pro' ), 'manage_options', CMP_Appearance_Page::SLUG, array( 'CMP_Appearance_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Categorii', 'consent-manager-pro' ), __( 'Categorii', 'consent-manager-pro' ), 'manage_options', 'cmp-categories', array( 'CMP_Categories_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Servicii', 'consent-manager-pro' ), __( 'Servicii', 'consent-manager-pro' ), 'manage_options', 'cmp-services', array( 'CMP_Services_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Verificare', 'consent-manager-pro' ), __( 'Verificare', 'consent-manager-pro' ), 'manage_options', CMP_Check_Page::SLUG, array( 'CMP_Check_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Registru consimțăminte', 'consent-manager-pro' ), __( 'Registru consimțăminte', 'consent-manager-pro' ), 'manage_options', 'cmp-audit', array( 'CMP_Audit_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Pagini legale', 'consent-manager-pro' ), __( 'Pagini legale', 'consent-manager-pro' ), 'manage_options', 'cmp-legal', array( 'CMP_Legal_Page', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Ghid', 'consent-manager-pro' ), __( 'Ghid', 'consent-manager-pro' ), 'manage_options', CMP_Guide::SLUG, array( 'CMP_Guide', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Setări', 'biscuitwp' ), __( 'Setări', 'biscuitwp' ), 'manage_options', self::SLUG, array( 'CMP_Settings_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Aspect', 'biscuitwp' ), __( 'Aspect', 'biscuitwp' ), 'manage_options', CMP_Appearance_Page::SLUG, array( 'CMP_Appearance_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Categorii', 'biscuitwp' ), __( 'Categorii', 'biscuitwp' ), 'manage_options', 'cmp-categories', array( 'CMP_Categories_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Servicii', 'biscuitwp' ), __( 'Servicii', 'biscuitwp' ), 'manage_options', 'cmp-services', array( 'CMP_Services_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Verificare', 'biscuitwp' ), __( 'Verificare', 'biscuitwp' ), 'manage_options', CMP_Check_Page::SLUG, array( 'CMP_Check_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Registru consimțăminte', 'biscuitwp' ), __( 'Registru consimțăminte', 'biscuitwp' ), 'manage_options', 'cmp-audit', array( 'CMP_Audit_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Pagini legale', 'biscuitwp' ), __( 'Pagini legale', 'biscuitwp' ), 'manage_options', 'cmp-legal', array( 'CMP_Legal_Page', 'render' ) );
+		add_submenu_page( self::SLUG, __( 'Ghid', 'biscuitwp' ), __( 'Ghid', 'biscuitwp' ), 'manage_options', CMP_Guide::SLUG, array( 'CMP_Guide', 'render' ) );
 	}
 
 	public function assets( $hook ) {
@@ -120,7 +120,7 @@ class CMP_Admin {
 	/** Manual update check: clear caches, re-check, report via notice on the Plugins screen. */
 	public function check_updates() {
 		if ( ! current_user_can( 'update_plugins' ) || ! check_admin_referer( 'cmp_check_updates' ) ) {
-			wp_die( esc_html__( 'Acțiune neautorizată.', 'consent-manager-pro' ) );
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		delete_site_transient( CMP_Updater::CACHE_KEY );
 		delete_site_transient( 'update_plugins' );
@@ -149,11 +149,11 @@ class CMP_Admin {
 			return;
 		}
 		$msg = CMP_Services::using_fallback()
-			? __( 'Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul).', 'consent-manager-pro' )
-			: __( 'Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect.', 'consent-manager-pro' );
-		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'BiscuitWP:', 'consent-manager-pro' ) . '</strong> '
+			? __( 'Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google Maps până o repari (reinstalează pluginul).', 'biscuitwp' )
+			: __( 'Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să nu fie blocate corect.', 'biscuitwp' );
+		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'BiscuitWP:', 'biscuitwp' ) . '</strong> '
 			. esc_html( $msg )
-			. ' <a href="' . esc_url( admin_url( 'admin.php?page=' . CMP_Services_Page::SLUG ) ) . '">' . esc_html__( 'Detalii în „Servicii”', 'consent-manager-pro' ) . '</a></p></div>';
+			. ' <a href="' . esc_url( admin_url( 'admin.php?page=' . CMP_Services_Page::SLUG ) ) . '">' . esc_html__( 'Detalii în „Servicii”', 'biscuitwp' ) . '</a></p></div>';
 	}
 
 	/**
@@ -176,17 +176,17 @@ class CMP_Admin {
 		}
 		$v = sanitize_text_field( wp_unslash( $_GET['cmp_up'] ) );
 		if ( 'unavailable' === $v ) {
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.', 'consent-manager-pro' ) . '</p></div>';
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai târziu.', 'biscuitwp' ) . '</p></div>';
 		} elseif ( 'latest' === $v ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf(
 				/* translators: %s — current plugin version */
-				__( 'BiscuitWP: ai ultima versiune (%s).', 'consent-manager-pro' ),
+				__( 'BiscuitWP: ai ultima versiune (%s).', 'biscuitwp' ),
 				CMP_VERSION
 			) ) . '</p></div>';
 		} else {
 			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf(
 				/* translators: %s — new version number */
-				__( 'BiscuitWP: este disponibilă versiunea %s — folosește „Update now" din lista de mai jos.', 'consent-manager-pro' ),
+				__( 'BiscuitWP: este disponibilă versiunea %s — folosește „Update now" din lista de mai jos.', 'biscuitwp' ),
 				$v
 			) ) . '</p></div>';
 		}

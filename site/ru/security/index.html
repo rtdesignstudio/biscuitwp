@@ -20,7 +20,7 @@
 <h2 id="raportare">Сообщите об уязвимости</h2>
 <p>Не открывайте публичный issue. Используйте один из двух закрытых каналов:</p>
 <ol>
-<li><strong>Закрытое сообщение на GitHub</strong> (предпочтительно): <a href="https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new">открыть отчёт</a>.</li>
+<li><strong>Закрытое сообщение на GitHub</strong> (предпочтительно): <a href="https://github.com/rtdesignstudio/biscuitwp/security/advisories/new">открыть отчёт</a>.</li>
 <li><strong>E-mail:</strong> <a href="mailto:security@rt.md">security@rt.md</a>.</li>
 </ol>
 
@@ -46,7 +46,7 @@
 <h2 id="update-uri">Как защищены обновления</h2>
 <p>Плагин не берёт обновления с wordpress.org. Он получает их так:</p>
 <ul>
-<li><strong>Подписанный манифест.</strong> На consent.rt.md лежит по одному манифесту для каждого канала (stable и beta) с отдельной подписью Ed25519. Манифест указывает, какая версия доступна, откуда её скачать и какой хеш SHA-256 у пакета. Плагин использует манифест, только если подпись действительна.</li>
+<li><strong>Подписанный манифест.</strong> На biscuitwp.rt.md лежит по одному манифесту для каждого канала (stable и beta) с отдельной подписью Ed25519. Манифест указывает, какая версия доступна, откуда её скачать и какой хеш SHA-256 у пакета. Плагин использует манифест, только если подпись действительна.</li>
 <li><strong>Подписанный пакет.</strong> Zip приходит из GitHub Releases. Перед установкой плагин проверяет хеш SHA-256 и подпись Ed25519 этого zip. Он принимает только точный адрес из проверенного манифеста. Если что-то не совпадает, пакет удаляется, а обновление отклоняется.</li>
 <li><strong>Защита от отката (anti-rollback).</strong> Плагин запоминает самый новый манифест, который видел на каждом канале, и отклоняет более старый. Так никто не сможет подсунуть вам старый, но действительный манифест, чтобы удержать вас на уязвимой версии.</li>
 <li><strong>Срок действия.</strong> Манифест действителен не больше 60 дней. Мы подписываем его заново каждый месяц. Просроченный манифест больше не предлагает обновлений, а в админке появляется предупреждение.</li>
@@ -60,12 +60,13 @@
 
 <h2 id="verificare">Проверьте zip вручную</h2>
 <ol>
-<li>Скачайте из <a href="https://github.com/rtdesignstudio/consent-manager-pro/releases">GitHub Releases</a> файлы <code>consent-manager-pro.zip</code> и <code>consent-manager-pro.zip.sig</code> одной и той же версии.</li>
+<li>Скачайте из <a href="https://github.com/rtdesignstudio/biscuitwp/releases">GitHub Releases</a> файлы <code>consent-manager-pro.zip</code> и <code>consent-manager-pro.zip.sig</code> одной и той же версии.</li>
 <li>Вычислите хеш zip и сравните его с полем <code>sha256</code> в <a href="../../manifest-stable.json">manifest-stable.json</a> (для версии, указанной в манифесте):
 <pre><code>shasum -a 256 consent-manager-pro.zip</code></pre></li>
 <li>Проверьте подпись ключом релизов. Команда должна вывести <code>OK</code>:
 <pre><code>php -r '$k = base64_decode("{{SIGN_PUBLIC_KEY}}"); $s = base64_decode(trim(file_get_contents("consent-manager-pro.zip.sig"))); $z = file_get_contents("consent-manager-pro.zip"); echo sodium_crypto_sign_verify_detached($s, $z, $k) ? "OK\n" : "INVALID\n";'</code></pre></li>
 </ol>
+<p>Для <code>biscuitwp.zip</code> (новая установка) в шаге 3 используйте <code>biscuitwp.zip</code> и <code>biscuitwp.zip.sig</code>; шаг 2 относится только к <code>consent-manager-pro.zip</code> (пакет обновления), чей хеш указан в манифесте.</p>
 <p>Если вы видите ошибку, файл .sig отсутствует или неверный.</p>
 <p>Если релиз подписан резервным ключом, подставьте в команду резервный ключ. Если проверка не проходит, не устанавливайте zip и напишите нам.</p>
 

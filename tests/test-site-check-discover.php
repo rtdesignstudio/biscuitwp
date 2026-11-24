@@ -25,7 +25,7 @@ require_once $cmp_cd_api . '/lib/ratelimit.php';
 require_once $cmp_cd_api . '/lib/endpoint.php';
 
 cmp_assert( false !== strpos( (string) file_get_contents( $cmp_cd_api . '/verifica.php' ), "require_once __DIR__ . '/lib/discover.php';" ), 'verifica.php loads lib/discover.php' );
-cmp_assert_eq( cmp_check_user_agent(), 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)', 'user-agent unchanged' );
+cmp_assert_eq( cmp_check_user_agent(), 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)', 'user-agent names BiscuitWP and the new site' );
 
 /* ------------------------------------------------------------------
  * Helpers.

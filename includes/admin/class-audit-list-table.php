@@ -10,14 +10,14 @@ class CMP_Audit_List_Table extends WP_List_Table {
 
 	public function get_columns() {
 		return array(
-			'ts'         => __( 'Dată', 'consent-manager-pro' ),
-			'consent_id' => __( 'ID consimțământ', 'consent-manager-pro' ),
-			'decision'   => __( 'Decizie', 'consent-manager-pro' ),
-			'categories' => __( 'Categorii', 'consent-manager-pro' ),
-			'services'   => __( 'Servicii', 'consent-manager-pro' ),
-			'lang'       => __( 'Limbă', 'consent-manager-pro' ),
-			'version'    => __( 'Versiune', 'consent-manager-pro' ),
-			'url'        => __( 'URL', 'consent-manager-pro' ),
+			'ts'         => __( 'Dată', 'biscuitwp' ),
+			'consent_id' => __( 'ID consimțământ', 'biscuitwp' ),
+			'decision'   => __( 'Decizie', 'biscuitwp' ),
+			'categories' => __( 'Categorii', 'biscuitwp' ),
+			'services'   => __( 'Servicii', 'biscuitwp' ),
+			'lang'       => __( 'Limbă', 'biscuitwp' ),
+			'version'    => __( 'Versiune', 'biscuitwp' ),
+			'url'        => __( 'URL', 'biscuitwp' ),
 		);
 	}
 

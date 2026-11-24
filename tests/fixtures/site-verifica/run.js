@@ -98,7 +98,7 @@ function later(f) { pending++; setImmediate(function () { pending--; try { f(); 
 var winListeners = {};
 var win = {
 	addEventListener: function (t, f) { (winListeners[t] = winListeners[t] || []).push(f); },
-	location: { origin: 'https://consent.rt.md' },
+	location: { origin: 'https://biscuitwp.rt.md' },
 	navigator: { clipboard: { writeText: function (t) { if (shareArg === 'noclip') { return Promise.reject(new Error('denied')); } copied = t; return Promise.resolve(); } } },
 	print: function () {
 		printCalls++;

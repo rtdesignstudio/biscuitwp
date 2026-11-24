@@ -21,7 +21,7 @@ BiscuitWP (formerly Consent Manager Pro) is free, and it stays free: there is no
 
 ## Installation
 
-1. Download `consent-manager-pro.zip` from [GitHub Releases](https://github.com/rtdesignstudio/consent-manager-pro/releases).
+1. Download `biscuitwp.zip` from [GitHub Releases](https://github.com/rtdesignstudio/biscuitwp/releases) (the latest stable: <https://github.com/rtdesignstudio/biscuitwp/releases/latest/download/biscuitwp.zip>).
 2. In WordPress, go to **Plugins > Add New > Upload Plugin**, or unzip it into `wp-content/plugins/`.
 3. Activate it. The audit table and the default categories are created on activation.
 
@@ -39,12 +39,12 @@ Configure under **WP Admin > BiscuitWP** (a "Settings" link is also shown direct
 
 ## Updates and security
 
-- Updates are **signed (Ed25519)** and delivered from <https://consent.rt.md/> as a signed manifest, with the zip hosted on GitHub Releases. Updates show up natively under **Plugins / Dashboard > Updates**.
+- Updates are **signed (Ed25519)** and delivered from <https://biscuitwp.rt.md/> as a signed manifest, with the zip hosted on GitHub Releases. Updates show up natively under **Plugins / Dashboard > Updates**.
 - **No telemetry.** The update check is a plain request for a static file and sends no site data.
 - Sites follow the `stable` channel; `define( 'CMP_UPDATE_CHANNEL', 'beta' );` in `wp-config.php` switches a site to beta.
-- Keys and how to verify a download by hand: [Security](https://consent.rt.md/en/security/) ([RO](https://consent.rt.md/securitate/)).
-- What the plugin does and does not send: [Privacy](https://consent.rt.md/en/privacy/).
-- Release history: [Changelog](https://consent.rt.md/changelog/) (also in [CHANGELOG.md](CHANGELOG.md)).
+- Keys and how to verify a download by hand: [Security](https://biscuitwp.rt.md/en/security/) ([RO](https://biscuitwp.rt.md/securitate/)).
+- What the plugin does and does not send: [Privacy](https://biscuitwp.rt.md/en/privacy/).
+- Release history: [Changelog](https://biscuitwp.rt.md/changelog/) (also in [CHANGELOG.md](CHANGELOG.md)).
 - Reporting a vulnerability: see [SECURITY.md](SECURITY.md).
 
 ## Developer API

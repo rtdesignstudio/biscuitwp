@@ -37,8 +37,8 @@ cmp_assert( 1 === preg_match( "/'respectGPC'\s*=>\s*self::respect_gpc\(\s*\\\$cm
 $gpc_page = (string) file_get_contents( __DIR__ . '/../includes/admin/class-settings-page.php' );
 cmp_assert( 1 === preg_match( '/<input type="hidden" name="cmp\[respect_gpc\]" value="0">\s*<label><input type="checkbox" name="cmp\[respect_gpc\]" value="1"/', $gpc_page ), 'gpc row: hidden "0" before the checkbox (unticking is saved)' );
 cmp_assert( false !== strpos( $gpc_page, "checked( ! isset( \$s['respect_gpc'] ) || ! empty( \$s['respect_gpc'] ) )" ), 'gpc row: ticked when nothing is stored (default on)' );
-cmp_assert( false !== strpos( $gpc_page, "esc_html_e( 'Respectă semnalul Global Privacy Control (GPC)', 'consent-manager-pro' )" ), 'gpc row: the label, translatable' );
-cmp_assert( 1 === preg_match( "/esc_html_e\( 'Când browserul vizitatorului trimite semnalul GPC, pluginul înregistrează „Doar cele necesare” și nu mai arată bannerul[^']*Setări cookie[^']*\. [^']*Moldova[^']*implicit[^']*\.', 'consent-manager-pro' \)/u", $gpc_page ), 'gpc row: the help text (two sentences, translatable)' );
+cmp_assert( false !== strpos( $gpc_page, "esc_html_e( 'Respectă semnalul Global Privacy Control (GPC)', 'biscuitwp' )" ), 'gpc row: the label, translatable' );
+cmp_assert( 1 === preg_match( "/esc_html_e\( 'Când browserul vizitatorului trimite semnalul GPC, pluginul înregistrează „Doar cele necesare” și nu mai arată bannerul[^']*Setări cookie[^']*\. [^']*Moldova[^']*implicit[^']*\.', 'biscuitwp' \)/u", $gpc_page ), 'gpc row: the help text (two sentences, translatable)' );
 cmp_assert( 0 === preg_match( "/GPC[^\n]*\xE2\x80\x94/u", $gpc_page ), 'gpc row: no em dash in the new texts' );
 
 // ---- banner.js: the GPC branch reads the option (missing = on) ----

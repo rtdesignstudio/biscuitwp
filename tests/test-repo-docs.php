@@ -22,7 +22,7 @@ $rt = $cmp_rd_read( 'readme.txt' );
 cmp_assert( 0 === strpos( $rt, '=== BiscuitWP ===' ), 'readme.txt: title' );
 cmp_assert( false !== strpos( $rt, 'Requires PHP: 7.4' ), 'readme.txt: Requires PHP' );
 cmp_assert( false !== strpos( $rt, 'License: GPLv2 or later' ), 'readme.txt: License' );
-$main = $cmp_rd_read( 'consent-manager-pro.php' );
+$main = $cmp_rd_read( 'biscuitwp.php' );
 preg_match( '/^ \* Version:\s*(\S+)/m', $main, $mv );
 preg_match( '/^Stable tag:\s*(\S+)/m', $rt, $ms );
 cmp_assert( isset( $mv[1], $ms[1] ) && $mv[1] === $ms[1], 'readme.txt: Stable tag equals plugin header Version' );
@@ -30,7 +30,7 @@ cmp_assert( isset( $mv[1], $ms[1] ) && $mv[1] === $ms[1], 'readme.txt: Stable ta
 // SECURITY.md.
 $sec = $cmp_rd_read( 'SECURITY.md' );
 cmp_assert( false !== strpos( $sec, 'security@rt.md' ), 'SECURITY.md: email' );
-cmp_assert( false !== strpos( $sec, 'https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new' ), 'SECURITY.md: advisory link' );
+cmp_assert( false !== strpos( $sec, 'https://github.com/rtdesignstudio/biscuitwp/security/advisories/new' ), 'SECURITY.md: advisory link' );
 cmp_assert( false !== strpos( $sec, '72' ), 'SECURITY.md: 72 hours' );
 cmp_assert( false !== strpos( $sec, '30' ), 'SECURITY.md: 30 days' );
 
@@ -45,7 +45,7 @@ foreach ( array( 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'readme.txt' ) a
 
 // README links.
 $rd = $cmp_rd_read( 'README.md' );
-cmp_assert( false !== strpos( $rd, 'https://consent.rt.md/securitate/' ) || false !== strpos( $rd, 'https://consent.rt.md/en/security/' ), 'README: security page link' );
+cmp_assert( false !== strpos( $rd, 'https://biscuitwp.rt.md/securitate/' ) || false !== strpos( $rd, 'https://biscuitwp.rt.md/en/security/' ), 'README: security page link' );
 cmp_assert( false !== strpos( $rd, 'docs/api.md' ), 'README: docs/api.md' );
 cmp_assert( false !== strpos( $rd, 'SECURITY.md' ), 'README: SECURITY.md' );
 
@@ -63,7 +63,7 @@ cmp_assert( '' !== $sa, 'standalone/README.md: exists' );
 cmp_assert( false === strpos( $sa, 'Proprietary' ), 'standalone/README.md: no "Proprietary"' );
 cmp_assert( false === strpos( $sa, 'Phase 2' ), 'standalone/README.md: no "Phase 2"' );
 cmp_assert( false !== strpos( $sa, 'GPL-2.0-or-later' ) && false !== strpos( $sa, '../LICENSE' ), 'standalone/README.md: GPL-2.0-or-later with link to ../LICENSE' );
-cmp_assert( false !== strpos( $sa, 'https://rt.md/cmp/' ) && false !== strpos( $sa, 'https://consent.rt.md/en/privacy/' ), 'standalone/README.md: RT copy note and privacy link' );
+cmp_assert( false !== strpos( $sa, 'https://rt.md/cmp/' ) && false !== strpos( $sa, 'https://biscuitwp.rt.md/en/privacy/' ), 'standalone/README.md: RT copy note and privacy link' );
 
 // CONTRIBUTING mentions the site and the SBOM.
 $ct = $cmp_rd_read( 'CONTRIBUTING.md' );

@@ -163,7 +163,7 @@ if ( false !== $xml ) {
 	cmp_assert_eq( count( $xml->channel->item ), 2, 'feed: 2 items (TBD skipped)' );
 	$it = $xml->channel->item[0];
 	cmp_assert_eq( (string) $it->title, 'BiscuitWP 1.2.3', 'feed: newest item title' );
-	cmp_assert_eq( (string) $it->link, 'https://consent.rt.md/changelog/#v1-2-3', 'feed: item link to the anchor' );
+	cmp_assert_eq( (string) $it->link, 'https://biscuitwp.rt.md/changelog/#v1-2-3', 'feed: item link to the anchor' );
 	cmp_assert( 1 === preg_match( '/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} [+-]\d{4}$/', (string) $it->pubDate ), 'feed: pubDate is RFC 822' );
 	cmp_assert_eq( strtotime( (string) $it->pubDate ), strtotime( '2026-10-05T00:00:00Z' ), 'feed: pubDate is the release date' );
 	cmp_assert( false !== strpos( (string) $it->description, '&lt;b&gt;&amp;&lt;/b&gt;' ), 'feed: description keeps the item text escaped as HTML' );
@@ -175,11 +175,11 @@ if ( false !== $xml ) {
 $st = $cmp_site_read( '.well-known/security.txt' );
 foreach ( array(
 	'Contact: mailto:security@rt.md',
-	'Contact: https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new',
+	'Contact: https://github.com/rtdesignstudio/biscuitwp/security/advisories/new',
 	'Expires: ' . gmdate( 'Y-m-d\TH:i:s\Z', $cmp_site_now + 180 * 86400 ),
 	'Preferred-Languages: ro, en, ru',
-	'Canonical: https://consent.rt.md/.well-known/security.txt',
-	'Policy: https://consent.rt.md/en/security/',
+	'Canonical: https://biscuitwp.rt.md/.well-known/security.txt',
+	'Policy: https://biscuitwp.rt.md/en/security/',
 ) as $line ) {
 	cmp_assert( 1 === preg_match( '/^' . preg_quote( $line, '/' ) . '$/m', $st ), "security.txt: {$line}" );
 }
@@ -218,13 +218,20 @@ foreach ( array( 'securitate/index.html' => 'niciuna', 'en/security/index.html' 
 	cmp_assert( false === strpos( $rev, $none ), "{$page}: revoked list is not „{$none}” when versions are revoked" );
 }
 
+// Security pages: biscuitwp.zip (new installs) is checked by its own .sig; its hash is not in the manifest.
+foreach ( array( 'securitate/index.html', 'en/security/index.html', 'ru/security/index.html' ) as $page ) {
+	$html = $cmp_site_read( $page );
+	cmp_assert( false !== strpos( $html, '<code>biscuitwp.zip.sig</code>' ), "{$page}: explains verifying biscuitwp.zip with biscuitwp.zip.sig" );
+	cmp_assert( 1 === preg_match( '#</ol>\s*<p>[^<]*<code>biscuitwp\.zip</code>#u', $html ), "{$page}: the biscuitwp.zip note follows the verification steps" );
+}
+
 // ---- Every page --------------------------------------------------------------------
 foreach ( $cmp_site_pages as $page => $lang ) {
 	$html = $cmp_site_read( $page );
 	cmp_assert( false !== strpos( $html, '<html lang="' . $lang . '"' ), "{$page}: <html lang=\"{$lang}\">" );
 	cmp_assert( 1 === preg_match( '#<link rel="stylesheet" href="[^"]*style\.css"#', $html ), "{$page}: links style.css" );
 	cmp_assert( false !== strpos( $html, '<meta name="viewport"' ), "{$page}: viewport meta" );
-	cmp_assert( false !== strpos( $html, 'https://github.com/rtdesignstudio/consent-manager-pro' ), "{$page}: links the GitHub repo" );
+	cmp_assert( false !== strpos( $html, 'https://github.com/rtdesignstudio/biscuitwp' ), "{$page}: links the GitHub repo" );
 }
 
 // ---- Shared header and footer, style assets (Task 1 of the landing) ---------------
@@ -266,7 +273,7 @@ foreach ( $cmp_site_frame as $page => $fr ) {
 		foreach ( array( 'security', 'privacy', 'changelog' ) as $k ) {
 			cmp_assert( false !== strpos( $part, 'href="' . $cmp_site_nav[ $lang ][ $k ] . '"' ), "{$page}: {$where} links {$cmp_site_nav[ $lang ][ $k ]}" );
 		}
-		cmp_assert( false !== strpos( $part, 'https://github.com/rtdesignstudio/consent-manager-pro' ), "{$page}: {$where} links GitHub" );
+		cmp_assert( false !== strpos( $part, 'https://github.com/rtdesignstudio/biscuitwp' ), "{$page}: {$where} links GitHub" );
 	}
 	cmp_assert( false !== strpos( $head, 'href="' . $cmp_site_nav[ $lang ]['home'] . '"' ), "{$page}: header links home" );
 	foreach ( $alts as $al => $alt ) {
@@ -364,13 +371,13 @@ foreach ( cmp_site_files( $cmp_site_root . '/site' ) as $f ) {
 // Privacy pages: every outgoing host the plugin can contact is declared.
 foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html', 'ru/privacy/index.html' ) as $page ) {
 	$html = $cmp_site_read( $page );
-	foreach ( array( 'consent.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/README.md' ) as $needle ) {
+	foreach ( array( 'biscuitwp.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/README.md' ) as $needle ) {
 		cmp_assert( false !== strpos( $html, $needle ), "{$page}: mentions {$needle}" );
 	}
 }
 
 // ---- Landing page, the tool and the demo (Task 4 of the landing) -------------------
-$cmp_site_repo = 'https://github.com/rtdesignstudio/consent-manager-pro/releases';
+$cmp_site_repo = 'https://github.com/rtdesignstudio/biscuitwp/releases';
 /** hrefs of the download links (data-download) of a page. */
 $cmp_site_dl = function ( $html ) {
 	preg_match_all( '#<a\b[^>]*\bdata-download\b[^>]*>#', $html, $m );
@@ -383,6 +390,12 @@ $cmp_site_dl = function ( $html ) {
 $cmp_site_out7 = $cmp_site_tmp . '/out7';
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_out7 ), array_merge( $cmp_site_env, array( 'CMP_BETA_MANIFEST' => $cmp_site_tmp . '/no-beta.json' ) ) );
 cmp_assert_eq( $rc, 0, 'build-site without any manifest: exits 0' . ( 0 === $rc ? '' : ' — ' . trim( $out ) ) );
+// A stable release older than 1.1.0 has no biscuitwp.zip asset: link the latest release page instead.
+$cmp_site_mf100 = $cmp_site_tmp . '/manifest-stable-100.json';
+file_put_contents( $cmp_site_mf100, json_encode( array( 'format' => 1, 'channel' => 'stable', 'version' => '1.0.0', 'revoked' => array() ) ) );
+$cmp_site_out9 = $cmp_site_tmp . '/out9';
+list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_out9 ), array_merge( $cmp_site_env, array( 'CMP_STABLE_MANIFEST' => $cmp_site_mf100 ) ) );
+cmp_assert_eq( $rc, 0, 'build-site with a 1.0.0 stable manifest: exits 0' . ( 0 === $rc ? '' : ' — ' . trim( $out ) ) );
 $cmp_site_badbeta = $cmp_site_tmp . '/bad-beta.json';
 file_put_contents( $cmp_site_badbeta, json_encode( array( 'version' => '1.0"><script>' ) ) );
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_tmp . '/out8' ), array_merge( $cmp_site_env, array( 'CMP_BETA_MANIFEST' => $cmp_site_badbeta ) ) );
@@ -393,11 +406,12 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' 
 	foreach ( array( 'verifica', 'legea', 'functii', 'demo', 'comparatie', 'resurse' ) as $id ) {
 		cmp_assert( false !== strpos( $html, 'id="' . $id . '"' ), "{$page}: section #{$id}" );
 	}
-	// Download: stable -> releases/latest; else the beta manifest's version; else the releases page.
+	// Download: stable -> the new-install zip of the latest release (biscuitwp.zip); else the beta manifest's version; else the releases page.
 	foreach ( array(
 		'beta only'   => array( $html, $cmp_site_repo . '/tag/v1.2.0' ),
-		'stable'      => array( (string) @file_get_contents( $cmp_site_out3 . '/' . $page ), $cmp_site_repo . '/latest' ),
+		'stable'      => array( (string) @file_get_contents( $cmp_site_out3 . '/' . $page ), $cmp_site_repo . '/latest/download/biscuitwp.zip' ),
 		'no manifest' => array( (string) @file_get_contents( $cmp_site_out7 . '/' . $page ), $cmp_site_repo ),
+		'stable 1.0.0' => array( (string) @file_get_contents( $cmp_site_out9 . '/' . $page ), $cmp_site_repo . '/latest' ),
 	) as $case => $pair ) {
 		$links = $cmp_site_dl( $pair[0] );
 		cmp_assert( count( $links ) >= 2, "{$page} ({$case}): at least two download links" );
@@ -405,6 +419,8 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' 
 		cmp_assert( false === strpos( $pair[0], 'DOWNLOAD_URL' ), "{$page} ({$case}): download marker replaced" );
 	}
 	cmp_assert_eq( substr_count( (string) @file_get_contents( $cmp_site_root . '/site/' . $page ), '<!-- DOWNLOAD_URL -->' ), count( $cmp_site_dl( $html ) ), "site/{$page}: every download link uses the marker" );
+	cmp_assert( 1 === preg_match( '#<a data-download href="[^"]*">[^<]+</a> <code>biscuitwp\.zip</code>#', $html ), "{$page}: the install step names biscuitwp.zip" );
+	cmp_assert( false === strpos( $html, '<code>consent-manager-pro.zip</code>' ), "{$page}: the install step no longer names consent-manager-pro.zip" );
 	// The tool.
 	cmp_assert( 1 === preg_match( '#<section[^>]*id="verifica".*?</section>#s', $html, $sm ), "{$page}: #verifica is a section" );
 	$sec = isset( $sm[0] ) ? $sm[0] : '';
@@ -454,7 +470,7 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' 
 	foreach ( array_keys( $notes ) as $n ) {
 		cmp_assert( 1 === preg_match( '#<li id="' . preg_quote( $n, '#' ) . '">(.*?)</li>#s', $cmp_sec, $lm2 ), "{$page}: note {$n} exists" );
 		$li = isset( $lm2[1] ) ? $lm2[1] : '';
-		cmp_assert( 1 === preg_match( '#<a href="https://(?!consent\.rt\.md)[^"]+"#', $li ), "{$page}: note {$n} links its source" );
+		cmp_assert( 1 === preg_match( '#<a href="https://(?!biscuitwp\.rt\.md)[^"]+"#', $li ), "{$page}: note {$n} links its source" );
 		cmp_assert( false !== strpos( $li, '<time datetime="2026-11-20">' ), "{$page}: note {$n} has the verification date" );
 	}
 	cmp_assert( false === strpos( $html, "\xe2\x80\x94" ) || 'en' === $lang, "{$page}: no em dash in Romanian text" );
@@ -581,7 +597,7 @@ if ( '' === $cmp_site_node ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
 	}
 	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
-		cmp_assert( 1 === preg_match( '#<a data-standalone href="https://github\.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README\.md">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
+		cmp_assert( 1 === preg_match( '#<a data-standalone href="https://github\.com/rtdesignstudio/biscuitwp/blob/main/standalone/README\.md">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
 	}
 	// The counter line under the form: from 100 successful checks, +1 after a check that read the site.
 	$r = $cmp_site_dom( 'ro', 'clean', true, 1239 );
@@ -623,10 +639,10 @@ if ( '' === $cmp_site_node ) {
 	cmp_assert_eq( $r['buttons'], array( 'Salvează ca PDF', 'Copiază raportul' ), 'share (ro): the two buttons under the report' );
 	cmp_assert( is_string( $r['copied'] ), 'share (ro): "Copiază raportul" writes to the clipboard' );
 	$cmp_site_txt = (string) $r['copied'];
-	foreach ( array( 'exemplu.md Am găsit 3 probleme', '3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'www.googletagmanager.com/gtag/js', '- /contacte/', 'Baza legală: Legea 195/2024', 'Am verificat 10 pagini.', 'În regulă', '- HTTPS', 'Raport făcut cu „Verifică-ți site-ul”, https://consent.rt.md/' ) as $need ) {
+	foreach ( array( 'exemplu.md Am găsit 3 probleme', '3 probleme', 'Ce faci întâi', 'Google Analytics pornește înainte de acord', 'Mută scriptul după acord.', 'www.googletagmanager.com/gtag/js', '- /contacte/', 'Baza legală: Legea 195/2024', 'Am verificat 10 pagini.', 'În regulă', '- HTTPS', 'Raport făcut cu „Verifică-ți site-ul”, https://biscuitwp.rt.md/' ) as $need ) {
 		cmp_assert( false !== strpos( $cmp_site_txt, $need ), "share (ro): the copied text has „{$need}”" );
 	}
-	foreach ( array( 'Salvează ca PDF', 'Copiază raportul', 'Descarcă', 'Vezi ce face', 'Raport „Verifică-ți site-ul” de pe consent.rt.md' ) as $bad ) {
+	foreach ( array( 'Salvează ca PDF', 'Copiază raportul', 'Descarcă', 'Vezi ce face', 'Raport „Verifică-ți site-ul” de pe biscuitwp.rt.md' ) as $bad ) {
 		cmp_assert( false === strpos( $cmp_site_txt, $bad ), "share (ro): the copied text has no „{$bad}”" );
 	}
 	cmp_assert( false === strpos( $cmp_site_txt, "\n\n\n" ), 'share (ro): no triple blank lines' );
@@ -635,10 +651,10 @@ if ( '' === $cmp_site_node ) {
 	cmp_assert( is_array( $r['printState'] ) && $r['printState']['details'] > 0 && $r['printState']['details'] === $r['printState']['open'], 'share: every folded detail is open while printing' );
 	cmp_assert( is_array( $r['printState'] ) && false !== strpos( $r['printState']['htmlClass'], 'print-report' ), 'share: the page is marked print-report while printing' );
 	cmp_assert( 0 === $r['openAfter'] && false === strpos( $r['htmlClassAfter'], 'print-report' ), 'share: after printing the details fold again and the mark goes' );
-	cmp_assert( false !== strpos( $r['text'], 'Raport „Verifică-ți site-ul” de pe consent.rt.md, ' ), 'share (ro): the print-only title line is in the report' );
+	cmp_assert( false !== strpos( $r['text'], 'Raport „Verifică-ți site-ul” de pe biscuitwp.rt.md, ' ), 'share (ro): the print-only title line is in the report' );
 	$r = $cmp_site_dom( 'en', 'issues-sitemap' );
 	cmp_assert_eq( $r['buttons'], array( 'Save as PDF', 'Copy the report' ), 'share (en): the two buttons' );
-	cmp_assert( false !== strpos( (string) $r['copied'], 'Report made with “Check your site”, https://consent.rt.md/' ) && 0 === strpos( (string) $r['shareStatus'], 'Report copied' ), 'share (en): footer and status' );
+	cmp_assert( false !== strpos( (string) $r['copied'], 'Report made with “Check your site”, https://biscuitwp.rt.md/' ) && 0 === strpos( (string) $r['shareStatus'], 'Report copied' ), 'share (en): footer and status' );
 	$r = $cmp_site_dom( 'ro', 'issues-sitemap', true, 'fail', 'noclip' );
 	cmp_assert( null === $r['copied'] && 0 === strpos( (string) $r['shareStatus'], 'Nu am putut copia raportul' ), 'share (ro): a refused clipboard says so (' . $r['shareStatus'] . ')' );
 	foreach ( array( 'clean', 'unsure' ) as $fx ) {
@@ -953,8 +969,8 @@ cmp_assert( false !== strpos( $cmp_f_js, 'Ne-am oprit după ' ) && false !== str
 cmp_assert( false !== strpos( $cmp_f_js, 'a request limit.' ) && false !== strpos( $cmp_f_js, 'so the check does not take too long.' ) && false !== strpos( $cmp_f_js, 'pages.stopped' ), 'verifica.js: EN stopped notes, reads pages.stopped' );
 cmp_assert( false !== strpos( $cmp_f_js, '!stopped && total > checked && checked >= 10' ), 'verifica.js: the total sentence shows only when we checked 10 pages and did not stop early' );
 // The privacy pages say what the server does.
-foreach ( array( 'confidentialitate/index.html' => array( 'primele 200 de intrări', 'cel mult 25 de cereri', 'cel mult 30 de secunde', '::ffff:a.b.c.d', 'cel mult 3 în același timp', '15 pe minut și 150 pe zi', '30 de verificări pe minut și 1000 pe zi', 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)', 'Bifa de proprietar', 'contoarele' ),
-	'en/privacy/index.html' => array( 'first 200 entries', 'at most 25 requests', 'at most 30 seconds', '::ffff:a.b.c.d', 'at most 3 at the same time', '15 a minute and 150 a day', '30 checks a minute and 1000 a day', 'ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)', 'The owner box', 'the counters' ) ) as $page => $facts ) {
+foreach ( array( 'confidentialitate/index.html' => array( 'primele 200 de intrări', 'cel mult 25 de cereri', 'cel mult 30 de secunde', '::ffff:a.b.c.d', 'cel mult 3 în același timp', '15 pe minut și 150 pe zi', '30 de verificări pe minut și 1000 pe zi', 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)', 'Bifa de proprietar', 'contoarele' ),
+	'en/privacy/index.html' => array( 'first 200 entries', 'at most 25 requests', 'at most 30 seconds', '::ffff:a.b.c.d', 'at most 3 at the same time', '15 a minute and 150 a day', '30 checks a minute and 1000 a day', 'BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)', 'The owner box', 'the counters' ) ) as $page => $facts ) {
 	$html = $cmp_site_read( $page );
 	foreach ( $facts as $f ) {
 		cmp_assert( false !== strpos( $html, $f ), "{$page}: tool section says „{$f}”" );
@@ -986,7 +1002,7 @@ foreach ( array( 'ru/index.html', 'ru/privacy/index.html', 'ru/security/index.ht
 	cmp_assert( 0 === preg_match( '/[ăâîșțĂÂÎȘȚ]/u', str_replace( 'München', '', $text ) ), "site/{$f}: no Romanian text left" );
 }
 $cmp_site_ru = (string) @file_get_contents( $cmp_site_root . '/site/ru/index.html' );
-foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">', 'Проверьте свой сайт' ) as $need ) {
+foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">', 'Проверьте свой сайт' ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_ru, $need ), "ru/index.html: has {$need}" );
 }
 cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/demo/demo.js' ), "ru: '/ru/privacy/'" ), 'demo.js: the Russian demo banner links the Russian privacy page' );

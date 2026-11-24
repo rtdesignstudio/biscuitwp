@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Admin translations: regenerate the .pot, merge it into each .po, compile the .mo.
-#   languages/consent-manager-pro.pot          <- wp i18n make-pot (Romanian source texts)
-#   languages/consent-manager-pro-<locale>.po  <- msgmerge --update (created if missing)
-#   languages/consent-manager-pro-<locale>.mo  <- msgfmt --check
+#   languages/biscuitwp.pot          <- wp i18n make-pot (Romanian source texts)
+#   languages/biscuitwp-<locale>.po  <- msgmerge --update (created if missing)
+#   languages/biscuitwp-<locale>.mo  <- msgfmt --check
 # Prints, per locale, how many texts are translated, fuzzy and untranslated.
 # tests/test-i18n-files.php fails when the .pot is stale, a .po is incomplete
 # or fuzzy, or a .mo is older than its .po. Needs WP-CLI and gettext.
@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-DOMAIN=consent-manager-pro
+DOMAIN=biscuitwp
 POT="languages/${DOMAIN}.pot"
 LOCALES="en_US ru_RU"
 

@@ -20,7 +20,7 @@
 <h2 id="reporting">Report a vulnerability</h2>
 <p>Please do not open a public issue. Use one of two private channels:</p>
 <ol>
-<li><strong>GitHub private reporting</strong> (preferred): <a href="https://github.com/rtdesignstudio/consent-manager-pro/security/advisories/new">open a report</a>.</li>
+<li><strong>GitHub private reporting</strong> (preferred): <a href="https://github.com/rtdesignstudio/biscuitwp/security/advisories/new">open a report</a>.</li>
 <li><strong>Email:</strong> <a href="mailto:security@rt.md">security@rt.md</a>.</li>
 </ol>
 
@@ -46,7 +46,7 @@
 <h2 id="updates">How updates are protected</h2>
 <p>The plugin does not get updates from wordpress.org. It gets them like this:</p>
 <ul>
-<li><strong>Signed manifest.</strong> consent.rt.md serves one manifest per channel (stable and beta), with a detached Ed25519 signature. The manifest says which version is available, where to download it and the SHA-256 hash of the package. The plugin uses it only if the signature is valid.</li>
+<li><strong>Signed manifest.</strong> biscuitwp.rt.md serves one manifest per channel (stable and beta), with a detached Ed25519 signature. The manifest says which version is available, where to download it and the SHA-256 hash of the package. The plugin uses it only if the signature is valid.</li>
 <li><strong>Signed package.</strong> The zip comes from GitHub Releases. Before installing, the plugin checks the zip's SHA-256 hash and its Ed25519 signature. It accepts only the exact URL from the verified manifest. If anything does not match, the package is deleted and the update is refused.</li>
 <li><strong>Anti-rollback.</strong> The plugin remembers the newest manifest it has seen on each channel and refuses an older one. Nobody can serve you an old but validly signed manifest to keep you on a vulnerable version.</li>
 <li><strong>Expiry.</strong> A manifest is valid for at most 60 days. We re-sign it every month. An expired manifest offers no updates, and a notice appears in the admin.</li>
@@ -60,12 +60,13 @@
 
 <h2 id="verify">Verify a zip by hand</h2>
 <ol>
-<li>From <a href="https://github.com/rtdesignstudio/consent-manager-pro/releases">GitHub Releases</a>, download <code>consent-manager-pro.zip</code> and <code>consent-manager-pro.zip.sig</code> of the same version.</li>
+<li>From <a href="https://github.com/rtdesignstudio/biscuitwp/releases">GitHub Releases</a>, download <code>consent-manager-pro.zip</code> and <code>consent-manager-pro.zip.sig</code> of the same version.</li>
 <li>Compute the zip's hash and compare it with the <code>sha256</code> field in <a href="../../manifest-stable.json">manifest-stable.json</a> (for the version in the manifest):
 <pre><code>shasum -a 256 consent-manager-pro.zip</code></pre></li>
 <li>Check the signature with the release key. The command must print <code>OK</code>:
 <pre><code>php -r '$k = base64_decode("{{SIGN_PUBLIC_KEY}}"); $s = base64_decode(trim(file_get_contents("consent-manager-pro.zip.sig"))); $z = file_get_contents("consent-manager-pro.zip"); echo sodium_crypto_sign_verify_detached($s, $z, $k) ? "OK\n" : "INVALID\n";'</code></pre></li>
 </ol>
+<p>For <code>biscuitwp.zip</code> (new installs), use <code>biscuitwp.zip</code> and <code>biscuitwp.zip.sig</code> in step 3; step 2 applies only to <code>consent-manager-pro.zip</code> (the update package), whose hash is in the manifest.</p>
 <p>If you see an error, the .sig file is missing or wrong.</p>
 <p>If a release was signed with the rescue key, put the rescue key in the command. If the check fails, do not install the zip, and write to us.</p>
 

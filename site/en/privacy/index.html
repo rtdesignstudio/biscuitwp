@@ -20,7 +20,7 @@
 <h2 id="to-rt">1. What the plugin sends to us (RT)</h2>
 <p>One thing only: the update check.</p>
 <ul>
-<li>Your site requests the manifest of the selected channel (<code>manifest-stable.json</code> or <code>manifest-beta.json</code>) and its signature (<code>.sig</code>) from <code>consent.rt.md</code>.</li>
+<li>Your site requests the manifest of the selected channel (<code>manifest-stable.json</code> or <code>manifest-beta.json</code>) and its signature (<code>.sig</code>) from <code>biscuitwp.rt.md</code>. Version 1.0.0 requests them from the old address, <code>consent.rt.md</code>, where the same files stay available.</li>
 <li>This happens when WordPress checks for updates (automatically, twice a day) or when you click “Check for updates”. The answer is cached for 6 hours (one hour after an error), so the request goes out at most once every 6 hours, apart from a manual check.</li>
 <li>The request carries no site address, no parameters, no cookies and no extra headers. The user agent is just <code>Consent-Manager-Pro/&lt;version&gt;</code>, without the site address WordPress normally adds.</li>
 <li>Like any web server, ours sees the IP address of your server, not of your visitors, and the time of the request.</li>
@@ -63,13 +63,13 @@
 <ul>
 <li>If you include them from <code>rt.md/cmp/</code>, each visitor's browser downloads them from our server. So our server sees the IP addresses of the visitors of those sites, in its access log, kept only for the usual rotation.</li>
 <li>The files send nothing to us: they do not report choices and make no requests of their own. After consent they only start the scripts and embeds you marked on your site. The choice is stored in the <code>cmp_consent</code> cookie (and <code>cmp_svc</code> for “Always load”), on your site. In Light mode, closing the banner is remembered in <code>localStorage</code>.</li>
-<li><strong>Our recommendation:</strong> host <code>cmp.js</code> and <code>cmp.css</code> on your own server. Copy the two files and include them with your own path, as in <a href="https://github.com/rtdesignstudio/consent-manager-pro/blob/main/standalone/README.md">standalone/README.md</a>. Then our server sees nothing.</li>
+<li><strong>Our recommendation:</strong> host <code>cmp.js</code> and <code>cmp.css</code> on your own server. Copy the two files and include them with your own path, as in <a href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">standalone/README.md</a>. Then our server sees nothing.</li>
 </ul>
 
 <h2 id="instrument">6. The "Check your site" tool</h2>
 <p>On the <a href="/en/#verifica">home page</a> you can check a site. This is how it works:</p>
 <ul>
-<li><strong>What we read:</strong> up to 10 public pages of the address you enter: the homepage and up to 9 others. To find them we read the <code>robots.txt</code> file and the sitemap, of which we take at most the first 200 entries; without a sitemap we take the links on the homepage. We read each page once, as a new visitor would: no cookies, no password, following at most 3 redirects, within the same site. A check makes at most 25 requests in all and takes at most 30 seconds, with at most 3 pages read at the same time. Our server identifies itself with the user agent <code>ConsentManagerPro-Check/1.0 (+https://consent.rt.md/)</code>. We only read public sites: addresses in private or reserved networks are refused.</li>
+<li><strong>What we read:</strong> up to 10 public pages of the address you enter: the homepage and up to 9 others. To find them we read the <code>robots.txt</code> file and the sitemap, of which we take at most the first 200 entries; without a sitemap we take the links on the homepage. We read each page once, as a new visitor would: no cookies, no password, following at most 3 redirects, within the same site. A check makes at most 25 requests in all and takes at most 30 seconds, with at most 3 pages read at the same time. Our server identifies itself with the user agent <code>BiscuitWP-Check/1.0 (+https://biscuitwp.rt.md/)</code>. We only read public sites: addresses in private or reserved networks are refused.</li>
 <li><strong>The owner box:</strong> the check starts only if you tick that you own the site or have the owner's permission. Without it, the server refuses the request.</li>
 <li><strong>What we keep:</strong> nothing from the check, apart from the counters below and a total of successful checks: a single number, with nothing about the site or about you, and how many checks found each kind of problem: numbers only. We show them under the form, from 100 checks on. We keep neither the checked address nor the result, and we do not write them to logs. The address reaches <code>/api/verifica.php</code> in the request body, so the server's access log sees, as for any page, your IP address, your browser and that a check was made, but not which site you checked.</li>
 <li><strong>Usage limit:</strong> to prevent abuse, the tool allows at most 5 checks a minute and 50 a day from the same IPv4 address (an IPv4 address reported in IPv6 form, ::ffff:a.b.c.d, is counted as IPv4 too). For IPv6 the limit applies per /64 network, plus a limit for the whole /48 network (15 a minute and 150 a day). Across the whole server, the tool runs at most 30 checks a minute and 1000 a day, at most 3 at the same time.
@@ -82,9 +82,9 @@
 <li><strong>The result</strong> is shown only to you, in your browser. The page sends it nowhere else.</li>
 </ul>
 
-<h2 id="pages">7. The consent.rt.md pages</h2>
+<h2 id="pages">7. The biscuitwp.rt.md pages</h2>
 <ul>
-<li>The pages of this site use no statistics, no cookies and no external resources: fonts, styles and scripts are all served from <code>consent.rt.md</code>. We only see the approximate number of visitors in the server's access log.</li>
+<li>The pages of this site use no statistics, no cookies and no external resources: fonts, styles and scripts are all served from <code>biscuitwp.rt.md</code>. We only see the approximate number of visitors in the server's access log.</li>
 <li>The pages also carry a small snippet for the RT team's internal feedback widget (from <code>cemainou.rt.md</code>). It loads nothing for visitors: the widget starts only in the browser of a team member who switched it on.</li>
 <li><strong>The banner demo</strong> (<code>/demo/</code>) sets a single, strictly necessary cookie, <code>cmp_consent</code>: it remembers your choice in the demo for a day and stays on <code>/demo/</code> only. The "Show again" button deletes it. The demo loads no trackers.</li>
 </ul>

@@ -1,6 +1,6 @@
 'use strict';
 var cmp = require('../cmp.js');
-var CUR_VER = require('fs').readFileSync(require('path').join(__dirname, '../../consent-manager-pro.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/)[1]; // the plugin's version (no hardcoded release number)
+var CUR_VER = require('fs').readFileSync(require('path').join(__dirname, '../../biscuitwp.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/)[1]; // the plugin's version (no hardcoded release number)
 var fails = 0, passes = 0;
 function ok(cond, msg) { if (cond) { passes++; } else { fails++; console.error('FAIL: ' + msg); } }
 function eq(a, b, msg) { ok(JSON.stringify(a) === JSON.stringify(b), msg + ' (got ' + JSON.stringify(a) + ')'); }
@@ -1376,7 +1376,7 @@ BUILDS.forEach(function (B) {
 // CMP.version sources: WordPress reads CMP_DATA.pluginVersion (CMP_DATA.version
 // is the policy version); the standalone constant follows the plugin version.
 ok(/version: String\(D\.pluginVersion \|\| ''\)/.test(bannerSrc), 'B7.4: banner.js CMP.version from CMP_DATA.pluginVersion');
-var pkgM = cmpSrc.match(/var PKG_VERSION = '([^']+)';/), plugM = require('fs').readFileSync(require('path').join(__dirname, '../../consent-manager-pro.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/);
+var pkgM = cmpSrc.match(/var PKG_VERSION = '([^']+)';/), plugM = require('fs').readFileSync(require('path').join(__dirname, '../../biscuitwp.php'), 'utf8').match(/define\( 'CMP_VERSION', '([^']+)' \)/);
 ok(!!pkgM && !!plugM && pkgM[1] === plugM[1], 'B7.4: cmp.js PKG_VERSION equals CMP_VERSION (got ' + (pkgM && pkgM[1]) + ' vs ' + (plugM && plugM[1]) + ')');
 // ---- B6 Task 3: appearance (shared pure block, standalone CMP_CONFIG.appearance, banner behaviour) ----
 function apBlock(src) { var m = src.match(/\/\/ appearance:begin\n([\s\S]*?)\/\/ appearance:end/); return m; }

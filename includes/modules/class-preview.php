@@ -204,11 +204,11 @@ class CMP_Preview {
 	 */
 	public static function bar_html( $close_url, $side = 'top' ) {
 		$side = 'bottom' === $side ? 'bottom' : 'top';
-		return '<div id="cmp-preview-bar" role="region" aria-label="' . esc_attr__( 'Previzualizare aspect', 'consent-manager-pro' ) . '"'
+		return '<div id="cmp-preview-bar" role="region" aria-label="' . esc_attr__( 'Previzualizare aspect', 'biscuitwp' ) . '"'
 			. ' style="position:fixed;' . $side . ':0;left:0;right:0;z-index:2147483647;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;justify-content:center;'
 			. 'padding:8px 16px;background:#1d2327;color:#fff;font:600 14px/1.4 system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.3)">'
-			. '<span>' . esc_html__( 'Previzualizare: setările nu sunt salvate', 'consent-manager-pro' ) . '</span>'
-			. '<a href="' . esc_url( $close_url ) . '" style="color:#72aee6;text-decoration:underline;padding:4px;outline-offset:2px">' . esc_html__( 'Închide previzualizarea', 'consent-manager-pro' ) . '</a>'
+			. '<span>' . esc_html__( 'Previzualizare: setările nu sunt salvate', 'biscuitwp' ) . '</span>'
+			. '<a href="' . esc_url( $close_url ) . '" style="color:#72aee6;text-decoration:underline;padding:4px;outline-offset:2px">' . esc_html__( 'Închide previzualizarea', 'biscuitwp' ) . '</a>'
 			. '</div>' . "\n";
 	}
 

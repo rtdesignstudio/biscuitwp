@@ -3,7 +3,8 @@
  * Uninstall logic (testable). Called from uninstall.php.
  *
  * Always removed: temporary and derived data (services library, scan results,
- * thumbnails, localized fonts, transients, cron hooks).
+ * thumbnails, localized fonts, transients, cron hooks) and the folder-move
+ * stub (plugins/consent-manager-pro, only when it holds exactly our stub files).
  *
  * Kept by default: the consent log table (the legal evidence of every
  * visitor's choice), settings, categories and cmp_db_version. They are removed
@@ -97,6 +98,8 @@ class CMP_Uninstaller {
 	 */
 	public static function cleanup_network( $full ) {
 		delete_site_transient( 'cmp_latest_release' ); // CMP_Updater::CACHE_KEY.
+		delete_site_option( 'cmp_folder_move' );      // CMP_Migrate_Folder::STATE.
+		delete_site_option( 'cmp_folder_move_lock' ); // CMP_Migrate_Folder::LOCK.
 		if ( $full ) {
 			delete_site_option( 'cmp_manifest_issued' ); // CMP_Updater::ISSUED_OPTION.
 			delete_site_option( 'cmp_update_state' );    // CMP_Updater::STATE_OPTION.
@@ -127,6 +130,28 @@ class CMP_Uninstaller {
 		return @rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	}
 
+	/**
+	 * Remove the folder-move stub (plugins/consent-manager-pro holding exactly our
+	 * two stub files, and the hidden build folder), so no inactive BiscuitWP row
+	 * is left after the plugin is deleted. Anything else is never touched.
+	 *
+	 * @param string $plugins_dir WP_PLUGIN_DIR.
+	 */
+	public static function remove_move_stub( $plugins_dir ) {
+		try {
+			if ( ! class_exists( 'CMP_Migrate_Folder' ) ) {
+				$file = __DIR__ . '/class-migrate-folder.php';
+				if ( ! defined( 'ABSPATH' ) || ! is_readable( $file ) ) {
+					return;
+				}
+				require_once $file;
+			}
+			CMP_Migrate_Folder::remove_stub_folders( $plugins_dir );
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+
 	/** Entry point from uninstall.php. Multisite: every site by its own flag. */
 	public static function run() {
 		global $wpdb;
@@ -144,10 +169,16 @@ class CMP_Uninstaller {
 				restore_current_blog();
 			}
 			self::cleanup_network( $network_full );
+			if ( defined( 'WP_PLUGIN_DIR' ) ) {
+				self::remove_move_stub( WP_PLUGIN_DIR );
+			}
 			return;
 		}
 		$full = self::wants_full();
 		self::cleanup_site( $wpdb, $full );
 		self::cleanup_network( $full );
+		if ( defined( 'WP_PLUGIN_DIR' ) ) {
+			self::remove_move_stub( WP_PLUGIN_DIR );
+		}
 	}
 }

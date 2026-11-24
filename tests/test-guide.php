@@ -131,7 +131,7 @@ $guide_admin = (string) file_get_contents( __DIR__ . '/../includes/admin/class-a
 preg_match_all( '/add_submenu_page\((.*?)\);/s', $guide_admin, $guide_sub );
 $guide_last = end( $guide_sub[1] );
 cmp_assert( false !== strpos( (string) $guide_last, "'cmp-guide'" ) || false !== strpos( (string) $guide_last, 'CMP_Guide::SLUG' ), 'guide: submenu Ghid is the last one' );
-cmp_assert( false !== strpos( (string) $guide_last, "'manage_options'" ) && false !== strpos( (string) $guide_last, "__( 'Ghid', 'consent-manager-pro' )" ), 'guide: submenu needs manage_options, label Ghid' );
+cmp_assert( false !== strpos( (string) $guide_last, "'manage_options'" ) && false !== strpos( (string) $guide_last, "__( 'Ghid', 'biscuitwp' )" ), 'guide: submenu needs manage_options, label Ghid' );
 cmp_assert( false !== strpos( $guide_admin, "require_once CMP_PATH . 'includes/admin/class-guide.php';" ), 'guide: class-admin loads class-guide.php' );
 
 // Paragraphs with HTML go through wp_kses_post: every echo in the template is escaped.
@@ -154,7 +154,7 @@ foreach ( $guide_toks as $guide_i => $guide_t ) {
 cmp_assert( ! $guide_raw, 'guide: every echo in the template is escaped or wp_kses_post' . ( $guide_raw ? ' (' . implode( ', ', $guide_raw ) . ')' : '' ) );
 cmp_assert( substr_count( $guide_tpl, 'wp_kses_post(' ) >= 10, 'guide: paragraphs with links use wp_kses_post (' . substr_count( $guide_tpl, 'wp_kses_post(' ) . ')' );
 // No HTML inside the translatable texts: links and code come in through placeholders.
-preg_match_all( "/(?:__|esc_html__|esc_html_e)\(\s*'((?:[^'\\\\]|\\\\.)*)'\s*,\s*'consent-manager-pro'/", $guide_tpl, $guide_strs );
+preg_match_all( "/(?:__|esc_html__|esc_html_e)\(\s*'((?:[^'\\\\]|\\\\.)*)'\s*,\s*'biscuitwp'/", $guide_tpl, $guide_strs );
 $guide_html_strs = array();
 foreach ( $guide_strs[1] as $guide_str ) {
 	if ( false !== strpos( $guide_str, '<' ) ) {

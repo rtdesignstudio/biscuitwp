@@ -1221,9 +1221,9 @@ class CMP_Scanner {
 	public static function progress_text( array $progress ) {
 		return self::cron_disabled()
 			/* translators: 1: pages scanned, 2: pages in the list */
-			? sprintf( __( 'Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui ecran', 'consent-manager-pro' ), $progress[0], $progress[1] )
+			? sprintf( __( 'Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui ecran', 'biscuitwp' ), $progress[0], $progress[1] )
 			/* translators: 1: pages scanned, 2: pages in the list */
-			: sprintf( __( 'Scanare în curs (%1$d/%2$d)', 'consent-manager-pro' ), $progress[0], $progress[1] );
+			: sprintf( __( 'Scanare în curs (%1$d/%2$d)', 'biscuitwp' ), $progress[0], $progress[1] );
 	}
 
 	/** Record a Settings/Services save: warnings from older results are hidden until a newer scan. */
