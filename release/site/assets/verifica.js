@@ -64,6 +64,7 @@
 		info: 'Good to know',
 		howto: 'How to check it yourself',
 		fixTitle: 'BiscuitWP fixes this',
+		fixCta: 'Fix this with the plugin',
 		fixText: 'It keeps trackers off until consent, moves Google Fonts to your server and gives you the legal texts for Moldova. Free.',
 		oursTitle: 'You already use BiscuitWP',
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
@@ -158,6 +159,7 @@
 		info: 'Полезно знать',
 		howto: 'Как проверить самостоятельно',
 		fixTitle: 'BiscuitWP это исправляет',
+		fixCta: 'Исправить с помощью плагина',
 		fixText: 'Блокирует трекеры до согласия, переносит Google Fonts на ваш сервер и даёт вам правовые тексты для Молдовы. Бесплатно.',
 		oursTitle: 'Вы уже используете BiscuitWP',
 		oursText: 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.',
@@ -252,6 +254,7 @@
 		info: 'De știut',
 		howto: 'Cum verifici singur',
 		fixTitle: 'BiscuitWP rezolvă asta',
+		fixCta: 'Repară asta cu pluginul',
 		fixText: 'Oprește trackerele până la acord, mută Google Fonts pe serverul tău și îți dă textele legale pentru Moldova. Gratuit.',
 		oursTitle: 'Folosești deja BiscuitWP',
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
@@ -808,7 +811,7 @@
 				[[downloadHref(), T.latest, 'btn'], ['#cum-verifici', T.howto, 'btn btn-ghost']] :
 				other ?
 				[[standaloneHref(), T.standalone, 'btn'], ['#cum-verifici', T.howto, 'btn btn-ghost']] :
-				[[downloadHref(), T.download, 'btn'], ['#functii', T.features, 'btn btn-ghost']]);
+				[[downloadHref(), T.fixCta, 'btn'], ['#functii', T.features, 'btn btn-ghost']]);
 			share(r);
 			show(r);
 		} else if (data.status === 'unsure') {

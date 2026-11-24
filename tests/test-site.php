@@ -728,6 +728,38 @@ foreach ( array(
 	cmp_assert( false !== strpos( $cmp_site_js, "fixCta: '" . $t[6] . "'" ), "verifica.js ({$page}): the report ends with „{$t[6]}”" );
 }
 cmp_assert( false !== strpos( $cmp_site_js, "[[downloadHref(), T.fixCta, 'btn'], ['#functii', T.features, 'btn btn-ghost']]" ), 'verifica.js: a WordPress site with issues gets the fix button to the download' );
+// #728 lot 2: link previews (Open Graph) per language, and the comparison as cards on a phone.
+foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' => array( 'en', '/en/', 'en_US' ), 'ru/index.html' => array( 'ru', '/ru/', 'ru_RU' ) ) as $page => $og ) {
+	$html  = $cmp_site_read( $page );
+	$title = 1 === preg_match( '#<title>([^<]+)</title>#', $html, $tm3 ) ? $tm3[1] : '';
+	$desc  = 1 === preg_match( '#<meta name="description" content="([^"]+)">#', $html, $dm3 ) ? $dm3[1] : '';
+	foreach ( array(
+		'og:type'         => 'website',
+		'og:site_name'    => 'BiscuitWP',
+		'og:title'        => $title,
+		'og:description'  => $desc,
+		'og:url'          => 'https://biscuitwp.rt.md' . $og[1],
+		'og:locale'       => $og[2],
+		'og:image'        => 'https://biscuitwp.rt.md/assets/og/og-' . $og[0] . '.png',
+		'og:image:width'  => '1200',
+		'og:image:height' => '630',
+	) as $prop => $val ) {
+		cmp_assert( '' !== $val && false !== strpos( $html, '<meta property="' . $prop . '" content="' . $val . '">' ), "{$page}: {$prop} = {$val}" );
+	}
+	cmp_assert( 1 === preg_match( '#<meta property="og:image:alt" content="[^"]{40,}">#', $html ), "{$page}: the preview picture has a text alternative" );
+	cmp_assert( false !== strpos( $html, '<meta name="twitter:card" content="summary_large_image">' ), "{$page}: large preview on X too" );
+	$png  = $cmp_site_root . '/site/assets/og/og-' . $og[0] . '.png';
+	$size = is_readable( $png ) ? getimagesize( $png ) : false;
+	cmp_assert( is_array( $size ) && 1200 === $size[0] && 630 === $size[1] && IMAGETYPE_PNG === $size[2], "site/assets/og/og-{$og[0]}.png: a 1200×630 PNG" );
+	cmp_assert( is_readable( $png ) && filesize( $png ) < 300 * 1024, "site/assets/og/og-{$og[0]}.png: under 300 KB" );
+}
+cmp_assert( is_executable( $cmp_site_root . '/bin/build-og.sh' ) && is_readable( $cmp_site_root . '/bin/build-og.php' ), 'bin/build-og.sh makes the preview pictures again' );
+$cmp_site_css_l2 = preg_replace( '#/\*.*?\*/#s', '', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) );
+cmp_assert( 1 === preg_match( '#@media \(max-width: 760px\)\s*\{.*?\.compare, \.compare tbody, \.compare tr, \.compare th, \.compare td \{ display: block;#s', $cmp_site_css_l2 ), 'style.css: on a phone the comparison rows become cards' );
+foreach ( array( 2 => 'BiscuitWP', 3 => 'Complianz', 4 => 'CookieYes', 5 => 'Cookiebot' ) as $nth => $prod ) {
+	cmp_assert( false !== strpos( $cmp_site_css_l2, '.compare td:nth-child(' . $nth . ')::before { content: "' . $prod . '"' ), "style.css: card answer {$nth} is labelled {$prod}" );
+	cmp_assert( 1 === preg_match( '#<th scope="col">[^<]*</th>(?:<th scope="col">[^<]*</th>){' . ( $nth - 2 ) . '}<th scope="col">' . $prod . '</th>#', $cmp_site_read( 'index.html' ) ), "index.html: column {$nth} of the comparison is {$prod}, as the card labels say" );
+}
 $cmp_site_sjs = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
 cmp_assert( false !== strpos( $cmp_site_sjs, "t.tagName === 'DETAILS'" ) && false !== strpos( $cmp_site_sjs, "'hashchange'" ), 'site.js: a link to #cum-verifici opens the folded how-to' );
 foreach ( array( "'.big .row > span'", "'measure'", "'ln'", "'wd'", 'animationend', 'fonts.ready' ) as $need ) {

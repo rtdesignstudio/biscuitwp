@@ -542,6 +542,22 @@ body.locked header.site { z-index: 30; }
 	.rules > li, .steps > li, .checks > li, .howto ol > li { padding-left: 40px; }
 	main.wrap > h1 { font-size: clamp(36px, 10vw, 56px); overflow-wrap: anywhere; hyphens: auto; }
 	.frame iframe { height: 32rem; }
+	/* The comparison on a phone (#728): one card per criterion, the four answers one under
+	   another, each under its product name. The names are the same in every language, so
+	   the labels come from the column; the header row stays for screen readers only. */
+	.table-scroll { overflow: visible; }
+	.compare { min-width: 0; }
+	.compare, .compare tbody, .compare tr, .compare th, .compare td { display: block; width: auto; }
+	.compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.compare tr { padding: 20px 0 4px; border-top: 1px solid var(--ink); }
+	.compare th[scope="row"] { width: auto; padding: 0 0 6px; border: 0; font-size: 20px; letter-spacing: -.015em; }
+	.compare td { padding: 10px 0 12px; }
+	.compare td::before { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 600; color: var(--mute-text); }
+	.compare td:nth-child(2)::before { content: "BiscuitWP"; color: var(--ink); }
+	.compare td:nth-child(3)::before { content: "Complianz"; }
+	.compare td:nth-child(4)::before { content: "CookieYes"; }
+	.compare td:nth-child(5)::before { content: "Cookiebot"; }
+	.compare tr > :last-child { border-bottom: 0; }
 	.tool .btn { flex: 1 1 auto; }
 	footer.site .wrap { flex-direction: column; }
 }

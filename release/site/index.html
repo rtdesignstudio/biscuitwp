@@ -6,6 +6,19 @@
 <meta name="color-scheme" content="light">
 <title>BiscuitWP. Cookie-uri cu acord, nu cu noroc.</title>
 <meta name="description" content="Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri, făcut pentru Legea 195/2024. Verifică-ți site-ul în câteva secunde.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BiscuitWP">
+<meta property="og:title" content="BiscuitWP. Cookie-uri cu acord, nu cu noroc.">
+<meta property="og:description" content="Plugin WordPress gratuit și open-source pentru consimțământul la cookie-uri, făcut pentru Legea 195/2024. Verifică-ți site-ul în câteva secunde.">
+<meta property="og:url" content="https://biscuitwp.rt.md/">
+<meta property="og:locale" content="ro_RO">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta property="og:image" content="https://biscuitwp.rt.md/assets/og/og-ro.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Banner de cookie-uri cu „Refuz” și „Accept” egale; Google Analytics, Meta și Clarity blocate înainte de acord și pornite după.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
 <link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
@@ -34,12 +47,21 @@
 <div class="wrap">
 <p class="eyebrow">Plugin WordPress pentru cookie-uri · Legea 195/2024</p>
 <h1 id="titlu" class="big" aria-label="Cookie-uri cu acord, nu cu noroc."><span class="row" aria-hidden="true"><span>Cookie-uri cu acord,</span></span> <span class="row" aria-hidden="true"><span>nu cu noroc.</span></span></h1>
+<figure class="hero-demo" aria-labelledby="hero-demo-cap">
+<figcaption id="hero-demo-cap">Ce pornește pe site cu BiscuitWP</figcaption>
+<div class="hd-banner" aria-hidden="true"><p>Folosim cookie-uri pentru statistici și reclame.</p><p class="hd-btns"><span>Refuz</span><span>Accept</span></p></div>
+<div class="hd-cols"><div class="hd-col"><p class="hd-h">Înainte de acord</p><ul class="hd-req"><li class="off"><code>google-analytics.<wbr>com</code><span>blocat</span></li><li class="off"><code>connect.<wbr>facebook.<wbr>net</code><span>blocat</span></li><li class="off"><code>clarity.ms</code><span>blocat</span></li></ul></div><div class="hd-col"><p class="hd-h">După „Accept”</p><ul class="hd-req"><li class="on"><code>google-analytics.<wbr>com</code><span>pornit</span></li><li class="on"><code>connect.<wbr>facebook.<wbr>net</code><span>pornit</span></li><li class="on"><code>clarity.ms</code><span>pornit</span></li></ul></div></div>
+</figure>
+<p class="urgent"><strong>Legea 195/2024 e în vigoare din 23 august 2026.</strong> Amenzi de până la 2 000 000 MDL sau 2% din cifra de afaceri.</p>
 <div class="hero-foot">
-<p class="lead">BiscuitWP oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Gratuit, open-source, fără date trimise nouă.</p>
+<p class="lead"><strong>Plugin gratuit pentru WordPress.</strong> Oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Open-source, fără date trimise nouă.</p>
+<div class="hero-cta">
 <p class="actions">
-<a class="btn" data-download href="https://github.com/rtdesignstudio/biscuitwp/releases/latest">Descarcă</a>
-<a class="btn btn-ghost" href="#verifica">Verifică-ți site-ul</a>
+<a class="btn" href="#verifica">Verifică-ți site-ul</a>
+<a class="btn btn-ghost" data-download href="https://github.com/rtdesignstudio/biscuitwp/releases/latest">Descarcă pentru WordPress</a>
 </p>
+<p class="alt small">Site-ul tău nu e pe WordPress? Folosește <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">versiunea standalone</a>.</p>
+</div>
 </div>
 <ul class="facts">
 <li>Gratuit, fără versiune plătită</li>
@@ -87,8 +109,8 @@
 <p>„N-am găsit probleme” înseamnă doar că pe paginile verificate nu am găsit nimic. Nu e o garanție că site-ul respectă legea.</p>
 </details>
 
-<div id="cum-verifici" class="howto">
-<h3>Cum verifici singur, în 5 minute</h3>
+<details id="cum-verifici" class="howto">
+<summary>Cum verifici singur, în 5 minute</summary>
 <ol>
 <li>Deschide o fereastră privată (incognito) în Chrome sau Firefox. Pornești fără cookie-uri și fără un acord salvat.</li>
 <li>Deschide DevTools (tasta F12 sau clic dreapta, apoi „Inspectează”), mergi la tab-ul Network („Rețea”) și bifează „Disable cache”.</li>
@@ -97,33 +119,13 @@
 <li>În tab-ul Application (în Firefox, Storage), la Cookies, nu trebuie să fie <code>_ga</code>, <code>_fbp</code>, <code>_clck</code> sau alte cookie-uri de urmărire.</li>
 <li>Apasă „Acceptă” în banner. Acum cererile și cookie-urile trebuie să apară. Așa știi că blocarea ține exact până la acord.</li>
 </ol>
-</div>
-</div>
-</section>
-
-<section id="legea" aria-labelledby="legea-titlu">
-<div class="wrap">
-<div class="sh"><p class="n">02 · Legea</p>
-<h2 id="legea-titlu">Ce cere legea</h2></div>
-<p>În Moldova, regula despre cookie-uri vine din două legi. <strong>Legea nr. 72/2025 a comunicațiilor electronice</strong>, art. 116, în vigoare din 1 ianuarie 2026, spune când ai voie să scrii sau să citești ceva pe dispozitivul vizitatorului. <strong>Legea nr. 195/2024 privind protecția datelor cu caracter personal</strong>, în vigoare din 23 august 2026, spune cum trebuie să arate acordul și ce trebuie să poți dovedi. Pe scurt:</p>
-<ol class="rules">
-<li><strong>Acord înainte, nu după.</strong> Analiza și marketingul pornesc doar după ce vizitatorul spune „Da”. Art. 116 cere în text informarea; acordul vine din Legea 195/2024, de îndată ce cookie-ul identifică vizitatorul. <span class="law">Legea 195/2024 art. 6-7, Legea 72/2025 art. 116</span></li>
-<li><strong>Spui clar, dinainte, ce colectezi și de ce.</strong> Informații clare și complete despre scopuri, înainte de orice cookie care nu e strict necesar. <span class="law">Legea 72/2025 art. 116 alin. (5), Legea 195/2024 art. 12-13</span></li>
-<li><strong>Strict necesarul nu cere acord.</strong> Sesiunea, coșul, securitatea și cookie-ul care ține minte alegerea merg fără întrebare. <span class="law">Legea 72/2025 art. 116 alin. (6)</span></li>
-<li><strong>Poți dovedi acordul.</strong> Trebuie să poți arăta că vizitatorul și-a dat acordul. <span class="law">Legea 195/2024 art. 7 alin. (1)</span></li>
-<li><strong>Retragerea e la fel de ușoară ca acordul.</strong> Vizitatorul se răzgândește oricând, la fel de simplu. <span class="law">Legea 195/2024 art. 7 alin. (3)</span></li>
-<li><strong>Nu prin „accept termenii”.</strong> Acordul dat prin acceptarea globală a termenilor și condițiilor nu e valid. <span class="law">Legea 195/2024 art. 7, practica CNPDCP</span></li>
-<li><strong>Vizitatorii din UE cer standardul UE.</strong> Pentru ei se aplică direct GDPR și legea statului lor (în România, Legea 506/2004), care cer consimțământ explicit. <span class="law">GDPR art. 3 alin. (2)</span></li>
-</ol>
-<p>Amenzile din Legea 195/2024 ajung până la 1 000 000 MDL sau 1% din cifra de afaceri, iar pentru încălcările grave până la 2 000 000 MDL sau 2% (art. 86-88). În primii ani se aplică treptat: 10% din amendă în primul an, 40% în al doilea, 100% din al treilea (art. 90 alin. 4).</p>
-<p class="law-link">Lista de verificare pentru site-ul tău: <a href="/legea-195/">Legea 195/2024 pe scurt</a>.</p>
-<p class="muted small">Pagina asta explică legea pe înțeles. Nu e consultanță juridică. Pentru cazul tău, întreabă un jurist din Moldova.</p>
+</details>
 </div>
 </section>
 
 <section id="functii" aria-labelledby="functii-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">03 · Pluginul</p>
+<div class="sh"><p class="n">02 · Pluginul</p>
 <h2 id="functii-titlu">Ce face pluginul</h2></div>
 <ul class="feat">
 <li><h3>Blochează până la acord</h3><p>Scripturile și embed-urile (YouTube, Vimeo, Google Maps) stau oprite până alege vizitatorul. Cu Google Consent Mode v2 și un mod de măsurare Strict sau Advanced.</p></li>
@@ -141,7 +143,7 @@
 
 <section id="demo" aria-labelledby="demo-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">04 · Demo</p>
+<div class="sh"><p class="n">03 · Demo</p>
 <h2 id="demo-titlu">Încearcă bannerul</h2></div>
 <p>E bannerul real, în versiunea fără WordPress. Alege un stil. Demo-ul nu încarcă niciun tracker.</p>
 <p class="switch" role="group" aria-label="Stilul bannerului">
@@ -153,9 +155,45 @@
 </div>
 </section>
 
+<section id="instalare" aria-labelledby="instalare-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">04 · Instalare</p>
+<h2 id="instalare-titlu">Pornit în 5 minute</h2></div>
+<ol class="steps">
+<li><a data-download href="https://github.com/rtdesignstudio/biscuitwp/releases/latest">Descarcă</a> <code>biscuitwp.zip</code>. În WordPress, la Module, încarcă fișierul zip și activează pluginul.</li>
+<li><strong>Setări:</strong> lasă modul Pro (bannerul cu consimțământ pe categorii). Lasă bifat „Blochează scripturile de tracking până la consimțământ” și modul de măsurare pe Strict.</li>
+<li><strong>Servicii:</strong> uită-te la lista „Găsite pe site”. Pluginul scanează singur. Verifică să nu lipsească nimic din ce știi că folosește site-ul.</li>
+<li><strong>Pagini legale:</strong> completează datele operatorului și apasă „Generează” la fiecare document. Citește paginile și publică-le.</li>
+<li><strong>Linkul „Setări cookie”</strong> în footer, cu shortcode-ul <code>[cmp_cookie_settings_link]</code>. Prin el vizitatorul își schimbă sau își retrage acordul.</li>
+<li><strong>Verificare:</strong> apasă „Verifică în browser”. Nicio pagină nu trebuie să iasă roșie.</li>
+</ol>
+<p>Ghidul complet e în plugin, la BiscuitWP, „Ghid”. Site-ul nu e pe WordPress? Folosește <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">versiunea standalone</a>.</p>
+</div>
+</section>
+
+<section id="legea" aria-labelledby="legea-titlu">
+<div class="wrap">
+<div class="sh"><p class="n">05 · Legea</p>
+<h2 id="legea-titlu">Ce cere legea</h2></div>
+<p>În Moldova, regula despre cookie-uri vine din două legi. <strong>Legea nr. 72/2025 a comunicațiilor electronice</strong>, art. 116, în vigoare din 1 ianuarie 2026, spune când ai voie să scrii sau să citești ceva pe dispozitivul vizitatorului. <strong>Legea nr. 195/2024 privind protecția datelor cu caracter personal</strong>, în vigoare din 23 august 2026, spune cum trebuie să arate acordul și ce trebuie să poți dovedi. Pe scurt:</p>
+<ol class="rules">
+<li><strong>Acord înainte, nu după.</strong> Analiza și marketingul pornesc doar după ce vizitatorul spune „Da”. Art. 116 cere în text informarea; acordul vine din Legea 195/2024, de îndată ce cookie-ul identifică vizitatorul. <span class="law">Legea 195/2024 art. 6-7, Legea 72/2025 art. 116</span></li>
+<li><strong>Spui clar, dinainte, ce colectezi și de ce.</strong> Informații clare și complete despre scopuri, înainte de orice cookie care nu e strict necesar. <span class="law">Legea 72/2025 art. 116 alin. (5), Legea 195/2024 art. 12-13</span></li>
+<li><strong>Strict necesarul nu cere acord.</strong> Sesiunea, coșul, securitatea și cookie-ul care ține minte alegerea merg fără întrebare. <span class="law">Legea 72/2025 art. 116 alin. (6)</span></li>
+<li><strong>Poți dovedi acordul.</strong> Trebuie să poți arăta că vizitatorul și-a dat acordul. <span class="law">Legea 195/2024 art. 7 alin. (1)</span></li>
+<li><strong>Retragerea e la fel de ușoară ca acordul.</strong> Vizitatorul se răzgândește oricând, la fel de simplu. <span class="law">Legea 195/2024 art. 7 alin. (3)</span></li>
+<li><strong>Nu prin „accept termenii”.</strong> Acordul dat prin acceptarea globală a termenilor și condițiilor nu e valid. <span class="law">Legea 195/2024 art. 7, practica CNPDCP</span></li>
+<li><strong>Vizitatorii din UE cer standardul UE.</strong> Pentru ei se aplică direct GDPR și legea statului lor (în România, Legea 506/2004), care cer consimțământ explicit. <span class="law">GDPR art. 3 alin. (2)</span></li>
+</ol>
+<p>Amenzile din Legea 195/2024 ajung până la 1 000 000 MDL sau 1% din cifra de afaceri, iar pentru încălcările grave până la 2 000 000 MDL sau 2% (art. 86-88). În primii ani se aplică treptat: 10% din amendă în primul an, 40% în al doilea, 100% din al treilea (art. 90 alin. 4).</p>
+<p class="law-link">Lista de verificare pentru site-ul tău: <a href="/legea-195/">Legea 195/2024 pe scurt</a>.</p>
+<p class="muted small">Pagina asta explică legea pe înțeles. Nu e consultanță juridică. Pentru cazul tău, întreabă un jurist din Moldova.</p>
+</div>
+</section>
+
 <section id="comparatie" aria-labelledby="comparatie-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">05 · Comparație</p>
+<div class="sh"><p class="n">06 · Comparație</p>
 <h2 id="comparatie-titlu">Cum se compară</h2></div>
 <p>Am citit paginile oficiale ale celorlalte trei pluginuri pe 20 noiembrie 2026. Fiecare afirmație are sursa în note. Unde n-am găsit informații, scrie asta.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
@@ -247,7 +285,7 @@
 
 <section id="resurse" aria-labelledby="resurse-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">06 · Resurse externe</p>
+<div class="sh"><p class="n">07 · Resurse externe</p>
 <h2 id="resurse-titlu">Google Fonts și alte resurse care trimit IP-ul</h2></div>
 <p>Când o pagină încarcă un font de la Google, browserul vizitatorului se conectează la serverele Google și le trimite adresa IP. Fără să-l fi întrebat cineva. IP-ul e o dată personală.</p>
 <p>În ianuarie 2022, un tribunal din München (Landgericht München I, dosarul 3 O 17493/20) a decis că un site care încărca Google Fonts de pe serverele Google a încălcat GDPR, pentru că fonturile se pot folosi și local, fără să plece IP-ul vizitatorului. Site-ul a fost obligat să plătească 100 € despăgubire vizitatorului care a reclamat. Decizia e a unui tribunal german, nu face lege în Moldova, dar arată cum e citit GDPR-ul în UE.</p>
@@ -264,7 +302,7 @@
 
 <section id="incredere" aria-labelledby="incredere-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">07 · Încredere</p>
+<div class="sh"><p class="n">08 · Încredere</p>
 <h2 id="incredere-titlu">Poți verifica tot</h2></div>
 <ul class="checks">
 <li><strong>Open-source.</strong> Tot codul e pe <a href="https://github.com/rtdesignstudio/biscuitwp">GitHub</a>, sub licența GPL-2.0-or-later.</li>
@@ -272,22 +310,6 @@
 <li><strong>Fără telemetrie.</strong> Pluginul nu ne trimite nimic despre vizitatorii tăi, iar cererea de update nu conține adresa site-ului sau alte date despre el. Ce trimite și cui scrie în <a href="/confidentialitate/">Confidențialitate</a>.</li>
 <li><strong>Istoric public.</strong> Fiecare versiune e în <a href="/changelog/">Changelog</a>, cu flux RSS.</li>
 </ul>
-</div>
-</section>
-
-<section id="instalare" aria-labelledby="instalare-titlu">
-<div class="wrap">
-<div class="sh"><p class="n">08 · Instalare</p>
-<h2 id="instalare-titlu">Pornit în 5 minute</h2></div>
-<ol class="steps">
-<li><a data-download href="https://github.com/rtdesignstudio/biscuitwp/releases/latest">Descarcă</a> <code>biscuitwp.zip</code>. În WordPress, la Module, încarcă fișierul zip și activează pluginul.</li>
-<li><strong>Setări:</strong> lasă modul Pro (bannerul cu consimțământ pe categorii). Lasă bifat „Blochează scripturile de tracking până la consimțământ” și modul de măsurare pe Strict.</li>
-<li><strong>Servicii:</strong> uită-te la lista „Găsite pe site”. Pluginul scanează singur. Verifică să nu lipsească nimic din ce știi că folosește site-ul.</li>
-<li><strong>Pagini legale:</strong> completează datele operatorului și apasă „Generează” la fiecare document. Citește paginile și publică-le.</li>
-<li><strong>Linkul „Setări cookie”</strong> în footer, cu shortcode-ul <code>[cmp_cookie_settings_link]</code>. Prin el vizitatorul își schimbă sau își retrage acordul.</li>
-<li><strong>Verificare:</strong> apasă „Verifică în browser”. Nicio pagină nu trebuie să iasă roșie.</li>
-</ol>
-<p>Ghidul complet e în plugin, la BiscuitWP, „Ghid”. Site-ul nu e pe WordPress? Folosește <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">versiunea standalone</a>.</p>
 </div>
 </section>
 
