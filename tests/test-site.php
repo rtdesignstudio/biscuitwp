@@ -754,6 +754,23 @@ foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' =>
 	cmp_assert( is_readable( $png ) && filesize( $png ) < 300 * 1024, "site/assets/og/og-{$og[0]}.png: under 300 KB" );
 }
 cmp_assert( is_executable( $cmp_site_root . '/bin/build-og.sh' ) && is_readable( $cmp_site_root . '/bin/build-og.php' ), 'bin/build-og.sh makes the preview pictures again' );
+// #728 lot 3: three screenshots from the plugin in #functii, and the 16 sites (a number only, no client names).
+foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldova' ), 'en/index.html' => array( 'en', 'Used on 16 sites in Moldova' ), 'ru/index.html' => array( 'ru', 'Используется на 16 сайтах в Молдове' ) ) as $page => $l3 ) {
+	$html = $cmp_site_read( $page );
+	cmp_assert( false !== strpos( $html, '<ul class="facts">' . "\n" . '<li>' . $l3[1] . '</li>' ), "{$page}: the first fact is the 16 sites" );
+	$fn = 1 === preg_match( '#<section id="functii".*?</section>#s', $html, $fsm ) ? $fsm[0] : '';
+	preg_match_all( '#<figure class="shot shot-([a-z]+)"><a href="/assets/shots/[a-z]+-[a-z]+\.webp"><img src="/assets/shots/([a-z]+)-([a-z]+)\.webp" width="(\d+)" height="(\d+)" alt="([^"]{60,})" loading="lazy" decoding="async"></a><figcaption>[^<]{30,}</figcaption></figure>#', $fn, $shm, PREG_SET_ORDER );
+	cmp_assert_eq( array_map( function ( $m ) { return $m[1]; }, $shm ), array( 'gasite', 'registru', 'verificare' ), "{$page}: three captioned screenshots with alt text in #functii" );
+	foreach ( $shm as $m ) {
+		cmp_assert( $m[2] === $l3[0] && $m[3] === $m[1], "{$page}: screenshot {$m[1]} is the {$l3[0]} one" );
+		$f = $cmp_site_root . '/site/assets/shots/' . $m[2] . '-' . $m[3] . '.webp';
+		$sz = is_readable( $f ) ? getimagesize( $f ) : false;
+		cmp_assert( is_array( $sz ) && abs( $sz[0] / 2 - (int) $m[4] ) <= 1 && abs( $sz[1] / 2 - (int) $m[5] ) <= 1, "site/assets/shots/{$m[2]}-{$m[3]}.webp: width/height are half its pixels (2x, no layout shift)" );
+		cmp_assert( is_readable( $f ) && filesize( $f ) < 300 * 1024, "site/assets/shots/{$m[2]}-{$m[3]}.webp: under 300 KB" );
+	}
+	cmp_assert( false !== strpos( $fn, 'example.com' ) && 1 === preg_match( '#<p class="muted small shots-note">[^<]*example\.com[^<]*</p>#', $fn ), "{$page}: the note says the screenshots come from a test site" );
+	cmp_assert( 1 === preg_match( '#</div>\s*<p class="muted small shots-note">[^<]*</p>\s*<p class="actions"><a class="btn" data-download#', $fn ), "{$page}: the download button still closes #functii" );
+}
 $cmp_site_css_l2 = preg_replace( '#/\*.*?\*/#s', '', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) );
 cmp_assert( 1 === preg_match( '#@media \(max-width: 760px\)\s*\{.*?\.compare, \.compare tbody, \.compare tr, \.compare th, \.compare td \{ display: block;#s', $cmp_site_css_l2 ), 'style.css: on a phone the comparison rows become cards' );
 foreach ( array( 2 => 'BiscuitWP', 3 => 'Complianz', 4 => 'CookieYes', 5 => 'Cookiebot' ) as $nth => $prod ) {

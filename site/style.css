@@ -228,7 +228,7 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 }
 
 /* facts: a row of cells between two lines (rt.md .facts) */
-.facts { display: grid; grid-template-columns: repeat(4, 1fr); margin: clamp(48px, 8vh, 96px) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.facts { display: grid; grid-template-columns: repeat(5, 1fr); margin: clamp(48px, 8vh, 96px) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .facts li { margin: 0; padding: clamp(20px, 3vw, 36px) 20px clamp(20px, 3vw, 36px) 0; font-size: clamp(18px, 1.7vw, 24px); line-height: 1.2; letter-spacing: -.015em; font-weight: 500; }
 .facts li + li { padding-left: clamp(20px, 2.6vw, 40px); border-left: 1px solid var(--line); }
 
@@ -237,7 +237,7 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .sh .n { margin: 0; font-size: 14px; color: var(--mute-text); }
 .sh h2 { margin: 0 0 0 -.065em; font-size: clamp(36px, 6vw, 96px); line-height: 1.04; letter-spacing: -.04em; scroll-margin-top: 24px; }
 /* everything under the head sits in the heading's column; wide blocks use the full width */
-.landing section:not(.hero) .wrap > :not(.sh):not(.feat):not(.table-scroll):not(.frame) { margin-left: var(--indent); max-width: 880px; }
+.landing section:not(.hero) .wrap > :not(.sh):not(.feat):not(.table-scroll):not(.frame):not(.shots):not(.shots-h):not(.shots-note) { margin-left: var(--indent); max-width: 880px; }
 .landing section h3 { margin: clamp(40px, 6vh, 64px) 0 16px; font-size: clamp(22px, 2vw, 28px); letter-spacing: -.025em; line-height: 1.15; }
 .landing section .wrap > p:first-of-type:not(.small) { font-size: clamp(20px, 2vw, 24px); line-height: 1.4; letter-spacing: -.012em; }
 
@@ -254,6 +254,20 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .feat li::before { content: counter(s, decimal-leading-zero); font-size: 14px; color: var(--mute-text); }
 .landing .feat h3 { margin: 0; font-size: clamp(22px, 2.2vw, 32px); letter-spacing: -.025em; line-height: 1.1; }
 .feat p { margin: 0; font-size: 17px; line-height: 1.45; color: var(--ink); }
+
+/* Screenshots from the plugin (#728): the services list and the register on the left,
+   the tall browser-check report on the right; one column on narrower screens. */
+.landing .shots-h { margin-top: 0; }
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 32px clamp(24px, 3vw, 48px); align-items: start; margin: 0 0 12px; }
+.shot { margin: 0; }
+.shot a { display: block; cursor: zoom-in; }
+.shot-verificare { grid-column: 2; grid-row: 1 / span 2; }
+.shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 2px; background: #f0f0f1; }
+.shot figcaption { margin-top: 10px; font-size: 15px; line-height: 1.45; color: var(--mute-text); }
+@media (max-width: 900px) {
+	.shots { grid-template-columns: 1fr; }
+	.shot-verificare { grid-column: auto; grid-row: auto; }
+}
 
 /* ---- The tool --------------------------------------------------------------- */
 .tool { margin: 32px 0 16px; }
@@ -524,8 +538,9 @@ body.locked header.site { z-index: 30; }
 	.hero-foot { flex-direction: column; align-items: flex-start; margin-top: 32px; }
 	.lead { font-size: 20px; }
 	.facts { grid-template-columns: 1fr 1fr; margin-top: 48px; }
-	.facts li:nth-child(3) { border-left: 0; padding-left: 0; }
+	.facts li:nth-child(odd) { border-left: 0; padding-left: 0; }
 	.facts li:nth-child(n+3) { border-top: 1px solid var(--line); }
+	.facts li:nth-child(5) { grid-column: 1 / -1; }
 	.r .r-facts { grid-template-columns: repeat(3, 1fr); margin-top: 20px; }
 	.r-facts li { padding-right: 8px; }
 	.r-facts li + li { padding-left: 12px; }
@@ -537,7 +552,7 @@ body.locked header.site { z-index: 30; }
 	.r-dt-fold { display: none; }
 	.sh { grid-template-columns: 1fr; gap: 10px; margin-bottom: 32px; }
 	.sh h2 { line-height: 1.06; }
-	.landing section:not(.hero) .wrap > :not(.sh):not(.feat):not(.table-scroll):not(.frame) { margin-left: 0; }
+	.landing section:not(.hero) .wrap > :not(.sh):not(.feat):not(.table-scroll):not(.frame):not(.shots):not(.shots-h):not(.shots-note) { margin-left: 0; }
 	.feat li { grid-template-columns: 1fr; gap: 6px; padding: 20px 0; }
 	.rules > li, .steps > li, .checks > li, .howto ol > li { padding-left: 40px; }
 	main.wrap > h1 { font-size: clamp(36px, 10vw, 56px); overflow-wrap: anywhere; hyphens: auto; }
