@@ -705,6 +705,31 @@ foreach ( array( 'index.html' => array( 'Cookie-uri cu acord, nu cu noroc.', 'Co
 	cmp_assert_eq( preg_match_all( '#<span class="row" aria-hidden="true"><span>([^<]+)</span></span>#', $rows, $rm2 ), 2, "{$page}: hero has two aria-hidden rows of spans" );
 	cmp_assert( isset( $rm2[1] ) && array( $h[1], $h[2] ) === $rm2[1], "{$page}: hero rows keep the title text" );
 }
+// #728 lot 1: the first screen sells to someone with 30 seconds; the page follows how they decide.
+foreach ( array(
+	'index.html'    => array( 'Plugin gratuit pentru WordPress.', 'Verifică-ți site-ul', 'Descarcă pentru WordPress', 'Legea 195/2024 e în vigoare din 23 august 2026.', 'Înainte de acord', 'După „Accept”', 'Repară asta cu pluginul' ),
+	'en/index.html' => array( 'A free WordPress plugin.', 'Check your site', 'Download for WordPress', 'Law 195/2024 has been in force since 23 August 2026.', 'Before consent', 'After “Accept”', 'Fix this with the plugin' ),
+	'ru/index.html' => array( 'Бесплатный плагин для WordPress.', 'Проверьте свой сайт', 'Скачать для WordPress', 'Закон № 195/2024 действует с 23 августа 2026 года.', 'До согласия', 'После «Принять»', 'Исправить с помощью плагина' ),
+) as $page => $t ) {
+	$html = $cmp_site_read( $page );
+	$hero = 1 === preg_match( '#<section class="hero".*?</section>#s', $html, $hsm ) ? $hsm[0] : '';
+	cmp_assert( false !== strpos( $hero, '<p class="lead"><strong>' . $t[0] . '</strong>' ), "{$page}: the lead starts by saying it is a free WordPress plugin" );
+	cmp_assert( 1 === preg_match( '#<p class="actions">\s*<a class="btn" href="\#verifica">' . preg_quote( $t[1], '#' ) . '</a>\s*<a class="btn btn-ghost" data-download href="[^"]*">' . preg_quote( $t[2], '#' ) . '</a>#', $hero ), "{$page}: the check is the filled button, the download the second one" );
+	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="https://github\.com/rtdesignstudio/biscuitwp/blob/main/standalone/README\.md">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
+	cmp_assert( 1 === preg_match( '#</h1>\s*<figure class="hero-demo" aria-labelledby="hero-demo-cap">.*?</figure>\s*<p class="urgent"><strong>' . preg_quote( $t[3], '#' ) . '</strong>#s', $hero ), "{$page}: after the title, the product picture and the law line" );
+	$fig = 1 === preg_match( '#<figure class="hero-demo".*?</figure>#s', $hero, $fgm ) ? $fgm[0] : '';
+	cmp_assert( false !== strpos( $fig, '<figcaption id="hero-demo-cap">' ) && false !== strpos( $fig, $t[4] ) && false !== strpos( $fig, $t[5] ), "{$page}: the picture shows before and after consent, with a caption" );
+	cmp_assert_eq( substr_count( $fig, '<li class="off">' ), substr_count( $fig, '<li class="on">' ), "{$page}: the same requests before (blocked) and after (loaded)" );
+	cmp_assert( 1 === preg_match( '#<div class="hd-banner" aria-hidden="true">#', $fig ) && false === strpos( $fig, '<button' ) && false === strpos( $fig, '<a ' ), "{$page}: the small banner is a picture, with nothing to click" );
+	preg_match_all( '#<section id="([a-z]+)"[^>]*>\s*<div class="wrap">\s*<div class="sh"><p class="n">(\d\d) · #', $html, $om );
+	cmp_assert_eq( $om[1], array( 'verifica', 'functii', 'demo', 'instalare', 'legea', 'comparatie', 'resurse', 'incredere', 'intrebari' ), "{$page}: check, what it does, demo, install, then the law and the comparison" );
+	cmp_assert_eq( $om[2], array( '01', '02', '03', '04', '05', '06', '07', '08', '09' ), "{$page}: the section numbers follow the new order" );
+	cmp_assert( 1 === preg_match( '#<details id="cum-verifici" class="howto">\s*<summary>[^<]+</summary>\s*<ol>#', $html ), "{$page}: the manual how-to is folded" );
+	cmp_assert( false !== strpos( $cmp_site_js, "fixCta: '" . $t[6] . "'" ), "verifica.js ({$page}): the report ends with „{$t[6]}”" );
+}
+cmp_assert( false !== strpos( $cmp_site_js, "[[downloadHref(), T.fixCta, 'btn'], ['#functii', T.features, 'btn btn-ghost']]" ), 'verifica.js: a WordPress site with issues gets the fix button to the download' );
+$cmp_site_sjs = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
+cmp_assert( false !== strpos( $cmp_site_sjs, "t.tagName === 'DETAILS'" ) && false !== strpos( $cmp_site_sjs, "'hashchange'" ), 'site.js: a link to #cum-verifici opens the folded how-to' );
 foreach ( array( "'.big .row > span'", "'measure'", "'ln'", "'wd'", 'animationend', 'fonts.ready' ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_site_js_v2 = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' ), $need ), "site.js: hero rows use {$need}" );
 }

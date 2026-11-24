@@ -177,7 +177,7 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .landing main { padding: 0; }
 .landing section { padding: clamp(80px, 14vh, 160px) 0; border-top: 1px solid var(--line); }
 .landing section.hero { border-top: 0; padding: clamp(48px, 12vh, 136px) 0 clamp(64px, 10vh, 112px); }
-.hero h1 { margin: 0 0 0 -.065em; font-size: clamp(46px, min(9.6vw, 13.5vh), 168px); line-height: 1; letter-spacing: -.045em; }
+.hero h1 { margin: 0 0 0 -.065em; font-size: clamp(46px, min(7vw, 12.5vh), 136px); line-height: 1; letter-spacing: -.045em; }
 .hero h1.big .row { display: block; }
 .hero h1.big .row > span { text-wrap: balance; }
 /* The hero rows come in one after the other (rt.md /umarul/ .big .row > span), only
@@ -187,9 +187,45 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .js .big .row > span.in { opacity: 1; filter: none; animation: none; font-variation-settings: "wght" 600; }
 @keyframes cmp-bin { to { opacity: 1; filter: blur(0); } }
 @keyframes cmp-weight { to { font-variation-settings: "wght" 600; } }
-.hero-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; margin-top: clamp(32px, 7vh, 96px); }
+.hero-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; margin-top: clamp(32px, 6vh, 80px); }
 .hero-foot .lead { max-width: 640px; margin: 0; }
-.hero-foot .actions { margin: 0; flex: none; }
+/* The hero grid (#728): the title with the product picture on its right, then the law
+   line; the text, buttons and facts below span the page. One column under 1100px, with
+   the picture after the buttons so they stay on the first screen of a phone. */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); column-gap: clamp(32px, 4vw, 72px); grid-template-areas: "eye eye" "title demo" "urgent demo" "foot foot" "facts facts"; }
+.hero .eyebrow { grid-area: eye; }
+.hero h1 { grid-area: title; align-self: end; }
+.hero .urgent { grid-area: urgent; align-self: start; }
+.hero-demo { grid-area: demo; align-self: end; }
+.hero-foot { grid-area: foot; }
+.hero .facts { grid-area: facts; }
+.urgent { margin: clamp(20px, 3vh, 32px) 0 0; padding-left: 14px; border-left: 2px solid #b3261e; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.4; }
+.hero-cta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.hero-cta .actions { margin: 0; }
+.hero-cta .alt { margin: 0; color: var(--mute-text); }
+/* The product picture: a small banner and the same requests before and after consent. */
+.hero-demo { margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 2px; background: var(--bg); }
+.hero-demo figcaption { margin: 0 0 14px; font-size: 13px; letter-spacing: .02em; color: var(--mute-text); }
+.hd-banner { margin: 0 0 16px; padding: 14px; border: 1px solid var(--ink); border-radius: 2px; }
+.hd-banner p { margin: 0; font-size: 14px; line-height: 1.35; }
+.hd-banner .hd-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.hd-btns span { display: flex; align-items: center; justify-content: center; min-height: 34px; border: 1px solid var(--ink); border-radius: 2px; font-size: 14px; font-weight: 500; }
+.hd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.hd-h { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+.hd-req { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.hd-req li { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.hd-req code { padding: 0; background: none; font-size: 12px; overflow-wrap: normal; }
+.hd-req span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mute-text); }
+.hd-req span::before { content: ""; flex: none; width: 8px; height: 8px; }
+.hd-req .off span::before { background: #b3261e; }
+.hd-req .on span { color: var(--ink); }
+.hd-req .on span::before { border-radius: 50%; background: var(--ink); }
+@media (max-width: 1100px) {
+	.hero .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "eye" "title" "urgent" "foot" "demo" "facts"; }
+	.hero-demo { max-width: 520px; margin-top: clamp(40px, 6vh, 64px); }
+	.hero-foot { flex-direction: column; align-items: flex-start; }
+	.hero-cta { align-items: flex-start; }
+}
 
 /* facts: a row of cells between two lines (rt.md .facts) */
 .facts { display: grid; grid-template-columns: repeat(4, 1fr); margin: clamp(48px, 8vh, 96px) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -371,8 +407,7 @@ details[open] > summary::after { content: "\2212"; }
 details > :not(summary) { max-width: 760px; }
 details[open] > :last-child { margin-bottom: 24px; }
 #verifica details { margin-top: 32px; }
-.howto { margin-top: clamp(48px, 7vh, 80px); }
-.landing .howto h3 { margin-top: 0; }
+#verifica details.howto { margin-top: 0; }
 
 /* ---- Demo ------------------------------------------------------------------- */
 .switch { display: flex; flex-wrap: wrap; gap: 4px 24px; margin: 16px 0 24px; }

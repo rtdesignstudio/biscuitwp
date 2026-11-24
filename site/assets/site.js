@@ -18,6 +18,20 @@
 		b.addEventListener('click', function () { window.print(); });
 	});
 
+	/* A link to a folded block (<details id>, e.g. #cum-verifici) opens it, on click and
+	   when the page loads with that address. */
+	function openFolded(hash) {
+		var id = hash && hash.charAt(0) === '#' ? hash.slice(1) : '';
+		var t = id ? doc.getElementById(id) : null;
+		if (t && t.tagName === 'DETAILS') { t.open = true; }
+	}
+	openFolded(window.location.hash);
+	window.addEventListener('hashchange', function () { openFolded(window.location.hash); });
+	doc.addEventListener('click', function (e) {
+		var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+		if (a) { openFolded(a.getAttribute('href')); }
+	});
+
 	/* ---- Phone menu (rt.md): a button with two lines (long on top, short below) opens a
 	   white sheet with the same links as the header nav, large and numbered; the same
 	   button turns into an x and closes it. The header stays above the sheet. ---------- */
