@@ -2,18 +2,25 @@
     "format": 1,
     "slug": "consent-manager-pro",
     "channel": "beta",
-    "version": "1.1.0",
-    "package": "https://github.com/rtdesignstudio/consent-manager-pro/releases/download/v1.1.0/consent-manager-pro.zip",
-    "sha256": "52efb9dabc729849e3df01fbe6a4b3ed5440e3fd8b798996c75fe8d7db8cb735",
-    "signature": "FEW5jaltGlwWnhKqpToImKpcsTwfX5USYJOrEeI/gTGgwX5RC+D40vQA51/W2aAYAKhI2nrgGBRFquppIFk0DQ==",
+    "version": "1.1.1",
+    "package": "https://github.com/rtdesignstudio/consent-manager-pro/releases/download/v1.1.1/consent-manager-pro.zip",
+    "sha256": "f6fe923c7025b60162c19b9e72d6657822c5c2bb334c02c73a278047eb901d3d",
+    "signature": "wQsWJrElRzdgzXi33oocP7XyeO92YKn11CBdeb6vW2IO6jy9dV9Gxf2VhwVRusb3sPRbwFCk3DMD0WAA4JWcDQ==",
     "requires_wp": "6.0",
     "requires_php": "7.4",
     "tested_wp": "6.9",
-    "released": "2026-11-24T11:22:06Z",
-    "issued": "2026-11-24T11:22:06Z",
-    "expires": "2027-01-23T11:22:06Z",
+    "released": "2026-11-24T12:51:49Z",
+    "issued": "2026-11-24T12:51:49Z",
+    "expires": "2027-01-23T12:51:49Z",
     "revoked": [],
     "notes": [
+        {
+            "version": "1.1.1",
+            "date": "2026-11-24",
+            "items": [
+                "Butonul de mutare merge și când pluginul stă într-un folder cu alt nume (de exemplu consent-manager-pro-main)."
+            ]
+        },
         {
             "version": "1.1.0",
             "date": "2026-11-24",
