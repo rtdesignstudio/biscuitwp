@@ -771,6 +771,13 @@ foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldov
 	cmp_assert( false !== strpos( $fn, 'example.com' ) && 1 === preg_match( '#<p class="muted small shots-note">[^<]*example\.com[^<]*</p>#', $fn ), "{$page}: the note says the screenshots come from a test site" );
 	cmp_assert( 1 === preg_match( '#</div>\s*<p class="muted small shots-note">[^<]*</p>\s*<p class="actions"><a class="btn" data-download#', $fn ), "{$page}: the download button still closes #functii" );
 }
+// The screenshots open in a lightbox (a native <dialog>); without it the link opens the picture.
+$cmp_site_lb = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
+foreach ( array( "querySelectorAll('.shot a')", "typeof HTMLDialogElement !== 'function'", 'dlg.showModal()', "e.metaKey || e.ctrlKey || e.shiftKey || e.altKey", "'ArrowLeft'", "'ArrowRight'", 'opener.focus()', "a.getAttribute('href')", "['Închide', 'Anterioara', 'Următoarea'", "['Close', 'Previous', 'Next'", "['Закрыть', 'Предыдущий', 'Следующий'" ) as $need ) {
+	cmp_assert( false !== strpos( $cmp_site_lb, $need ), "site.js lightbox: has {$need}" );
+}
+cmp_assert( false === strpos( $cmp_site_lb, 'innerHTML' ), 'site.js: the lightbox builds its DOM without innerHTML' );
+cmp_assert( 1 === preg_match( '#dialog\.lb \{[^}]*position: fixed;#', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: the lightbox covers the screen' );
 $cmp_site_css_l2 = preg_replace( '#/\*.*?\*/#s', '', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) );
 cmp_assert( 1 === preg_match( '#@media \(max-width: 760px\)\s*\{.*?\.compare, \.compare tbody, \.compare tr, \.compare th, \.compare td \{ display: block;#s', $cmp_site_css_l2 ), 'style.css: on a phone the comparison rows become cards' );
 foreach ( array( 2 => 'BiscuitWP', 3 => 'Complianz', 4 => 'CookieYes', 5 => 'Cookiebot' ) as $nth => $prod ) {

@@ -32,6 +32,92 @@
 		if (a) { openFolded(a.getAttribute('href')); }
 	});
 
+	/* ---- Lightbox for the screenshots (.shot a): a native <dialog> over the page, the
+	   picture at full size (scrolls when taller than the screen), its caption, previous /
+	   next among the screenshots. Escape, the x and a click on the dark area close it;
+	   the arrow keys move between pictures; focus goes back to the link. Without
+	   <dialog> support, or with a modifier key, the link opens the picture as before. */
+	(function () {
+		var links = Array.prototype.slice.call(doc.querySelectorAll('.shot a'));
+		if (!links.length || typeof HTMLDialogElement !== 'function') { return; }
+		var L = en ? ['Close', 'Previous', 'Next', 'Screenshot'] : ru ? ['Закрыть', 'Предыдущий', 'Следующий', 'Снимок экрана'] : ['Închide', 'Anterioara', 'Următoarea', 'Captură de ecran'];
+
+		var dlg = doc.createElement('dialog');
+		dlg.className = 'lb';
+		dlg.setAttribute('aria-label', L[3]);
+		var bar = doc.createElement('div');
+		bar.className = 'lb-bar';
+		var count = doc.createElement('span');
+		count.className = 'lb-count';
+		function button(cls, label, text) {
+			var b = doc.createElement('button');
+			b.type = 'button';
+			b.className = 'lb-btn ' + cls;
+			b.setAttribute('aria-label', label);
+			b.textContent = text;
+			return b;
+		}
+		var prev = button('lb-prev', L[1], '←');
+		var next = button('lb-next', L[2], '→');
+		var close = button('lb-close', L[0], '×');
+		bar.appendChild(count);
+		bar.appendChild(prev);
+		bar.appendChild(next);
+		bar.appendChild(close);
+		var fig = doc.createElement('figure');
+		fig.className = 'lb-fig';
+		var img = doc.createElement('img');
+		img.decoding = 'async';
+		var cap = doc.createElement('figcaption');
+		fig.appendChild(img);
+		fig.appendChild(cap);
+		dlg.appendChild(bar);
+		dlg.appendChild(fig);
+		doc.body.appendChild(dlg);
+
+		var at = 0;
+		var opener = null;
+		function show(i) {
+			at = (i + links.length) % links.length;
+			var a = links[at];
+			var thumb = a.querySelector('img');
+			var fc = a.parentNode.querySelector('figcaption');
+			img.src = a.getAttribute('href');
+			img.alt = thumb ? thumb.getAttribute('alt') || '' : '';
+			// The thumbnail's width/height (half the pixels) keep the space before the picture loads.
+			img.width = thumb ? +thumb.getAttribute('width') || 0 : 0;
+			img.height = thumb ? +thumb.getAttribute('height') || 0 : 0;
+			cap.textContent = fc ? fc.textContent : '';
+			count.textContent = (at + 1) + ' / ' + links.length;
+			prev.hidden = next.hidden = links.length < 2;
+			dlg.scrollTop = 0;
+		}
+		links.forEach(function (a, i) {
+			a.addEventListener('click', function (e) {
+				if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+				e.preventDefault();
+				opener = a;
+				show(i);
+				root.classList.add('lb-open');
+				dlg.showModal();
+				close.focus();
+			});
+		});
+		prev.addEventListener('click', function () { show(at - 1); });
+		next.addEventListener('click', function () { show(at + 1); });
+		close.addEventListener('click', function () { dlg.close(); });
+		// A click on the dark area (the dialog itself, not the picture or the bar) closes it.
+		dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target === fig) { dlg.close(); } });
+		dlg.addEventListener('keydown', function (e) {
+			if (e.key === 'ArrowLeft') { e.preventDefault(); show(at - 1); }
+			if (e.key === 'ArrowRight') { e.preventDefault(); show(at + 1); }
+		});
+		dlg.addEventListener('close', function () {
+			root.classList.remove('lb-open');
+			if (opener) { opener.focus(); }
+		});
+	})();
+
 	/* ---- Phone menu (rt.md): a button with two lines (long on top, short below) opens a
 	   white sheet with the same links as the header nav, large and numbered; the same
 	   button turns into an x and closes it. The header stays above the sheet. ---------- */

@@ -269,6 +269,20 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 	.shot-verificare { grid-column: auto; grid-row: auto; }
 }
 
+/* Lightbox for the screenshots (assets/site.js): a dark full-screen <dialog>, the picture
+   at its real size (half its pixels), scrolling when taller than the screen. */
+html.lb-open { overflow: hidden; }
+dialog.lb { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0 var(--pad) 32px; border: 0; background: rgba(10, 10, 10, .94); color: #fff; overflow: auto; overscroll-behavior: contain; }
+dialog.lb::backdrop { background: transparent; }
+.lb-bar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 0; background: linear-gradient(rgba(10, 10, 10, .94) 70%, transparent); }
+.lb-count { margin-right: auto; font-size: 14px; color: #bdbdbd; font-variant-numeric: tabular-nums; }
+.lb-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, .35); border-radius: 2px; background: transparent; color: #fff; font: inherit; font-size: 22px; line-height: 1; cursor: pointer; transition: background-color .2s, border-color .2s; }
+.lb-btn:hover { background: rgba(255, 255, 255, .12); border-color: #fff; }
+.lb-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.lb-fig { display: flex; flex-direction: column; align-items: center; margin: 8px 0 0; cursor: zoom-out; }
+.lb-fig img { display: block; max-width: 100%; height: auto; border-radius: 2px; background: #f0f0f1; cursor: default; }
+.lb-fig figcaption { max-width: 760px; margin-top: 14px; font-size: 15px; line-height: 1.45; color: #d6d6d6; text-align: center; }
+
 /* ---- The tool --------------------------------------------------------------- */
 .tool { margin: 32px 0 16px; }
 .tool label { display: block; margin-bottom: 8px; font-size: 15px; font-weight: 500; }
