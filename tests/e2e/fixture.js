@@ -63,6 +63,9 @@ const TYPICAL = {
 		inline: "window.ttq=window.ttq||{load:function(){}};ttq.load('E2E');fetch('https://analytics.tiktok.com/api/v2/pixel/e2e',{method:'POST',mode:'no-cors',body:'e2e'}).catch(function(){});",
 		loads: ['https://analytics.tiktok.com/api/v2/pixel/e2e'],
 	},
+	// The theme form of the Maps API loader (no callback: themes use google.maps at once).
+	// WordPress prints it raw; the plugin puts the maps gate in its place.
+	'google-maps-js': { src: 'https://maps.googleapis.com/maps/api/js?key=E2ETESTKEY' },
 	youtube: { iframe: 'https://www.youtube.com/embed/E2Etest0001' },
 	vimeo: { iframe: 'https://player.vimeo.com/video/1' },
 	'google-maps': { iframe: 'https://www.google.com/maps/embed?pb=e2e' },

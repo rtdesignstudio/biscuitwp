@@ -7,11 +7,11 @@ cmp_assert_eq(
 	array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' ),
 	'library starts with the six original services in order'
 );
-$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha', 'umami', 'plausible', 'fathom', 'matomo', 'google-adsense', 'cloudflare-turnstile' );
+$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha', 'umami', 'plausible', 'fathom', 'matomo', 'google-adsense', 'cloudflare-turnstile', 'google-maps-js' );
 $cmp_have_ids     = array_column( $lib, 'id' );
 sort( $cmp_expected_ids );
 sort( $cmp_have_ids );
-cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 20 expected ids' );
+cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 21 expected ids' );
 cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'real library validates' );
 foreach ( array( 'id', 'name', 'provider', 'type', 'category', 'hosts', 'inline', 'gtm', 'path', 'nocookie', 'cookies', 'transfer', 'privacy_url' ) as $k ) {
 	cmp_assert( array_key_exists( $k, $lib[0] ), "service has key {$k}" );
@@ -58,7 +58,7 @@ cmp_assert( null === CMP_Services::script_service( '', 'var a = 1;', $lib ), 'pl
 $cmp_slugs = array( 'necessary', 'statistics', 'marketing' );
 $cmp_all   = CMP_Services::all( $lib, array( 'overrides' => array( 'clarity' => array( 'category' => 'statistics', 'exempt' => true ) ) ), $cmp_slugs );
 $cmp_by    = array_column( $cmp_all, null, 'id' );
-cmp_assert_eq( count( $cmp_all ), 20, 'all() without custom keeps 20 services' );
+cmp_assert_eq( count( $cmp_all ), 21, 'all() without custom keeps 21 services' );
 cmp_assert_eq( $cmp_by['clarity']['category'], 'statistics', 'override category applied' );
 cmp_assert_eq( $cmp_by['clarity']['exempt'], true, 'override exempt applied' );
 cmp_assert_eq( $cmp_by['clarity']['source'], 'library', 'library service has source library' );
@@ -90,8 +90,8 @@ $cmp_custom = array(
 	),
 );
 $cmp_all = CMP_Services::all( $lib, $cmp_custom, $cmp_slugs );
-cmp_assert_eq( count( $cmp_all ), 21, 'custom service appended' );
-$cx = $cmp_all[20];
+cmp_assert_eq( count( $cmp_all ), 22, 'custom service appended' );
+$cx = $cmp_all[21];
 cmp_assert_eq( $cx['source'], 'custom', 'custom source' );
 cmp_assert_eq( $cx['type'], 'script', 'custom type script' );
 cmp_assert_eq( $cx['category'], 'marketing', 'custom unknown category remapped' );
@@ -118,7 +118,9 @@ $cmp_exp = array_map(
 	},
 	$lib
 );
-cmp_assert_eq( $cmp_act, $cmp_exp, 'active() without WP equals library() plus source' );
+// Without WordPress the maps gate is off: its service is exempt through the setting (apply_gate()), nothing else changes.
+$cmp_exp = CMP_Services::apply_gate( $cmp_exp, false );
+cmp_assert_eq( $cmp_act, $cmp_exp, 'active() without WP equals library() plus source (and the gate service exempt)' );
 cmp_assert_eq( array_column( CMP_Services::all( $lib, array( 'seq' => 9 ), array() ), 'id' ), array_column( $lib, 'id' ), 'all() ignores seq' );
 
 // newly_blocked: found ids that 0.4.x did not already block.
@@ -143,7 +145,7 @@ cmp_assert_eq( CMP_Blocker::found_ids( '<p>hi</p>', $cmp_ex2 ), array(), 'found_
 
 // ---- B2 Task 1: cookieless analytics tools, exempt_default ----
 $cmp_cl_ids = array( 'umami', 'plausible', 'fathom' );
-cmp_assert_eq( count( $lib ), 20, 'library has 20 services' );
+cmp_assert_eq( count( $lib ), 21, 'library has 21 services' );
 $cmp_cl_by = array_column( $lib, null, 'id' );
 foreach ( $cmp_cl_ids as $cmp_cl ) {
 	cmp_assert( isset( $cmp_cl_by[ $cmp_cl ] ), "{$cmp_cl} in library" );

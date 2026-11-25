@@ -35,6 +35,19 @@
 		// "Adaugă ca serviciu" on an unknown domain: a new custom row with the host filled in. Nothing is saved until "Salvează serviciile".
 		var useHost = e.target.closest('[data-cmp-use-host]');
 		if (useHost) {
+			// The Maps API loader has its own switch on the service row: show where, fill nothing.
+			var hint = useHost.getAttribute('data-cmp-use-hint');
+			if (hint) {
+				var note = useHost.parentNode.querySelector('.cmp-use-hint');
+				if (!note) {
+					note = document.createElement('p');
+					note.className = 'description cmp-use-hint';
+					note.setAttribute('role', 'status');
+					useHost.parentNode.appendChild(note);
+				}
+				note.textContent = hint;
+				return true;
+			}
 			var host = useHost.getAttribute('data-cmp-use-host') || '';
 			var added = addCustomRow();
 			if (added && host) {

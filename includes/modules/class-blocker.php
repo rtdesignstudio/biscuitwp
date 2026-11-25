@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 require_once dirname( __DIR__ ) . '/class-services.php';
 require_once __DIR__ . '/class-thumbs.php';
+require_once __DIR__ . '/class-maps-gate.php';
 
 /**
  * Prior blocking of Google Analytics / Tag Manager / Meta Pixel: rewrites their
@@ -35,7 +36,11 @@ class CMP_Blocker {
 		$s     = CMP_Consent::get_settings();
 		$hosts = array();
 		if ( self::blocks_trackers( $s ) ) {
-			$hosts = array_merge( $hosts, self::tracker_hosts( self::rewritable( self::default_services() ) ) );
+			$all   = self::default_services();
+			$hosts = array_merge( $hosts, self::tracker_hosts( self::rewritable( self::without_gated( $all ) ) ) );
+			if ( CMP_Services::gate_on( (array) $s ) ) {
+				$hosts = array_merge( $hosts, self::gate_hosts( $all ) );
+			}
 		}
 		if ( self::localizes_fonts( $s ) ) {
 			$hosts = array_merge( $hosts, self::FONT_HOSTS );
@@ -125,7 +130,8 @@ class CMP_Blocker {
 			}
 		}
 		$blocked = array();
-		if ( preg_match_all( '/data-cmp-block\s*=\s*["\']([a-z0-9_-]+)["\']/i', $html, $m ) ) {
+		// A plain block, or the gate of the Maps API (its category is in the attribute).
+		if ( preg_match_all( '/data-cmp-(?:block|maps-gate)\s*=\s*["\']([a-z0-9_-]+)["\']/i', $html, $m ) ) {
 			$blocked = array_values( array_unique( $m[1] ) );
 		}
 		return array( 'raw' => $raw, 'blocked' => $blocked );
@@ -173,7 +179,7 @@ class CMP_Blocker {
 			foreach ( $scripts as $other ) {
 				foreach ( (array) $other['hosts'] as $oh ) {
 					foreach ( (array) $svc['hosts'] as $h ) {
-						if ( $other['id'] !== $svc['id'] && 0 === stripos( $oh, $h . '/' ) ) {
+						if ( $other['id'] !== $svc['id'] && 0 === stripos( $oh, $h . '/' ) && ! self::yields_to( $other, $svc ) ) {
 							$page = str_ireplace( $oh, '', $page );
 						}
 					}
@@ -197,6 +203,16 @@ class CMP_Blocker {
 			$blocked = array_values( array_unique( $m[1] ) );
 		}
 		return array( 'raw' => $raw, 'blocked' => $blocked );
+	}
+
+	/** Pure: does the custom service $custom decide for the URLs of the library service $lib (with_except())? Then its own bare host covers them, whole. */
+	private static function yields_to( array $lib, array $custom ) {
+		foreach ( isset( $lib['except'] ) ? $lib['except'] : array() as $e ) {
+			if ( isset( $custom['id'], $e['id'] ) && $e['id'] === $custom['id'] ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -304,7 +320,8 @@ class CMP_Blocker {
 		$html = (string) $html;
 		if ( self::blocks_trackers( $s ) ) {
 			$thumb = class_exists( 'CMP_Thumbs' ) ? array( 'CMP_Thumbs', 'url' ) : null;
-			$html  = self::rewrite( $html, self::embed_labels(), null, $thumb ); // services: active() when available, else the library
+			$gate  = CMP_Services::gate_on( (array) $s ) ? CMP_Maps_Gate::current() : null;
+			$html  = self::rewrite( $html, self::embed_labels(), null, $thumb, $gate ); // services: active() when available, else the library
 			// Advanced leaves GA4/GTM live wherever the theme put them (often before
 			// wp_head), so the Consent Mode default must come first in <head>.
 			if ( CMP_Services::measurement_active( $s ) && class_exists( 'CMP_Banner' ) ) {
@@ -341,7 +358,13 @@ class CMP_Blocker {
 		if ( ! preg_match( '/<head(?=[\s>\/])[^>]*>/i', $html ) ) {
 			return $html;
 		}
-		$html = (string) preg_replace( '/<script\b[^>]*\sdata-cmp-default(?=[\s=>\/])[^>]*>.*?<\/script>\n?/is', '', $html );
+		$html = self::replace(
+			'/<script\b[^>]*\sdata-cmp-default(?=[\s=>\/])[^>]*>.*?<\/script>\n?/is',
+			function () {
+				return '';
+			},
+			$html
+		);
 		return self::inject_after_head( $html, $snippet );
 	}
 
@@ -360,6 +383,42 @@ class CMP_Blocker {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Pure: $services without the maps gate service (CMP_Services::GATE_ID): the Maps
+	 * API loader of a theme must never reach the generic rewrite, a plain block breaks
+	 * the theme (google is not defined). Gate off: its tag, <noscript> and hints stay as
+	 * they are. Gate on: gated_service() and rewrite_tag() put the gate in its place.
+	 */
+	private static function without_gated( array $services ) {
+		return array_values(
+			array_filter(
+				$services,
+				function ( $s ) {
+					return ! is_array( $s ) || ! isset( $s['id'] ) || CMP_Services::GATE_ID !== $s['id'];
+				}
+			)
+		);
+	}
+
+	/**
+	 * Pure: the maps gate service when the gate may act for it, or null: not exempt
+	 * (gate off, "nu bloca"), not necessary, not decided whole by a custom service.
+	 */
+	private static function gated_service( array $services ) {
+		foreach ( self::rewritable( $services ) as $s ) {
+			if ( isset( $s['id'] ) && CMP_Services::GATE_ID === $s['id'] && ! CMP_Services::replaced( $s ) ) {
+				return $s;
+			}
+		}
+		return null;
+	}
+
+	/** Pure: the hosts whose resource hints go while the gate is on: its own, and the one that serves only Maps. */
+	public static function gate_hosts( array $services ) {
+		$svc = self::gated_service( $services );
+		return null === $svc ? array() : array_merge( self::tracker_hosts( array( $svc ) ), array( CMP_Maps_Gate::HINT_HOST ) );
 	}
 
 	/**
@@ -389,19 +448,23 @@ class CMP_Blocker {
 	 * (embed_text with %s for the service, embed_load, settings). $services: the
 	 * rules to apply (null = active services, else the library). $thumb: optional
 	 * callable( $youtube_id ): local thumbnail URL or '' (YouTube embeds only).
+	 * $gate: the config of the maps gate (CMP_Maps_Gate::config()), null = gate off.
 	 */
-	public static function rewrite( $html, array $labels = array(), ?array $services = null, $thumb = null ) {
+	public static function rewrite( $html, array $labels = array(), ?array $services = null, $thumb = null, ?array $gate = null ) {
 		$thumb    = is_callable( $thumb ) ? $thumb : null;
 		$html     = (string) $html;
 		$all      = null === $services ? self::default_services() : $services;
+		$hosts    = null === $gate ? array() : self::gate_hosts( $all );
+		$maps     = null === $gate ? null : self::gated_service( $all );
+		$all      = self::without_gated( $all );
 		$services = self::rewritable( $all );
 		// Script tags: also the services only the Advanced mode exempts, decided per tag.
 		$scripts = self::blockable( $all );
 		$options = self::keeps_bridge_data( $html, true );
-		$html    = preg_replace_callback(
+		$html    = self::replace(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
-			function ( $m ) use ( $scripts, $options ) {
-				return self::rewrite_tag( $m, $scripts, $options );
+			function ( $m ) use ( $scripts, $options, $maps, $gate ) {
+				return self::rewrite_tag( $m, $scripts, $options, $maps, $gate );
 			},
 			$html
 		);
@@ -416,7 +479,10 @@ class CMP_Blocker {
 				$html = self::strip_tracker_noscript( $html, self::tracker_hosts( array( $s ) ), $s );
 			}
 		}
-		return self::strip_hint_links( (string) $html, self::tracker_hosts( $services ) );
+		if ( null !== $maps ) {
+			$html = self::strip_tracker_noscript( $html, self::tracker_hosts( array( $maps ) ), $maps );
+		}
+		return self::strip_hint_links( (string) $html, array_merge( self::tracker_hosts( $services ), $hosts ), $services, $hosts );
 	}
 
 	/**
@@ -550,7 +616,7 @@ class CMP_Blocker {
 			),
 			array_filter( $labels, 'strlen' )
 		);
-		return (string) preg_replace_callback(
+		return self::replace(
 			'/(<template\b[^>]*\bdata-cmp-embed-src\b[^>]*>.*?<\/template>)|<iframe\b([^>]*)>(.*?)<\/iframe>/is',
 			function ( $m ) use ( $labels, $services, $thumb ) {
 				if ( ! empty( $m[1] ) ) {
@@ -725,24 +791,75 @@ class CMP_Blocker {
 			. '</div>';
 	}
 
-	/** Pure: drop dns-prefetch / preconnect <link> hints whose href matches one of $hosts. */
-	public static function strip_hint_links( $html, array $hosts ) {
-		return (string) preg_replace_callback(
+	/**
+	 * Pure: drop the <link> hints that would contact a blocked host before consent.
+	 * dns-prefetch / preconnect: by $hosts. With $services also preload, prefetch,
+	 * modulepreload and prerender of what those services' rules block (URL rules,
+	 * paths and exceptions included) or of a host in $always. A stylesheet or a font
+	 * is never blocked itself, so its preload stays (often the stylesheet, loaded
+	 * late: onload="this.rel='stylesheet'").
+	 */
+	public static function strip_hint_links( $html, array $hosts, ?array $services = null, array $always = array() ) {
+		return self::replace(
 			'/<link\b[^>]*>/i',
-			function ( $m ) use ( $hosts ) {
-				$tag = $m[0];
-				if ( ! preg_match( '/rel\s*=\s*["\'](?:dns-prefetch|preconnect)["\']/i', $tag ) ) {
-					return $tag;
+			function ( $m ) use ( $hosts, $services, $always ) {
+				$rel = preg_split( '/\s+/', strtolower( trim( self::tag_attr( $m[0], 'rel' ) ) ) );
+				$url = trim( self::tag_attr( $m[0], 'href' ) );
+				if ( in_array( 'stylesheet', $rel, true ) ) {
+					return $m[0];
 				}
-				foreach ( $hosts as $host ) {
-					if ( self::has_host( $tag, $host ) ) {
-						return '';
-					}
+				if ( array_intersect( $rel, array( 'dns-prefetch', 'preconnect' ) ) && self::has_any_host( $url, $hosts ) ) {
+					return '';
 				}
-				return $tag;
+				if ( null === $services || ! array_intersect( $rel, array( 'preload', 'prefetch', 'modulepreload', 'prerender' ) )
+					|| in_array( strtolower( trim( self::tag_attr( $m[0], 'as' ) ) ), array( 'style', 'font' ), true ) ) {
+					return $m[0];
+				}
+				$blocked = self::has_any_host( (string) parse_url( $url, PHP_URL_HOST ), $always )
+					|| null !== CMP_Services::script_service( $url, '', $services )
+					|| null !== CMP_Services::iframe_service( $url, $services );
+				return '' !== $url && $blocked ? '' : $m[0];
 			},
 			(string) $html
 		);
+	}
+
+	/** Pure: an attribute of a tag, quoted or not, decoded ('' when missing). */
+	private static function tag_attr( $tag, $name ) {
+		if ( ! preg_match( '/[\s"\']' . $name . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>]+))/i', (string) $tag, $m ) ) {
+			return '';
+		}
+		return html_entity_decode( (string) end( $m ), ENT_QUOTES );
+	}
+
+	/** Pure: does $text name one of $hosts? */
+	private static function has_any_host( $text, array $hosts ) {
+		foreach ( $hosts as $host ) {
+			if ( self::has_host( $text, $host ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * preg_replace_callback() that never loses the page: a very long inline script
+	 * passes PCRE's default backtrack limit (1,000,000), so the limit is raised for
+	 * the call; if PCRE still gives up (null: a host that locks the limit), the HTML comes back
+	 * unchanged, trackers included, instead of an empty page.
+	 */
+	private static function replace( $pattern, callable $callback, $html ) {
+		$limit = function_exists( 'ini_get' ) ? ini_get( 'pcre.backtrack_limit' ) : 0;
+		$need  = 20 * strlen( $html ) + 1000000;
+		$raise = (int) $limit < $need && function_exists( 'ini_set' ); // some hosts disable ini_set
+		if ( $raise ) {
+			ini_set( 'pcre.backtrack_limit', (string) $need ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		}
+		$out = preg_replace_callback( $pattern, $callback, $html );
+		if ( $raise ) {
+			ini_set( 'pcre.backtrack_limit', (string) $limit ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		}
+		return null === $out ? $html : $out;
 	}
 
 	/** Pure: remove <noscript> blocks whose content references a tracker host.
@@ -750,7 +867,7 @@ class CMP_Blocker {
 	 * compliant outcome is to not load the tracker at all (no re-injection).
 	 * $service: the hosts are of this service, without its excepted URLs. */
 	public static function strip_tracker_noscript( $html, array $hosts, array $service = array() ) {
-		return (string) preg_replace_callback(
+		return self::replace(
 			'/<noscript\b[^>]*>.*?<\/noscript>/is',
 			function ( $m ) use ( $hosts, $service ) {
 				$text = CMP_Services::without_excepted( $m[0], $service );
@@ -861,7 +978,20 @@ class CMP_Blocker {
 		return $out;
 	}
 
-	private static function rewrite_tag( $m, array $services, $options = false ) {
+	/**
+	 * Pure: the maps gate in place of a tag, or null when the tag is not the loader (or a
+	 * custom service decides for its URL). Without the gate's script the tag is
+	 * blocked like any other (fails closed).
+	 */
+	private static function gate_tag( $attrs, $body, ?array $maps, ?array $gate ) {
+		if ( null === $maps || null === $gate || ! CMP_Maps_Gate::is_tag( $attrs, $body ) || CMP_Services::excepted( CMP_Maps_Gate::url( $attrs, $body ), $maps ) ) {
+			return null;
+		}
+		$out = CMP_Maps_Gate::gate( $attrs, $body, $gate );
+		return '' !== $out ? $out : self::blocked_script( $maps['category'], $maps['id'], CMP_Maps_Gate::url( $attrs, $body ), $body, '' );
+	}
+
+	private static function rewrite_tag( $m, array $services, $options = false, ?array $maps = null, ?array $gate = null ) {
 		$attrs = $m[1];
 		$body  = $m[2];
 
@@ -889,6 +1019,10 @@ class CMP_Blocker {
 
 		$svc = self::script_for( $src, $body, $services );
 		if ( null === $svc ) {
+			$gated = self::gate_tag( $attrs, $body, $maps, $gate );
+			if ( null !== $gated ) {
+				return $gated;
+			}
 			// An invalid data-cmp-category fails closed: blocked as marketing.
 			return '' === $cat ? self::blocked_script( 'marketing', null, $src, $body, $attrs ) : $m[0];
 		}
@@ -906,7 +1040,8 @@ class CMP_Blocker {
 			);
 			$other = self::script_for( $src, $body, $others );
 			if ( null === $other ) {
-				return $m[0];
+				$gated = self::gate_tag( $attrs, $body, $maps, $gate ); // the Maps API loader in the same tag
+				return null !== $gated ? $gated : $m[0];
 			}
 			return self::blocked_script( $other['category'], $other['id'], $src, $body, $attrs );
 		}

@@ -141,6 +141,7 @@ class CMP_Plugin {
 		CMP_Updater::register();
 		require_once CMP_PATH . 'includes/modules/class-thumbs.php';
 		CMP_Thumbs::register();
+		require_once CMP_PATH . 'includes/modules/class-maps-gate.php';
 		require_once CMP_PATH . 'includes/modules/class-blocker.php';
 		CMP_Blocker::register();
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
@@ -261,6 +262,16 @@ class CMP_Plugin {
 		$notice = $added ? get_option( 'cmp_services_notice', false ) : false;
 		if ( $added && ( ! $notice || is_array( $notice ) ) ) {
 			update_option( 'cmp_services_notice', array_values( array_unique( array_merge( $notice ? $notice : array(), $added ) ) ) );
+		}
+		// Maps gate: the Maps API loader of a theme still loads before consent after the
+		// update (maps_gate is absent = off). A one-time note on existing installs tells
+		// the owner, once the scan finds it (CMP_Services_Page::maps_notice()); never on
+		// a fresh install, where the gate is on from the start.
+		if ( CMP_Services::maps_notice_due( $old ) ) {
+			$settings = get_option( 'cmp_settings', array() );
+			if ( ! is_array( $settings ) || ! array_key_exists( 'maps_gate', $settings ) ) {
+				update_option( 'cmp_maps_notice', 1 );
+			}
 		}
 		// B4: the legal templates changed (Moldova texts, RO/RU/EN): flag a one-time
 		// note on "Pagini legale" for existing installs only.

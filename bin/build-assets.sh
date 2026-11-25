@@ -3,6 +3,7 @@
 #   assets/js/banner.js      -> assets/js/banner.min.js
 #   assets/css/banner.css    -> assets/css/banner.min.css
 #   assets/js/banner-check.js -> assets/js/banner-check.min.js (check mode only; not in the budget)
+#   assets/js/maps-gate.js   -> assets/js/maps-gate.min.js (printed inline by the maps gate; not in the budget)
 #   standalone/cmp.js        -> standalone/cmp.min.js
 #   standalone/cmp.css       -> standalone/cmp.min.css  (synced from banner.css first)
 # Each .min file starts with `/*! cmp-src-sha256:<sha256 of the source> */`;
@@ -43,10 +44,11 @@ bash standalone/build.sh
 min_js  assets/js/banner.js   assets/js/banner.min.js
 min_css assets/css/banner.css assets/css/banner.min.css
 min_js  assets/js/banner-check.js assets/js/banner-check.min.js
+min_js  assets/js/maps-gate.js assets/js/maps-gate.min.js
 min_js  standalone/cmp.js     standalone/cmp.min.js
 min_css standalone/cmp.css    standalone/cmp.min.css
 
 echo "gzip sizes (bytes):"
-for f in assets/js/banner.min.js assets/css/banner.min.css assets/js/banner-check.min.js standalone/cmp.min.js standalone/cmp.min.css; do
+for f in assets/js/banner.min.js assets/css/banner.min.css assets/js/banner-check.min.js assets/js/maps-gate.min.js standalone/cmp.min.js standalone/cmp.min.css; do
 	printf '  %-28s %s\n' "$f" "$(gzip -9 -c "$f" | wc -c | tr -d ' ')"
 done

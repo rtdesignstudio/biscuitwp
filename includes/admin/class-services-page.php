@@ -40,6 +40,10 @@ class CMP_Services_Page {
 		if ( isset( $svc['category'] ) && 'necessary' === $svc['category'] ) {
 			return __( 'neblocat (necesar)', 'biscuitwp' );
 		}
+		// Maps gate off: the loader runs before consent, as it always did (the setting, not an "excepție" the admin chose).
+		if ( ! empty( $svc['gate_off'] ) && empty( $svc['admin_exempt'] ) ) {
+			return __( 'se încarcă înainte de acord', 'biscuitwp' );
+		}
 		if ( ! empty( $svc['exempt'] ) ) {
 			return __( 'excepție', 'biscuitwp' );
 		}
@@ -49,11 +53,16 @@ class CMP_Services_Page {
 		return __( 'blocat până la acord', 'biscuitwp' );
 	}
 
-	/** One library service row with its controls. */
+	/**
+	 * One library service row with its controls (the Maps API loader also has its
+	 * switch, the stored setting maps_gate).
+	 */
 	private static function library_row( $svc, array $cats ) {
 		$id  = (string) $svc['id'];
 		$cat = isset( $svc['category'] ) ? (string) $svc['category'] : 'marketing';
 		$n   = 'cmp_services[overrides][' . $id . ']';
+		// The admin's own "nu bloca": with the maps gate off the service is exempt through the setting, which the box must not show (saving would store it).
+		$own = ! empty( $svc['gate_off'] ) ? ! empty( $svc['admin_exempt'] ) : ! empty( $svc['exempt'] );
 		if ( ! isset( $cats[ $cat ] ) ) {
 			$cats[ $cat ] = $cat;
 		}
@@ -77,13 +86,19 @@ class CMP_Services_Page {
 			</td>
 			<td>
 				<?php if ( 'necessary' === $cat ) : ?>
-					<input type="hidden" name="<?php echo esc_attr( $n ); ?>[exempt]" value="<?php echo ! empty( $svc['exempt'] ) ? '1' : '0'; ?>">
+					<input type="hidden" name="<?php echo esc_attr( $n ); ?>[exempt]" value="<?php echo $own ? '1' : '0'; ?>">
 				<?php elseif ( ! empty( $svc['mode_exempt'] ) ) : ?>
 					<label><input type="checkbox" value="1" checked disabled> <?php esc_html_e( 'nu bloca (excepție)', 'biscuitwp' ); ?></label>
 					<p class="description"><?php esc_html_e( 'În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu Consent Mode pe «refuzat».', 'biscuitwp' ); ?></p>
 					<p class="description"><?php echo esc_html( CMP_Services::consent_exempt( $svc ) ? __( 'Setarea ta: nu bloca (se aplică și în Strict).', 'biscuitwp' ) : __( 'Setarea ta: blocat până la acord (se aplică în Strict).', 'biscuitwp' ) ); ?></p>
 				<?php else : ?>
-					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[exempt]" value="1" <?php checked( ! empty( $svc['exempt'] ) ); ?>> <?php esc_html_e( 'nu bloca (excepție)', 'biscuitwp' ); ?></label>
+					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[exempt]" value="1" <?php checked( $own ); ?>> <?php esc_html_e( 'nu bloca (excepție)', 'biscuitwp' ); ?></label>
+				<?php endif; ?>
+				<?php if ( CMP_Services::GATE_ID === $id ) : // the stored setting, not gate_now(): with blocking off, saving must not turn it off ?>
+					<?php $stored = get_option( 'cmp_settings', array() ); ?>
+					<input type="hidden" name="cmp_services[maps_gate]" value="0">
+					<p><label><input type="checkbox" name="cmp_services[maps_gate]" value="1" <?php checked( is_array( $stored ) && ! empty( $stored['maps_gate'] ) ); ?>> <?php esc_html_e( 'ține harta până la acord', 'biscuitwp' ); ?></label></p>
+					<p class="description"><?php esc_html_e( 'Probează harta după pornire.', 'biscuitwp' ); ?></p>
 				<?php endif; ?>
 			</td>
 			<td class="cmp-svc-status"><?php echo esc_html( self::status_label( $svc ) ); ?></td>
@@ -169,6 +184,11 @@ class CMP_Services_Page {
 		$note = get_option( 'cmp_services_notice' );
 		$note = is_array( $note ) ? self::notice_names( $note ) : array();
 		self::mark_seen();
+		// Maps gate: the one-time note is shown here first, then it is cleared (shown once).
+		$maps_note = self::maps_note_due();
+		if ( $maps_note ) {
+			delete_option( 'cmp_maps_notice' );
+		}
 
 		$cats       = self::category_options();
 		$active     = CMP_Services::active();
@@ -210,6 +230,9 @@ class CMP_Services_Page {
 			<?php if ( $note ) : ?>
 				<div class="notice notice-warning"><p><strong><?php esc_html_e( 'BiscuitWP:', 'biscuitwp' ); ?></strong> <?php echo esc_html( sprintf( /* translators: %s: service names */ __( 'Am început să blocăm până la acord: %s. Le vezi mai jos, în listă.', 'biscuitwp' ), implode( ', ', $note ) ) ); ?></p></div>
 			<?php endif; ?>
+			<?php if ( $maps_note ) : ?>
+				<div class="notice notice-warning"><p><strong><?php esc_html_e( 'BiscuitWP:', 'biscuitwp' ); ?></strong> <?php echo esc_html( self::maps_note_text() ); ?></p></div>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
@@ -236,7 +259,7 @@ class CMP_Services_Page {
 			<?php endforeach; ?>
 			<?php if ( class_exists( 'WooCommerce' ) && ! CMP_Consent_API::active() ) : ?>
 				<div class="notice notice-info"><p>
-					<?php esc_html_e( 'WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile WooCommerce nu află alegerea vizitatorului.', 'biscuitwp' ); ?>
+					<?php esc_html_e( 'WooCommerce este activ, fără WP Consent API. Ai nevoie de el doar dacă folosești extensii WooCommerce care citesc acordul. Cu cache de pagină, legătura BiscuitWP e mai sigură pentru sursa comenzilor.', 'biscuitwp' ); ?>
 					<?php if ( current_user_can( 'install_plugins' ) ) : ?>
 						<a href="<?php echo esc_url( admin_url( 'plugin-install.php?s=wp-consent-api&tab=search&type=term' ) ); ?>"><?php esc_html_e( 'Instalează WP Consent API', 'biscuitwp' ); ?></a>
 					<?php endif; ?>
@@ -288,7 +311,11 @@ class CMP_Services_Page {
 									<td class="cmp-svc-name"><strong><?php echo esc_html( $u_host ); ?></strong></td>
 									<td class="description"><?php echo esc_html( implode( ', ', $u_paths ) ); ?></td>
 									<td>
-										<button type="button" class="button" data-cmp-use-host="<?php echo esc_attr( $u_host ); ?>"><?php esc_html_e( 'Adaugă ca serviciu', 'biscuitwp' ); ?></button>
+										<?php if ( 'maps.googleapis.com' === $u_host ) : // the Maps API loader has its own switch: no form to fill ?>
+												<button type="button" class="button" data-cmp-use-host="<?php echo esc_attr( $u_host ); ?>" data-cmp-use-hint="<?php echo esc_attr( sprintf( /* translators: %s: name of the service */ __( 'Pentru harta din temă folosește comutatorul de la serviciul „%s”, din lista de servicii.', 'biscuitwp' ), isset( $by_id[ CMP_Services::GATE_ID ] ) ? $by_id[ CMP_Services::GATE_ID ]['name'] : CMP_Services::GATE_ID ) ); ?>"><?php esc_html_e( 'Adaugă ca serviciu', 'biscuitwp' ); ?></button>
+											<?php else : ?>
+												<button type="button" class="button" data-cmp-use-host="<?php echo esc_attr( $u_host ); ?>"><?php esc_html_e( 'Adaugă ca serviciu', 'biscuitwp' ); ?></button>
+											<?php endif; ?>
 										<button type="submit" class="button-link" name="host" value="<?php echo esc_attr( $u_host ); ?>" form="cmp-ignore-form"><?php esc_html_e( 'Ignoră', 'biscuitwp' ); ?></button>
 									</td>
 								</tr>
@@ -450,6 +477,19 @@ class CMP_Services_Page {
 		$locked = CMP_Services::advanced_now() ? CMP_Services::MEASUREMENT_IDS : array();
 		$clean  = CMP_Sanitizer::services( $raw, $ids, $cats, $can_script, $old, $lib_cats, $own, $lib_exempt, $locked );
 		update_option( 'cmp_services', $clean );
+		// Maps gate: the switch of the library row, posted with the form (a hidden 0, then the checkbox).
+		if ( array_key_exists( 'maps_gate', $raw ) ) {
+			$settings = CMP_Consent::get_settings();
+			$settings = is_array( $settings ) ? $settings : array();
+			$gate     = CMP_Sanitizer::maps_gate( $raw, $settings );
+			if ( ! array_key_exists( 'maps_gate', $settings ) || $gate !== (bool) $settings['maps_gate'] ) {
+				$settings['maps_gate'] = $gate;
+				update_option( 'cmp_settings', $settings );
+			}
+			if ( $gate ) {
+				delete_option( 'cmp_maps_notice' ); // decided: the note has nothing left to say
+			}
+		}
 		CMP_Scanner::mark_saved();
 		CMP_Scanner::enqueue_all(); // the next result follows the new services; the last one stays meanwhile
 		// The Cookie Policy page renders [cmp_cookie_table] live, so it is not
@@ -563,6 +603,52 @@ class CMP_Services_Page {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
 		self::mark_seen( true );
+		$back = wp_get_referer();
+		wp_safe_redirect( $back ? $back : admin_url() );
+		exit;
+	}
+
+	/** The one-time maps gate note is due now (flag, gate off, the cached scan found the loader). From the cached scan only: no HTTP request on an admin page. */
+	private static function maps_note_due() {
+		$flag = current_user_can( 'manage_options' ) ? get_option( 'cmp_maps_notice' ) : false;
+		if ( ! $flag ) {
+			return false;
+		}
+		$scan = get_transient( 'cmp_tracker_scan' );
+		if ( ! is_array( $scan ) || ! isset( $scan['services'] ) ) {
+			return false;
+		}
+		$found = isset( $scan['services']['found'] ) ? (array) $scan['services']['found'] : array_merge( (array) $scan['services']['raw'], (array) $scan['services']['blocked'] );
+		$s     = CMP_Consent::get_settings();
+		return CMP_Services::maps_notice_shown( $flag, is_array( $s ) ? $s : array(), $found );
+	}
+
+	/** What the maps gate note says (RO source; no em dash). */
+	private static function maps_note_text() {
+		return __( 'Harta Google din temă se încarcă înainte de acordul vizitatorului, ca până acum. O poți ține până la acord din „Servicii”, la rândul „Google Maps JavaScript API”.', 'biscuitwp' );
+	}
+
+	/** One-time note on existing installs: the map of the theme loads before consent until the gate is turned on. */
+	public static function maps_notice() {
+		if ( isset( $_GET['page'] ) && self::SLUG === $_GET['page'] ) {
+			return; // the Servicii screen prints it itself, then clears it
+		}
+		if ( ! self::maps_note_due() ) {
+			return;
+		}
+		$url     = admin_url( 'admin.php?page=' . self::SLUG );
+		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_maps_notice' ), 'cmp_dismiss_maps_notice' );
+		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'BiscuitWP:', 'biscuitwp' ) . '</strong> ' . esc_html( self::maps_note_text() )
+			. ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Deschide „Servicii”', 'biscuitwp' ) . '</a>'
+			. ' · <a href="' . esc_url( $dismiss ) . '">' . esc_html__( 'Închide', 'biscuitwp' ) . '</a></p></div>';
+	}
+
+	/** admin-post: the maps gate note is closed for good. */
+	public static function dismiss_maps() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_maps_notice' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
+		}
+		delete_option( 'cmp_maps_notice' );
 		$back = wp_get_referer();
 		wp_safe_redirect( $back ? $back : admin_url() );
 		exit;

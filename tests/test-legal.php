@@ -399,9 +399,9 @@ if ( method_exists( 'CMP_Legal_Page', 'measurement_vars' ) && method_exists( 'CM
 		'en' => 'Google Tag Manager can also load other tags that the website configures; those must respect your choice, and the website is responsible for configuring them.',
 	);
 	$b2_exempt = array(
-		'ro' => 'Se pot încărca fără acord serviciile pe care site-ul le-a marcat ca excepție, de exemplu unelte de statistică fără cookie-uri.',
-		'ru' => 'Без согласия могут загружаться сервисы, которые сайт отметил как исключение, например инструменты статистики без файлов cookie.',
-		'en' => 'Services the website has marked as exempt, for example cookieless statistics tools, may load without consent.',
+		'ro' => 'Se pot încărca fără acord serviciile pe care site-ul le-a marcat ca excepție, de exemplu unelte de statistică fără cookie-uri, sau pe care instrumentul nostru le arată ca pornite înainte de acord.',
+		'ru' => 'Без согласия могут загружаться сервисы, которые сайт отметил как исключение, например инструменты статистики без файлов cookie, или которые наш инструмент показывает как запускаемые до согласия.',
+		'en' => 'Services the website has marked as exempt, for example cookieless statistics tools, or that our tool shows as loading before consent, may load without consent.',
 	);
 	$b2_light_ex = array(
 		'ro' => '(de exemplu, pentru securitatea formularelor sau pentru statistici fără cookie-uri)',

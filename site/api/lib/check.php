@@ -1133,6 +1133,11 @@ function cmp_check_fix( string $key, string $lang, array $vars = array() ): arra
 			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'BiscuitWP recognises {name} and blocks it until consent, with no extra code.' ),
 			'ru' => array( 'Запускайте {name} только после того, как посетитель согласится в баннере.', 'BiscuitWP распознаёт {name} и блокирует его до согласия, без дополнительного кода.' ),
 		),
+		'tracker-maps'    => array(
+			'ro' => array( 'Încarcă harta doar după ce vizitatorul acceptă în banner.', 'BiscuitWP poate ține harta temei până la acord, dintr-un comutator din Servicii. Pe site-urile existente e oprit: pornește-l și probează harta.' ),
+			'en' => array( 'Load the map only after the visitor accepts in the banner.', 'BiscuitWP can hold the theme map until consent, with a switch in Services. On existing sites it is off: turn it on and test the map.' ),
+			'ru' => array( 'Загружайте карту только после того, как посетитель согласится в баннере.', 'BiscuitWP может держать карту темы до согласия: переключатель находится в разделе «Сервисы». На существующих сайтах он выключен: включите его и проверьте карту.' ),
+		),
 		'tracker-custom'  => array(
 			'ro' => array( 'Pornește {name} doar după ce vizitatorul acceptă în banner.', 'Adaugă {name} în BiscuitWP ca serviciu personalizat, cu domeniile lui, și pluginul îl blochează până la acord.' ),
 			'en' => array( 'Start {name} only after the visitor accepts in the banner.', 'Add {name} to BiscuitWP as a custom service, with its hosts, and the plugin blocks it until consent.' ),
@@ -1590,7 +1595,7 @@ function cmp_check_analyze( string $html, array $headers, string $url, array $se
 			return;
 		}
 		// The blocker rewrites <script> and <iframe> only: a pixel <img> is never blocked by the plugin.
-		$fix_key = $embed ? 'embed' : ( $pixel ? 'tracker-pixel' : ( isset( $lib_ids[ $s['id'] ] ) ? 'tracker' : 'tracker-custom' ) );
+		$fix_key = $embed ? 'embed' : ( $pixel ? 'tracker-pixel' : ( 'google-maps-js' === $s['id'] ? 'tracker-maps' : ( isset( $lib_ids[ $s['id'] ] ) ? 'tracker' : 'tracker-custom' ) ) );
 		$add(
 			$id,
 			'issue',

@@ -90,6 +90,7 @@ function cmp_un_reset( $full_flag = false ) {
 			'cmp_services_history'         => array( 'youtube' ),
 			'cmp_services_seen'            => 1,
 			'cmp_services_found'           => array( 'youtube' ),
+			'cmp_maps_notice'              => 1,
 			'cmp_unknown_hosts'            => array( 'known' => array( 'a.com' ) ),
 			'cmp_unknown_hosts_lock'       => 1,
 			'cmp_future_option'            => 'x',
@@ -120,6 +121,7 @@ cmp_assert( ! isset( $o['cmp_fonts_map'] ), 'off: cmp_fonts_map deleted' );
 cmp_assert( ! isset( $o['cmp_unknown_hosts'] ) && ! isset( $o['cmp_unknown_hosts_lock'] ), 'off: the new-domain state and its lock deleted' );
 cmp_assert( isset( $o['cmp_services'] ) && isset( $o['cmp_services_history'] ) && isset( $o['cmp_services_seen'] ), 'off: configured services, history and seen flag kept' );
 cmp_assert( ! isset( $o['cmp_services_found'] ), 'off: cmp_services_found (scan cache) deleted' );
+cmp_assert( isset( $o['cmp_maps_notice'] ), 'off: the one-time note flag is kept like the other settings' );
 cmp_assert( ! isset( $o['_transient_cmp_thumb_fail_1'] ) && ! isset( $o['_transient_timeout_cmp_thumb_fail_1'] ), 'off: thumb transients deleted' );
 cmp_assert( ! isset( $o['_transient_cmp_tracker_scan'] ), 'off: tracker scan transient deleted' );
 cmp_assert_eq( in_array( 'cmp_scan_daily', $GLOBALS['cmp_un']['cron'], true ), true, 'off: cron cleared' );
@@ -138,6 +140,7 @@ CMP_Uninstaller::cleanup_site( $db, true );
 $o = $GLOBALS['cmp_un']['options'];
 cmp_assert( ! isset( $o['cmp_settings'] ) && ! isset( $o['cmp_categories'] ) && ! isset( $o['cmp_db_version'] ), 'on: base options deleted' );
 cmp_assert( ! isset( $o['cmp_future_option'] ), 'on: any cmp_ option deleted' );
+cmp_assert( ! isset( $o['cmp_maps_notice'] ), 'on: the maps gate note flag deleted' );
 cmp_assert( ! isset( $o['cmp_scan_aggregate'] ) && ! isset( $o['cmp_fonts_map'] ), 'on: temporary data deleted' );
 cmp_assert( ! isset( $o['cmp_unknown_hosts'] ) && ! isset( $o['cmp_unknown_hosts_lock'] ), 'on: the new-domain state and its lock deleted' );
 cmp_assert( ! isset( $o['cmp_services'] ) && ! isset( $o['cmp_services_history'] ) && ! isset( $o['cmp_services_seen'] ) && ! isset( $o['cmp_services_found'] ), 'on: services, history, seen flag and scan cache deleted' );

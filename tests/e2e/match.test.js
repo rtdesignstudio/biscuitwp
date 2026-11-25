@@ -40,6 +40,12 @@ eq(sf('https://googleads.g.doubleclick.net/pagead/viewthroughconversion/1/'), 'g
 eq(sf('https://challenges.cloudflare.com/turnstile/v0/api.js'), 'cloudflare-turnstile', 'turnstile -> cloudflare-turnstile');
 eq(sf('https://www.cloudflare.com/x.js'), null, 'cloudflare.com elsewhere -> no service');
 
+// Maps gate: the Maps API loader of a theme (script) is its own service; iframe maps and other paths are not.
+eq(sf('https://maps.googleapis.com/maps/api/js?key=K&callback=initMap'), 'google-maps-js', 'Maps API loader -> google-maps-js');
+eq(sf('https://maps.googleapis.com/maps/api/js/e2e.js'), 'google-maps-js', 'a path under /maps/api/js -> google-maps-js');
+eq(sf('https://maps.googleapis.com/maps/api/staticmap?center=1'), null, 'another path of maps.googleapis.com -> no service');
+eq(sf('https://www.google.com/maps/embed?pb=1'), 'google-maps', 'the iframe map stays google-maps');
+
 // Look-alike hosts never match.
 eq(sf('https://notyoutube.com/embed/abc'), null, 'suffix without dot -> null');
 eq(sf('https://youtube.com.evil.example/x'), null, 'prefix look-alike -> null');
@@ -89,6 +95,16 @@ services.forEach(function (s) {
 eq(built.standalone.before, services.filter(function (s) { return s.category === 'necessary'; }).map(function (s) { return s.id; }), 'standalone: only necessary loads before consent');
 ok(built.standalone.html.indexOf('<script async src="https://www.google.com/recaptcha/') !== -1, 'reCAPTCHA left unmarked in standalone');
 eq(built.standalone.categories[0], 'necessary', 'standalone categories start with necessary');
+
+// Maps gate: WordPress gets the theme's raw tag; the plugin decides what loads (expect.before),
+// so the fixture never expects a plain block of it. Standalone marks it like any other script.
+var mapsSvc = services.filter(function (s) { return s.id === 'google-maps-js'; })[0];
+ok(!!mapsSvc && mapsSvc.category === 'marketing' && mapsSvc.type === 'script', 'google-maps-js is a marketing script in the library');
+var mapsParts = fixture.partsFor(mapsSvc || {});
+ok(/^https:\/\/maps\.googleapis\.com\/maps\/api\/js\?/.test(mapsParts.src), 'google-maps-js: the fixture tag is the theme form (query string)');
+ok(built.wp.head.indexOf('src="' + mapsParts.src.replace(/&/g, '&amp;')) !== -1 && built.wp.head.indexOf('data-e2e-service="google-maps-js"') !== -1, 'google-maps-js: printed raw in wp_head');
+ok(built.standalone.before.indexOf('google-maps-js') === -1, 'google-maps-js: not loaded before consent in standalone (it is marked there)');
+ok(built.standalone.html.indexOf('data-cmp-src="' + Buffer.from(mapsParts.src).toString('base64') + '"') !== -1, 'google-maps-js: marked in standalone, as the README says');
 
 // Other request channels: <img> pixel (JS + noscript), sendBeacon, fetch — attributed to their service.
 eq(sf('https://px.ads.linkedin.com/collect/?pid=0000000&fmt=gif&e2e=img'), 'linkedin-insight', 'img pixel -> linkedin-insight');

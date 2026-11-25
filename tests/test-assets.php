@@ -8,6 +8,7 @@ $pairs = array(
 	'assets/js/banner.js'  => 'assets/js/banner.min.js',
 	'assets/css/banner.css' => 'assets/css/banner.min.css',
 	'assets/js/banner-check.js' => 'assets/js/banner-check.min.js',
+	'assets/js/maps-gate.js' => 'assets/js/maps-gate.min.js',
 	'standalone/cmp.js'    => 'standalone/cmp.min.js',
 	'standalone/cmp.css'   => 'standalone/cmp.min.css',
 );

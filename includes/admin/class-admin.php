@@ -31,6 +31,8 @@ class CMP_Admin {
 		add_action( 'admin_post_cmp_unignore_domain', array( 'CMP_Services_Page', 'unignore_domain' ) );
 		add_action( 'admin_post_cmp_dismiss_services_notice', array( 'CMP_Services_Page', 'dismiss' ) );
 		add_action( 'admin_notices', array( 'CMP_Services_Page', 'update_notice' ) );
+		add_action( 'admin_post_cmp_dismiss_maps_notice', array( 'CMP_Services_Page', 'dismiss_maps' ) );
+		add_action( 'admin_notices', array( 'CMP_Services_Page', 'maps_notice' ) );
 		add_action( 'admin_notices', array( $this, 'library_notice' ) );
 
 		require_once CMP_PATH . 'includes/admin/class-check-page.php';

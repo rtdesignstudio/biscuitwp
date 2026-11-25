@@ -965,6 +965,36 @@
       "cookies": [],
       "transfer": "US",
       "privacy_url": "https://www.cloudflare.com/privacypolicy/"
+    },
+    {
+      "id": "google-maps-js",
+      "standalone": false,
+      "name": "Google Maps JavaScript API",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "maps.googleapis.com/maps/api/js"
+      ],
+      "inline": [],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "NID",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Stochează preferințele și personalizează reclamele.",
+            "ru": "Хранит предпочтения и персонализирует рекламу.",
+            "en": "Stores preferences and personalizes ads."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
     }
   ]
 }

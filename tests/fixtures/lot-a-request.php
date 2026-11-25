@@ -235,6 +235,9 @@ function wp_get_referer() {
 function wp_nonce_url( $u, $a ) {
 	return $u . '&_wpnonce=x';
 }
+function wp_parse_url( $url, $component = -1 ) {
+	return parse_url( $url, $component );
+}
 function is_admin() {
 	return true;
 }
@@ -379,8 +382,46 @@ try {
 					if ( PHP_VERSION_ID < 80100 ) {
 						$m->setAccessible( true );
 					}
-					$m->invoke( null, $s, array( 'necessary' => 'Necesare', 'statistics' => 'Statistici', 'marketing' => 'Marketing' ) );
+					$m->invoke( null, $s, array( 'necessary' => 'Necesare', 'statistics' => 'Statistici', 'marketing' => 'Marketing' ), ! empty( $in['found'] ) );
 				}
+			}
+			break;
+		case 'gate_state': // Maps gate: the active service and the re-consent map of the front end
+			$svc = array();
+			foreach ( CMP_Services::active() as $s ) {
+				if ( 'google-maps-js' === $s['id'] ) {
+					$svc = array_intersect_key( $s, array_flip( array( 'exempt', 'gate_off', 'admin_exempt', 'mode_exempt', 'own_exempt' ) ) );
+				}
+			}
+			$result = array( 'svc' => $svc, 'by_cat' => CMP_Services::current_svc_by_cat( CMP_Consent::get_categories() ) );
+			break;
+		case 'hints': // Maps gate: the resource hints WordPress prints
+			$result = CMP_Blocker::filter_hints( array( 'https://maps.googleapis.com', array( 'href' => '//maps.gstatic.com' ), 'https://www.googletagmanager.com' ), 'preconnect' );
+			break;
+		case 'apply': // Maps gate: a whole page through the output buffer (get: cmp_check = an isolated admin session)
+			require CMP_PATH . 'includes/modules/class-lang.php';
+			if ( isset( $in['get']['cmp_check'] ) ) {
+				$modes = new ReflectionProperty( 'CMP_Scanner', 'modes' );
+				$modes->setAccessible( true );
+				$modes->setValue( null, array( 'cmp_check' => true ) );
+			}
+			$result = CMP_Blocker::apply( $in['page'] );
+			break;
+		case 'gate_save': // Maps gate: the Servicii save with the switch
+			$_POST['cmp_services'] = $in['post'];
+			CMP_Services_Page::save();
+			break;
+		case 'maps_notice': // Maps gate: the one-time note
+			$GLOBALS['w']['transients']['cmp_tracker_scan'] = isset( $in['scan'] ) ? $in['scan'] : false;
+			$_GET = $in['get'];
+			if ( 'services' === $in['page'] ) {
+				$_GET['page'] = 'cmp-services';
+				CMP_Services_Page::maps_notice();
+				CMP_Services_Page::render();
+			} elseif ( 'dismiss' === $in['page'] ) {
+				CMP_Services_Page::dismiss_maps();
+			} else {
+				CMP_Services_Page::maps_notice();
 			}
 			break;
 	}

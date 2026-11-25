@@ -12,6 +12,9 @@
  * "necessary" or `exempt` (CMP_Blocker::rewritable(); in Advanced, GA4/GTM get
  * exempt from the mode). Required non-necessary categories still wait for the
  * visitor's decision in banner.js, so they are not listed.
+ * The Maps API loader of a theme (google-maps-js) follows the stored maps_gate
+ * (apply_gate()): off = it loads before consent; on = 'gated' names it: it waits for
+ * consent and comes back on the next page, not on the one where it was given.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,7 +40,8 @@ add_action(
 			}
 		}
 		$stored = get_option( 'cmp_services', array() );
-		$all    = CMP_Services::all( CMP_Services::library(), is_array( $stored ) ? $stored : array(), $slugs );
+		$gate   = CMP_Services::gate_now();
+		$all    = CMP_Services::apply_gate( CMP_Services::all( CMP_Services::library(), is_array( $stored ) ? $stored : array(), $slugs ), $gate );
 		$before = function ( array $services ) {
 			$out = array();
 			foreach ( $services as $s ) {
@@ -63,6 +67,7 @@ add_action(
 		wp_send_json(
 			array(
 				'before'         => $before( $all ),
+				'gated'          => $gate ? array( CMP_Services::GATE_ID ) : array(),
 				'advancedBefore' => $before( CMP_Services::apply_measurement( $all, true ) ),
 				'required'       => CMP_Services::required_slugs( (array) CMP_Consent::get_categories() ),
 				'library'        => $library,

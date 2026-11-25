@@ -366,7 +366,7 @@ This ensures the standalone bundle always matches the plugin's visual design.
 To regenerate the minified files (`cmp.min.js`, `cmp.min.css`, and the plugin's `.min` assets) run `bash bin/build-assets.sh` from the repo root; it calls `build.sh` first.
 It also produces, from `data/services.json`:
 
-- `services.json`, an identical copy of the library;
+- `services.json`, the library without the services marked `"standalone": false` (the Google Maps API loader: a plain marker breaks a theme that uses it);
 - `services.js`, containing `window.CMP_SERVICES = <json>;`, which the marker
   generator loads with a plain `<script>` so it works when opened from `file://`
   (where fetching a local JSON file fails).

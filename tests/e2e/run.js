@@ -31,7 +31,7 @@ const LOCAL_HOSTS = ['127.0.0.1', 'localhost', '[::1]', '::1'];
  * standalone. A wrong `exempt` / `category` in the library or in CMP_Services
  * would otherwise make the test agree with the bug.
  */
-const NEVER_BEFORE = ['meta-pixel', 'tiktok-pixel', 'linkedin-insight', 'clarity', 'hotjar', 'youtube', 'vimeo', 'google-maps', 'hubspot', 'tawk-to', 'crisp'];
+const NEVER_BEFORE = ['meta-pixel', 'tiktok-pixel', 'linkedin-insight', 'clarity', 'hotjar', 'youtube', 'vimeo', 'google-maps', 'google-maps-js', 'hubspot', 'tawk-to', 'crisp'];
 /** The only services the Advanced mode may add on top of Strict. */
 const ADVANCED_EXTRA = ['google-analytics', 'google-tag-manager'];
 
@@ -245,8 +245,11 @@ async function noBackdrop(browser, { url, host }) {
 	}
 }
 
-/** Per-service verdict for one scenario. */
-function judge(services, allowed, action, external, svcFor) {
+/**
+ * Per-service verdict for one scenario. gated: services behind a gate (the Maps API
+ * loader): after "accept" they come back on the next page, never on this one.
+ */
+function judge(services, allowed, action, external, svcFor, gated) {
 	const rows = [];
 	// The fixture page holds only library fragments, so an external request the
 	// matcher cannot attribute is a leak whenever nothing may load: before the
@@ -277,6 +280,13 @@ function judge(services, allowed, action, external, svcFor) {
 		} else if (before.length) {
 			status = 'LEAK';
 			url = before[0].url;
+		} else if (action === 'accept' && (gated || []).indexOf(s.id) !== -1) {
+			if (after.length) {
+				status = 'LEAK';
+				url = after[0].url + ' (gated: only on the next page)';
+			} else {
+				url = '(gated: on the next page)';
+			}
 		} else if (action === 'accept') {
 			if (!after.length) {
 				status = 'MISSING';
@@ -409,7 +419,7 @@ async function main() {
 			let res;
 			try {
 				const external = await visit(browser, sc);
-				res = sc.control ? judgeControl(services, external, svcFor, built.urls) : judge(services, sc.allowed, sc.action, external, svcFor);
+				res = sc.control ? judgeControl(services, external, svcFor, built.urls) : judge(services, sc.allowed, sc.action, external, svcFor, sc.name.indexOf('wp-') === 0 ? expect.gated : []);
 			} catch (e) {
 				harness.push(sc.name + ': ' + e.message.split('\n')[0]);
 				continue;

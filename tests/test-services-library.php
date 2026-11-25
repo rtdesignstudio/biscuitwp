@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/modules/class-blocker.php';
 
-// The bundled library: 20 services, valid, with the vendors' official loaders blocked by category.
+// The bundled library: 21 services, valid, with the vendors' official loaders blocked by category.
 
 $cmp_all = CMP_Services::library();
-cmp_assert_eq( count( $cmp_all ), 20, 'library lists 20 services' );
+cmp_assert_eq( count( $cmp_all ), 21, 'library lists 21 services' );
 $cmp_file = CMP_Services::load_file( __DIR__ . '/../data/services.json' );
 cmp_assert_eq( $cmp_file['errors'], array(), 'library passes validate()' );
 

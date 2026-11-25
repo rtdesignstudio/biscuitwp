@@ -68,6 +68,9 @@ class CMP_Installer {
 			// before it has no key and stays off (CMP_Alerts::enabled()).
 			'alert_email_on'   => true,
 			'alert_email'      => '',
+			// Maps gate: on for a new install; an install updated from before it has no
+			// key and stays off (CMP_Services::gate_on()) until the owner turns it on.
+			'maps_gate'        => true,
 		);
 	}
 

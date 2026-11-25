@@ -131,12 +131,28 @@ class CMP_Sanitizer {
 			'alert_email'      => self::alert_email( $input, $old ),
 			'texts'            => $texts,
 		);
+		// Maps gate: switched on the Servicii screen, so this form does not post it: the stored value stays.
+		if ( array_key_exists( 'maps_gate', $input ) || array_key_exists( 'maps_gate', $old ) ) {
+			$out['maps_gate'] = self::maps_gate( $input, $old );
+		}
 		// B6: the appearance array, only when posted (the "Aspect" screen). Without it the
 		// old keys above stay the source (CMP_Appearance::from_settings migrates lazily).
 		if ( isset( $input['appearance'] ) && is_array( $input['appearance'] ) ) {
 			$out['appearance'] = CMP_Appearance::sanitize( $input['appearance'], CMP_Appearance::from_settings( $old ) );
 		}
 		return $out;
+	}
+
+	/**
+	 * Pure: the maps gate switch. Posted (the Servicii form sends a hidden 0 before
+	 * the checkbox): exactly a yes turns it on, anything else off. Not posted: the
+	 * stored value; nothing stored: off.
+	 */
+	public static function maps_gate( array $input, array $old ) {
+		if ( array_key_exists( 'maps_gate', $input ) ) {
+			return self::flag( $input['maps_gate'] );
+		}
+		return ! empty( $old['maps_gate'] );
 	}
 
 	/** Old keys edited on the "Aspect" screen since B6 (still read while 'appearance' is missing). */

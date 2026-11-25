@@ -22,7 +22,19 @@ class CMP_Services {
 	const YIELD = array(
 		'google-adsense'       => 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
 		'cloudflare-turnstile' => 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+		'google-maps-js'       => 'https://maps.googleapis.com/maps/api/js',
 	);
+
+	/**
+	 * The Maps API loader of a theme (maps gate). Not blocked like the others: a plain
+	 * block breaks the theme (google is not defined). The setting maps_gate decides:
+	 * off = its tag stays and it loads before consent, so it is exempt (apply_gate());
+	 * on = the gate takes its place (CMP_Maps_Gate).
+	 */
+	const GATE_ID = 'google-maps-js';
+
+	/** The version whose update asks the owner once about the gate (existing installs only). */
+	const GATE_SINCE = '1.2.0';
 
 	/** Services the Advanced measurement mode always loads (Consent Mode on "denied"). */
 	const MEASUREMENT_IDS = array( 'google-analytics', 'google-tag-manager' );
@@ -559,6 +571,65 @@ class CMP_Services {
 		return ! empty( $s['mode_exempt'] ) ? ! empty( $s['own_exempt'] ) : ! empty( $s['exempt'] );
 	}
 
+	/**
+	 * Pure: is the maps gate on? The setting maps_gate (absent = off) and script
+	 * blocking on: Light always blocks, Pro follows block_scripts (as
+	 * CMP_Blocker::blocks_trackers()). Without blocking there is nothing to gate.
+	 */
+	public static function gate_on( array $settings ) {
+		$mode = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+		return ! empty( $settings['maps_gate'] ) && ( 'light' === $mode || ! empty( $settings['block_scripts'] ) );
+	}
+
+	/**
+	 * Pure: with the gate off the Maps API loader loads before consent, as it always
+	 * did, so its service is exempt: 'exempt' for the blocker and the scan, 'gate_off'
+	 * to tell why. Not through own_exempt / mode_exempt (consent_exempt() then reads
+	 * the flag as the admin's "nu bloca"), so it stays out of re-consent, the update
+	 * notes and the "tracking without consent" list. 'admin_exempt' keeps the admin's
+	 * own "nu bloca" apart, for the Servicii row. Gate on: the service as it is.
+	 */
+	public static function apply_gate( array $services, $gate_on ) {
+		if ( $gate_on ) {
+			return $services;
+		}
+		foreach ( $services as $i => $s ) {
+			if ( is_array( $s ) && isset( $s['id'] ) && self::GATE_ID === $s['id'] ) {
+				$services[ $i ]['admin_exempt'] = ! empty( $s['exempt'] );
+				$services[ $i ]['exempt']       = true;
+				$services[ $i ]['gate_off']     = true;
+			}
+		}
+		return $services;
+	}
+
+	/** WP: is the maps gate on for the stored settings? False without WordPress. */
+	public static function gate_now() {
+		if ( ! function_exists( 'get_option' ) ) {
+			return false;
+		}
+		$settings = get_option( 'cmp_settings', array() );
+		return self::gate_on( is_array( $settings ) ? $settings : array() );
+	}
+
+	/** Pure: does the one-time note about the gate belong to an update from $old (false = a fresh install: never)? */
+	public static function maps_notice_due( $old ) {
+		return false !== $old && version_compare( (string) $old, self::GATE_SINCE, '<' );
+	}
+
+	/**
+	 * Pure: is the one-time note shown now? The flag is set, the scan found the Maps
+	 * API loader, and it still loads before consent with a gate that could be on:
+	 * the setting is off while blocking is on (with blocking off nothing is gated).
+	 */
+	public static function maps_notice_shown( $flag, array $settings, array $found_ids ) {
+		if ( ! $flag || ! in_array( self::GATE_ID, $found_ids, true ) || ! empty( $settings['maps_gate'] ) ) {
+			return false;
+		}
+		$mode = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+		return 'light' === $mode || ! empty( $settings['block_scripts'] );
+	}
+
 	/** Pure: the GA/GTM ids the admin marked "nu bloca" (they stay unblocked in Strict too). */
 	public static function admin_exempt_measurement( array $services ) {
 		$out = array();
@@ -580,7 +651,7 @@ class CMP_Services {
 		return self::measurement_active( is_array( $settings ) ? $settings : array() );
 	}
 
-	/** WordPress wrapper: library + cmp_services option + current category slugs + measurement mode (memoised per request). */
+	/** WordPress wrapper: library + cmp_services option + current category slugs + measurement mode + maps gate (memoised per request). */
 	public static function active() {
 		if ( null !== self::$active ) {
 			return self::$active;
@@ -594,7 +665,7 @@ class CMP_Services {
 				}
 			}
 		}
-		self::$active = self::apply_measurement( self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs ), self::advanced_now() );
+		self::$active = self::apply_gate( self::apply_measurement( self::all( self::library(), is_array( $stored ) ? $stored : array(), $slugs ), self::advanced_now() ), self::gate_now() );
 		return self::$active;
 	}
 

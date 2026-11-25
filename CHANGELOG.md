@@ -45,6 +45,18 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
 - Aspect: export și import. Exportul descarcă aspectul salvat într-un fișier
   .json; importul îl încarcă în formular, fără să salveze nimic. Cu WPML sau
   Polylang, textele bannerului nu intră în fișier.
+- Harta Google pornită de temă (Maps JavaScript API) poate aștepta acordul,
+  dintr-un comutator din Servicii. Oprit pe site-urile existente, unde nu se
+  schimbă nimic, și pornit la instalările noi. Fără acord, în locul hărții apare
+  un chenar cu „Încarcă harta”, iar codul temei merge mai departe fără erori.
+  Probează harta după pornire și golește cache-ul paginilor.
+- Linkurile preload, prefetch, modulepreload și prerender spre ce e blocat se
+  scot din pagină, ca dns-prefetch și preconnect. Foile de stil rămân.
+- O pagină cu un script foarte lung scris în ea (peste 1 MB) nu mai iese goală.
+- Nota despre WP Consent API spune când ai nevoie de el.
+- Politicile generate spun că, înainte de acord, pot porni și serviciile pe care
+  instrumentul le arată așa (de exemplu harta, cât comutatorul e oprit).
+  Regenerează paginile legale dacă vrei textul nou.
 
 ## 1.1.1 – 2026-11-24
 
