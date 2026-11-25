@@ -866,20 +866,20 @@ foreach ( array( 'confidentialitate/index.html' => array( 'Verifică-ți site-ul
 }
 
 // ---- rt.md elements: favicon, RT symbol (rt.md .sym), phone menu and motion (site.js) ------------
-$cmp_site_fav   = '/assets/favicon/rt-favicon-512.png';
+$cmp_site_fav   = '/assets/favicon/biscuit-192.png';
 $cmp_site_sjs   = '<script src="/assets/site.js" defer></script>';
 $cmp_site_badge = '<svg class="sym" viewBox="168.695 162.277 46.734 60.156" aria-hidden="true" focusable="false"><path fill="currentColor" d="M 208.25 177.652344 ';
 foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'demo/index.html', 'demo/en/index.html', 'demo/embed/index.html', 'demo/en/embed/index.html' ) ) as $page ) {
 	$html = $cmp_site_read( $page );
 	$bare = false !== strpos( $page, '/embed/' );
-	cmp_assert( false !== strpos( $html, '<link rel="icon" type="image/png" sizes="512x512" href="' . $cmp_site_fav . '">' ), "{$page}: links the favicon" );
-	cmp_assert( false !== strpos( $html, '<link rel="apple-touch-icon" href="' . $cmp_site_fav . '">' ), "{$page}: links the apple-touch-icon" );
+	cmp_assert( false !== strpos( $html, '<link rel="icon" href="/favicon.ico" sizes="32x32">' . "\n" . '<link rel="icon" type="image/png" sizes="192x192" href="' . $cmp_site_fav . '">' ) && false !== strpos( $html, '<link rel="manifest" href="/site.webmanifest">' ), "{$page}: links the favicon" );
+	cmp_assert( false !== strpos( $html, '<link rel="apple-touch-icon" href="/assets/favicon/biscuit-180.png">' ), "{$page}: links the apple-touch-icon" );
 	if ( $bare ) {
 		cmp_assert( false === strpos( $html, '/assets/site.js' ), "{$page}: a bare page does not load site.js" );
 		continue;
 	}
 	cmp_assert_eq( substr_count( $html, $cmp_site_sjs ), 1, "{$page}: loads /assets/site.js once, deferred" );
-	cmp_assert( 1 === preg_match( '#<header class="site">(.*?)</header>#s', $html, $hm ) && false !== strpos( $hm[1], '<a class="logo" href="https://rt.md/" aria-label="RT Design Studio">' . $cmp_site_badge ), "{$page}: header starts with the RT symbol, linking to rt.md" );
+	cmp_assert( 1 === preg_match( '#<header class="site">(.*?)</header>#s', $html, $hm ) && 1 === preg_match( '#^\s*<div class="wrap">\s*<p class="brand"><a href="/(?:en/)?"[^>]*><img src="/assets/icon/biscuit-88\.webp" width="40" height="40" alt="">BiscuitWP</a></p>#', $hm[1] ) && false === strpos( $hm[1], 'rt.md/"' ), "{$page}: header starts with the biscuit and the name (the RT symbol is in the footer)" );
 	cmp_assert( isset( $hm[1] ) && false === strpos( $hm[1], 'class="badge"' ) && false === strpos( $hm[1], 'xmlns' ), "{$page}: header uses the current symbol, not the old framed badge" );
 	cmp_assert( isset( $hm[1] ) && false !== strpos( $hm[1], '>BiscuitWP</a>' ) && 1 === preg_match( '#<nav\b#', $hm[1] ), "{$page}: header keeps the product name and the inline nav" );
 	cmp_assert( 1 === preg_match( '#<footer class="site">(.*?)</footer>#s', $html, $fm ) && 1 === preg_match( '#<a href="https://rt\.md/"[^>]*>' . preg_quote( $cmp_site_badge, '#' ) . '.*?</svg>RT Design Studio</a>#s', $fm[1] ), "{$page}: footer shows the RT symbol next to RT Design Studio" );
@@ -887,7 +887,7 @@ foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'demo/index.html', 
 foreach ( array( 'site' => $cmp_site_root . '/site', 'out' => $cmp_site_out1 ) as $label => $dir ) {
 	$png = (string) @file_get_contents( $dir . $cmp_site_fav );
 	$sz  = '' === $png ? false : @getimagesizefromstring( $png );
-	cmp_assert( false !== $sz && 512 === $sz[0] && 512 === $sz[1] && IMAGETYPE_PNG === $sz[2], "{$label}{$cmp_site_fav}: a 512x512 PNG" );
+	cmp_assert( false !== $sz && 192 === $sz[0] && 192 === $sz[1] && IMAGETYPE_PNG === $sz[2], "{$label}{$cmp_site_fav}: a 192x192 PNG" );
 }
 $cmp_site_site_js = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
 cmp_assert( '' !== $cmp_site_site_js && $cmp_site_site_js === $cmp_site_read( 'assets/site.js' ), 'build-site: copies assets/site.js as is' );

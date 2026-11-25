@@ -33,6 +33,41 @@
 		});
 	});
 
+	/* The biscuit of the hero: the shield in front, WP on the back, in layers (depth as a share of the width), and
+	   two turns when it comes on screen or under the pointer. Without this, a still picture. */
+	(function () {
+		var box = doc.querySelector('[data-coin]');
+		var pic = box && box.querySelector('img');
+		if (!pic || !window.IntersectionObserver) { return; }
+		var N = 9, DEPTH = 0.055;
+		var coin = doc.createElement('div');
+		coin.className = 'coin-in';
+		var backSrc = box.getAttribute('data-back');
+		var layer = function (z, cls, back) {
+			var im = pic.cloneNode(false);
+			if (backSrc && z < 0 || backSrc && back) { im.src = backSrc; }
+			im.className = cls;
+			im.style.transform = (back ? 'rotateY(180deg) ' : '') + 'translateZ(' + z.toFixed(2) + 'px)';
+			coin.appendChild(im);
+		};
+		var build = function () {
+			var t = box.offsetWidth * DEPTH / 2;
+			while (coin.firstChild) { coin.removeChild(coin.firstChild); }
+			for (var i = 0; i < N; i++) { layer((-t + 2 * t * i / (N - 1)) * 0.94, 'side', false); }
+			layer(t, 'face', true);
+			layer(t, 'face', false);
+		};
+		build();
+		box.replaceChild(coin, pic);
+		window.addEventListener('resize', build);
+		var spin = function () { box.classList.add('spin'); };
+		coin.addEventListener('animationend', function () { box.classList.remove('spin'); });
+		box.addEventListener('pointerenter', spin);
+		new IntersectionObserver(function (es) {
+			es.forEach(function (e) { if (e.isIntersecting) { spin(); } else { box.classList.remove('spin'); } });
+		}, { threshold: 0.4 }).observe(box);
+	})();
+
 	/* A link to a folded block (<details id>, e.g. #cum-verifici) opens it, on click and
 	   when the page loads with that address. */
 	function openFolded(hash) {

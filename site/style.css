@@ -89,13 +89,13 @@ h1, h2, h3, h4 { font-weight: 600; color: var(--ink); text-wrap: balance; }
 p, li, .lead { text-wrap: pretty; }
 
 /* ---- Header: name left, small muted nav right (rt.md .top / .nav) ---------------- */
-/* Left: the RT symbol (rt.md .logo .sym after its intro: 40px high in a 44px box, at
-   the page padding; 30px on phones), linking to rt.md, then the product name. */
+/* Left: the biscuit (40px in a 44px row, smaller on phones and once scrolled) and the name.
+   The RT symbol stays in the footer (#755). */
 header.site .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 28px; padding-top: var(--pad); padding-bottom: calc(var(--pad) * .6); }
-.logo { display: flex; flex: none; align-items: center; height: 44px; margin-right: -8px; color: var(--ink); }
-.logo .sym { display: block; height: 40px; width: auto; }
 .brand { margin: 0 auto 0 0; font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
-.brand a { text-decoration: none; }
+.brand a { display: flex; align-items: center; gap: 10px; height: 44px; text-decoration: none; }
+.brand img { display: block; width: 40px; height: 40px; transition: transform .9s var(--ease); }
+.brand a:hover img, .brand a:focus-visible img { transform: perspective(400px) rotateY(360deg); }
 header.site nav ul { display: flex; flex-wrap: wrap; gap: 0 28px; margin: 0; padding: 0; list-style: none; }
 header.site nav li { margin: 0; }
 header.site nav a, .lang a { display: inline-block; padding: 10px 0; font-size: 15px; color: var(--mute-text); text-decoration: none; transition: color .3s; }
@@ -119,8 +119,8 @@ header.site nav a[aria-current="page"] { color: var(--ink); }
 }
 .js header.site.scrolled::before { opacity: 1; }
 .js header.site.scrolled .wrap { padding-top: 14px; padding-bottom: 66px; }
-.js .logo .sym { transition: height .5s var(--ease); }
-.js header.site.scrolled .logo .sym { height: 30px; }
+.js .brand img { transition: transform .9s var(--ease), width .5s var(--ease), height .5s var(--ease); }
+.js header.site.scrolled .brand img { width: 30px; height: 30px; }
 /* The content starts where the header used to end; anchors land under it. */
 .js body { padding-top: var(--head); }
 .js main [id] { scroll-margin-top: var(--anchor); }
@@ -216,6 +216,17 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .hero-cta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
 .hero-cta .actions { margin: 0; }
 .hero-cta .alt { margin: 0; color: var(--mute-text); }
+/* The biscuit (#755): layers of the same picture along the Z axis give it an edge
+   (assets/site.js); it turns twice when it comes on screen, under 5 seconds, then rests. */
+.hero-demo { position: relative; }
+.coin { position: absolute; top: -78px; right: -30px; width: 132px; height: 132px; perspective: 700px; z-index: 1; }
+.coin > img, .coin-in, .coin-in img { display: block; width: 100%; height: 100%; }
+.coin-in { position: relative; transform-style: preserve-3d; transform: rotateX(8deg) rotateY(-24deg); }
+.coin-in img { position: absolute; inset: 0; }
+.coin-in .side { filter: brightness(.72) saturate(1.1); }
+.coin-in .face { backface-visibility: hidden; }
+.coin.spin .coin-in { animation: cmp-coin 2.3s cubic-bezier(.55, .05, .35, 1) 2; }
+@keyframes cmp-coin { from { transform: rotateX(8deg) rotateY(-24deg); } to { transform: rotateX(8deg) rotateY(336deg); } }
 /* The product picture: a small banner and the same requests before and after consent. */
 .hero-demo { margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 2px; background: var(--bg); }
 .hero-demo figcaption { margin: 0 0 14px; font-size: 13px; letter-spacing: .02em; color: var(--mute-text); }
@@ -235,7 +246,8 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .hd-req .on span::before { border-radius: 50%; background: var(--ink); }
 @media (max-width: 1100px) {
 	.hero .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "eye" "title" "check" "urgent" "foot" "demo" "facts"; }
-	.hero-demo { max-width: 520px; margin-top: clamp(40px, 6vh, 64px); }
+	.hero-demo { max-width: 520px; margin-top: clamp(72px, 9vh, 96px); }
+	.coin { top: -62px; right: 12px; width: 104px; height: 104px; }
 	.hero-foot { flex-direction: column; align-items: flex-start; }
 	.hero-cta { align-items: flex-start; }
 }
@@ -556,13 +568,12 @@ body.locked header.site { z-index: 30; }
 	header.site .wrap { gap: 0 20px; padding-top: calc(var(--pad) - 9px); }
 	.js header.site .wrap { padding-bottom: 66px; }
 	.js header.site.scrolled .wrap { padding-top: calc(var(--pad) - 9px); padding-bottom: 58px; }
-	.js header.site.scrolled .logo .sym { height: 24px; }
-	.logo { height: 38px; margin-right: -6px; }
-	.logo .sym { height: 30px; }
+	.brand a { height: 38px; gap: 8px; }
+	.brand img { width: 32px; height: 32px; }
+	.js header.site.scrolled .brand img { width: 26px; height: 26px; }
 	header.site nav { order: 3; width: 100%; }
 	/* With JavaScript the nav moves into the menu sheet; without it, it stays inline. */
 	.js header.site .wrap { flex-wrap: nowrap; gap: 0 14px; }
-	.js .logo { margin-right: 0; }
 	.js .brand { min-width: 0; }
 	.js header.site nav { display: none; }
 	.menu-btn { display: block; }
@@ -619,11 +630,13 @@ body.locked header.site { z-index: 30; }
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
 	.run-steps .run-step, .run-steps .run-step::after { animation: none; transition: none; }
+	.brand img { transform: none !important; }
+	.coin.spin .coin-in { animation: none; }
 	*, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 	.js .fd { opacity: 1; filter: none; }
 	.js .k { opacity: 1; filter: none; font-variation-settings: "wght" var(--to, 600); }
 	.js .big .row > span { opacity: 1; filter: none; animation: none; font-variation-settings: "wght" 600; }
-	.js header.site .wrap, .js header.site::before, .js .logo .sym { transition: none; }
+	.js header.site .wrap, .js header.site::before, .js .brand img { transition: none; }
 	.sheet a { opacity: 1; filter: none; }
 	.sheet-main a { font-variation-settings: "wght" 600; }
 }
