@@ -17,6 +17,7 @@ class CMP_Admin {
 
 		require_once CMP_PATH . 'includes/admin/class-appearance-page.php';
 		add_action( 'admin_post_cmp_save_appearance', array( 'CMP_Appearance_Page', 'save' ) );
+		add_action( 'admin_post_cmp_export_appearance', array( 'CMP_Appearance_Page', 'export' ) );
 		add_action( 'cmp_appearance_actions', array( 'CMP_Appearance_Page', 'render_preview_button' ) );
 
 		require_once CMP_PATH . 'includes/admin/class-categories-page.php';
@@ -26,6 +27,8 @@ class CMP_Admin {
 		add_action( 'admin_post_cmp_save_services', array( 'CMP_Services_Page', 'save' ) );
 		add_action( 'admin_post_cmp_rescan_services', array( 'CMP_Services_Page', 'rescan' ) );
 		add_action( 'admin_post_cmp_reset_seen', array( 'CMP_Services_Page', 'reset_seen' ) );
+		add_action( 'admin_post_cmp_ignore_domain', array( 'CMP_Services_Page', 'ignore_domain' ) );
+		add_action( 'admin_post_cmp_unignore_domain', array( 'CMP_Services_Page', 'unignore_domain' ) );
 		add_action( 'admin_post_cmp_dismiss_services_notice', array( 'CMP_Services_Page', 'dismiss' ) );
 		add_action( 'admin_notices', array( 'CMP_Services_Page', 'update_notice' ) );
 		add_action( 'admin_notices', array( $this, 'library_notice' ) );

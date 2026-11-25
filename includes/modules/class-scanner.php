@@ -368,6 +368,142 @@ class CMP_Scanner {
 		return $out;
 	}
 
+	/** At most this many unknown hosts are stored per page (and per path in the aggregate). */
+	const UNKNOWN_MAX_HOSTS = 200;
+
+	/** Pure: a host name worth reporting (letters, digits, dots, hyphens; a dot; at most 100 characters). */
+	private static function reportable_host( $host ) {
+		return strlen( $host ) <= 100 && 1 === preg_match( '/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/', $host ) && false !== strpos( $host, '.' ) && false === strpos( $host, '..' );
+	}
+
+	/** Pure: does a tag's attribute string carry a valid data-cmp-category (an admin decision) or one of our own markers? */
+	private static function decided_tag( $attrs ) {
+		if ( 1 === preg_match( '/(?:^|[\s"\'\/])(?:data-cmp-keep|data-cmp-enc|data-cmp-block)(?=[\s=\/>]|$)/i', $attrs ) ) {
+			return true; // ours: kept on purpose, or already rewritten by the blocker (known by definition)
+		}
+		if ( 1 === preg_match( '/(?:^|[\s"\'\/])data-cmp-category\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>\/]+))/i', $attrs, $m ) ) {
+			$v = '';
+			for ( $i = 1; $i <= 3; $i++ ) {
+				if ( isset( $m[ $i ] ) && '' !== $m[ $i ] ) {
+					$v = $m[ $i ];
+					break;
+				}
+			}
+			return 1 === preg_match( '/^[a-z0-9_-]{1,40}$/', strtolower( trim( html_entity_decode( $v, ENT_QUOTES ) ) ) );
+		}
+		return false;
+	}
+
+	/** Pure: is this host no news: the site's own, an IP_HOSTS resource or part of a service? (Used to drop what a service now covers.) */
+	public static function host_known( $host, array $services, $home ) {
+		$host = strtolower( trim( (string) $host ) );
+		if ( '' === $host ) {
+			return true;
+		}
+		$url = 'https://' . $host . '/';
+		return self::is_own_host( $url, $home ) || '' !== self::ip_type( $host ) || null !== self::host_service( $url, $services );
+	}
+
+	/**
+	 * Pure: the attribute strings of the <script> and <iframe> elements of a page,
+	 * in page order, read left to right: a comment, <noscript>, <template>, <style>,
+	 * <textarea>, <title> or script is passed over whole, so what is written inside one (markup in a script
+	 * string, a script tag in a comment) is never an element and never hides a
+	 * later tag. One that is not closed hides nothing. Null when PCRE gave up.
+	 */
+	private static function element_attrs( $html ) {
+		$out  = array();
+		$at   = 0;
+		$open = array(); // tags never closed from here on: not searched again
+		while ( true ) {
+			$hit = preg_match( '#<!--|<(noscript|template|style|textarea|title|script|iframe)(?=[\s/>])([^>]*)>#i', $html, $m, PREG_OFFSET_CAPTURE, $at );
+			if ( false === $hit ) {
+				return null;
+			}
+			if ( 1 !== $hit ) {
+				return $out;
+			}
+			$at  = $m[0][1] + strlen( $m[0][0] );
+			$tag = isset( $m[1] ) ? strtolower( $m[1][0] ) : '';
+			if ( 'script' === $tag || 'iframe' === $tag ) {
+				$out[] = $m[2][0];
+			}
+			// "<title/>" and "<style/>" inside an <svg> are empty.
+			if ( 'iframe' === $tag || isset( $open[ $tag ] ) || ( in_array( $tag, array( 'title', 'style' ), true ) && '/' === substr( $m[2][0], -1 ) ) ) {
+				continue;
+			}
+			// "<!-->" and "<!--->" are whole comments: their end may overlap the start.
+			$end = '' === $tag
+				? preg_match( '#--!?>#', $html, $e, PREG_OFFSET_CAPTURE, $at - 2 )
+				: preg_match( '#</' . $tag . '(?=[\s/>])[^>]*>#i', $html, $e, PREG_OFFSET_CAPTURE, $at );
+			if ( false === $end ) {
+				return null;
+			}
+			if ( 1 === $end ) {
+				$at = $e[0][1] + strlen( $e[0][0] );
+			} else {
+				$open[ $tag ] = true;
+			}
+		}
+	}
+
+	/**
+	 * Pure: the lowercase, unique hosts that load a <script src> or an <iframe src>
+	 * on the page and are not the site's own, not part of a service (library or
+	 * custom, whatever its category or exemption, embeds with their path), not one
+	 * of the IP_HOSTS resources and not already decided (data-cmp-category) or
+	 * rewritten by our blocker (data-cmp-enc / <template data-cmp-embed-src>).
+	 * Comments, <noscript>, <template> and script bodies are not elements, so
+	 * what they mention does not count. Relative, data:, blob: and javascript: URLs have no host.
+	 * At most UNKNOWN_MAX_HOSTS. Null when PCRE gave up: the page was not read.
+	 *
+	 * Limits (the blocker's own patterns have them too): an iframe written in
+	 * a raw attribute value counts, and so does a comment mark there; not seen: international (IDN) hosts, <iframe data-src>, a src with no
+	 * space before it, an attribute with ">" in its value before src, anything
+	 * JavaScript or Tag Manager adds after loading. A service that covers only a
+	 * path of a host does not cover the host (host_known()): a host queued for the
+	 * email before such a service was added is still mailed, once.
+	 *
+	 * @return string[]|null
+	 */
+	public static function unknown_hosts( $html, array $services, $home ) {
+		$list = self::element_attrs( (string) $html );
+		if ( null === $list ) {
+			return null;
+		}
+		$urls = array();
+		foreach ( $list as $attrs ) {
+			if ( ! self::decided_tag( $attrs ) && preg_match( '/(?:^|\s)src\s*=\s*(?:(["\'])(.*?)\1|([^\s"\'>]+))/is', $attrs, $sm ) ) {
+				$urls[] = isset( $sm[3] ) && '' !== $sm[3] ? $sm[3] : $sm[2];
+			}
+		}
+		$out = array();
+		foreach ( $urls as $u ) {
+			$u = trim( html_entity_decode( (string) $u, ENT_QUOTES ) );
+			if ( 1 === preg_match( '#^//#', $u ) ) {
+				$u = 'https:' . $u;
+			}
+			if ( 1 !== preg_match( '#^https?://#i', $u ) || self::is_own_host( $u, $home ) ) {
+				continue;
+			}
+			$host = parse_url( $u, PHP_URL_HOST );
+			if ( ! is_string( $host ) ) {
+				continue;
+			}
+			$host = rtrim( strtolower( $host ), '.' );
+			if ( ! self::reportable_host( $host ) || '' !== self::ip_type( $host ) || null !== self::host_service( $u, $services ) ) {
+				continue;
+			}
+			if ( ! in_array( $host, $out, true ) ) {
+				$out[] = $host;
+				if ( count( $out ) >= self::UNKNOWN_MAX_HOSTS ) {
+					break;
+				}
+			}
+		}
+		return $out;
+	}
+
 	/* ------------------------------------------------------------------
 	 * Multi-page scan: per-page results, aggregate, queue (pure helpers).
 	 * ------------------------------------------------------------------ */
@@ -406,6 +542,10 @@ class CMP_Scanner {
 		$res['sources']   = self::script_sources( $html, $services, $home );
 		$res['resources'] = self::ip_resources( $html, $home );
 		$res['fonts']     = CMP_Fonts::extract_font_links( $html );
+		$unknown          = self::unknown_hosts( $html, $services, $home );
+		if ( null !== $unknown ) { // no key = not read for unknown hosts (aggregate: "unread")
+			$res['unknown'] = $unknown;
+		}
 		return $res;
 	}
 
@@ -441,12 +581,16 @@ class CMP_Scanner {
 			'resources' => array(),
 			'pages'     => 0,
 			'failed'    => array(),
+			// Which pages really answered "what is unknown here" (path => hosts), and which paths of the list did not (CMP_Alerts).
+			'unknown_pages' => array(),
+			'unread'        => array(),
 		);
 		$seen_res = array();
 		foreach ( $pages as $p ) {
 			if ( ! self::page_ok( $p ) ) {
 				if ( is_array( $p ) && isset( $p['url'] ) ) {
 					$agg['failed'][] = (string) $p['url'];
+					$agg['unread'][] = self::url_path( $p['url'] );
 				}
 				continue;
 			}
@@ -466,6 +610,16 @@ class CMP_Scanner {
 			foreach ( ( isset( $p['sources'] ) && is_array( $p['sources'] ) ? $p['sources'] : array() ) as $id => $srcs ) {
 				$agg['sources'][ $id ] = self::union( isset( $agg['sources'][ $id ] ) ? $agg['sources'][ $id ] : array(), $srcs );
 			}
+			// A stale page (last fetch failed) keeps its old good result for the services, but its
+			// unknown hosts were already handled when that result was fresh: no news from it.
+			$path = isset( $p['url'] ) ? self::url_path( $p['url'] ) : '/';
+			if ( empty( $p['stale'] ) && isset( $p['unknown'] ) && is_array( $p['unknown'] ) ) {
+				// Two addresses may share a path (plain permalinks: /?p=1, /?p=2).
+				$hosts = self::union( isset( $agg['unknown_pages'][ $path ] ) ? $agg['unknown_pages'][ $path ] : array(), array_filter( $p['unknown'], 'is_string' ) );
+				$agg['unknown_pages'][ $path ] = array_slice( $hosts, 0, self::UNKNOWN_MAX_HOSTS );
+			} else {
+				$agg['unread'][] = $path; // stale, saved before the "unknown" key existed, or PCRE gave up
+			}
 			foreach ( ( isset( $p['resources'] ) && is_array( $p['resources'] ) ? $p['resources'] : array() ) as $r ) {
 				if ( ! is_array( $r ) || ! isset( $r['type'], $r['host'] ) ) {
 					continue;
@@ -477,7 +631,15 @@ class CMP_Scanner {
 				}
 			}
 		}
+		$agg['unread'] = array_values( array_diff( array_unique( $agg['unread'] ), array_keys( $agg['unknown_pages'] ) ) );
 		return $agg;
+	}
+
+	/** Pure: the page path of a URL without query or fragment ('/' when none), capped. */
+	private static function url_path( $url ) {
+		$path = parse_url( (string) $url, PHP_URL_PATH );
+		$path = is_string( $path ) && '' !== $path ? preg_replace( '/[\x00-\x1f\x7f]/', '', $path ) : '/';
+		return substr( (string) $path, 0, 200 );
 	}
 
 	/** Pure: Google Fonts links from every ok page, deduped. */
@@ -774,7 +936,7 @@ class CMP_Scanner {
 			$path = isset( $s['type'] ) && 'embed' === $s['type'] && isset( $s['path'] ) ? (string) $s['path'] : '';
 			foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
 				$p = (string) $h . $path;
-				if ( strlen( $p ) > $len && CMP_Services::host_matches( $url, $p ) ) {
+				if ( strlen( $p ) > $len && CMP_Services::host_matches( $url, $p ) && ! CMP_Services::excepted( $url, $s ) ) {
 					$best = $s;
 					$len  = strlen( $p );
 				}
@@ -783,7 +945,7 @@ class CMP_Scanner {
 		return $best;
 	}
 
-	/** Pure: the service that lists this cookie name. */
+	/** Pure: the service that lists this cookie name (the custom one where it decides for the loader of a library service). */
 	private static function cookie_service( $name, array $services ) {
 		foreach ( $services as $s ) {
 			if ( ! is_array( $s ) || empty( $s['id'] ) ) {
@@ -792,7 +954,8 @@ class CMP_Scanner {
 			foreach ( (array) ( isset( $s['cookies'] ) ? $s['cookies'] : array() ) as $ck ) {
 				$pat = is_array( $ck ) && isset( $ck['name'] ) ? $ck['name'] : $ck;
 				if ( is_string( $pat ) && self::cookie_matches( $name, $pat ) ) {
-					return $s;
+					$custom = CMP_Services::loader_service( $s, $services );
+					return null !== $custom ? $custom : $s;
 				}
 			}
 		}
@@ -1456,10 +1619,13 @@ class CMP_Scanner {
 			}
 		}
 		update_option( self::PAGES_OPTION, $pages, false ); // pages no longer listed are dropped
-		$agg = self::aggregate( array_values( $pages ) );
+		$agg  = self::aggregate( array_values( $pages ) );
+		$fire = null;
 		if ( $agg['pages'] > 0 ) {
-			$agg['run'] = (int) $state['started'];
+			$agg['run']     = (int) $state['started'];
+			$agg['sitemap'] = empty( $state['expand'] ); // false: an inline run, the sitemap was not read
 			CMP_Blocker::store_scan( $agg );
+			$fire = $agg;
 		} else {
 			set_transient( 'cmp_tracker_scan_fail', 1, self::FAIL_BACKOFF ); // nothing could be read: the last result stays
 			delete_option( self::SAVED_OPTION ); // and is shown again rather than "rescanning" forever
@@ -1467,6 +1633,10 @@ class CMP_Scanner {
 		$state['status']   = 'idle';
 		$state['finished'] = time();
 		update_option( self::STATE_OPTION, $state, false );
+		if ( null !== $fire ) {
+			// Only a scan that read at least one page: listeners (the new-domain email) never see an empty result.
+			do_action( 'cmp_scan_finished', $fire );
+		}
 	}
 
 	/** Google Fonts links from every scanned page. */

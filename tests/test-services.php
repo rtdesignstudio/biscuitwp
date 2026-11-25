@@ -7,11 +7,11 @@ cmp_assert_eq(
 	array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' ),
 	'library starts with the six original services in order'
 );
-$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha', 'umami', 'plausible', 'fathom', 'matomo' );
+$cmp_expected_ids = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps', 'clarity', 'hotjar', 'tiktok-pixel', 'linkedin-insight', 'hubspot', 'tawk-to', 'crisp', 'recaptcha', 'umami', 'plausible', 'fathom', 'matomo', 'google-adsense', 'cloudflare-turnstile' );
 $cmp_have_ids     = array_column( $lib, 'id' );
 sort( $cmp_expected_ids );
 sort( $cmp_have_ids );
-cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 18 expected ids' );
+cmp_assert_eq( $cmp_have_ids, $cmp_expected_ids, 'library holds exactly the 20 expected ids' );
 cmp_assert_eq( CMP_Services::validate( array( 'services' => $lib ) ), array(), 'real library validates' );
 foreach ( array( 'id', 'name', 'provider', 'type', 'category', 'hosts', 'inline', 'gtm', 'path', 'nocookie', 'cookies', 'transfer', 'privacy_url' ) as $k ) {
 	cmp_assert( array_key_exists( $k, $lib[0] ), "service has key {$k}" );
@@ -58,7 +58,7 @@ cmp_assert( null === CMP_Services::script_service( '', 'var a = 1;', $lib ), 'pl
 $cmp_slugs = array( 'necessary', 'statistics', 'marketing' );
 $cmp_all   = CMP_Services::all( $lib, array( 'overrides' => array( 'clarity' => array( 'category' => 'statistics', 'exempt' => true ) ) ), $cmp_slugs );
 $cmp_by    = array_column( $cmp_all, null, 'id' );
-cmp_assert_eq( count( $cmp_all ), 18, 'all() without custom keeps 18 services' );
+cmp_assert_eq( count( $cmp_all ), 20, 'all() without custom keeps 20 services' );
 cmp_assert_eq( $cmp_by['clarity']['category'], 'statistics', 'override category applied' );
 cmp_assert_eq( $cmp_by['clarity']['exempt'], true, 'override exempt applied' );
 cmp_assert_eq( $cmp_by['clarity']['source'], 'library', 'library service has source library' );
@@ -90,8 +90,8 @@ $cmp_custom = array(
 	),
 );
 $cmp_all = CMP_Services::all( $lib, $cmp_custom, $cmp_slugs );
-cmp_assert_eq( count( $cmp_all ), 19, 'custom service appended' );
-$cx = $cmp_all[18];
+cmp_assert_eq( count( $cmp_all ), 21, 'custom service appended' );
+$cx = $cmp_all[20];
 cmp_assert_eq( $cx['source'], 'custom', 'custom source' );
 cmp_assert_eq( $cx['type'], 'script', 'custom type script' );
 cmp_assert_eq( $cx['category'], 'marketing', 'custom unknown category remapped' );
@@ -143,7 +143,7 @@ cmp_assert_eq( CMP_Blocker::found_ids( '<p>hi</p>', $cmp_ex2 ), array(), 'found_
 
 // ---- B2 Task 1: cookieless analytics tools, exempt_default ----
 $cmp_cl_ids = array( 'umami', 'plausible', 'fathom' );
-cmp_assert_eq( count( $lib ), 18, 'library has 18 services' );
+cmp_assert_eq( count( $lib ), 20, 'library has 20 services' );
 $cmp_cl_by = array_column( $lib, null, 'id' );
 foreach ( $cmp_cl_ids as $cmp_cl ) {
 	cmp_assert( isset( $cmp_cl_by[ $cmp_cl ] ), "{$cmp_cl} in library" );
@@ -213,4 +213,172 @@ foreach ( $cmp_ma_ov2 as $cmp_s ) {
 	if ( 'google-analytics' === $cmp_s['id'] ) {
 		cmp_assert( true === $cmp_s['exempt'], 'apply_measurement(true): the mode wins over a per-service override' );
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Lot A, M9 / R1: a custom service with a pattern on the two services 1.2.0 adds
+// (AdSense, Turnstile) decides for the URLs its own patterns match, and only for them.
+// ---------------------------------------------------------------------------
+require_once __DIR__ . '/../includes/modules/class-blocker.php';
+require_once __DIR__ . '/../includes/modules/class-scanner.php';
+require_once __DIR__ . '/../includes/modules/class-legal.php';
+$ya_lib = CMP_Services::library();
+$ya_all = function ( array $custom, array $over = array() ) use ( $ya_lib ) {
+	$list = array();
+	foreach ( $custom as $i => $c ) {
+		$list[] = array_merge( array( 'id' => 'custom-' . ( $i + 1 ), 'name' => 'Al meu ' . ( $i + 1 ), 'category' => 'marketing', 'exempt' => false ), $c );
+	}
+	return CMP_Services::all( $ya_lib, array( 'custom' => $list, 'overrides' => $over ), array( 'necessary', 'statistics', 'marketing', 'reclame' ) );
+};
+$ya_get = function ( array $svcs, $id ) {
+	foreach ( $svcs as $s ) {
+		if ( $s['id'] === $id ) {
+			return $s;
+		}
+	}
+	return null;
+};
+$ya_lvl = function ( array $svcs, $url ) { // [ level, service id ] of one resource in the browser check
+	$i = CMP_Scanner::classify( array( $url ), array(), $svcs, 'https://example.md', 'pro' )['items'][0];
+	return array( $i[0], $i[3] );
+};
+$ya_js   = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+$ya_tag  = '<script async src="' . $ya_js . '?client=ca-pub-1"></script>';
+$ya_dc   = '<script src="https://googleads.g.doubleclick.net/pagead/x.js"></script>';
+$ya_inl  = '<script>var s=document.createElement("script");s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=1";</script>';
+$ya_esc  = '<script>var u="https:\/\/pagead2.googlesyndication.com\/pagead\/js\/adsbygoogle.js";</script>';
+$ya_full = array( 'pagead2.googlesyndication.com', 'googleads.g.doubleclick.net' );
+$ya_is   = function ( $html, $id ) { // blocked as this service
+	return false !== strpos( $html, 'data-cmp-service="' . $id . '"' );
+};
+$ya_rw   = function ( $html, array $svcs ) {
+	return CMP_Blocker::rewrite( $html, array(), $svcs );
+};
+$ya_none = $ya_all( array( array( 'hosts' => array( 'vendor.com' ) ) ) );
+cmp_assert( ! isset( $ya_get( $ya_none, 'google-adsense' )['except'] ) && $ya_is( $ya_rw( $ya_tag, $ya_none ), 'google-adsense' ), 'except: an unrelated custom service changes nothing' );
+cmp_assert( $ya_is( $ya_rw( $ya_inl, $ya_none ), 'google-adsense' ) && $ya_is( $ya_rw( $ya_esc, $ya_none ), 'google-adsense' ), 'except: an inline loader is blocked by the library' );
+// "nu bloca" on the bare host(s) is kept everywhere.
+$ya_ex = $ya_all( array( array( 'exempt' => true, 'hosts' => $ya_full ) ) );
+foreach ( array( $ya_tag, $ya_dc, $ya_inl, $ya_esc, '<noscript><img src="https://pagead2.googlesyndication.com/p.gif"></noscript>', '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' ) as $ya_h ) {
+	cmp_assert_eq( $ya_rw( $ya_h, $ya_ex ), $ya_h, 'except, both hosts on "nu bloca": left as it is: ' . substr( $ya_h, 0, 60 ) );
+	cmp_assert( $ya_rw( $ya_h, $ya_none ) !== $ya_h, 'fixture: the library alone changes it: ' . substr( $ya_h, 0, 60 ) );
+}
+cmp_assert_eq( CMP_Blocker::detect_services( $ya_tag . $ya_esc, $ya_ex )['raw'], array(), 'except: ... not reported as loading without consent' );
+cmp_assert_eq( CMP_Blocker::found_ids( $ya_tag, $ya_ex ), array( 'custom-1' ), 'except: ... the scan finds the custom service' );
+cmp_assert_eq( CMP_Scanner::script_sources( $ya_tag, $ya_ex, 'https://example.md' ), array( 'custom-1' => array( array( 'kind' => 'external', 'slug' => 'pagead2.googlesyndication.com' ) ) ), 'except: ... and its source' );
+cmp_assert_eq( $ya_lvl( $ya_ex, $ya_js ), array( 'exempt', 'custom-1' ), 'except: ... the check names it, not red' );
+cmp_assert_eq( CMP_Scanner::unknown_hosts( $ya_tag, $ya_ex, 'https://example.md' ), array(), 'except: ... the host is not unknown' );
+cmp_assert( CMP_Services::replaced( $ya_get( $ya_ex, 'google-adsense' ) ) && ! CMP_Services::replaced( $ya_get( $ya_none, 'google-adsense' ) ) && ! CMP_Services::replaced( $ya_get( $ya_none, 'hotjar' ) ), 'replaced: every host is decided by a custom service' );
+cmp_assert_eq( CMP_Services::notice_ids( array( 'google-adsense' ), array( 'google-adsense' ), $ya_ex, true ), array(), 'except: the update note does not name it' );
+// One bare host frees that host only.
+$ya_one = $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'pagead2.googlesyndication.com' ) ) ) );
+cmp_assert( $ya_rw( $ya_tag, $ya_one ) === $ya_tag && $ya_is( $ya_rw( $ya_dc, $ya_one ), 'google-adsense' ), 'except: a bare host frees that host, not the other one of the service' );
+cmp_assert( ! CMP_Services::replaced( $ya_get( $ya_one, 'google-adsense' ) ), 'replaced: not with one host of two' );
+cmp_assert_eq( CMP_Blocker::found_ids( $ya_tag . $ya_dc, $ya_one ), array( 'google-adsense', 'custom-1' ), 'except: the scan finds both' );
+cmp_assert_eq( array( $ya_lvl( $ya_one, $ya_js ), $ya_lvl( $ya_one, 'https://googleads.g.doubleclick.net/x' ) ), array( array( 'exempt', 'custom-1' ), array( 'red', 'google-adsense' ) ), 'except: the check tells them apart' );
+cmp_assert_eq( $ya_rw( str_replace( 'pagead2.', 'eu.pagead2.', $ya_tag ), $ya_one ), str_replace( 'pagead2.', 'eu.pagead2.', $ya_tag ), 'except: a bare host covers its subdomains, as the matcher does' );
+// Its category is kept.
+$ya_cat = $ya_all( array( array( 'category' => 'reclame', 'hosts' => array( 'pagead2.googlesyndication.com' ) ) ) );
+$ya_h   = $ya_rw( $ya_tag, $ya_cat );
+cmp_assert( false !== strpos( $ya_h, 'data-cmp-block="reclame"' ) && $ya_is( $ya_h, 'custom-1' ), 'except: the category of the custom service decides' );
+cmp_assert( $ya_is( $ya_rw( $ya_inl, $ya_cat ), 'custom-1' ), 'except: ... for an inline loader too' );
+cmp_assert_eq( $ya_rw( '<noscript><img src="https://pagead2.googlesyndication.com/p.gif"></noscript>', $ya_cat ), '', 'except: ... its noscript is dropped as any blocked one' );
+// R1: the three probes. A path entry decides for its own path only; the real loader stays with the library.
+foreach ( array(
+	array( 'pagead2.googlesyndication.com/pagead/managed/', true, 'https://pagead2.googlesyndication.com/pagead/managed/js/x.js' ),
+	array( 'pagead2.googlesyndication.com/ccm/', false, 'https://pagead2.googlesyndication.com/ccm/x.js' ),
+	array( 'googlesyndication.com/safeframe/', true, 'https://pagead2.googlesyndication.com/safeframe/x.js' ),
+) as $ya_p ) {
+	$ya_s = $ya_all( array( array( 'exempt' => $ya_p[1], 'hosts' => array( $ya_p[0] ) ) ) );
+	$ya_o = '<script src="' . $ya_p[2] . '"></script>';
+	cmp_assert( $ya_is( $ya_rw( $ya_tag, $ya_s ), 'google-adsense' ), "R1 {$ya_p[0]}: adsbygoogle.js stays blocked by the library" );
+	cmp_assert( $ya_is( $ya_rw( $ya_inl, $ya_s ), 'google-adsense' ) && $ya_is( $ya_rw( $ya_esc, $ya_s ), 'google-adsense' ), "R1 {$ya_p[0]}: an inline loader of it too" );
+	cmp_assert( $ya_p[1] ? $ya_rw( $ya_o, $ya_s ) === $ya_o : $ya_is( $ya_rw( $ya_o, $ya_s ), 'custom-1' ), "R1 {$ya_p[0]}: its own path is the custom service's" );
+	cmp_assert_eq( array( $ya_lvl( $ya_s, $ya_js ), $ya_lvl( $ya_s, $ya_p[2] ) ), array( array( 'red', 'google-adsense' ), array( $ya_p[1] ? 'exempt' : 'red', 'custom-1' ) ), "R1 {$ya_p[0]}: the check agrees" );
+	cmp_assert( in_array( 'google-adsense', CMP_Blocker::found_ids( $ya_tag, $ya_s ), true ) && array( 'google-adsense' ) === CMP_Blocker::detect_services( $ya_tag, $ya_s )['raw'], "R1 {$ya_p[0]}: a live loader is reported as AdSense" );
+	cmp_assert( ! in_array( 'google-adsense', CMP_Blocker::found_ids( $ya_o, $ya_s ), true ), "R1 {$ya_p[0]}: its own path alone is not AdSense" );
+	cmp_assert( ! CMP_Services::replaced( $ya_get( $ya_s, 'google-adsense' ) ), "R1 {$ya_p[0]}: the library service is not replaced" );
+	cmp_assert_eq( $ya_rw( '<noscript><img src="https://pagead2.googlesyndication.com/p.gif"></noscript>', $ya_s ), '', "R1 {$ya_p[0]}: another noscript of the host is dropped" );
+	cmp_assert_eq( $ya_rw( '<noscript><img src="' . $ya_p[2] . '"></noscript>', $ya_s ), $ya_p[1] ? '<noscript><img src="' . $ya_p[2] . '"></noscript>' : '', "R1 {$ya_p[0]}: a noscript of its own path follows it" );
+}
+// A subdomain entry does not free the parent host.
+$ya_sub = $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'x.pagead2.googlesyndication.com' ) ) ) );
+$ya_o   = '<script src="https://x.pagead2.googlesyndication.com/a.js"></script>';
+cmp_assert( $ya_is( $ya_rw( $ya_tag, $ya_sub ), 'google-adsense' ) && $ya_rw( $ya_o, $ya_sub ) === $ya_o, 'except: a subdomain entry frees the subdomain, not the parent' );
+// The full URL of the loader on "nu bloca" works, pasted as normalize_host() stores it.
+require_once __DIR__ . '/../includes/class-sanitizer.php';
+$ya_url = $ya_all( array( array( 'exempt' => true, 'hosts' => array( CMP_Sanitizer::normalize_host( $ya_js . '?client=ca-pub-1' ) ) ) ) );
+cmp_assert( $ya_rw( $ya_tag, $ya_url ) === $ya_tag && $ya_rw( $ya_inl, $ya_url ) === $ya_inl && $ya_rw( $ya_esc, $ya_url ) === $ya_esc, 'except: the full adsbygoogle.js URL on "nu bloca"' );
+cmp_assert( $ya_is( $ya_rw( '<script src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>', $ya_url ), 'google-adsense' ), 'except: ... and nothing else of the host' );
+cmp_assert( $ya_is( $ya_rw( '<script>var a="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js",b="https://pagead2.googlesyndication.com/pagead/show_ads.js";</script>', $ya_url ), 'google-adsense' ), 'except: an inline script that also names another URL of the host stays blocked' );
+// A parent domain covers the host; look-alikes do not.
+cmp_assert_eq( $ya_rw( $ya_tag, $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'googlesyndication.com' ) ) ) ) ), $ya_tag, 'except: the parent domain' );
+foreach ( array( 'evilpagead2.googlesyndication.com', 'notgooglesyndication.com', 'pagead2.googlesyndication.com.evil.md' ) as $ya_p ) {
+	$ya_s = $ya_all( array( array( 'exempt' => true, 'hosts' => array( $ya_p ) ) ) );
+	cmp_assert( $ya_is( $ya_rw( $ya_tag, $ya_s ), 'google-adsense' ) && ! isset( $ya_get( $ya_s, 'google-adsense' )['except'] ), "except: $ya_p is another host" );
+}
+// Only an inline marker / its own script, no hosts: the library decides.
+$ya_in = $ya_all( array( array( 'exempt' => true, 'hosts' => array(), 'script' => '<script>window.adsbygoogle=[];</script>' ) ) );
+cmp_assert( $ya_is( $ya_rw( $ya_tag, $ya_in ), 'google-adsense' ) && ! isset( $ya_get( $ya_in, 'google-adsense' )['except'] ), 'except: a custom service without domains takes nothing' );
+// Turnstile: necessary in the library; a custom service that blocks it keeps blocking it, everywhere.
+$ya_ts = $ya_all( array( array( 'hosts' => array( 'challenges.cloudflare.com' ) ) ) );
+$ya_t  = '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>';
+cmp_assert( $ya_is( $ya_rw( $ya_t, $ya_ts ), 'custom-1' ) && array( 'red', 'custom-1' ) === $ya_lvl( $ya_ts, 'https://challenges.cloudflare.com/x' ) && array( 'custom-1' ) === CMP_Blocker::found_ids( $ya_t, $ya_ts ), 'except: a custom Turnstile in marketing: blocked, checked and found as such' );
+// Only these two ids.
+$ya_old = $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'connect.facebook.net', 'static.hotjar.com', 'www.google.com' ) ) ) );
+foreach ( array( 'meta-pixel', 'hotjar', 'recaptcha', 'google-maps' ) as $ya_id ) {
+	cmp_assert( ! isset( $ya_get( $ya_old, $ya_id )['except'] ), "except: $ya_id is not touched" );
+}
+// R4: the cookies go with the loader: to the custom service that decides for adsbygoogle.js, else to the library one.
+$ya_ck = function ( array $svcs ) {
+	$c = CMP_Scanner::classify( array(), array( '__gads' ), $svcs, 'https://example.md', 'pro' );
+	return array( $c['status'], $c['items'][0][1], $c['items'][0][3] );
+};
+foreach ( array( 'both hosts' => $ya_ex, 'the usual host' => $ya_one, 'the full URL' => $ya_url ) as $ya_n => $ya_s ) {
+	cmp_assert_eq( $ya_ck( $ya_s ), array( 'green', 'Al meu 1', 'custom-1' ), "cookies, $ya_n on nu bloca: the custom service, not red" );
+}
+cmp_assert_eq( $ya_ck( $ya_cat ), array( 'red', 'Al meu 1', 'custom-1' ), 'cookies, a custom service that waits: red under its name' );
+cmp_assert_eq( $ya_ck( $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'pagead2.googlesyndication.com/pagead/managed/' ) ) ) ) ), array( 'red', 'Google AdSense', 'google-adsense' ), 'cookies, another path on nu bloca: still AdSense, red' );
+cmp_assert_eq( $ya_ck( $ya_none ), array( 'red', 'Google AdSense', 'google-adsense' ), 'cookies, no custom service: AdSense' );
+// The policy table. Custom before the update: it is found, AdSense is not listed twice, and the cookies are not lost.
+$ya_rows = function ( array $found, array $svcs ) {
+	return array_column( CMP_Legal::table_services( $found, $svcs ), 'cookies', 'id' );
+};
+$ya_gads = array_column( $ya_get( $ya_none, 'google-adsense' )['cookies'], 'name' );
+$ya_tb   = $ya_rows( CMP_Blocker::found_ids( $ya_tag, $ya_one ), $ya_one );
+cmp_assert_eq( array_map( function ( $c ) { return array_column( $c, 'name' ); }, $ya_tb ), array( 'custom-1' => $ya_gads ), 'policy: a custom AdSense that declares no cookies lists the ones of AdSense, once' );
+$ya_own = $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'pagead2.googlesyndication.com' ), 'cookies' => array( array( 'name' => 'mine', 'duration' => '1', 'purpose' => 'x' ) ) ) ) );
+cmp_assert_eq( array_column( $ya_rows( array( 'custom-1' ), $ya_own )['custom-1'], 'name' ), array( 'mine' ), 'policy: cookies the owner declared are left as they are' );
+cmp_assert_eq( array_keys( $ya_rows( CMP_Blocker::found_ids( $ya_tag, $ya_s = $ya_all( array( array( 'exempt' => true, 'hosts' => array( 'pagead2.googlesyndication.com/ccm/' ) ) ) ) ), $ya_s ) ), array( 'google-adsense', 'custom-1' ), 'policy: a path entry: both are listed' );
+cmp_assert_eq( $ya_rows( array( 'google-adsense', 'custom-1' ), $ya_s )['custom-1'], array(), 'policy: ... and it does not take the cookies' );
+// Added later: until the next scan the stored list still has AdSense (listed, with its cookies), after it only the custom one.
+cmp_assert_eq( array_keys( $ya_rows( array( 'google-adsense' ), $ya_one ) ), array( 'google-adsense', 'custom-1' ), 'policy, added later: before the rescan both are listed' );
+// Re-consent: at the update nothing new is asked; added later, only a service that waits is new.
+$ya_map = function ( array $svcs, array $seen ) {
+	$m = CMP_Services::svc_by_cat( $svcs, $seen, array( 'necessary' ) );
+	return isset( $m['marketing'] ) ? $m['marketing'] : array();
+};
+$ya_wait = $ya_all( array( array( 'hosts' => array( 'pagead2.googlesyndication.com' ) ) ) );
+cmp_assert_eq( $ya_map( $ya_wait, CMP_Services::merge_seen( array( 'custom-1' ), CMP_Blocker::found_ids( $ya_tag, $ya_wait ) ) ), array( 'custom-1' ), 're-consent at the update: the custom service only, nothing new asked' );
+cmp_assert_eq( $ya_map( $ya_one, CMP_Services::merge_seen( array( 'custom-1' ), CMP_Blocker::found_ids( $ya_tag, $ya_one ) ) ), array(), 're-consent at the update, nu bloca: nothing' );
+$ya_seen = CMP_Services::merge_seen( array(), CMP_Blocker::found_ids( $ya_tag, $ya_none ) );
+cmp_assert_eq( $ya_map( $ya_one, $ya_seen ), array( 'google-adsense' ), 're-consent, added later on nu bloca: the map is unchanged, nobody is asked again' );
+cmp_assert_eq( $ya_map( $ya_wait, $ya_seen ), array( 'custom-1', 'google-adsense' ), 're-consent, added later and waiting: the custom service is new, as any other' );
+$ya_uw = $ya_all( array( array( 'hosts' => array( 'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js' ) ) ) );
+cmp_assert( $ya_is( $ya_rw( $ya_esc, $ya_uw ), 'custom-1' ) && $ya_is( $ya_rw( $ya_inl, $ya_uw ), 'custom-1' ) && $ya_is( $ya_rw( $ya_tag, $ya_uw ), 'custom-1' ), 'except: the full URL of a service that waits: blocked under it, also in an inline loader with escaped slashes' );
+// S1: the token of an excepted URL ends where the URL ends: another URL of the host in the same body stays blocked.
+$ya_c0 = 'https://pagead2.googlesyndication.com/ccm/a';
+foreach ( array( true, false ) as $ya_e ) {
+	$ya_s = $ya_all( array( array( 'exempt' => $ya_e, 'hosts' => array( 'pagead2.googlesyndication.com/ccm/' ) ) ) );
+	$ya_bodies = array( 'template strings' => 'var u=[`' . $ya_c0 . '`,`' . $ya_js . '`];', 'a comma list' => 'load("' . $ya_c0 . ',' . $ya_js . '");', 'a query' => 'load("' . $ya_c0 . '?u=' . $ya_js . '");', 'escaped, a query' => str_replace( '/', '\/', 'load("' . $ya_c0 . '?u=' . $ya_js . '");' ) );
+	foreach ( array( '`', ',', ';', '|', '?', '#', '&', '[', ']', '{', '}', '=', ':', '+', '@', '*', '!', '$', '^', '//', '' ) as $ya_sep ) {
+		$ya_bodies[ "separator '$ya_sep'" ] = 'load("' . $ya_c0 . $ya_sep . $ya_js . '");';
+	}
+	foreach ( $ya_bodies as $ya_n => $ya_b ) {
+		$ya_h = '<script>' . $ya_b . '</script>';
+		cmp_assert( $ya_is( $ya_rw( $ya_h, $ya_s ), 'google-adsense' ), 'S1, ' . ( $ya_e ? 'nu bloca' : 'blocked' ) . ", $ya_n: the loader next to the custom URL stays with the library" );
+		cmp_assert_eq( CMP_Blocker::detect_services( str_replace( '\/', '/', $ya_h ), $ya_s )['raw'][0], 'google-adsense', "S1, $ya_n: and the scan sees it" );
+	}
+	$ya_h = '<script>var u=[`' . $ya_c0 . '?x=1`,`' . $ya_c0 . '/b.js#y`];</script>';
+	cmp_assert( $ya_e ? $ya_rw( $ya_h, $ya_s ) === $ya_h : $ya_is( $ya_rw( $ya_h, $ya_s ), 'custom-1' ), 'S1: a body with only its own URLs (query, fragment) is the custom service\'s' );
 }

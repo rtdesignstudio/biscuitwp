@@ -434,3 +434,12 @@ foreach ( array( 'ru_RU', 'en_US' ) as $cmp_loc ) {
 	}
 	cmp_assert_eq( $cmp_dash, array(), "i18n {$cmp_loc}: folder-move strings have no em dash" );
 }
+
+// Lot A, M10: the EN and RU texts name the screens, menus and buttons as the translated admin does, never in Romanian.
+foreach ( array( 'en_US', 'ru_RU' ) as $cmp_m10 ) {
+	$cmp_m10_po = (string) preg_replace( '/"\R"/', '', (string) file_get_contents( __DIR__ . '/../languages/biscuitwp-' . $cmp_m10 . '.po' ) );
+	preg_match_all( '/^msgstr(?:\[\d\])? "(.*)"$/m', $cmp_m10_po, $cmp_m10_m );
+	cmp_assert( count( $cmp_m10_m[1] ) > 600, "$cmp_m10: the .po was read" );
+	$cmp_m10_bad = array_values( preg_grep( '/Servicii|Verificare|Verifică|Setăril?e?|Salvează|Ignoră|Adaugă|Domenii|Pagini legale/u', $cmp_m10_m[1] ) );
+	cmp_assert_eq( $cmp_m10_bad, array(), "$cmp_m10: no Romanian screen or button name in a translation" );
+}

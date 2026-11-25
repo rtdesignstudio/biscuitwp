@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: BiscuitWP\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro-public\n"
-"POT-Creation-Date: 2026-11-24T12:39:09+00:00\n"
+"POT-Creation-Date: 2026-11-25T11:09:26+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: BiscuitWP\n"
 "Language-Team: en_US\n"
@@ -15,8 +15,8 @@ msgstr ""
 "X-Domain: biscuitwp\n"
 
 #. Plugin Name of the plugin
-#: biscuitwp.php includes/admin/class-admin.php:86
-#: includes/admin/class-admin.php:87
+#: biscuitwp.php includes/admin/class-admin.php:89
+#: includes/admin/class-admin.php:90
 msgid "BiscuitWP"
 msgstr "BiscuitWP"
 
@@ -46,50 +46,52 @@ msgstr "RT.md"
 msgid "https://rt.md"
 msgstr "https://rt.md"
 
-#: includes/admin/class-admin.php:64 includes/admin/class-admin.php:94
+#: includes/admin/class-admin.php:67 includes/admin/class-admin.php:97
 #: includes/admin/class-check-page.php:363
 msgid "Setări"
 msgstr "Settings"
 
-#: includes/admin/class-admin.php:66 includes/admin/class-admin.php:79
+#: includes/admin/class-admin.php:69 includes/admin/class-admin.php:82
 msgid "Caută actualizări"
 msgstr "Check for updates"
 
-#: includes/admin/class-admin.php:95 includes/admin/class-settings-page.php:120
+#: includes/admin/class-admin.php:98 includes/admin/class-settings-page.php:123
 msgid "Aspect"
 msgstr "Appearance"
 
-#: includes/admin/class-admin.php:96
+#: includes/admin/class-admin.php:99
 #: includes/admin/class-audit-list-table.php:16
 msgid "Categorii"
 msgstr "Categories"
 
-#: includes/admin/class-admin.php:97
+#: includes/admin/class-admin.php:100
 #: includes/admin/class-audit-list-table.php:17
 #: includes/admin/class-guide.php:23
 msgid "Servicii"
 msgstr "Services"
 
-#: includes/admin/class-admin.php:98
+#: includes/admin/class-admin.php:101
 msgid "Verificare"
 msgstr "Check"
 
-#: includes/admin/class-admin.php:99 includes/admin/class-audit-page.php:43
+#: includes/admin/class-admin.php:102 includes/admin/class-audit-page.php:43
 msgid "Registru consimțăminte"
 msgstr "Consent register"
 
-#: includes/admin/class-admin.php:100 includes/admin/class-guide.php:26
-#: includes/admin/class-settings-page.php:206
-#: includes/admin/class-settings-page.php:333
+#: includes/admin/class-admin.php:103 includes/admin/class-guide.php:26
+#: includes/admin/class-settings-page.php:221
+#: includes/admin/class-settings-page.php:351
 msgid "Pagini legale"
 msgstr "Legal pages"
 
-#: includes/admin/class-admin.php:101 includes/admin/class-guide.php:71
+#: includes/admin/class-admin.php:104 includes/admin/class-guide.php:71
 msgid "Ghid"
 msgstr "Guide"
 
-#: includes/admin/class-admin.php:123
-#: includes/admin/class-appearance-page.php:514
+#: includes/admin/class-admin.php:126
+#: includes/admin/class-appearance-page.php:149
+#: includes/admin/class-appearance-page.php:266
+#: includes/admin/class-appearance-page.php:663
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
@@ -97,16 +99,18 @@ msgstr "Guide"
 #: includes/admin/class-legal-page.php:408
 #: includes/admin/class-legal-page.php:461
 #: includes/admin/class-legal-page.php:471
-#: includes/admin/class-services-page.php:284
-#: includes/admin/class-services-page.php:364
-#: includes/admin/class-services-page.php:375
-#: includes/admin/class-services-page.php:395
-#: includes/admin/class-settings-page.php:260
+#: includes/admin/class-services-page.php:391
+#: includes/admin/class-services-page.php:484
+#: includes/admin/class-services-page.php:499
+#: includes/admin/class-services-page.php:512
+#: includes/admin/class-services-page.php:523
+#: includes/admin/class-services-page.php:563
+#: includes/admin/class-settings-page.php:275
 #: includes/modules/class-fonts.php:127 includes/modules/class-fonts.php:186
 msgid "Acțiune neautorizată."
 msgstr "Unauthorized action."
 
-#: includes/admin/class-admin.php:152
+#: includes/admin/class-admin.php:155
 msgid ""
 "Biblioteca de servicii (data/services.json) lipsește sau e coruptă. Blocăm "
 "doar Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo și Google "
@@ -116,7 +120,7 @@ msgstr ""
 "Google Analytics, Tag Manager, Meta Pixel, YouTube, Vimeo and Google Maps "
 "are blocked until you fix it (reinstall the plugin)."
 
-#: includes/admin/class-admin.php:153
+#: includes/admin/class-admin.php:156
 msgid ""
 "Biblioteca de servicii (data/services.json) are erori. Unele servicii pot să "
 "nu fie blocate corect."
@@ -124,17 +128,18 @@ msgstr ""
 "The services library (data/services.json) has errors. Some services may not "
 "be blocked correctly."
 
-#: includes/admin/class-admin.php:154
-#: includes/admin/class-services-page.php:426
+#: includes/admin/class-admin.php:157
+#: includes/admin/class-services-page.php:211
+#: includes/admin/class-services-page.php:586
 #: includes/modules/class-updater.php:829
 msgid "BiscuitWP:"
 msgstr "BiscuitWP:"
 
-#: includes/admin/class-admin.php:156
+#: includes/admin/class-admin.php:159
 msgid "Detalii în „Servicii”"
 msgstr "Details in “Services”"
 
-#: includes/admin/class-admin.php:179
+#: includes/admin/class-admin.php:182
 msgid ""
 "BiscuitWP: nu am putut verifica update-urile acum. Încearcă din nou mai "
 "târziu."
@@ -142,13 +147,13 @@ msgstr ""
 "BiscuitWP: we could not check for updates right now. Please try again later."
 
 #. translators: %s — current plugin version
-#: includes/admin/class-admin.php:183
+#: includes/admin/class-admin.php:186
 #, php-format
 msgid "BiscuitWP: ai ultima versiune (%s)."
 msgstr "BiscuitWP: you have the latest version (%s)."
 
 #. translators: %s — new version number
-#: includes/admin/class-admin.php:189
+#: includes/admin/class-admin.php:192
 #, php-format
 msgid ""
 "BiscuitWP: este disponibilă versiunea %s — folosește „Update now\" din lista "
@@ -156,7 +161,7 @@ msgid ""
 msgstr ""
 "BiscuitWP: version %s is available — use “Update now” in the list below."
 
-#: includes/admin/class-appearance-page.php:76
+#: includes/admin/class-appearance-page.php:83
 msgid ""
 "Schimbi stilul? Colțurile, umbra, lățimea, butoanele și animația revin la "
 "valorile noului stil, iar tu îți pierzi ajustările."
@@ -165,33 +170,33 @@ msgstr ""
 "the new style's values, and you lose your adjustments."
 
 #. translators: %s: contrast ratio, e.g. 5.2
-#: includes/admin/class-appearance-page.php:78
+#: includes/admin/class-appearance-page.php:85
 #, php-format
 msgid "Contrast %s:1, trece."
 msgstr "Contrast %s:1, passes."
 
 #. translators: 1: contrast ratio, 2: proposed colour (#rrggbb), 3: its contrast ratio
-#: includes/admin/class-appearance-page.php:80
-#: includes/admin/class-appearance-page.php:165
+#: includes/admin/class-appearance-page.php:87
+#: includes/admin/class-appearance-page.php:313
 #, php-format
 msgid "Contrast %1$s:1, sub 4,5:1. Nuanța propusă: %2$s (%3$s:1)."
 msgstr "Contrast %1$s:1, below 4.5:1. Proposed shade: %2$s (%3$s:1)."
 
-#: includes/admin/class-appearance-page.php:81
+#: includes/admin/class-appearance-page.php:88
 msgid "Scrie o culoare în forma #rrggbb."
 msgstr "Enter a colour as #rrggbb."
 
 #. translators: %d: how many more removed parts are not listed
-#: includes/admin/class-appearance-page.php:98
+#: includes/admin/class-appearance-page.php:105
 #, php-format
 msgid "… și încă %d."
 msgstr "… and %d more."
 
-#: includes/admin/class-appearance-page.php:100
+#: includes/admin/class-appearance-page.php:107
 msgid "Am eliminat din CSS-ul propriu:"
 msgstr "Removed from your custom CSS:"
 
-#: includes/admin/class-appearance-page.php:101
+#: includes/admin/class-appearance-page.php:109
 msgid ""
 "regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și "
 "„Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului e salvat."
@@ -200,20 +205,141 @@ msgstr ""
 "buttons, addresses pointing to other sites, and @import. The rest of the CSS "
 "is saved."
 
-#: includes/admin/class-appearance-page.php:120
+#: includes/admin/class-appearance-page.php:110
+msgid ""
+"regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și "
+"„Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului nu e salvat "
+"încă: apasă „Salvează”."
+msgstr ""
+"rules that could hide, shrink or set apart the “Accept” and “Reject” "
+"buttons, addresses pointing to other sites, and @import. The rest of the CSS "
+"is not saved yet: press “Save”."
+
+#: includes/admin/class-appearance-page.php:129
 msgid "Aspect salvat."
 msgstr "Appearance saved."
 
-#: includes/admin/class-appearance-page.php:148
-#: includes/admin/class-appearance-page.php:453
+#: includes/admin/class-appearance-page.php:193
+msgid "Alege un fișier .json de importat."
+msgstr "Choose a .json file to import."
+
+#: includes/admin/class-appearance-page.php:195
+msgid "Fișierul nu s-a încărcat complet. Încearcă din nou."
+msgstr "The file was not uploaded completely. Try again."
+
+#: includes/admin/class-appearance-page.php:197
+msgid "Fișierul e prea mare: cel mult 256 KB."
+msgstr "The file is too large: 256 KB at most."
+
+#: includes/admin/class-appearance-page.php:199
+msgid "Fișierul nu e un JSON valid."
+msgstr "The file is not valid JSON."
+
+#: includes/admin/class-appearance-page.php:201
+msgid "Nu e un fișier de aspect BiscuitWP."
+msgstr "This is not a BiscuitWP appearance file."
+
+#: includes/admin/class-appearance-page.php:203
+msgid ""
+"Fișierul vine dintr-o versiune mai nouă de BiscuitWP. Actualizează pluginul "
+"și încearcă din nou."
+msgstr ""
+"The file comes from a newer version of BiscuitWP. Update the plugin and try "
+"again."
+
+#: includes/admin/class-appearance-page.php:205
+msgid "Fișierul nu a putut fi încărcat. Încearcă din nou."
+msgstr "The file could not be uploaded. Try again."
+
+#: includes/admin/class-appearance-page.php:217
+msgid "Aspectul din fișier e încărcat în formular, dar nu e salvat."
+msgstr ""
+"The appearance from the file is loaded into the form, but it is not saved."
+
+#: includes/admin/class-appearance-page.php:218
+msgid ""
+"Apasă „Vezi pe site” ca să-l vezi întâi, apoi „Salvează aspectul” ca să-l "
+"aplici. Dacă reîncarci pagina fără să retrimiți formularul, revii la "
+"aspectul salvat."
+msgstr ""
+"Press “View on site” to see it first, then “Save appearance” to apply it. If "
+"you reload the page without resubmitting the form, you are back to the saved "
+"appearance."
+
+#. translators: %d: how many keys of the file were not used
+#: includes/admin/class-appearance-page.php:222
+#, php-format
+msgid "Chei ignorate (necunoscute sau care nu se importă, ca excluderile): %d."
+msgstr "Ignored keys (unknown, or not imported, like the exclusions): %d."
+
+#: includes/admin/class-appearance-page.php:225
+msgid ""
+"Textele din fișier nu s-au importat: site-ul folosește WPML sau Polylang, "
+"iar textele se traduc acolo."
+msgstr ""
+"The texts in the file were not imported: the site uses WPML or Polylang, and "
+"the texts are translated there."
+
+#. translators: %d: how many values of the file were not used because the current mode does not show them
+#: includes/admin/class-appearance-page.php:229
+#, php-format
+msgid ""
+"Valori care nu se aplică modului curent (Light sau Pro): %d. Au rămas cele "
+"salvate sau, dacă fișierul aduce alt stil, cele ale stilului."
+msgstr ""
+"Values that do not apply to the current mode (Light or Pro): %d. The saved "
+"ones stay or, if the file brings another style, the ones of that style."
+
+#: includes/admin/class-appearance-page.php:243 templates/admin/guide.php:93
+msgid "Export și import"
+msgstr "Export and import"
+
+#: includes/admin/class-appearance-page.php:247
+msgid "Exportă aspectul salvat"
+msgstr "Export the saved appearance"
+
+#: includes/admin/class-appearance-page.php:248
+msgid ""
+"Descarcă un fișier .json cu aspectul salvat, textele bannerului și CSS-ul "
+"propriu, ca să-l folosești pe alt site. Cu WPML sau Polylang, textele "
+"bannerului nu intră în fișier: ele se traduc acolo. Modificările nesalvate "
+"din formular nu intră. Excluderile, setările, serviciile și datele "
+"operatorului nu se exportă."
+msgstr ""
+"Downloads a .json file with the saved appearance, the banner texts and the "
+"custom CSS, to use on another site. With WPML or Polylang the banner texts "
+"are not in the file: they are translated there. Unsaved changes in the form "
+"are not included. Exclusions, settings, services and operator data are not "
+"exported."
+
+#: includes/admin/class-appearance-page.php:253
+msgid "Importă dintr-un fișier"
+msgstr "Import from a file"
+
+#: includes/admin/class-appearance-page.php:255
+msgid "Încarcă în formular"
+msgstr "Load into the form"
+
+#: includes/admin/class-appearance-page.php:256
+msgid ""
+"Un fișier exportat din BiscuitWP, cel mult 256 KB. Valorile apar în "
+"formularul de mai sus, nesalvate: nu se schimbă nimic pe site până nu apeși "
+"„Salvează aspectul”. Fișierul nu se păstrează pe server."
+msgstr ""
+"A file exported from BiscuitWP, 256 KB at most. The values appear in the "
+"form above, unsaved: nothing changes on the site until you press “Save "
+"appearance”. The file is not kept on the server."
+
+#: includes/admin/class-appearance-page.php:296
+#: includes/admin/class-appearance-page.php:602
 msgid "Nu se aplică în modul Light."
 msgstr "Does not apply in Light mode."
 
-#: includes/admin/class-appearance-page.php:159
+#: includes/admin/class-appearance-page.php:307
 msgid "BiscuitWP — Aspect"
 msgstr "BiscuitWP — Appearance"
 
-#: includes/admin/class-appearance-page.php:160
+#: includes/admin/class-appearance-page.php:308
 msgid ""
 "Cum arată bannerul pe site. Ce alegi aici nu poate face bannerul neconform: "
 "„Accept” și „Refuz” rămân la fel de vizibile."
@@ -221,7 +347,7 @@ msgstr ""
 "How the banner looks on the site. Nothing you choose here can make the "
 "banner non-compliant: “Accept” and “Reject” stay equally visible."
 
-#: includes/admin/class-appearance-page.php:162
+#: includes/admin/class-appearance-page.php:310
 msgid ""
 "Ești în modul Light. Câmpurile care nu se aplică cardului Light sunt "
 "dezactivate: formatul și poziția, fundalul, lățimea, butoanele, "
@@ -232,7 +358,7 @@ msgstr ""
 "the Pro button texts. Their saved values are kept."
 
 #. translators: 1: contrast ratio, 2: proposed colour (#rrggbb), 3: its contrast ratio
-#: includes/admin/class-appearance-page.php:165
+#: includes/admin/class-appearance-page.php:313
 msgid ""
 "Accentul ales e greu de citit. Bannerul îl folosește oricum, dar îți "
 "recomandăm nuanța propusă."
@@ -240,7 +366,7 @@ msgstr ""
 "The chosen accent is hard to read. The banner uses it anyway, but we "
 "recommend the proposed shade."
 
-#: includes/admin/class-appearance-page.php:168
+#: includes/admin/class-appearance-page.php:316
 msgid ""
 "Tema nu declară culori cu nume cunoscute (background sau base, foreground "
 "sau contrast, primary sau accent). Bannerul folosește paleta aleasă."
@@ -250,7 +376,7 @@ msgstr ""
 "palette."
 
 #. translators: 1: the theme's colour (#rrggbb), 2: contrast ratio, 3: proposed colour (#rrggbb), 4: its contrast ratio
-#: includes/admin/class-appearance-page.php:170
+#: includes/admin/class-appearance-page.php:318
 #, php-format
 msgid ""
 "Culoarea principală a temei (%1$s) are contrast %2$s:1, sub 4,5:1, așa că "
@@ -261,23 +387,23 @@ msgstr ""
 "banner uses the palette's colour. For a colour close to the theme's, set the "
 "proposed shade as the accent: %3$s (%4$s:1)."
 
-#: includes/admin/class-appearance-page.php:177
+#: includes/admin/class-appearance-page.php:325
 msgid "Stil"
 msgstr "Style"
 
-#: includes/admin/class-appearance-page.php:182
+#: includes/admin/class-appearance-page.php:330
 msgid "Minimal"
 msgstr "Minimal"
 
-#: includes/admin/class-appearance-page.php:183
+#: includes/admin/class-appearance-page.php:331
 msgid "Brand"
 msgstr "Brand"
 
-#: includes/admin/class-appearance-page.php:184
+#: includes/admin/class-appearance-page.php:332
 msgid "Prietenos"
 msgstr "Friendly"
 
-#: includes/admin/class-appearance-page.php:190
+#: includes/admin/class-appearance-page.php:338
 msgid ""
 "Stilul dă forma: colțurile, umbra, lățimea, butoanele și animația. Brand e "
 "aspectul de până acum. Schimbarea stilului reîncarcă aceste valori; le poți "
@@ -287,19 +413,19 @@ msgstr ""
 "Brand is the look you had so far. Switching the style reloads these values; "
 "you can then adjust them below."
 
-#: includes/admin/class-appearance-page.php:194
+#: includes/admin/class-appearance-page.php:342
 msgid "Culori"
 msgstr "Colours"
 
-#: includes/admin/class-appearance-page.php:196
+#: includes/admin/class-appearance-page.php:344
 msgid "Paletă"
 msgstr "Palette"
 
-#: includes/admin/class-appearance-page.php:204
+#: includes/admin/class-appearance-page.php:352
 msgid "Preia din temă"
 msgstr "Use the theme's colours"
 
-#: includes/admin/class-appearance-page.php:205
+#: includes/admin/class-appearance-page.php:353
 msgid ""
 "„Preia din temă” citește paleta temei (theme.json): fundalul, textul și "
 "culoarea principală. Folosește doar culorile care trec verificarea de "
@@ -311,15 +437,15 @@ msgstr ""
 "check (4.5:1) are used; the rest stay from the chosen palette. It applies "
 "only with the “Light” theme."
 
-#: includes/admin/class-appearance-page.php:207
+#: includes/admin/class-appearance-page.php:355
 msgid "Accent"
 msgstr "Accent"
 
-#: includes/admin/class-appearance-page.php:211
+#: includes/admin/class-appearance-page.php:359
 msgid "Folosește nuanța propusă"
 msgstr "Use the proposed shade"
 
-#: includes/admin/class-appearance-page.php:213
+#: includes/admin/class-appearance-page.php:361
 msgid ""
 "Opțional: culoarea butoanelor și a linkurilor. Verificăm contrastul cu "
 "textul butonului și cu fundalul (minimum 4,5:1). Gol = culoarea paletei."
@@ -328,39 +454,39 @@ msgstr ""
 "the button text and with the background (at least 4.5:1). Empty = the "
 "palette's colour."
 
-#: includes/admin/class-appearance-page.php:217
+#: includes/admin/class-appearance-page.php:365
 msgid "Font"
 msgstr "Font"
 
-#: includes/admin/class-appearance-page.php:220
+#: includes/admin/class-appearance-page.php:368
 msgid "Fontul sistemului (ca până acum)"
 msgstr "System font (as before)"
 
-#: includes/admin/class-appearance-page.php:221
+#: includes/admin/class-appearance-page.php:369
 msgid "Fontul temei"
 msgstr "Theme font"
 
-#: includes/admin/class-appearance-page.php:226
+#: includes/admin/class-appearance-page.php:374
 msgid "Temă"
 msgstr "Theme"
 
-#: includes/admin/class-appearance-page.php:231
+#: includes/admin/class-appearance-page.php:379
 msgid "Luminos"
 msgstr "Light"
 
-#: includes/admin/class-appearance-page.php:232
+#: includes/admin/class-appearance-page.php:380
 msgid "Întunecat"
 msgstr "Dark"
 
-#: includes/admin/class-appearance-page.php:233
+#: includes/admin/class-appearance-page.php:381
 msgid "Automat"
 msgstr "Automatic"
 
-#: includes/admin/class-appearance-page.php:234
+#: includes/admin/class-appearance-page.php:382
 msgid "Ca site-ul"
 msgstr "Like the site"
 
-#: includes/admin/class-appearance-page.php:240
+#: includes/admin/class-appearance-page.php:388
 msgid ""
 "Automat urmează setarea de culoare a dispozitivului vizitatorului. „Ca site-"
 "ul” face bannerul întunecat când pagina are clasa sau atributul de mai jos "
@@ -370,97 +496,97 @@ msgstr ""
 "site” makes the banner dark when the page has the class or attribute below "
 "on html or body; otherwise it stays light."
 
-#: includes/admin/class-appearance-page.php:242
+#: includes/admin/class-appearance-page.php:390
 msgid "Selector pentru tema întunecată a site-ului"
 msgstr "Selector for the site's dark theme"
 
-#: includes/admin/class-appearance-page.php:248
+#: includes/admin/class-appearance-page.php:396
 msgid "Format și poziție"
 msgstr "Format and position"
 
-#: includes/admin/class-appearance-page.php:250
+#: includes/admin/class-appearance-page.php:398
 msgid "Format"
 msgstr "Format"
 
-#: includes/admin/class-appearance-page.php:252
+#: includes/admin/class-appearance-page.php:400
 msgid "Bară pe toată lățimea"
 msgstr "Full-width bar"
 
-#: includes/admin/class-appearance-page.php:253
+#: includes/admin/class-appearance-page.php:401
 msgid "Card într-un colț"
 msgstr "Card in a corner"
 
-#: includes/admin/class-appearance-page.php:254
+#: includes/admin/class-appearance-page.php:402
 msgid "Fereastră"
 msgstr "Window"
 
-#: includes/admin/class-appearance-page.php:260
+#: includes/admin/class-appearance-page.php:408
 msgid "Jos"
 msgstr "Bottom"
 
-#: includes/admin/class-appearance-page.php:261
+#: includes/admin/class-appearance-page.php:409
 msgid "Sus"
 msgstr "Top"
 
-#: includes/admin/class-appearance-page.php:264
+#: includes/admin/class-appearance-page.php:412
 msgid "Dreapta jos"
 msgstr "Bottom right"
 
-#: includes/admin/class-appearance-page.php:265
+#: includes/admin/class-appearance-page.php:413
 msgid "Stânga jos"
 msgstr "Bottom left"
 
-#: includes/admin/class-appearance-page.php:266
+#: includes/admin/class-appearance-page.php:414
 msgid "Dreapta sus"
 msgstr "Top right"
 
-#: includes/admin/class-appearance-page.php:267
+#: includes/admin/class-appearance-page.php:415
 msgid "Stânga sus"
 msgstr "Top left"
 
-#: includes/admin/class-appearance-page.php:270
+#: includes/admin/class-appearance-page.php:418
 msgid "Mijloc centru"
 msgstr "Middle center"
 
-#: includes/admin/class-appearance-page.php:271
+#: includes/admin/class-appearance-page.php:419
 msgid "Sus centru"
 msgstr "Top center"
 
-#: includes/admin/class-appearance-page.php:272
+#: includes/admin/class-appearance-page.php:420
 msgid "Jos centru"
 msgstr "Bottom center"
 
-#: includes/admin/class-appearance-page.php:278
+#: includes/admin/class-appearance-page.php:426
 msgid "Poziție"
 msgstr "Position"
 
-#: includes/admin/class-appearance-page.php:286
+#: includes/admin/class-appearance-page.php:434
 msgid "Pe telefon, bannerul apare ca bandă jos, indiferent de format."
 msgstr ""
 "On phones the banner shows as a strip at the bottom, whatever the format."
 
-#: includes/admin/class-appearance-page.php:291
+#: includes/admin/class-appearance-page.php:439
 msgid "Fundal"
 msgstr "Backdrop"
 
-#: includes/admin/class-appearance-page.php:294
+#: includes/admin/class-appearance-page.php:442
 msgid "Întunecare și blur"
 msgstr "Dim and blur"
 
-#: includes/admin/class-appearance-page.php:295
-#: includes/admin/class-appearance-page.php:298
+#: includes/admin/class-appearance-page.php:443
+#: includes/admin/class-appearance-page.php:446
 msgid "Întunecare"
 msgstr "Dim"
 
-#: includes/admin/class-appearance-page.php:296
+#: includes/admin/class-appearance-page.php:444
 msgid "Fără fundal (pagina rămâne folosibilă)"
 msgstr "No backdrop (the page stays usable)"
 
-#: includes/admin/class-appearance-page.php:301
+#: includes/admin/class-appearance-page.php:449
 msgid "Blur"
 msgstr "Blur"
 
-#: includes/admin/class-appearance-page.php:304
+#: includes/admin/class-appearance-page.php:452
 msgid ""
 "Întunecarea: 0–80%; gol = valoarea paletei. Blurul: 0–10 px; pe telefoane "
 "rămâne doar întunecarea."
@@ -468,60 +594,60 @@ msgstr ""
 "Dim: 0–80%; empty = the palette's value. Blur: 0–10 px; on phones only the "
 "dim remains."
 
-#: includes/admin/class-appearance-page.php:309
+#: includes/admin/class-appearance-page.php:457
 msgid "Detalii"
 msgstr "Details"
 
-#: includes/admin/class-appearance-page.php:311
+#: includes/admin/class-appearance-page.php:459
 msgid "Colțuri"
 msgstr "Corners"
 
-#: includes/admin/class-appearance-page.php:315
+#: includes/admin/class-appearance-page.php:463
 msgid "Umbră"
 msgstr "Shadow"
 
-#: includes/admin/class-appearance-page.php:317
-#: includes/admin/class-appearance-page.php:367
+#: includes/admin/class-appearance-page.php:465
+#: includes/admin/class-appearance-page.php:515
 msgid "Fără"
 msgstr "None"
 
-#: includes/admin/class-appearance-page.php:318
+#: includes/admin/class-appearance-page.php:466
 msgid "Mică"
 msgstr "Small"
 
-#: includes/admin/class-appearance-page.php:319
+#: includes/admin/class-appearance-page.php:467
 msgid "Medie"
 msgstr "Medium"
 
-#: includes/admin/class-appearance-page.php:320
+#: includes/admin/class-appearance-page.php:468
 msgid "Mare"
 msgstr "Large"
 
-#: includes/admin/class-appearance-page.php:323
+#: includes/admin/class-appearance-page.php:471
 msgid "Lățime max"
 msgstr "Max width"
 
-#: includes/admin/class-appearance-page.php:326
+#: includes/admin/class-appearance-page.php:474
 msgid "Margine"
 msgstr "Margin"
 
-#: includes/admin/class-appearance-page.php:329
+#: includes/admin/class-appearance-page.php:477
 msgid "Densitate"
 msgstr "Density"
 
-#: includes/admin/class-appearance-page.php:331
+#: includes/admin/class-appearance-page.php:479
 msgid "Compact"
 msgstr "Compact"
 
-#: includes/admin/class-appearance-page.php:332
+#: includes/admin/class-appearance-page.php:480
 msgid "Normal"
 msgstr "Normal"
 
-#: includes/admin/class-appearance-page.php:333
+#: includes/admin/class-appearance-page.php:481
 msgid "Extins"
 msgstr "Comfortable"
 
-#: includes/admin/class-appearance-page.php:336
+#: includes/admin/class-appearance-page.php:484
 msgid ""
 "Colțuri 0–24 px, lățimea maximă 360–960 px (doar în Pro), distanța față de "
 "marginea ecranului 0–40 px."
@@ -529,24 +655,24 @@ msgstr ""
 "Corners 0–24 px, max width 360–960 px (Pro only), distance from the screen "
 "edge 0–40 px."
 
-#: includes/admin/class-appearance-page.php:340
+#: includes/admin/class-appearance-page.php:488
 msgid "Butoane"
 msgstr "Buttons"
 
-#: includes/admin/class-appearance-page.php:345
+#: includes/admin/class-appearance-page.php:493
 msgid "Plin"
 msgstr "Solid"
 
-#: includes/admin/class-appearance-page.php:346
+#: includes/admin/class-appearance-page.php:494
 msgid "Contur"
 msgstr "Outline"
 
-#: includes/admin/class-appearance-page.php:347
-#: includes/admin/class-appearance-page.php:384
+#: includes/admin/class-appearance-page.php:495
+#: includes/admin/class-appearance-page.php:532
 msgid "Text"
 msgstr "Text"
 
-#: includes/admin/class-appearance-page.php:353
+#: includes/admin/class-appearance-page.php:501
 msgid ""
 "„Accept” și „Refuz” arată mereu la fel: același stil, aceeași mărime. Nu "
 "există setare separată pe buton."
@@ -554,27 +680,27 @@ msgstr ""
 "“Accept” and “Reject” always look the same: same style, same size. There is "
 "no separate setting per button."
 
-#: includes/admin/class-appearance-page.php:358
+#: includes/admin/class-appearance-page.php:506
 msgid "Texte"
 msgstr "Texts"
 
-#: includes/admin/class-appearance-page.php:364
+#: includes/admin/class-appearance-page.php:512
 msgid "Animație"
 msgstr "Animation"
 
-#: includes/admin/class-appearance-page.php:368
+#: includes/admin/class-appearance-page.php:516
 msgid "Apariție"
 msgstr "Fade in"
 
-#: includes/admin/class-appearance-page.php:369
+#: includes/admin/class-appearance-page.php:517
 msgid "Alunecare"
 msgstr "Slide"
 
-#: includes/admin/class-appearance-page.php:371
+#: includes/admin/class-appearance-page.php:519
 msgid "Întârziere"
 msgstr "Delay"
 
-#: includes/admin/class-appearance-page.php:374
+#: includes/admin/class-appearance-page.php:522
 msgid ""
 "Vizitatorii care cer mișcare redusă nu văd animația. Întârzierea (0–2 s) "
 "amână doar afișarea: trackerele rămân blocate de la început."
@@ -582,23 +708,23 @@ msgstr ""
 "Visitors who ask for reduced motion do not see the animation. The delay (0–2 "
 "s) only postpones the display: trackers stay blocked from the start."
 
-#: includes/admin/class-appearance-page.php:378
+#: includes/admin/class-appearance-page.php:526
 msgid "Redeschidere"
 msgstr "Reopen button"
 
-#: includes/admin/class-appearance-page.php:383
+#: includes/admin/class-appearance-page.php:531
 msgid "Iconiță"
 msgstr "Icon"
 
-#: includes/admin/class-appearance-page.php:385
+#: includes/admin/class-appearance-page.php:533
 msgid "Ambele"
 msgstr "Both"
 
-#: includes/admin/class-appearance-page.php:386
+#: includes/admin/class-appearance-page.php:534
 msgid "Deloc"
 msgstr "None"
 
-#: includes/admin/class-appearance-page.php:392
+#: includes/admin/class-appearance-page.php:540
 msgid ""
 "Un buton plutitor (jos-stânga) care redeschide preferințele, după ce "
 "vizitatorul a ales. Recomandat: „Deloc”, cu un link „Setări cookie” în "
@@ -610,11 +736,11 @@ msgstr ""
 "the footer: the [cmp_cookie_settings_link] shortcode or a menu link with the "
 "URL #cmp-settings."
 
-#: includes/admin/class-appearance-page.php:397
+#: includes/admin/class-appearance-page.php:545
 msgid "Excluderi"
 msgstr "Exclusions"
 
-#: includes/admin/class-appearance-page.php:400
+#: includes/admin/class-appearance-page.php:548
 msgid ""
 "Paginile pe care bannerul nu se deschide singur: o adresă pe rând, de "
 "exemplu /contact/. Pune * la final pentru toate paginile care încep așa, de "
@@ -626,7 +752,7 @@ msgstr ""
 "example /landing/*. On a site with the language in the address, write one "
 "line per language (/ru/landing/*)."
 
-#: includes/admin/class-appearance-page.php:401
+#: includes/admin/class-appearance-page.php:549
 msgid ""
 "Blocarea rămâne activă și acolo: fără acord, trackerele nu se încarcă. "
 "Vizitatorul își poate deschide setările din linkul din footer sau din "
@@ -635,11 +761,11 @@ msgstr ""
 "Blocking stays on there too: without consent, trackers do not load. Visitors "
 "can open their settings from the footer link or the reopen button."
 
-#: includes/admin/class-appearance-page.php:405
+#: includes/admin/class-appearance-page.php:553
 msgid "CSS propriu"
 msgstr "Custom CSS"
 
-#: includes/admin/class-appearance-page.php:408
+#: includes/admin/class-appearance-page.php:556
 msgid ""
 "Se adaugă după CSS-ul bannerului, în ambele moduri. La salvare eliminăm "
 "@import, adresele spre alte site-uri și regulile care ar putea ascunde, "
@@ -652,57 +778,57 @@ msgstr ""
 "apart the “Accept” and “Reject” buttons (for example rules on .cmp__btn--"
 "primary or [data-cmp-action=\"reject\"]). We show you what we removed."
 
-#: includes/admin/class-appearance-page.php:410
+#: includes/admin/class-appearance-page.php:558
 msgid "Variabile disponibile"
 msgstr "Available variables"
 
 #. translators: %s: example CSS rule
-#: includes/admin/class-appearance-page.php:411
+#: includes/admin/class-appearance-page.php:559
 #, php-format
 msgid "Le setezi pe .cmp (sau .cmp-light pentru modul Light), de exemplu %s."
 msgstr "Set them on .cmp (or .cmp-light for Light mode), for example %s."
 
-#: includes/admin/class-appearance-page.php:422
+#: includes/admin/class-appearance-page.php:570
 msgid "Salvează aspectul"
 msgstr "Save appearance"
 
-#: includes/admin/class-appearance-page.php:434
+#: includes/admin/class-appearance-page.php:583
 msgid "Titlu banner"
 msgstr "Banner title"
 
-#: includes/admin/class-appearance-page.php:435
+#: includes/admin/class-appearance-page.php:584
 msgid "Text introductiv"
 msgstr "Intro text"
 
-#: includes/admin/class-appearance-page.php:436
+#: includes/admin/class-appearance-page.php:585
 msgid "Text notice (Light)"
 msgstr "Notice text (Light)"
 
-#: includes/admin/class-appearance-page.php:437
+#: includes/admin/class-appearance-page.php:586
 msgid "Buton „Accept\""
 msgstr "“Accept” button"
 
-#: includes/admin/class-appearance-page.php:438
+#: includes/admin/class-appearance-page.php:587
 msgid "Buton „Doar necesare\""
 msgstr "“Necessary only” button"
 
-#: includes/admin/class-appearance-page.php:439
+#: includes/admin/class-appearance-page.php:588
 msgid "Buton „Gestionează\""
 msgstr "“Manage” button"
 
-#: includes/admin/class-appearance-page.php:440
+#: includes/admin/class-appearance-page.php:589
 msgid "Buton „Confirmă selecția\""
 msgstr "“Confirm selection” button"
 
-#: includes/admin/class-appearance-page.php:441
+#: includes/admin/class-appearance-page.php:590
 msgid "Titlu preferințe"
 msgstr "Preferences title"
 
-#: includes/admin/class-appearance-page.php:453
+#: includes/admin/class-appearance-page.php:602
 msgid "Doar în modul Light."
 msgstr "Light mode only."
 
-#: includes/admin/class-appearance-page.php:460
+#: includes/admin/class-appearance-page.php:609
 msgid ""
 "Site-ul folosește WPML sau Polylang. Textele de mai jos sunt cele de bază; "
 "le traduci în pluginul de traduceri, ca până acum."
@@ -710,38 +836,38 @@ msgstr ""
 "The site uses WPML or Polylang. The texts below are the base texts; you "
 "translate them in the translation plugin, as before."
 
-#: includes/admin/class-appearance-page.php:461
+#: includes/admin/class-appearance-page.php:610
 msgid "Deschide traducerile textelor"
 msgstr "Open the text translations"
 
-#: includes/admin/class-appearance-page.php:464
+#: includes/admin/class-appearance-page.php:613
 msgid "(implicit)"
 msgstr "(default)"
 
-#: includes/admin/class-appearance-page.php:470
+#: includes/admin/class-appearance-page.php:619
 msgid "Câmp gol = textul implicit al limbii (arătat în câmp, estompat)."
 msgstr ""
 "Empty field = the language's default text (shown greyed out in the field)."
 
-#: includes/admin/class-appearance-page.php:471
+#: includes/admin/class-appearance-page.php:620
 msgid "Limba textelor"
 msgstr "Language of the texts"
 
-#: includes/admin/class-appearance-page.php:497
+#: includes/admin/class-appearance-page.php:646
 msgid ""
 "Previzualizarea nu a putut fi pregătită. Reîncarcă pagina și încearcă din "
 "nou."
 msgstr "The preview could not be prepared. Reload the page and try again."
 
-#: includes/admin/class-appearance-page.php:498
+#: includes/admin/class-appearance-page.php:647
 msgid "Deschide previzualizarea"
 msgstr "Open the preview"
 
-#: includes/admin/class-appearance-page.php:499
+#: includes/admin/class-appearance-page.php:648
 msgid "Vezi pe site"
 msgstr "View on site"
 
-#: includes/admin/class-appearance-page.php:500
+#: includes/admin/class-appearance-page.php:649
 msgid "(se deschide într-o filă nouă, cu setările nesalvate)"
 msgstr "(opens in a new tab, with the unsaved settings)"
 
@@ -859,12 +985,12 @@ msgid "Salvează categoriile"
 msgstr "Save categories"
 
 #: includes/admin/class-categories-page.php:53
-#: includes/admin/class-services-page.php:98
+#: includes/admin/class-services-page.php:118
 msgid "Categorie"
 msgstr "Category"
 
 #: includes/admin/class-categories-page.php:54
-#: includes/admin/class-services-page.php:90
+#: includes/admin/class-services-page.php:110
 msgid "Șterge"
 msgstr "Delete"
 
@@ -893,8 +1019,8 @@ msgid "Cookies"
 msgstr "Cookies"
 
 #: includes/admin/class-categories-page.php:79
-#: includes/admin/class-services-page.php:96
-#: includes/admin/class-services-page.php:114
+#: includes/admin/class-services-page.php:116
+#: includes/admin/class-services-page.php:134
 msgid "Nume"
 msgstr "Name"
 
@@ -903,22 +1029,22 @@ msgid "Furnizor"
 msgstr "Provider"
 
 #: includes/admin/class-categories-page.php:81
-#: includes/admin/class-services-page.php:115
+#: includes/admin/class-services-page.php:135
 msgid "Durată"
 msgstr "Duration"
 
 #: includes/admin/class-categories-page.php:82
-#: includes/admin/class-services-page.php:116
+#: includes/admin/class-services-page.php:136
 msgid "Scop"
 msgstr "Purpose"
 
 #: includes/admin/class-categories-page.php:91
-#: includes/admin/class-services-page.php:130
+#: includes/admin/class-services-page.php:150
 msgid "+ Adaugă cookie"
 msgstr "+ Add cookie"
 
 #: includes/admin/class-check-page.php:39
-#: includes/admin/class-services-page.php:32
+#: includes/admin/class-services-page.php:49
 msgid "blocat până la acord"
 msgstr "blocked until consent"
 
@@ -927,7 +1053,7 @@ msgid "blocat permanent (modul Light)"
 msgstr "permanently blocked (Light mode)"
 
 #: includes/admin/class-check-page.php:43
-#: includes/admin/class-services-page.php:27
+#: includes/admin/class-services-page.php:41
 msgid "neblocat (necesar)"
 msgstr "not blocked (necessary)"
 
@@ -984,7 +1110,7 @@ msgid "cod în pagină (temă, plugin sau conținut)"
 msgstr "inline code (theme, plugin or content)"
 
 #: includes/admin/class-check-page.php:119
-#: includes/admin/class-settings-page.php:236
+#: includes/admin/class-settings-page.php:251
 msgid "Google Fonts"
 msgstr "Google Fonts"
 
@@ -1075,6 +1201,7 @@ msgid "trimite IP-ul vizitatorului"
 msgstr "sends the visitor’s IP address"
 
 #: includes/admin/class-check-page.php:175
+#: includes/admin/class-services-page.php:30
 msgid "necesar"
 msgstr "necessary"
 
@@ -1115,7 +1242,7 @@ msgstr[1] ""
 
 #. translators: %d — count
 #: includes/admin/class-check-page.php:244
-#: includes/admin/class-settings-page.php:238
+#: includes/admin/class-settings-page.php:253
 #, php-format
 msgid "Localizate %d fonturi."
 msgstr "Localized %d fonts."
@@ -1164,7 +1291,7 @@ msgstr "Server scan"
 
 #. translators: 1: number of pages, 2: time span like "12 minute"
 #: includes/admin/class-check-page.php:278
-#: includes/admin/class-services-page.php:212
+#: includes/admin/class-services-page.php:254
 #, php-format
 msgid "%1$d pagină, acum %2$s"
 msgid_plural "%1$d pagini, acum %2$s"
@@ -1172,7 +1299,7 @@ msgstr[0] "%1$d page, %2$s ago"
 msgstr[1] "%1$d pages, %2$s ago"
 
 #: includes/admin/class-check-page.php:280
-#: includes/admin/class-services-page.php:217
+#: includes/admin/class-services-page.php:259
 msgid "Rescanează"
 msgstr "Rescan"
 
@@ -1185,7 +1312,7 @@ msgstr ""
 "what is in the page, not what JavaScript adds later."
 
 #: includes/admin/class-check-page.php:289
-#: includes/admin/class-services-page.php:220
+#: includes/admin/class-services-page.php:262
 msgid "Scanăm paginile site-ului în fundal. Reîncarcă pagina mai târziu."
 msgstr "Scanning the site’s pages in the background. Reload this page later."
 
@@ -1649,7 +1776,7 @@ msgstr ""
 "documents or close it."
 
 #: includes/admin/class-legal-page.php:307
-#: includes/admin/class-services-page.php:433
+#: includes/admin/class-services-page.php:593
 msgid "Închide"
 msgstr "Close"
 
@@ -1809,11 +1936,34 @@ msgstr "Could not create the page."
 msgid "Necesare"
 msgstr "Necessary"
 
-#: includes/admin/class-services-page.php:30
+#: includes/admin/class-services-page.php:28
+msgid "legat"
+msgstr "linked"
+
+#: includes/admin/class-services-page.php:29
+msgid "blocat în pagină"
+msgstr "blocked in the page"
+
+#: includes/admin/class-services-page.php:31
+#: includes/admin/class-services-page.php:44
 msgid "excepție"
 msgstr "exception"
 
-#: includes/admin/class-services-page.php:48
+#: includes/admin/class-services-page.php:38
+msgid "decide serviciul tău personalizat"
+msgstr "your custom service decides"
+
+#: includes/admin/class-services-page.php:47
+msgid "blocat până la acord, în afară de ce decide serviciul tău personalizat"
+msgstr "blocked until consent, except what your custom service decides"
+
+#. translators: 1: domain or address, 2: name of the custom service
+#: includes/admin/class-services-page.php:65
+#, php-format
+msgid "Pentru %1$s decide serviciul tău personalizat „%2$s”."
+msgstr "For %1$s your custom service “%2$s” decides."
+
+#: includes/admin/class-services-page.php:68
 msgid ""
 "Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat "
 "ca să nu se strice formularele. Îl poți bloca dintr-un click."
@@ -1821,12 +1971,12 @@ msgstr ""
 "EU authorities consider that reCAPTCHA requires consent. It is left "
 "unblocked so forms don’t break. You can block it with one click."
 
-#: includes/admin/class-services-page.php:62
-#: includes/admin/class-services-page.php:66
+#: includes/admin/class-services-page.php:82
+#: includes/admin/class-services-page.php:86
 msgid "nu bloca (excepție)"
 msgstr "don’t block (exception)"
 
-#: includes/admin/class-services-page.php:63
+#: includes/admin/class-services-page.php:83
 msgid ""
 "În modul Advanced, Google Analytics și Tag Manager se încarcă mereu, cu "
 "Consent Mode pe «refuzat»."
@@ -1834,23 +1984,23 @@ msgstr ""
 "In Advanced mode, Google Analytics and Tag Manager always load, with Consent "
 "Mode set to “denied”."
 
-#: includes/admin/class-services-page.php:64
+#: includes/admin/class-services-page.php:84
 msgid "Setarea ta: nu bloca (se aplică și în Strict)."
 msgstr "Your setting: don’t block (also applies in Strict)."
 
-#: includes/admin/class-services-page.php:64
+#: includes/admin/class-services-page.php:84
 msgid "Setarea ta: blocat până la acord (se aplică în Strict)."
 msgstr "Your setting: blocked until consent (applies in Strict)."
 
-#: includes/admin/class-services-page.php:89 templates/admin/guide.php:113
+#: includes/admin/class-services-page.php:109 templates/admin/guide.php:136
 msgid "Serviciu personalizat"
 msgstr "Custom service"
 
-#: includes/admin/class-services-page.php:106
+#: includes/admin/class-services-page.php:126
 msgid "Domenii (unul pe rând)"
 msgstr "Domains (one per line)"
 
-#: includes/admin/class-services-page.php:108
+#: includes/admin/class-services-page.php:128
 msgid ""
 "Se blochează scripturile și iframe-urile (video, formulare, calendare) de pe "
 "aceste domenii."
@@ -1858,31 +2008,57 @@ msgstr ""
 "Scripts and iframes (videos, forms, calendars) from these domains are "
 "blocked."
 
-#: includes/admin/class-services-page.php:111
+#: includes/admin/class-services-page.php:131
 msgid "Cookie-uri"
 msgstr "Cookies"
 
-#: includes/admin/class-services-page.php:134
+#: includes/admin/class-services-page.php:154
 msgid "Script (opțional, rulează doar după acord)"
 msgstr "Script (optional, runs only after consent)"
 
-#: includes/admin/class-services-page.php:138
+#: includes/admin/class-services-page.php:158
 msgid "Are script (doar un administrator cu drept de cod îl poate modifica)"
 msgstr "Has a script (only an administrator allowed to add code can change it)"
 
-#: includes/admin/class-services-page.php:179
+#: includes/admin/class-services-page.php:209
 msgid "BiscuitWP — Servicii"
 msgstr "BiscuitWP — Services"
 
-#: includes/admin/class-services-page.php:181
+#. translators: %s: service names
+#: includes/admin/class-services-page.php:211
+#, php-format
+msgid "Am început să blocăm până la acord: %s. Le vezi mai jos, în listă."
+msgstr "We started blocking until consent: %s. You see them in the list below."
+
+#: includes/admin/class-services-page.php:214
 msgid "Servicii salvate."
 msgstr "Services saved."
 
-#: includes/admin/class-services-page.php:184
+#: includes/admin/class-services-page.php:217
 msgid "Lista a fost resetată."
 msgstr "The list was reset."
 
-#: includes/admin/class-services-page.php:187
+#: includes/admin/class-services-page.php:220
+msgid "Domeniul e ignorat: nu mai primești email despre el."
+msgstr "The domain is ignored: you will not get emails about it."
+
+#: includes/admin/class-services-page.php:222
+msgid "Domeniul nu mai e ignorat."
+msgstr "The domain is no longer ignored."
+
+#: includes/admin/class-services-page.php:224
+msgid ""
+"Domeniul nu mai e în lista de pe acest ecran, deci nu s-a schimbat nimic."
+msgstr ""
+"The domain is no longer on the list of this screen, so nothing was changed."
+
+#: includes/admin/class-services-page.php:226
+msgid ""
+"O scanare termina chiar atunci și schimbarea nu s-a făcut. Apasă din nou."
+msgstr ""
+"A scan was finishing at that moment and the change was not made. Press again."
+
+#: includes/admin/class-services-page.php:229
 msgid ""
 "Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod "
 "(unfiltered_html). Restul modificărilor au fost salvate."
@@ -1890,7 +2066,7 @@ msgstr ""
 "The script was not saved: your account is not allowed to add code "
 "(unfiltered_html). The other changes were saved."
 
-#: includes/admin/class-services-page.php:190
+#: includes/admin/class-services-page.php:232
 msgid ""
 "Domeniul site-ului tău nu poate fi un domeniu de serviciu personalizat (ar "
 "bloca scripturile site-ului). L-am scos din listă."
@@ -1899,12 +2075,12 @@ msgstr ""
 "site’s own scripts). It was removed from the list."
 
 #. translators: %s: error text
-#: includes/admin/class-services-page.php:193
+#: includes/admin/class-services-page.php:235
 #, php-format
 msgid "Biblioteca de servicii: %s"
 msgstr "Services library: %s"
 
-#: includes/admin/class-services-page.php:197
+#: includes/admin/class-services-page.php:239
 msgid ""
 "WooCommerce este activ, dar pluginul WP Consent API lipsește: extensiile "
 "WooCommerce nu află alegerea vizitatorului."
@@ -1912,49 +2088,94 @@ msgstr ""
 "WooCommerce is active, but the WP Consent API plugin is missing: WooCommerce "
 "extensions don’t know the visitor’s choice."
 
-#: includes/admin/class-services-page.php:199
+#: includes/admin/class-services-page.php:241
 msgid "Instalează WP Consent API"
 msgstr "Install WP Consent API"
 
-#: includes/admin/class-services-page.php:209
+#: includes/admin/class-services-page.php:251
 msgid "Găsite pe site"
 msgstr "Found on the site"
 
-#: includes/admin/class-services-page.php:222
+#: includes/admin/class-services-page.php:264
 msgid "Paginile site-ului nu au putut fi citite. Încearcă „Rescanează”."
 msgstr "The site’s pages could not be read. Try “Rescan”."
 
-#: includes/admin/class-services-page.php:224
+#: includes/admin/class-services-page.php:266
 msgid "Apasă „Rescanează” ca să afli ce servicii încarcă site-ul."
 msgstr "Click “Rescan” to find out which services the site loads."
 
-#: includes/admin/class-services-page.php:226
+#: includes/admin/class-services-page.php:268
 msgid "Nu am găsit pe site servicii care să aștepte acordul."
 msgstr "No services that wait for consent were found on the site."
 
-#: includes/admin/class-services-page.php:231
+#: includes/admin/class-services-page.php:273
 msgid "configurat mai jos"
 msgstr "configured below"
 
+#: includes/admin/class-services-page.php:282
+msgid "Domenii necunoscute"
+msgstr "Unknown domains"
+
+#: includes/admin/class-services-page.php:283
+msgid ""
+"Scripturi sau iframe-uri de pe domenii care nu sunt ale site-ului și nu "
+"aparțin niciunui serviciu din listă. Ele se încarcă acum fără acord. „Adaugă "
+"ca serviciu” completează formularul de mai jos, dar nu salvează nimic până "
+"nu apeși „Salvează serviciile”."
+msgstr ""
+"Scripts or iframes from domains that are not the site's own and belong to no "
+"service in the list. They load now without consent. “Add as a service” fills "
+"in the form below but saves nothing until you press “Save services”."
+
+#: includes/admin/class-services-page.php:291
+msgid "Adaugă ca serviciu"
+msgstr "Add as a service"
+
+#: includes/admin/class-services-page.php:292
+msgid "Ignoră"
+msgstr "Ignore"
+
+#. translators: %d: number of ignored domains
+#: includes/admin/class-services-page.php:300
+#, php-format
+msgid "Domenii ignorate (%d)"
+msgstr "Ignored domains (%d)"
+
+#: includes/admin/class-services-page.php:305
+msgid "Nu mai ignora"
+msgstr "Stop ignoring"
+
+#: includes/admin/class-services-page.php:314 templates/admin/guide.php:118
+msgid "Pluginuri recunoscute"
+msgstr "Recognised plugins"
+
+#: includes/admin/class-services-page.php:315
+msgid ""
+"Pluginuri active pe care le cunoaștem. Categoria serviciilor lor se schimbă "
+"în lista de servicii."
+msgstr ""
+"Active plugins we know. The category of their services is changed in the "
+"services list."
+
 #. translators: %d: number of services
-#: includes/admin/class-services-page.php:240
+#: includes/admin/class-services-page.php:338
 #, php-format
 msgid "Toată biblioteca (%d)"
 msgstr "Entire library (%d)"
 
-#: includes/admin/class-services-page.php:244
+#: includes/admin/class-services-page.php:342
 msgid "găsit pe site, se setează mai sus"
 msgstr "found on the site, configured above"
 
-#: includes/admin/class-services-page.php:252
+#: includes/admin/class-services-page.php:350
 msgid "Servicii personalizate"
 msgstr "Custom services"
 
-#: includes/admin/class-services-page.php:258
+#: includes/admin/class-services-page.php:356
 msgid "+ Adaugă serviciu"
 msgstr "+ Add service"
 
-#: includes/admin/class-services-page.php:260
+#: includes/admin/class-services-page.php:358
 msgid ""
 "Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt "
 "JavaScript ulterior trebuie controlat din GTM (Consent Mode)."
@@ -1962,22 +2183,22 @@ msgstr ""
 "We block what appears in the page’s HTML. Whatever Google Tag Manager or "
 "other JavaScript adds later must be controlled from GTM (Consent Mode)."
 
-#: includes/admin/class-services-page.php:262
+#: includes/admin/class-services-page.php:360
 msgid "Salvează serviciile"
 msgstr "Save services"
 
-#: includes/admin/class-services-page.php:270
+#: includes/admin/class-services-page.php:377
 msgid ""
 "Lista serviciilor văzute va conține doar ce a găsit ultima scanare. Continui?"
 msgstr ""
 "The list of seen services will contain only what the last scan found. "
 "Continue?"
 
-#: includes/admin/class-services-page.php:273
+#: includes/admin/class-services-page.php:380
 msgid "Resetează lista serviciilor văzute"
 msgstr "Reset the list of seen services"
 
-#: includes/admin/class-services-page.php:274
+#: includes/admin/class-services-page.php:381
 msgid ""
 "Serviciile găsite vreodată pe site rămân în listă (pentru re-consimțământ) "
 "până o resetezi."
@@ -1986,16 +2207,16 @@ msgstr ""
 "reset it."
 
 #. translators: %s: service names
-#: includes/admin/class-services-page.php:428
+#: includes/admin/class-services-page.php:588
 #, php-format
 msgid "Am început să blocăm până la acord: %s —"
 msgstr "We started blocking until consent: %s —"
 
-#: includes/admin/class-services-page.php:430
+#: includes/admin/class-services-page.php:590
 msgid "Unele servicii de pe site așteaptă acum acordul vizitatorului —"
 msgstr "Some services on the site now wait for the visitor’s consent —"
 
-#: includes/admin/class-services-page.php:432
+#: includes/admin/class-services-page.php:592
 msgid "verifică în „Servicii”"
 msgstr "review them in “Services”"
 
@@ -2089,19 +2310,31 @@ msgstr ""
 msgid "Setări salvate."
 msgstr "Settings saved."
 
-#: includes/admin/class-settings-page.php:109
+#: includes/admin/class-settings-page.php:103
+msgid ""
+"Adresa de email pentru domenii noi nu e validă, deci nu a fost salvată. Dacă "
+"aveai deja o adresă, a rămas ea. Dacă nu aveai, salvarea aceasta nu a pornit "
+"emailul. Scrie o adresă validă sau lasă câmpul gol pentru adresa de "
+"administrator."
+msgstr ""
+"The email address for new domains is not valid, so it was not saved. If you "
+"already had an address, it stays. If you did not, this save did not switch "
+"the email on. Enter a valid address, or leave the field empty for the "
+"administrator address."
+
+#: includes/admin/class-settings-page.php:112
 msgid "Mod afișare"
 msgstr "Display mode"
 
-#: includes/admin/class-settings-page.php:113
+#: includes/admin/class-settings-page.php:116
 msgid "Pro — banner cu consimțământ granular"
 msgstr "Pro — banner with granular consent"
 
-#: includes/admin/class-settings-page.php:114
+#: includes/admin/class-settings-page.php:117
 msgid "Light — bară informativă, fără cookie-uri"
 msgstr "Light — information bar, no cookies"
 
-#: includes/admin/class-settings-page.php:116
+#: includes/admin/class-settings-page.php:119
 msgid ""
 "Light: site-ul e utilizabil imediat, se afișează doar un notice și nu se "
 "stochează niciun cookie. Light nu poate cere acord, așa că Google Analytics, "
@@ -2112,7 +2345,7 @@ msgstr ""
 "is stored. Light cannot ask for consent, so Google Analytics, Tag Manager "
 "and Meta Pixel are permanently blocked; if you need them, use Pro."
 
-#: includes/admin/class-settings-page.php:122
+#: includes/admin/class-settings-page.php:125
 msgid ""
 "Culorile, poziția, textele bannerului și butonul de redeschidere se setează "
 "în ecranul Aspect."
@@ -2120,15 +2353,15 @@ msgstr ""
 "Colours, position, banner texts and the reopen button are set on the "
 "Appearance screen."
 
-#: includes/admin/class-settings-page.php:123
+#: includes/admin/class-settings-page.php:126
 msgid "Deschide Aspect"
 msgstr "Open Appearance"
 
-#: includes/admin/class-settings-page.php:127
+#: includes/admin/class-settings-page.php:130
 msgid "Memorarea consimțământului (zile)"
 msgstr "Remember consent for (days)"
 
-#: includes/admin/class-settings-page.php:130
+#: includes/admin/class-settings-page.php:133
 msgid ""
 "Câte zile ține minte browserul alegerea vizitatorului înainte să reapară "
 "bannerul (implicit 180, maximum 396 = 13 luni, practica din UE). Diferit de "
@@ -2138,15 +2371,15 @@ msgstr ""
 "shows again (default 180, maximum 396 = 13 months, in line with EU "
 "practice). Not the same as the consent register retention."
 
-#: includes/admin/class-settings-page.php:134
+#: includes/admin/class-settings-page.php:137
 msgid "Blocare scripturi tracking"
 msgstr "Tracking script blocking"
 
-#: includes/admin/class-settings-page.php:136
+#: includes/admin/class-settings-page.php:139
 msgid "Blochează scripturile de tracking până la consimțământ"
 msgstr "Block tracking scripts until consent"
 
-#: includes/admin/class-settings-page.php:137
+#: includes/admin/class-settings-page.php:140
 msgid ""
 "Google Analytics, Tag Manager și Meta Pixel nu se încarcă deloc înainte de "
 "Accept: Google și Meta nu primesc nimic, nici măcar IP-ul (Consent Mode "
@@ -2160,15 +2393,15 @@ msgstr ""
 "block with a “Load content” button until consent. Recommended: on. In Light "
 "mode, blocking is always on."
 
-#: includes/admin/class-settings-page.php:145
+#: includes/admin/class-settings-page.php:148
 msgid "Mod de măsurare"
 msgstr "Measurement mode"
 
-#: includes/admin/class-settings-page.php:148
+#: includes/admin/class-settings-page.php:151
 msgid "Strict"
 msgstr "Strict"
 
-#: includes/admin/class-settings-page.php:148
+#: includes/admin/class-settings-page.php:151
 msgid ""
 "serviciile blocate nu se încarcă înainte de acord (excepțiile marcate, de "
 "ex. unelte de statistică fără cookie-uri, da). Recomandat."
@@ -2176,11 +2409,11 @@ msgstr ""
 "blocked services don’t load before consent (marked exceptions, e.g. "
 "cookieless analytics tools, do). Recommended."
 
-#: includes/admin/class-settings-page.php:149
+#: includes/admin/class-settings-page.php:152
 msgid "Advanced"
 msgstr "Advanced"
 
-#: includes/admin/class-settings-page.php:149
+#: includes/admin/class-settings-page.php:152
 msgid ""
 "Google Analytics 4 și Tag Manager se încarcă de la început, cu Consent Mode "
 "pe „refuzat” până la acord. Google estimează vizitele celor care refuză. "
@@ -2192,7 +2425,7 @@ msgstr ""
 "decline. Google Ads (AW-), Floodlight (DC-) and the old Universal Analytics "
 "(analytics.js) stay blocked until consent."
 
-#: includes/admin/class-settings-page.php:151
+#: includes/admin/class-settings-page.php:154
 msgid ""
 "Am înțeles că Google primește date înainte de acord. E o zonă gri în Moldova "
 "(Legea 72/2025, art. 116) și în UE."
@@ -2200,7 +2433,7 @@ msgstr ""
 "I understand that Google receives data before consent. This is a grey area "
 "in Moldova (Law 72/2025, Art. 116) and in the EU."
 
-#: includes/admin/class-settings-page.php:154
+#: includes/admin/class-settings-page.php:157
 msgid ""
 "Advanced cere modul Pro cu blocarea scripturilor pornită. Altfel opțiunea nu "
 "are niciun efect, iar alegerea salvată se păstrează."
@@ -2208,15 +2441,15 @@ msgstr ""
 "Advanced requires Pro mode with script blocking on. Otherwise the option has "
 "no effect, and the saved choice is kept."
 
-#: includes/admin/class-settings-page.php:158
+#: includes/admin/class-settings-page.php:161
 msgid "Reîncărcare după alegere"
 msgstr "Reload after choice"
 
-#: includes/admin/class-settings-page.php:160
+#: includes/admin/class-settings-page.php:163
 msgid "Reîncarcă pagina după alegerea din banner"
 msgstr "Reload the page after the banner choice"
 
-#: includes/admin/class-settings-page.php:161
+#: includes/admin/class-settings-page.php:164
 msgid ""
 "Pentru site-uri cu animații la încărcare, ascunse de overlay: după "
 "reîncărcare se văd de la început. Se aplică doar la prima alegere, din "
@@ -2227,15 +2460,15 @@ msgstr ""
 "play from the start. Applies only to the first choice, from the banner shown "
 "on load — not to later changes made from the “Cookie settings” link."
 
-#: includes/admin/class-settings-page.php:165
+#: includes/admin/class-settings-page.php:168
 msgid "Global Privacy Control"
 msgstr "Global Privacy Control"
 
-#: includes/admin/class-settings-page.php:168
+#: includes/admin/class-settings-page.php:171
 msgid "Respectă semnalul Global Privacy Control (GPC)"
 msgstr "Respect the Global Privacy Control (GPC) signal"
 
-#: includes/admin/class-settings-page.php:169
+#: includes/admin/class-settings-page.php:172
 msgid ""
 "Când browserul vizitatorului trimite semnalul GPC, pluginul înregistrează "
 "„Doar cele necesare” și nu mai arată bannerul (vizitatorul poate accepta "
@@ -2247,15 +2480,41 @@ msgstr ""
 "time from “Cookie settings”). Moldovan law does not require it explicitly, "
 "so it is an option, on by default."
 
-#: includes/admin/class-settings-page.php:173
+#: includes/admin/class-settings-page.php:176
+msgid "Email la domenii noi"
+msgstr "Email for new domains"
+
+#: includes/admin/class-settings-page.php:179
+msgid "Trimite un email când apare pe site un domeniu terț necunoscut"
+msgstr "Send an email when an unknown third-party domain appears on the site"
+
+#: includes/admin/class-settings-page.php:181
+msgid "Adresa"
+msgstr "Address"
+
+#: includes/admin/class-settings-page.php:184
+msgid ""
+"Scanarea zilnică caută scripturi și iframe-uri de pe domenii care nu sunt "
+"ale site-ului și nu aparțin niciunui serviciu. Primești cel mult un email la "
+"7 zile, cu domeniile noi, doar în text. Lasă adresa goală ca să folosești "
+"adresa administratorului. Nu vede ce adaugă JavaScript după încărcare sau "
+"Tag Manager: pentru asta folosește ecranul „Verificare”."
+msgstr ""
+"The daily scan looks for scripts and iframes from domains that are not the "
+"site's own and belong to no service. You get at most one email every 7 days, "
+"with the new domains, in plain text. Leave the address empty to use the "
+"administrator's address. It does not see what JavaScript adds after loading "
+"or what Tag Manager adds: use the “Check” screen for that."
+
+#: includes/admin/class-settings-page.php:188
 msgid "Localizare Google Fonts"
 msgstr "Localize Google Fonts"
 
-#: includes/admin/class-settings-page.php:175
+#: includes/admin/class-settings-page.php:190
 msgid "Servește Google Fonts local (fără request la Google)"
 msgstr "Serve Google Fonts locally (no request to Google)"
 
-#: includes/admin/class-settings-page.php:177
+#: includes/admin/class-settings-page.php:192
 msgid ""
 "După activare (și Salvează), apasă „Localizează fonturile\" de mai jos ca să "
 "descarci fonturile de pe paginile scanate ale site-ului. Se aplică doar în "
@@ -2265,16 +2524,16 @@ msgstr ""
 "the fonts from the site’s scanned pages. Applies only in Pro mode."
 
 #. translators: %d — count
-#: includes/admin/class-settings-page.php:181
+#: includes/admin/class-settings-page.php:196
 #, php-format
 msgid "(%d fonturi localizate)"
 msgstr "(%d fonts localized)"
 
-#: includes/admin/class-settings-page.php:188
+#: includes/admin/class-settings-page.php:203
 msgid "Resurse terțe WordPress"
 msgstr "WordPress third-party resources"
 
-#: includes/admin/class-settings-page.php:190
+#: includes/admin/class-settings-page.php:205
 msgid ""
 "Oprește emoji-urile WordPress (nu mai trimit IP-ul vizitatorilor către "
 "s.w.org)"
@@ -2282,7 +2541,7 @@ msgstr ""
 "Disable WordPress emoji (they no longer send visitors’ IP addresses to "
 "s.w.org)"
 
-#: includes/admin/class-settings-page.php:191
+#: includes/admin/class-settings-page.php:206
 msgid ""
 "Înlocuiește Gravatar cu un avatar local (Gravatar trimite IP-ul și un hash "
 "al emailului)"
@@ -2290,41 +2549,41 @@ msgstr ""
 "Replace Gravatar with a local avatar (Gravatar sends the IP address and a "
 "hash of the email)"
 
-#: includes/admin/class-settings-page.php:195
+#: includes/admin/class-settings-page.php:210
 msgid "Versiune politică"
 msgstr "Policy version"
 
-#: includes/admin/class-settings-page.php:198
+#: includes/admin/class-settings-page.php:213
 msgid "Incrementează pentru a re-afișa banner-ul tuturor vizitatorilor."
 msgstr "Increase the number to show the banner again to all visitors."
 
-#: includes/admin/class-settings-page.php:202
+#: includes/admin/class-settings-page.php:217
 msgid "Retenție log (luni)"
 msgstr "Consent register retention (months)"
 
 #. translators: 1: published count, 2: total, 3: drafts
-#: includes/admin/class-settings-page.php:213
+#: includes/admin/class-settings-page.php:228
 #, php-format
 msgid "Publicate: %1$d din %2$d · ciorne: %3$d"
 msgstr "Published: %1$d of %2$d · drafts: %3$d"
 
-#: includes/admin/class-settings-page.php:219
+#: includes/admin/class-settings-page.php:234
 msgid "Gestionează paginile legale"
 msgstr "Manage legal pages"
 
-#: includes/admin/class-settings-page.php:223
+#: includes/admin/class-settings-page.php:238
 msgid "Dezinstalare"
 msgstr "Uninstall"
 
-#: includes/admin/class-settings-page.php:226
+#: includes/admin/class-settings-page.php:241
 msgid "Date"
 msgstr "Data"
 
-#: includes/admin/class-settings-page.php:228
+#: includes/admin/class-settings-page.php:243
 msgid "Șterge toate datele la dezinstalare"
 msgstr "Delete all data on uninstall"
 
-#: includes/admin/class-settings-page.php:229
+#: includes/admin/class-settings-page.php:244
 msgid ""
 "Include registrul de consimțăminte, care e dovada legală a alegerilor "
 "vizitatorilor. Păstrează-l cât cere legea (de exemplu 13 luni) înainte să "
@@ -2334,15 +2593,15 @@ msgstr ""
 "choices. Keep it as long as the law requires (for example 13 months) before "
 "deleting the plugin with this option on."
 
-#: includes/admin/class-settings-page.php:233
+#: includes/admin/class-settings-page.php:248
 msgid "Salvează setările"
 msgstr "Save settings"
 
-#: includes/admin/class-settings-page.php:241
+#: includes/admin/class-settings-page.php:256
 msgid "Fonturi localizate șterse."
 msgstr "Localized fonts deleted."
 
-#: includes/admin/class-settings-page.php:243
+#: includes/admin/class-settings-page.php:258
 msgid ""
 "Descarcă fonturile Google folosite pe paginile scanate ale site-ului și "
 "servește-le local. Activează întâi opțiunea „Localizare Google Fonts\" de "
@@ -2351,15 +2610,15 @@ msgstr ""
 "Downloads the Google fonts used on the site’s scanned pages and serves them "
 "locally. First turn on the “Localize Google Fonts” option above and save."
 
-#: includes/admin/class-settings-page.php:247
+#: includes/admin/class-settings-page.php:262
 msgid "Localizează fonturile"
 msgstr "Localize fonts"
 
-#: includes/admin/class-settings-page.php:252
+#: includes/admin/class-settings-page.php:267
 msgid "Șterge fonturile localizate"
 msgstr "Delete localized fonts"
 
-#: includes/admin/class-settings-page.php:321
+#: includes/admin/class-settings-page.php:339
 msgid ""
 "Ai trecut pe Advanced. De acum Google primește ping-uri fără cookie-uri de "
 "la toți vizitatorii și estimează vizitele celor care refuză. Verifică în Tag "
@@ -2369,7 +2628,7 @@ msgstr ""
 "all visitors and estimates visits from those who decline. Check in Tag "
 "Manager that your tags respect Consent Mode."
 
-#: includes/admin/class-settings-page.php:323
+#: includes/admin/class-settings-page.php:341
 msgid ""
 "Ai trecut pe Strict. De acum nu mai primești date de la vizitatorii care "
 "refuză, deci statisticile vor arăta mai puține vizite."
@@ -2377,14 +2636,14 @@ msgstr ""
 "You switched to Strict. From now on you no longer receive data from visitors "
 "who decline, so your analytics will show fewer visits."
 
-#: includes/admin/class-settings-page.php:325
+#: includes/admin/class-settings-page.php:343
 msgid ""
 "Google Analytics / Tag Manager rămân neblocate prin setarea din «Servicii»."
 msgstr ""
 "Google Analytics / Tag Manager stay unblocked through the setting in "
 "“Services”."
 
-#: includes/admin/class-settings-page.php:331
+#: includes/admin/class-settings-page.php:349
 msgid "Regenerează paginile legale."
 msgstr "Regenerate the legal pages."
 
@@ -2414,7 +2673,11 @@ msgid ""
 "plugins/biscuitwp, fără să-l dezactiveze: setările, registrul și paginile "
 "legale rămân la fel. După mutare, golește cache-ul paginilor și verifică "
 "bannerul pe site."
-msgstr "The plugin still runs from the old folder, %s. The button below moves it to plugins/biscuitwp without deactivating it: settings, the register and the legal pages stay the same. After the move, clear the page cache and check the banner on the site."
+msgstr ""
+"The plugin still runs from the old folder, %s. The button below moves it to "
+"plugins/biscuitwp without deactivating it: settings, the register and the "
+"legal pages stay the same. After the move, clear the page cache and check "
+"the banner on the site."
 
 #. translators: %s: the current folder, e.g. plugins/consent-manager-pro
 #: includes/class-migrate-folder.php:258
@@ -2422,13 +2685,17 @@ msgstr "The plugin still runs from the old folder, %s. The button below moves it
 msgid ""
 "Am înțeles: pluginul își mută folderul din %s în plugins/biscuitwp, fără să "
 "se dezactiveze."
-msgstr "I understand: the plugin moves its folder from %s to plugins/biscuitwp, without being deactivated."
+msgstr ""
+"I understand: the plugin moves its folder from %s to plugins/biscuitwp, "
+"without being deactivated."
 
 #: includes/class-migrate-folder.php:262
 msgid ""
 "Pluginul nu rulează dintr-un folder vechi care poate fi mutat (de exemplu, "
 "rulează deja din plugins/biscuitwp). Nu e nimic de mutat."
-msgstr "The plugin does not run from an old folder that can be moved (for example, it already runs from plugins/biscuitwp). There is nothing to move."
+msgstr ""
+"The plugin does not run from an old folder that can be moved (for example, "
+"it already runs from plugins/biscuitwp). There is nothing to move."
 
 #: includes/class-migrate-folder.php:275
 msgid ""
@@ -2508,6 +2775,50 @@ msgstr ""
 msgid "Nu ai voie să muți pluginul."
 msgstr "You are not allowed to move the plugin."
 
+#. translators: 1: domain, 2: page paths
+#: includes/modules/class-alerts.php:408
+#, php-format
+msgid "- %1$s (pagini: %2$s)"
+msgstr "- %1$s (pages: %2$s)"
+
+#. translators: %d: number of domains not listed
+#: includes/modules/class-alerts.php:410
+#, php-format
+msgid "Și încă %d domenii."
+msgstr "And %d more domains."
+
+#. translators: %s: site name
+#: includes/modules/class-alerts.php:412
+#, php-format
+msgid ""
+"BiscuitWP a găsit pe %s domenii terțe noi, care încarcă scripturi sau iframe-"
+"uri și nu sunt încă tratate ca servicii:"
+msgstr ""
+"BiscuitWP found new third-party domains on %s that load scripts or iframes "
+"and are not yet handled as services:"
+
+#. translators: %s: site name
+#: includes/modules/class-alerts.php:414
+#, php-format
+msgid "BiscuitWP: domenii noi pe %s"
+msgstr "BiscuitWP: new domains on %s"
+
+#: includes/modules/class-alerts.php:415
+msgid "Bună ziua,"
+msgstr "Hello,"
+
+#: includes/modules/class-alerts.php:416
+msgid "Deschide „Servicii” ca să le adaugi ca serviciu sau să le ignori:"
+msgstr "Open “Services” to add them as a service or ignore them:"
+
+#: includes/modules/class-alerts.php:417
+msgid ""
+"Primești acest mesaj pentru că notificarea e pornită în Setările BiscuitWP. "
+"O poți opri acolo."
+msgstr ""
+"You get this message because the notification is on in the BiscuitWP "
+"settings. You can turn it off there."
+
 #: includes/modules/class-legal.php:302
 msgid ""
 "Acest site folosește cookie-uri gestionate prin BiscuitWP. Cookie-urile "
@@ -2527,7 +2838,7 @@ msgid "Închide previzualizarea"
 msgstr "Close the preview"
 
 #. translators: 1: pages scanned, 2: pages in the list
-#: includes/modules/class-scanner.php:1224
+#: includes/modules/class-scanner.php:1387
 #, php-format
 msgid ""
 "Scanare în curs (%1$d/%2$d) — se continuă la fiecare deschidere a acestui "
@@ -2536,7 +2847,7 @@ msgstr ""
 "Scan in progress (%1$d/%2$d) — it continues each time you open this screen"
 
 #. translators: 1: pages scanned, 2: pages in the list
-#: includes/modules/class-scanner.php:1226
+#: includes/modules/class-scanner.php:1389
 #, php-format
 msgid "Scanare în curs (%1$d/%2$d)"
 msgstr "Scan in progress (%1$d/%2$d)"
@@ -2937,11 +3248,52 @@ msgstr ""
 "EN). With one of them, you write the base texts and translate them in the "
 "translation plugin."
 
-#: templates/admin/guide.php:93
+#: templates/admin/guide.php:94
+msgid ""
+"Ai făcut aspectul pe un site și îl vrei pe altul? „Exportă aspectul salvat” "
+"descarcă un fișier .json cu aspectul salvat, textele bannerului și CSS-ul "
+"propriu. Cu WPML sau Polylang, textele bannerului nu intră în fișier: ele se "
+"traduc acolo. Ce nu e salvat încă în formular nu intră nici el. Excluderile, "
+"setările, serviciile și datele operatorului nu se exportă, fiindcă țin de "
+"fiecare site."
+msgstr ""
+"Made the appearance on one site and want it on another? “Export the saved "
+"appearance” downloads a .json file with the saved appearance, the banner "
+"texts and the custom CSS. With WPML or Polylang the banner texts are not in "
+"the file: they are translated there. What is not saved yet in the form is "
+"not in it either. Exclusions, settings, services and operator data are not "
+"exported, because they belong to each site."
+
+#: templates/admin/guide.php:95
+msgid ""
+"„Importă dintr-un fișier” citește fișierul (cel mult 256 KB), îl curăță ca "
+"la o salvare, inclusiv CSS-ul propriu, și deschide formularul completat cu "
+"valorile din fișier. Nu se salvează nimic: „Vezi pe site” îți arată cum ar "
+"arăta, iar „Salvează aspectul” le aplică. Până atunci site-ul rămâne cum era."
+msgstr ""
+"“Import from a file” reads the file (at most 256 KB), cleans it as a save "
+"would, custom CSS included, and opens the form filled with the values from "
+"the file. Nothing is saved: “View on site” shows how it would look, and "
+"“Save appearance” applies it. Until then the site stays as it was."
+
+#: templates/admin/guide.php:96
+msgid ""
+"Ce lipsește din fișier păstrează valoarea curentă, iar cheile necunoscute "
+"sunt ignorate și numărate într-un mesaj. Un fișier din altă sursă, stricat "
+"sau făcut de o versiune mai nouă a pluginului e refuzat, cu motivul. Cu WPML "
+"sau Polylang textele nu se importă: le traduci în pluginul de traduceri."
+msgstr ""
+"What is missing from the file keeps its current value, and unknown keys are "
+"ignored and counted in a message. A file from another source, a broken one, "
+"or one made by a newer version of the plugin is refused, with the reason. "
+"With WPML or Polylang the texts are not imported: you translate them in the "
+"translation plugin."
+
+#: templates/admin/guide.php:98
 msgid "CSS propriu și variabile"
 msgstr "Custom CSS and variables"
 
-#: templates/admin/guide.php:94
+#: templates/admin/guide.php:99
 msgid ""
 "CSS-ul propriu se adaugă după CSS-ul bannerului. La salvare, pluginul "
 "elimină @import, adresele spre alte site-uri și regulile care ar putea "
@@ -2954,7 +3306,7 @@ msgstr ""
 "removed."
 
 #. translators: 1: .cmp, 2: .cmp-light, 3: example rule
-#: templates/admin/guide.php:95
+#: templates/admin/guide.php:100
 #, php-format
 msgid ""
 "Cel mai simplu e să schimbi variabilele, pe %1$s (sau pe %2$s în modul "
@@ -2963,12 +3315,12 @@ msgstr ""
 "The simplest way is to change the variables, on %1$s (or on %2$s in Light "
 "mode), for example %3$s. The available variables:"
 
-#: templates/admin/guide.php:107
+#: templates/admin/guide.php:112
 msgid "Biblioteca"
 msgstr "The library"
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:108
+#: templates/admin/guide.php:113
 #, php-format
 msgid ""
 "Pluginul recunoaște singur serviciile din bibliotecă: Google Analytics, Meta "
@@ -2980,7 +3332,7 @@ msgstr ""
 "The full list is under “Entire library”, on the %1$sServices%2$s screen."
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:109
+#: templates/admin/guide.php:114
 msgid ""
 "„Găsite pe site” arată serviciile din ultima scanare. Pluginul rescanează "
 "site-ul o dată pe zi și după fiecare salvare a setărilor sau a serviciilor. "
@@ -2990,7 +3342,7 @@ msgstr ""
 "rescans the site once a day and after every save of the settings or the "
 "services. “Rescan” starts a new scan right away."
 
-#: templates/admin/guide.php:110
+#: templates/admin/guide.php:115
 msgid ""
 "La fiecare serviciu poți schimba categoria de acord. Bifa „nu bloca "
 "(excepție)” îl lasă să se încarce fără acord. Folosește-o doar pentru unelte "
@@ -3001,7 +3353,7 @@ msgstr ""
 "(exception)” box lets it load without consent. Use it only for tools that "
 "set no cookies and don’t track the visitor, for example cookieless analytics."
 
-#: templates/admin/guide.php:111
+#: templates/admin/guide.php:116
 msgid ""
 "Scanarea vede doar ce e în HTML-ul paginii. Ce adaugă ulterior Google Tag "
 "Manager sau alt JavaScript trebuie controlat din Tag Manager, cu Consent "
@@ -3011,7 +3363,190 @@ msgstr ""
 "other JavaScript adds later must be controlled from Tag Manager, with "
 "Consent Mode."
 
-#: templates/admin/guide.php:114
+#: templates/admin/guide.php:119
+msgid ""
+"La „Găsite pe site”, ecranul Servicii arată și pluginurile pe care BiscuitWP "
+"le recunoaște: Site Kit, MonsterInsights, PixelYourSite, WooCommerce și "
+"Contact Form 7. Fiecare apare cu serviciile pe care le aduce, categoria lor "
+"și starea: „legat”, „blocat în pagină”, „necesar” sau „excepție” (toate "
+"serviciile lui sunt pe „nu bloca”). Starea rămâne goală când serviciile lui "
+"nu sunt toate la fel și când nimic nu îl ține în așteptare (blocarea e "
+"oprită sau legătura nu are efect). În modul Advanced, Google Analytics și "
+"Tag Manager se încarcă mereu, deci pluginurile care le aduc nu apar ca "
+"blocate. Categoria se schimbă tot în lista de servicii. În bibliotecă sunt "
+"acum și Google AdSense, care așteaptă acordul pentru marketing, și "
+"Cloudflare Turnstile, care rămâne necesar. Dacă ai un serviciu personalizat "
+"cu un domeniu sau o adresă de-a lor, el decide, cu categoria și cu „nu "
+"bloca” alese de tine, dar numai pentru domeniul sau adresa scrise la el. "
+"Restul rămâne la serviciul din bibliotecă."
+msgstr ""
+"In “Found on the site”, the Services screen also shows the plugins BiscuitWP "
+"recognises: Site Kit, MonsterInsights, PixelYourSite, WooCommerce and "
+"Contact Form 7. Each appears with the services it brings, their category and "
+"the state: “linked”, “blocked in the page”, “necessary” or “exception” (all "
+"its services are set to “don’t block”). The state stays empty when its "
+"services are not all the same, and when nothing holds it back (blocking is "
+"off or the link has no effect). In Advanced mode Google Analytics and Tag "
+"Manager always load, so the plugins that bring them are not shown as "
+"blocked. The category is still changed in the services list. The library now "
+"also has Google AdSense, which waits for marketing consent, and Cloudflare "
+"Turnstile, which stays necessary. If you have a custom service with one of "
+"their domains or addresses, it decides, with the category and the “don’t "
+"block” you chose, but only for the domain or address written in it. The rest "
+"stays with the library service."
+
+#: templates/admin/guide.php:120
+msgid ""
+"PixelYourSite are o legătură proprie, activă doar cât blocarea e pornită. "
+"Scriptul lui rămâne în așteptare până la acordul pentru categoria lui Meta "
+"Pixel, iar Google Analytics și Tag Manager cer și acordul pentru categoria "
+"lor. Evenimentele trimise de pe server (Meta, OpenAI) pleacă tot numai cu "
+"acord. Cine acceptă doar statistici nu primește nimic prin PixelYourSite: se "
+"măsoară mai puțin, niciodată prea mult."
+msgstr ""
+"PixelYourSite has its own link, active only while blocking is on. Its script "
+"is held back until consent to the category of Meta Pixel, and Google "
+"Analytics and Tag Manager also need consent to their own category. Events "
+"sent from the server (Meta, OpenAI) also go out only with consent. Whoever "
+"accepts only statistics gets nothing through PixelYourSite: less is "
+"measured, never too much."
+
+#: templates/admin/guide.php:121
+msgid ""
+"La WooCommerce, coșul, plata și formularele nu sunt atinse. Când blocarea e "
+"pornită, atribuirea comenzilor (cookie-urile sbjs_* și sursa salvată cu "
+"comanda) pornește doar după acordul pentru marketing, iar în modul Light "
+"rămâne oprită. Dacă pluginul WP Consent API e activ, WooCommerce citește "
+"singur acordul și legătura nu face nimic."
+msgstr ""
+"With WooCommerce, the cart, checkout and forms are not touched. When "
+"blocking is on, order attribution (the sbjs_* cookies and the source saved "
+"with the order) starts only after consent to marketing, and in Light mode it "
+"stays off. If the WP Consent API plugin is active, WooCommerce reads the "
+"consent by itself and the link does nothing."
+
+#: templates/admin/guide.php:122
+msgid "Limitele acestor legături, pe scurt:"
+msgstr "The limits of these links, in short:"
+
+#: templates/admin/guide.php:124
+msgid ""
+"Un optimizator care lipește scripturile într-un singur fișier poate ascunde "
+"scriptul PixelYourSite. Atunci legătura nu-l mai găsește și nu-l poate ține "
+"în așteptare. PixelYourSite Pro nu e legat."
+msgstr ""
+"An optimizer that combines scripts into one file can hide the PixelYourSite "
+"script. Then the link does not find it and cannot hold it back. "
+"PixelYourSite Pro is not linked."
+
+#: templates/admin/guide.php:125
+msgid ""
+"La retragerea acordului, ce pleacă de pe server se oprește pe loc, dar "
+"pixelii deja porniți în pagină merg până la pagina următoare, ca orice "
+"script. La WooCommerce, cookie-urile sbjs_* ale site-ului se șterg."
+msgstr ""
+"When consent is withdrawn, what is sent from the server stops at once, but "
+"pixels already running in the page go on until the next page, like any "
+"script. With WooCommerce, the site’s sbjs_* cookies are deleted."
+
+#: templates/admin/guide.php:126
+msgid ""
+"Unde PixelYourSite e legat, el nu mai pornește sesiunea PHP fără acord. Fără "
+"sesiune, răspunsul paginii nu mai primește antetul no-store pe care îl punea "
+"sesiunea, deci aceste pagini pot fi păstrate acum în cache de server sau de "
+"CDN."
+msgstr ""
+"Where PixelYourSite is linked, it no longer starts the PHP session without "
+"consent. Without a session, the page response no longer gets the no-store "
+"header the session added, so these pages can now be kept in the cache of the "
+"server or the CDN."
+
+#: templates/admin/guide.php:127
+msgid ""
+"După update, golește cache-ul paginilor: o pagină veche din cache nu are "
+"legăturile noi."
+msgstr ""
+"After an update, clear the page cache: an old cached page does not have the "
+"new links."
+
+#. translators: %1$s, %2$s: link to the Verificare screen
+#: templates/admin/guide.php:129
+#, php-format
+msgid ""
+"Dovada că ceva nu pornește înainte de acord e „Verifică în browser”, din "
+"ecranul %1$sVerificare%2$s: el rulează pluginul real, cu tot ce a făcut un "
+"optimizator, și arată ce se încarcă. Rulează-l după fiecare update al "
+"pluginului legat: dacă acesta își schimbă numele filtrelor sau ale "
+"scripturilor, din PHP nu se vede."
+msgstr ""
+"The proof that nothing starts before consent is “Check in browser”, on the "
+"%1$sCheck%2$s screen: it runs the real plugin, with everything an optimizer "
+"did, and shows what loads. Run it after every update of the linked plugin: "
+"if that plugin changes the names of its filters or scripts, PHP cannot see "
+"it."
+
+#: templates/admin/guide.php:131
+msgid "Domenii necunoscute și emailul"
+msgstr "Unknown domains and the email"
+
+#: templates/admin/guide.php:132
+msgid ""
+"Scanarea de pe server caută și domeniile terțe care încarcă un script sau un "
+"iframe și nu aparțin niciunui serviciu, din bibliotecă sau personalizat. Ele "
+"apar în Servicii, la „Domenii necunoscute”, cu pagina unde au fost găsite: "
+"întâi cele încă neanunțate, cel mult 200, apoi cele anunțate, până la 50 de "
+"rânduri. „Adaugă ca serviciu” completează formularul de serviciu "
+"personalizat (se salvează abia cu „Salvează serviciile”). „Ignoră” scoate "
+"domeniul din listă și din email, iar „Nu mai ignora” îl readuce."
+msgstr "The server scan also looks for third-party domains that load a script or an iframe and belong to no service, from the library or custom. They appear in Services, under “Unknown domains”, with the page where they were found: first the ones not announced yet, at most 200, then the announced ones, up to 50 rows. “Add as a service” fills in the custom service form (it is saved only with “Save services”). “Ignore” removes the domain from the list and from the email, and “Stop ignoring” brings it back."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:133
+#, php-format
+msgid ""
+"Prima scanare completă după update, făcută de cron împreună cu sitemap-ul, "
+"doar notează ce e deja pe site și nu trimite nimic. Apoi, când apare un "
+"domeniu nou, BiscuitWP îți trimite un email cu toate domeniile noi adunate, "
+"cel mult unul la 7 zile, și fiecare domeniu e anunțat o singură dată. Ce nu "
+"încape într-o scanare (peste 50 de domenii noi) vine la următoarele. Dacă un "
+"site își schimbă mereu subdomeniile, sunt anunțate cel mult 10 cu același "
+"domeniu (cele de la început nu se numără); celelalte apar doar în Servicii. "
+"În %1$sSetări%2$s, la „Email la domenii noi”, pornești sau oprești emailul "
+"și alegi adresa; câmpul gol înseamnă adresa de administrator. Pe site-urile "
+"care aveau deja pluginul emailul e oprit până îl pornești tu; pe instalările "
+"noi e pornit. O adresă scrisă greșit nu o înlocuiește pe cea de dinainte și "
+"nu pornește emailul către administrator: ecranul te anunță."
+msgstr ""
+"The first full scan after an update, run by cron together with the sitemap, "
+"only notes what is already on the site and sends nothing. Then, when a new "
+"domain appears, BiscuitWP sends you one email with all the new domains "
+"collected, at most once every 7 days, and each domain is announced only "
+"once. What does not fit in one scan (over 50 new domains) comes with the "
+"next ones. If a site keeps changing its subdomains, at most 10 of the same "
+"domain are announced (the ones there at the start do not count); the others "
+"appear only in Services. In %1$sSettings%2$s, under “Email for new domains”, "
+"you switch the email on or off and choose the address; an empty field means "
+"the administrator address. On sites that already had the plugin the email is "
+"off until you switch it on; on new installs it is on. A mistyped address "
+"does not replace the previous one and does not switch on the email to the "
+"administrator: the screen tells you."
+
+#. translators: %1$s, %2$s: link to the Setări screen
+#: templates/admin/guide.php:134
+msgid ""
+"Scanarea nu vede ce adaugă JavaScript după încărcarea paginii sau Tag "
+"Manager: pentru asta folosește „Verifică în browser”. Dacă pe site nu "
+"rulează deloc cron, nici scanarea zilnică, nici emailul nu pornesc. Cu "
+"legături permanente simple, emailul nu poate spune pagina. Emailul pleacă "
+"doar de pe site-ul tău, cu wp_mail. Nimic nu se trimite către noi."
+msgstr ""
+"The scan does not see what JavaScript or Tag Manager adds after the page "
+"loads: use “Check in browser” for that. If no cron runs on the site at all, "
+"neither the daily scan nor the email starts. With plain permalinks the email "
+"cannot tell the page. The email is sent only from your own site, with "
+"wp_mail. Nothing is sent to us."
+
+#: templates/admin/guide.php:137
 msgid ""
 "Dacă un serviciu lipsește din bibliotecă, apasă „+ Adaugă serviciu” la "
 "„Servicii personalizate” și completează:"
@@ -3019,15 +3554,15 @@ msgstr ""
 "If a service is missing from the library, click “+ Add service” under "
 "“Custom services” and fill in:"
 
-#: templates/admin/guide.php:116
+#: templates/admin/guide.php:139
 msgid "Nume: numele serviciului, așa cum îl văd vizitatorii."
 msgstr "Name: the name of the service, as visitors see it."
 
-#: templates/admin/guide.php:117
+#: templates/admin/guide.php:140
 msgid "Categorie: categoria de acord de care depinde serviciul."
 msgstr "Category: the consent category the service depends on."
 
-#: templates/admin/guide.php:118
+#: templates/admin/guide.php:141
 msgid ""
 "Domenii (unul pe rând): pluginul blochează până la acord scripturile și "
 "iframe-urile de pe aceste domenii."
@@ -3035,7 +3570,7 @@ msgstr ""
 "Domains (one per line): the plugin blocks scripts and iframes from these "
 "domains until consent."
 
-#: templates/admin/guide.php:119
+#: templates/admin/guide.php:142
 msgid ""
 "Cookie-uri: numele, durata și scopul fiecărui cookie. Apar în tabelul din "
 "Politica de cookie-uri."
@@ -3043,7 +3578,7 @@ msgstr ""
 "Cookies: the name, duration and purpose of each cookie. They appear in the "
 "table in the Cookie Policy."
 
-#: templates/admin/guide.php:120
+#: templates/admin/guide.php:143
 msgid ""
 "Script (opțional): cod care rulează doar după acord. Câmpul apare doar "
 "pentru administratorii care au dreptul de a adăuga cod (unfiltered_html)."
@@ -3051,7 +3586,7 @@ msgstr ""
 "Script (optional): code that runs only after consent. The field is shown "
 "only to administrators who are allowed to add code (unfiltered_html)."
 
-#: templates/admin/guide.php:122
+#: templates/admin/guide.php:145
 msgid ""
 "Apoi apasă „Salvează serviciile”. Domeniul site-ului tău nu poate fi "
 "domeniul unui serviciu, pentru că ar bloca site-ul însuși."
@@ -3059,12 +3594,12 @@ msgstr ""
 "Then click “Save services”. Your site’s own domain cannot be a service "
 "domain, because it would block the site itself."
 
-#: templates/admin/guide.php:124
+#: templates/admin/guide.php:147
 msgid "Scripturi proprii: atributul data-cmp-category"
 msgstr "Your own scripts: the data-cmp-category attribute"
 
 #. translators: %s: the data-cmp-category attribute
-#: templates/admin/guide.php:125
+#: templates/admin/guide.php:148
 #, php-format
 msgid ""
 "Ai un script pus în temă sau într-un plugin, pe care pluginul nu îl "
@@ -3073,7 +3608,7 @@ msgstr ""
 "Do you have a script in your theme or in a plugin that the plugin does not "
 "recognize? Add the %s attribute to it, with the category slug:"
 
-#: templates/admin/guide.php:127
+#: templates/admin/guide.php:150
 msgid ""
 "Scriptul nu rulează până când vizitatorul acceptă categoria. Atributul merge "
 "la fel pe un iframe."
@@ -3082,7 +3617,7 @@ msgstr ""
 "attribute works the same way on an iframe."
 
 #. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
-#: templates/admin/guide.php:128
+#: templates/admin/guide.php:151
 #, php-format
 msgid ""
 "Slug-urile sunt pe ecranul %1$sCategorii%2$s. Implicit: %3$s, %4$s și %5$s. "
@@ -3094,7 +3629,7 @@ msgstr ""
 "not understand blocks the script, so that nothing slips through."
 
 #. translators: %1$s, %2$s: link to the Categorii screen; %3$s, %4$s, %5$s: category slugs
-#: templates/admin/guide.php:129
+#: templates/admin/guide.php:152
 msgid ""
 "Atributul contează doar când blocarea e activă: în Pro, cu „Blochează "
 "scripturile de tracking până la consimțământ” bifat; în Light, mereu."
@@ -3102,11 +3637,11 @@ msgstr ""
 "The attribute only matters when blocking is active: in Pro, with “Block "
 "tracking scripts until consent” ticked; in Light, always."
 
-#: templates/admin/guide.php:131
+#: templates/admin/guide.php:154
 msgid "„Încarcă mereu” la embed-uri"
 msgstr "“Always load” on embeds"
 
-#: templates/admin/guide.php:132
+#: templates/admin/guide.php:155
 msgid ""
 "Până la acord, video-urile YouTube și Vimeo, hărțile Google Maps și iframe-"
 "urile serviciilor tale apar ca un bloc cu butonul „Încarcă conținutul”. El "
@@ -3116,7 +3651,7 @@ msgstr ""
 "your services appear as a box with a “Load content” button. It loads only "
 "that content, on the current page."
 
-#: templates/admin/guide.php:133
+#: templates/admin/guide.php:156
 msgid ""
 "Butonul „Încarcă mereu” ține minte alegerea pentru acel serviciu, pe tot "
 "site-ul, fără să accepte toată categoria. Alegerea se scrie în registru ca "
@@ -3126,7 +3661,7 @@ msgstr ""
 "whole site, without accepting the whole category. The choice is written to "
 "the register as “Service allowed (“Always load”)”."
 
-#: templates/admin/guide.php:134
+#: templates/admin/guide.php:157
 msgid ""
 "Vizitatorul retrage alegerea din „Setări cookie”, din lista serviciilor "
 "încărcate mereu. „Încarcă mereu” nu există în modul Light, pentru că Light "
@@ -3136,7 +3671,7 @@ msgstr ""
 "loaded services. “Always load” does not exist in Light mode, because Light "
 "sets no cookies."
 
-#: templates/admin/guide.php:135
+#: templates/admin/guide.php:158
 msgid ""
 "„Încarcă mereu” apare doar la conținutul unui serviciu din bibliotecă sau al "
 "unui serviciu personalizat, nu și la un iframe marcat cu atributul data-cmp-"
@@ -3145,15 +3680,15 @@ msgstr ""
 "“Always load” appears only on content from a library service or a custom "
 "service, not on an iframe marked with the data-cmp-category attribute."
 
-#: templates/admin/guide.php:141
+#: templates/admin/guide.php:164
 msgid "Cazuri frecvente, fiecare cu pașii de urmat."
 msgstr "Common cases, each with the steps to follow."
 
-#: templates/admin/guide.php:143
+#: templates/admin/guide.php:166
 msgid "„Am Clarity (sau alt tracker) pus direct în temă”"
 msgstr "“I have Clarity (or another tracker) added directly to my theme”"
 
-#: templates/admin/guide.php:144
+#: templates/admin/guide.php:167
 msgid ""
 "Problema: codul de tracking e lipit în tema site-ului, de exemplu în "
 "header.php sau într-un câmp pentru cod din setările temei. Vrei să nu ruleze "
@@ -3164,7 +3699,7 @@ msgstr ""
 "run before consent."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:146
+#: templates/admin/guide.php:169
 #, php-format
 msgid ""
 "În %1$sSetări%2$s, verifică că modul e Pro și că „Blochează scripturile de "
@@ -3174,7 +3709,7 @@ msgstr ""
 "scripts until consent” is ticked."
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:147
+#: templates/admin/guide.php:170
 #, php-format
 msgid ""
 "În %1$sServicii%2$s, apasă „Rescanează”. Clarity e în bibliotecă, deci "
@@ -3184,7 +3719,7 @@ msgstr ""
 "appear under “Found on the site” with the status “blocked until consent”."
 
 #. translators: %s: the attribute with a category
-#: templates/admin/guide.php:148
+#: templates/admin/guide.php:171
 #, php-format
 msgid ""
 "Dacă trackerul nu apare (nu e în bibliotecă sau codul lui arată altfel), "
@@ -3196,7 +3731,7 @@ msgstr ""
 "custom service with its domain."
 
 #. translators: %s: the attribute with a category
-#: templates/admin/guide.php:149
+#: templates/admin/guide.php:172
 msgid ""
 "Dacă trackerul vine din Google Tag Manager, nu din temă, pluginul nu îl vede "
 "în pagină. Setează în Tag Manager eticheta să ceară consimțământ (Consent "
@@ -3207,7 +3742,7 @@ msgstr ""
 "consent (Consent Mode)."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:150
+#: templates/admin/guide.php:173
 #, php-format
 msgid ""
 "Rulează %1$sVerificare%2$s. Pagina trebuie să fie verde, iar Clarity să "
@@ -3216,11 +3751,11 @@ msgstr ""
 "Run %1$sCheck%2$s. The page should be green, and Clarity should appear only "
 "in the “After “Accept all”” column."
 
-#: templates/admin/guide.php:153
+#: templates/admin/guide.php:176
 msgid "„Am un chat (Tawk.to, Crisp)”"
 msgstr "“I have a chat (Tawk.to, Crisp)”"
 
-#: templates/admin/guide.php:154
+#: templates/admin/guide.php:177
 msgid ""
 "Problema: widgetul de chat pune cookie-uri și contactează serverele "
 "furnizorului imediat ce se încarcă. Tawk.to și Crisp sunt în bibliotecă, în "
@@ -3231,7 +3766,7 @@ msgstr ""
 "Marketing category."
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:156
+#: templates/admin/guide.php:179
 #, php-format
 msgid ""
 "În %1$sServicii%2$s, apasă „Rescanează” și verifică că chatul apare la "
@@ -3241,7 +3776,7 @@ msgstr ""
 "“Found on the site” with the status “blocked until consent”."
 
 #. translators: %1$s, %2$s: link to the Categorii screen
-#: templates/admin/guide.php:157
+#: templates/admin/guide.php:180
 #, php-format
 msgid ""
 "Vrei ca chatul să depindă de o categorie separată? Creeaz-o în "
@@ -3253,7 +3788,7 @@ msgstr ""
 "in the list next to the service and click “Save services”."
 
 #. translators: %1$s, %2$s: link to the Categorii screen
-#: templates/admin/guide.php:158
+#: templates/admin/guide.php:181
 msgid ""
 "Fără acord, bula de chat nu apare. Spune-le vizitatorilor asta, de exemplu "
 "pe pagina de contact: pentru chat, trebuie acceptată categoria lui din "
@@ -3263,7 +3798,7 @@ msgstr ""
 "on the contact page: to use the chat, they need to accept its category in "
 "“Cookie settings”."
 
-#: templates/admin/guide.php:159
+#: templates/admin/guide.php:182
 msgid ""
 "Pentru un furnizor de chat care nu e în bibliotecă, adaugă un serviciu "
 "personalizat cu domeniile lui."
@@ -3272,7 +3807,7 @@ msgstr ""
 "its domains."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:160
+#: templates/admin/guide.php:183
 #, php-format
 msgid ""
 "Rulează %1$sVerificare%2$s. Domeniile chatului nu trebuie să apară în "
@@ -3281,11 +3816,11 @@ msgstr ""
 "Run %1$sCheck%2$s. The chat’s domains must not appear in the “Before "
 "consent” column."
 
-#: templates/admin/guide.php:163
+#: templates/admin/guide.php:186
 msgid "„Am YouTube în articole”"
 msgstr "“I have YouTube in my posts”"
 
-#: templates/admin/guide.php:164
+#: templates/admin/guide.php:187
 msgid ""
 "Problema: un video YouTube încorporat pune cookie-uri chiar dacă vizitatorul "
 "nu apasă play."
@@ -3293,7 +3828,7 @@ msgstr ""
 "The problem: an embedded YouTube video sets cookies even if the visitor "
 "never clicks play."
 
-#: templates/admin/guide.php:166
+#: templates/admin/guide.php:189
 msgid ""
 "Nu schimbi nimic în articole. Cu blocarea pornită, pluginul înlocuiește "
 "singur fiecare video cu un bloc „Încarcă conținutul”. Imaginea video-ului, "
@@ -3305,7 +3840,7 @@ msgstr ""
 "when there is one, is served from your site, so YouTube is not contacted "
 "before consent."
 
-#: templates/admin/guide.php:167
+#: templates/admin/guide.php:190
 msgid ""
 "Vizitatorul poate încărca un singur video („Încarcă conținutul”) sau toate "
 "video-urile YouTube („Încarcă mereu”). Dacă acceptă în banner categoria lui "
@@ -3316,7 +3851,7 @@ msgstr ""
 "load right away."
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:168
+#: templates/admin/guide.php:191
 #, php-format
 msgid ""
 "YouTube e în categoria Marketing. Dacă vrei altă categorie, schimb-o la "
@@ -3326,7 +3861,7 @@ msgstr ""
 "it for YouTube in %1$sServices%2$s."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:169
+#: templates/admin/guide.php:192
 #, php-format
 msgid ""
 "Deschide un articol cu video într-o fereastră privată și uită-te la bloc. "
@@ -3335,11 +3870,11 @@ msgstr ""
 "Open a post with a video in a private window and look at the box. Then run "
 "%1$sCheck%2$s."
 
-#: templates/admin/guide.php:172
+#: templates/admin/guide.php:195
 msgid "„Folosesc Google Fonts din temă”"
 msgstr "“I use Google Fonts from my theme”"
 
-#: templates/admin/guide.php:173
+#: templates/admin/guide.php:196
 msgid ""
 "Problema: tema încarcă fonturile de la fonts.googleapis.com. La fiecare "
 "vizită, Google primește IP-ul vizitatorului. Soluția e să servești fonturile "
@@ -3350,7 +3885,7 @@ msgstr ""
 "the fonts from your own site."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:175
+#: templates/admin/guide.php:198
 #, php-format
 msgid ""
 "Funcția merge doar în modul Pro. În %1$sSetări%2$s, bifează „Localizare "
@@ -3360,7 +3895,7 @@ msgstr ""
 "Google Fonts” and click “Save settings”."
 
 #. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
-#: templates/admin/guide.php:176
+#: templates/admin/guide.php:199
 #, php-format
 msgid ""
 "Apasă „Localizează fonturile”, în secțiunea Google Fonts de jos din "
@@ -3374,7 +3909,7 @@ msgstr ""
 "option is on."
 
 #. translators: %1$s, %2$s: link to the Setări screen; %3$s, %4$s: link to the Verificare screen
-#: templates/admin/guide.php:177
+#: templates/admin/guide.php:200
 msgid ""
 "Pluginul descarcă fonturile găsite pe paginile scanate și pe pagina "
 "principală. Apoi trimite vizitatorii la copia de pe site, nu la Google."
@@ -3383,7 +3918,7 @@ msgstr ""
 "page. Then it sends visitors to the copy on your site, not to Google."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:178
+#: templates/admin/guide.php:201
 #, php-format
 msgid ""
 "În %1$sVerificare%2$s, apasă „Rescanează”. Google Fonts nu mai trebuie să "
@@ -3393,7 +3928,7 @@ msgstr ""
 "“Resources that send the IP address”."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:179
+#: templates/admin/guide.php:202
 msgid ""
 "Pluginul înlocuiește doar fonturile încărcate cu un tag link în HTML. Dacă "
 "tema le încarcă din CSS (@import) sau din JavaScript, ele rămân la Google. "
@@ -3403,7 +3938,7 @@ msgstr ""
 "theme loads them from CSS (@import) or from JavaScript, they stay with "
 "Google. In that case, host the fonts in the theme."
 
-#: templates/admin/guide.php:180
+#: templates/admin/guide.php:203
 msgid ""
 "Dacă schimbi fonturile temei, apasă din nou „Localizează fonturile”. „Șterge "
 "fonturile localizate” te întoarce la fonturile de la Google."
@@ -3411,17 +3946,17 @@ msgstr ""
 "If you change the theme’s fonts, click “Localize fonts” again. “Delete "
 "localized fonts” takes you back to the fonts from Google."
 
-#: templates/admin/guide.php:188
+#: templates/admin/guide.php:211
 msgid "Ecranul Verificare"
 msgstr "The Check screen"
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:189
+#: templates/admin/guide.php:212
 #, php-format
 msgid "Ecranul %1$sVerificare%2$s face două lucruri:"
 msgstr "The %1$sCheck%2$s screen does two things:"
 
-#: templates/admin/guide.php:191
+#: templates/admin/guide.php:214
 msgid ""
 "„Scanarea pe server” citește HTML-ul paginilor ca un vizitator fără cookie-"
 "uri. Arată, pe fiecare pagină, serviciile găsite, starea lor și de unde vin "
@@ -3435,7 +3970,7 @@ msgstr ""
 "visitor’s IP address: Google Fonts, Adobe Fonts, Font Awesome, CDNs, "
 "Gravatar, WordPress emoji."
 
-#: templates/admin/guide.php:192
+#: templates/admin/guide.php:215
 msgid ""
 "„Verifică în browser” încarcă pe rând, invizibil, paginile în browserul tău. "
 "Notează ce se încarcă înainte de acord și ce apare în plus după un „Acceptă "
@@ -3446,7 +3981,7 @@ msgstr ""
 "simulated “Accept all”."
 
 #. translators: %d: max pages
-#: templates/admin/guide.php:194
+#: templates/admin/guide.php:217
 #, php-format
 msgid ""
 "Se verifică cel mult %d de pagini: pagina principală, paginile legale, "
@@ -3460,11 +3995,11 @@ msgstr ""
 "line)”, then click “Save list”."
 
 #. translators: %d: max pages
-#: templates/admin/guide.php:195
+#: templates/admin/guide.php:218
 msgid "Ce înseamnă culorile din raport:"
 msgstr "What the colours in the report mean:"
 
-#: templates/admin/guide.php:197
+#: templates/admin/guide.php:220
 msgid ""
 "Roșu: un serviciu care cere acord sau un domeniu terț necunoscut s-a "
 "încărcat înainte de acord. Asta trebuie reparat."
@@ -3472,7 +4007,7 @@ msgstr ""
 "Red: a service that needs consent or an unknown third-party domain loaded "
 "before consent. This must be fixed."
 
-#: templates/admin/guide.php:198
+#: templates/admin/guide.php:221
 msgid ""
 "Galben: pagina folosește resurse care trimit IP-ul vizitatorului la terți, "
 "sau cookie-uri pe care pluginul nu le cunoaște. Nu e o blocare ratată, dar "
@@ -3482,11 +4017,11 @@ msgstr ""
 "parties, or cookies the plugin does not know. It is not a failed block, but "
 "it is worth checking."
 
-#: templates/admin/guide.php:199
+#: templates/admin/guide.php:222
 msgid "Verde: nimic din ce cere acord nu s-a încărcat înainte de acord."
 msgstr "Green: nothing that needs consent loaded before consent."
 
-#: templates/admin/guide.php:200
+#: templates/admin/guide.php:223
 msgid ""
 "„nu s-a putut verifica”: pagina nu a răspuns, nu permite încărcarea într-un "
 "cadru, e pe altă origine decât adminul sau nu are bannerul. Nu înseamnă "
@@ -3496,7 +4031,7 @@ msgstr ""
 "a frame, is on a different origin than the admin or has no banner. It does "
 "not mean green: check it manually."
 
-#: templates/admin/guide.php:202
+#: templates/admin/guide.php:225
 msgid ""
 "Excepțiile, serviciile necesare și, în Advanced, Google Analytics și Tag "
 "Manager apar separat și nu schimbă culoarea."
@@ -3505,7 +4040,7 @@ msgstr ""
 "Manager are listed separately and do not change the colour."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:203
+#: templates/admin/guide.php:226
 #, php-format
 msgid ""
 "Pentru emoji și Gravatar, bifează opțiunile din „Resurse terțe WordPress”, "
@@ -3515,11 +4050,11 @@ msgstr ""
 "resources”, in %1$sSettings%2$s."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:204
+#: templates/admin/guide.php:227
 msgid "Limitele verificării, pe scurt:"
 msgstr "The limits of the check, in short:"
 
-#: templates/admin/guide.php:206
+#: templates/admin/guide.php:229
 msgid ""
 "Rulează ca administrator logat. Pluginurile care schimbă pagina pentru "
 "utilizatorii logați pot da alt rezultat decât pentru vizitatori."
@@ -3527,11 +4062,11 @@ msgstr ""
 "It runs as a logged-in administrator. Plugins that change the page for "
 "logged-in users may give a different result than for visitors."
 
-#: templates/admin/guide.php:207
+#: templates/admin/guide.php:230
 msgid "Ce apare doar după un clic sau după scroll nu e prins."
 msgstr "What appears only after a click or a scroll is not caught."
 
-#: templates/admin/guide.php:208
+#: templates/admin/guide.php:231
 msgid ""
 "Cookie-urile puse de terți pe domeniile lor nu se pot citi. Se văd doar "
 "domeniile contactate."
@@ -3539,7 +4074,7 @@ msgstr ""
 "Cookies that third parties set on their own domains cannot be read. Only the "
 "contacted domains are visible."
 
-#: templates/admin/guide.php:209
+#: templates/admin/guide.php:232
 msgid ""
 "După „Acceptă tot”, cookie-urile serviciilor rămân în browserul tău, iar "
 "paginile verificate pot apărea ca vizite în statistici."
@@ -3547,15 +4082,15 @@ msgstr ""
 "After “Accept all”, the services’ cookies stay in your browser, and the "
 "checked pages may show up as visits in your analytics."
 
-#: templates/admin/guide.php:211
+#: templates/admin/guide.php:234
 msgid "Lista completă e pe ecran, la „Limitele verificării”."
 msgstr "The full list is on the screen, under “Limits of the check”."
 
-#: templates/admin/guide.php:213
+#: templates/admin/guide.php:236
 msgid "Verificarea manuală cu DevTools"
 msgstr "Checking manually with DevTools"
 
-#: templates/admin/guide.php:214
+#: templates/admin/guide.php:237
 msgid ""
 "DevTools sunt uneltele pentru dezvoltatori din browser. Le deschizi cu tasta "
 "F12 sau cu clic dreapta pe pagină, apoi „Inspect” („Inspectează”)."
@@ -3563,7 +4098,7 @@ msgstr ""
 "DevTools are the developer tools built into your browser. You open them with "
 "the F12 key, or by right-clicking the page and choosing “Inspect”."
 
-#: templates/admin/guide.php:215
+#: templates/admin/guide.php:238
 msgid ""
 "Tab-ul Network („Rețea”) din DevTools arată fiecare cerere a paginii: "
 "fiecare fișier, script sau imagine, cu domeniul de la care vine."
@@ -3571,7 +4106,7 @@ msgstr ""
 "The Network tab in DevTools shows every request the page makes: every file, "
 "script or image, with the domain it comes from."
 
-#: templates/admin/guide.php:217
+#: templates/admin/guide.php:240
 msgid ""
 "Deschide o fereastră privată (incognito) în Chrome sau Firefox. Așa pornești "
 "fără cookie-uri și fără un acord salvat. Folosește un browser fără GPC (sau "
@@ -3583,15 +4118,15 @@ msgstr ""
 "off): Brave and DuckDuckGo send it, and then the plugin records a refusal "
 "automatically and the banner does not appear."
 
-#: templates/admin/guide.php:218
+#: templates/admin/guide.php:241
 msgid "Deschide DevTools, mergi la tab-ul Network și bifează „Disable cache”."
 msgstr "Open DevTools, go to the Network tab and tick “Disable cache”."
 
-#: templates/admin/guide.php:219
+#: templates/admin/guide.php:242
 msgid "Intră pe site. Nu apăsa nimic în banner."
 msgstr "Go to the site. Don’t click anything in the banner."
 
-#: templates/admin/guide.php:220
+#: templates/admin/guide.php:243
 msgid ""
 "În câmpul de filtrare din Network, scrie pe rând domeniile serviciilor tale, "
 "de exemplu google-analytics.com, googletagmanager.com, facebook.net, "
@@ -3601,7 +4136,7 @@ msgstr ""
 "time, for example google-analytics.com, googletagmanager.com, facebook.net, "
 "clarity.ms, youtube.com. No request to them should appear."
 
-#: templates/admin/guide.php:221
+#: templates/admin/guide.php:244
 msgid ""
 "În tab-ul Application (în Firefox, Storage), la Cookies, uită-te la cookie-"
 "urile site-ului. Înainte de acord nu trebuie să fie _ga, _fbp, _clck sau "
@@ -3611,7 +4146,7 @@ msgstr ""
 "site’s cookies. Before consent there must be no _ga, _fbp, _clck or other "
 "tracking cookies."
 
-#: templates/admin/guide.php:222
+#: templates/admin/guide.php:245
 msgid ""
 "Apasă „Permite tot” în banner (sau textul pe care l-ai pus tu în Setări). "
 "Acum cererile și cookie-urile serviciilor trebuie să apară. Asta arată că "
@@ -3621,7 +4156,7 @@ msgstr ""
 "services’ requests and cookies should appear. This shows that the blocking "
 "holds exactly until consent."
 
-#: templates/admin/guide.php:224
+#: templates/admin/guide.php:247
 msgid ""
 "În modul Advanced e normal să vezi cereri spre Google Analytics și Tag "
 "Manager înainte de acord, dar fără cookie-ul _ga."
@@ -3630,7 +4165,7 @@ msgstr ""
 "Manager before consent, but without the _ga cookie."
 
 #. translators: %1$s, %2$s: link to the Pagini legale screen
-#: templates/admin/guide.php:230
+#: templates/admin/guide.php:253
 #, php-format
 msgid ""
 "Pe ecranul %1$sPagini legale%2$s, pluginul generează trei documente din "
@@ -3643,7 +4178,7 @@ msgstr ""
 "templates are written for Moldova and exist in Romanian, Russian and English."
 
 #. translators: %1$s, %2$s: link to the Pagini legale screen
-#: templates/admin/guide.php:231
+#: templates/admin/guide.php:254
 msgid ""
 "Textele se adaptează la setările tale: modul Pro sau Light, blocarea "
 "scripturilor, modul de măsurare, durata acordului și retenția registrului."
@@ -3652,7 +4187,7 @@ msgstr ""
 "measurement mode, consent duration and register retention."
 
 #. translators: %s: the cookie table shortcode
-#: templates/admin/guide.php:232
+#: templates/admin/guide.php:255
 #, php-format
 msgid ""
 "Politica de cookie-uri conține tabelul de cookie-uri (shortcode-ul %s). "
@@ -3664,7 +4199,7 @@ msgstr ""
 "page for it."
 
 #. translators: %s: the cookie table shortcode
-#: templates/admin/guide.php:233
+#: templates/admin/guide.php:256
 msgid ""
 "O pagină nouă se salvează ca ciornă. Citește-o, completeaz-o și publică-o "
 "din editor. Linkul „Politica de confidențialitate” din banner apare doar "
@@ -3675,7 +4210,7 @@ msgstr ""
 "is published."
 
 #. translators: 1, 2: shortcodes
-#: templates/admin/guide.php:234
+#: templates/admin/guide.php:257
 #, php-format
 msgid ""
 "Pentru linkuri spre Politica de confidențialitate și spre Termeni și "
@@ -3689,7 +4224,7 @@ msgstr ""
 "link."
 
 #. translators: 1, 2: shortcodes
-#: templates/admin/guide.php:235
+#: templates/admin/guide.php:258
 msgid ""
 "Pe paginile legale legate în plugin, bannerul apare fără fundalul întunecat, "
 "ca vizitatorul să le poată citi înainte să decidă."
@@ -3697,11 +4232,11 @@ msgstr ""
 "On the legal pages linked in the plugin, the banner appears without the dark "
 "background, so visitors can read them before they decide."
 
-#: templates/admin/guide.php:237
+#: templates/admin/guide.php:260
 msgid "Ce completezi tu"
 msgstr "What you fill in"
 
-#: templates/admin/guide.php:238
+#: templates/admin/guide.php:261
 msgid ""
 "La „Datele operatorului”: Denumire operator, Email contact, Responsabil date "
 "(DPO), Jurisdicție și Adresa. Ele apar în paginile generate."
@@ -3709,7 +4244,7 @@ msgstr ""
 "Under “Controller details”: Controller name, Contact email, Data protection "
 "officer (DPO), Jurisdiction and Address. They appear in the generated pages."
 
-#: templates/admin/guide.php:239
+#: templates/admin/guide.php:262
 msgid ""
 "Caseta „Ce face pluginul și ce rămâne la tine” de pe ecran arată ce nu "
 "acoperă pluginul. De exemplu: registrul activităților de prelucrare, "
@@ -3719,11 +4254,11 @@ msgstr ""
 "what the plugin does not cover. For example: the record of processing "
 "activities, the notice for forms, newsletters or shops, notifying the NCPDP."
 
-#: templates/admin/guide.php:241
+#: templates/admin/guide.php:264
 msgid "De ce e nevoie de o revizie juridică"
 msgstr "Why a legal review is needed"
 
-#: templates/admin/guide.php:242
+#: templates/admin/guide.php:265
 msgid ""
 "Șabloanele sunt un punct de plecare, nu consultanță juridică. Pluginul nu "
 "știe ce alte date prelucrezi: formulare, comenzi, newsletter, conturi. Dă "
@@ -3733,11 +4268,11 @@ msgstr ""
 "know what other data you process: forms, orders, newsletters, accounts. Have "
 "a lawyer read the text before you publish it."
 
-#: templates/admin/guide.php:244
+#: templates/admin/guide.php:267
 msgid "Când regenerezi"
 msgstr "When to regenerate"
 
-#: templates/admin/guide.php:245
+#: templates/admin/guide.php:268
 msgid ""
 "„Regenerează” înlocuiește textul paginii cu șablonul. Ce ai schimbat de mână "
 "în pagină se pierde, deci notează-ți modificările înainte."
@@ -3745,16 +4280,16 @@ msgstr ""
 "“Regenerate” replaces the page’s text with the template. Anything you "
 "changed by hand in the page is lost, so note your changes first."
 
-#: templates/admin/guide.php:247
+#: templates/admin/guide.php:270
 msgid ""
 "după ce schimbi „Mod afișare” (Pro sau Light) sau blocarea scripturilor;"
 msgstr "after you change the “Display mode” (Pro or Light) or script blocking;"
 
-#: templates/admin/guide.php:248
+#: templates/admin/guide.php:271
 msgid "după ce schimbi „Mod de măsurare” (Strict sau Advanced);"
 msgstr "after you change the “Measurement mode” (Strict or Advanced);"
 
-#: templates/admin/guide.php:249
+#: templates/admin/guide.php:272
 msgid ""
 "după ce schimbi „Memorarea consimțământului (zile)” sau „Retenție log "
 "(luni)”;"
@@ -3762,7 +4297,7 @@ msgstr ""
 "after you change “Remember consent for (days)” or “Consent register "
 "retention (months)”;"
 
-#: templates/admin/guide.php:250
+#: templates/admin/guide.php:273
 msgid ""
 "când ecranul Pagini legale spune că șabloanele au fost actualizate sau că o "
 "pagină a fost generată pentru alt mod de măsurare."
@@ -3770,7 +4305,7 @@ msgstr ""
 "when the Legal pages screen says the templates were updated or that a page "
 "was generated for another measurement mode."
 
-#: templates/admin/guide.php:252
+#: templates/admin/guide.php:275
 msgid ""
 "Regenerarea actualizează și traducerile paginii create de plugin (WPML sau "
 "Polylang). Traducerile făcute de tine nu sunt atinse."
@@ -3778,7 +4313,7 @@ msgstr ""
 "Regenerating also updates the page translations the plugin created (WPML or "
 "Polylang). Translations you made yourself are not touched."
 
-#: templates/admin/guide.php:258
+#: templates/admin/guide.php:281
 msgid ""
 "Pluginul se actualizează din ecranul Plugins, ca orice plugin. După un "
 "update, fă trei verificări:"
@@ -3787,7 +4322,7 @@ msgstr ""
 "update, do three checks:"
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:260
+#: templates/admin/guide.php:283
 #, php-format
 msgid ""
 "Citește notificările BiscuitWP din admin. De exemplu, „Am început să blocăm "
@@ -3803,13 +4338,13 @@ msgstr ""
 "the library may recognize new services without telling you."
 
 #. translators: %1$s, %2$s: link to the Verificare screen
-#: templates/admin/guide.php:261
+#: templates/admin/guide.php:284
 #, php-format
 msgid "Rulează %1$sVerificare%2$s, ca să vezi că paginile sunt încă verzi."
 msgstr "Run %1$sCheck%2$s to see that the pages are still green."
 
 #. translators: %1$s, %2$s: link to the Pagini legale screen
-#: templates/admin/guide.php:262
+#: templates/admin/guide.php:285
 #, php-format
 msgid ""
 "Dacă %1$sPagini legale%2$s spune că șabloanele au fost actualizate, "
@@ -3819,7 +4354,7 @@ msgstr ""
 "If %1$sLegal pages%2$s says the templates were updated, regenerate each "
 "document. The message disappears once you have regenerated all three."
 
-#: templates/admin/guide.php:264
+#: templates/admin/guide.php:287
 msgid ""
 "Din versiunea 1.1.0, pluginul se poate muta din folderul plugins/consent-"
 "manager-pro în plugins/biscuitwp. Pe site-urile instalate înainte nu se mută "
@@ -3846,11 +4381,11 @@ msgstr ""
 "folder already exists, the screen shows the reason and the plugin stays in "
 "the old folder."
 
-#: templates/admin/guide.php:266
+#: templates/admin/guide.php:289
 msgid "Re-consimțământul"
 msgstr "Re-consent"
 
-#: templates/admin/guide.php:267
+#: templates/admin/guide.php:290
 msgid ""
 "Când pe site apare un serviciu nou, într-o categorie pe care vizitatorul a "
 "acceptat-o deja, pluginul nu îl încarcă pe baza acordului vechi. La "
@@ -3865,7 +4400,7 @@ msgstr ""
 "then, the category is treated as refused."
 
 #. translators: %1$s, %2$s: link to the Servicii screen
-#: templates/admin/guide.php:268
+#: templates/admin/guide.php:291
 #, php-format
 msgid ""
 "Pluginul ține minte toate serviciile găsite vreodată pe site. Dacă ai scos "
@@ -3877,7 +4412,7 @@ msgstr ""
 "“Reset the list of seen services” in %1$sServices%2$s."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:269
+#: templates/admin/guide.php:292
 #, php-format
 msgid ""
 "Vrei să întrebi din nou toți vizitatorii, de exemplu după o schimbare mare "
@@ -3887,7 +4422,7 @@ msgstr ""
 "your policy? Increase the “Policy version” in %1$sSettings%2$s."
 
 #. translators: %1$s, %2$s: link to the Registru consimțăminte screen
-#: templates/admin/guide.php:275
+#: templates/admin/guide.php:298
 #, php-format
 msgid ""
 "%1$sRegistru consimțăminte%2$s păstrează dovada alegerilor făcute de "
@@ -3899,7 +4434,7 @@ msgstr ""
 "not ask for consent."
 
 #. translators: %1$s, %2$s: link to the Registru consimțăminte screen
-#: templates/admin/guide.php:276
+#: templates/admin/guide.php:299
 msgid ""
 "La fiecare alegere se păstrează: data, ID-ul consimțământului, decizia, "
 "categoriile și serviciile, limba, versiunea politicii și adresa paginii. IP-"
@@ -3911,7 +4446,7 @@ msgstr ""
 "plain text."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:277
+#: templates/admin/guide.php:300
 #, php-format
 msgid ""
 "Înregistrările se șterg automat după numărul de luni din „Retenție log "
@@ -3920,11 +4455,11 @@ msgstr ""
 "Records are deleted automatically after the number of months in “Consent "
 "register retention (months)”, in %1$sSettings%2$s. Default: 13 months."
 
-#: templates/admin/guide.php:279
+#: templates/admin/guide.php:302
 msgid "Căutarea după ID"
 msgstr "Searching by ID"
 
-#: templates/admin/guide.php:280
+#: templates/admin/guide.php:303
 msgid ""
 "Vizitatorul își vede ID-ul în fereastra „Setări cookie”, sub preferințe. "
 "Dacă îți scrie cu o cerere, pune ID-ul în câmpul „ID consimțământ” și apasă "
@@ -3934,11 +4469,11 @@ msgstr ""
 "preferences. If one writes to you with a request, put the ID in the “Consent "
 "ID” field and click “Filter”. You see the full history of their choices."
 
-#: templates/admin/guide.php:282
+#: templates/admin/guide.php:305
 msgid "Exportul"
 msgstr "Export"
 
-#: templates/admin/guide.php:283
+#: templates/admin/guide.php:306
 msgid ""
 "„Export CSV” și „Export JSON” descarcă tot registrul. Păstrează fișierul în "
 "siguranță: e o dovadă legală."
@@ -3946,7 +4481,7 @@ msgstr ""
 "“Export CSV” and “Export JSON” download the whole register. Keep the file "
 "safe: it is legal proof."
 
-#: templates/admin/guide.php:284
+#: templates/admin/guide.php:307
 msgid ""
 "„Golește registrul” șterge definitiv toate înregistrările. Folosește-l doar "
 "dacă știi sigur că nu mai ai nevoie de ele."
@@ -3954,11 +4489,11 @@ msgstr ""
 "“Clear the register” permanently deletes all records. Use it only if you are "
 "sure you no longer need them."
 
-#: templates/admin/guide.php:286
+#: templates/admin/guide.php:309
 msgid "Dezinstalarea"
 msgstr "Uninstalling"
 
-#: templates/admin/guide.php:287
+#: templates/admin/guide.php:310
 msgid ""
 "La dezinstalare, pluginul șterge mereu datele lui de lucru: rezultatele "
 "scanărilor, raportul verificării, imaginile video și fonturile localizate."
@@ -3967,7 +4502,7 @@ msgstr ""
 "the check report, the video images and the localized fonts."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:288
+#: templates/admin/guide.php:311
 #, php-format
 msgid ""
 "Setările, categoriile, serviciile configurate și registrul se șterg doar "
@@ -3981,7 +4516,7 @@ msgstr ""
 "(or an export of it) for as long as the law requires before you tick it."
 
 #. translators: %1$s, %2$s: link to the Setări screen
-#: templates/admin/guide.php:289
+#: templates/admin/guide.php:312
 msgid ""
 "Paginile legale generate rămân pe site. Le ștergi tu, din Pagini, dacă nu "
 "mai ai nevoie de ele."
@@ -3989,7 +4524,7 @@ msgstr ""
 "The generated legal pages stay on the site. You delete them yourself, from "
 "Pages, if you no longer need them."
 
-#: templates/admin/guide.php:295
+#: templates/admin/guide.php:318
 msgid ""
 "Pluginul are un API JavaScript și o funcție PHP, ca să legi codul tău de "
 "acordul vizitatorului."
@@ -3998,7 +4533,7 @@ msgstr ""
 "code to the visitor’s consent."
 
 #. translators: 1: window.CMP, 2: the script handle, 3: DOMContentLoaded
-#: templates/admin/guide.php:296
+#: templates/admin/guide.php:319
 #, php-format
 msgid ""
 "În JavaScript, %1$s există după ce se încarcă scriptul bannerului (handle-ul "
@@ -4008,25 +4543,25 @@ msgstr ""
 "in the footer). Load your script with it as a dependency, or wait for %3$s."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:298
+#: templates/admin/guide.php:321
 #, php-format
 msgid "%s: dacă o categorie e permisă acum."
 msgstr "%s: whether a category is allowed right now."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:299
+#: templates/admin/guide.php:322
 #, php-format
 msgid "%s: decizia salvată, sau null dacă vizitatorul nu a decis."
 msgstr "%s: the saved decision, or null if the visitor has not decided."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:300
+#: templates/admin/guide.php:323
 #, php-format
 msgid "%s: deschide preferințele."
 msgstr "%s: opens the preferences."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:301
+#: templates/admin/guide.php:324
 #, php-format
 msgid ""
 "%s: apelează funcția la fiecare decizie, și imediat dacă vizitatorul a decis "
@@ -4036,13 +4571,13 @@ msgstr ""
 "already decided."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:302
+#: templates/admin/guide.php:325
 #, php-format
 msgid "%s: apelează funcția o singură dată, când categoria e permisă."
 msgstr "%s: calls the function once, when the category is allowed."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:303
+#: templates/admin/guide.php:326
 #, php-format
 msgid ""
 "%s: adaugă o categorie la acord. Merge doar dintr-un clic real al "
@@ -4052,19 +4587,19 @@ msgstr ""
 "for example on your own “Load map” button."
 
 #. translators: %s: method name
-#: templates/admin/guide.php:304
+#: templates/admin/guide.php:327
 #, php-format
 msgid "%s: scoate o categorie din acord."
 msgstr "%s: removes a category from the consent."
 
 #. translators: %s: event name
-#: templates/admin/guide.php:305
+#: templates/admin/guide.php:328
 #, php-format
 msgid "%s: eveniment pe document, după fiecare decizie pe categorii."
 msgstr "%s: an event on document, after every category decision."
 
 #. translators: %s: the PHP function
-#: templates/admin/guide.php:308
+#: templates/admin/guide.php:331
 #, php-format
 msgid ""
 "În PHP, %s spune dacă vizitatorul a permis o categorie. Nu o folosi pe "
@@ -4074,7 +4609,7 @@ msgstr ""
 "fully cached pages: the cookie differs from one visitor to the next."
 
 #. translators: 1-3: category slugs
-#: templates/admin/guide.php:310
+#: templates/admin/guide.php:333
 #, php-format
 msgid ""
 "Categoriile se identifică prin slug: %1$s (mereu permisă), %2$s, %3$s și "
@@ -4084,7 +4619,7 @@ msgstr ""
 "ones you created in Categories."
 
 #. translators: 1-3: category slugs
-#: templates/admin/guide.php:311
+#: templates/admin/guide.php:334
 msgid ""
 "În modul Light nu există decizie: allowCategory și denyCategory nu fac "
 "nimic, iar onConsent și whenAllowed nu apelează funcția pentru categoriile "

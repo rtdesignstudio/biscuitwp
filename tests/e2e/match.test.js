@@ -34,6 +34,12 @@ eq(sf('https://player.vimeo.com/video/1'), 'vimeo', 'player.vimeo.com -> vimeo')
 eq(sf('https://connect.facebook.net/en_US/fbevents.js'), 'meta-pixel', 'fbevents -> meta-pixel');
 eq(sf('https://cdn-eu.usefathom.com/script.js'), 'fathom', 'fathom EU -> fathom');
 
+// Lot A: AdSense (marketing) and Turnstile (necessary), on their own hosts.
+eq(sf('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1'), 'google-adsense', 'adsbygoogle -> google-adsense');
+eq(sf('https://googleads.g.doubleclick.net/pagead/viewthroughconversion/1/'), 'google-adsense', 'googleads.g.doubleclick.net -> google-adsense');
+eq(sf('https://challenges.cloudflare.com/turnstile/v0/api.js'), 'cloudflare-turnstile', 'turnstile -> cloudflare-turnstile');
+eq(sf('https://www.cloudflare.com/x.js'), null, 'cloudflare.com elsewhere -> no service');
+
 // Look-alike hosts never match.
 eq(sf('https://notyoutube.com/embed/abc'), null, 'suffix without dot -> null');
 eq(sf('https://youtube.com.evil.example/x'), null, 'prefix look-alike -> null');

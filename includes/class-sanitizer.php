@@ -31,6 +31,56 @@ class CMP_Sanitizer {
 	}
 
 	/**
+	 * Pure: "Email la domenii noi", off unless set. The form posts a hidden "0" before the
+	 * checkbox. Not posted (another screen, an old form): the stored value; a missing
+	 * key (an install updated from before the setting) is off. Ticked with an address
+	 * that is not valid and no stored one: also the stored value, so a typo never
+	 * turns the email on towards the admin address (the admin may be the client).
+	 */
+	public static function alert_email_on( array $input, array $old ) {
+		$stored = ! empty( $old['alert_email_on'] );
+		if ( ! array_key_exists( 'alert_email_on', $input ) || ! is_scalar( $input['alert_email_on'] ) ) {
+			return $stored;
+		}
+		if ( empty( $input['alert_email_on'] ) ) {
+			return false;
+		}
+		return self::alert_email_error( $input ) && '' === self::alert_email( $input, $old ) ? $stored : true;
+	}
+
+	/** Pure: a usable email address (trimmed) or ''. */
+	private static function email_or_empty( $v ) {
+		$v = is_string( $v ) ? trim( $v ) : '';
+		return strlen( $v ) <= 254 && false !== filter_var( $v, FILTER_VALIDATE_EMAIL ) ? $v : '';
+	}
+
+	/** Pure: did the form post an address that is not empty and not valid (a non-string counts)? */
+	public static function alert_email_error( array $input ) {
+		if ( ! array_key_exists( 'alert_email', $input ) ) {
+			return false;
+		}
+		$v = $input['alert_email'];
+		if ( ! is_string( $v ) ) {
+			return true;
+		}
+		return '' !== trim( $v ) && '' === self::email_or_empty( $v );
+	}
+
+	/**
+	 * Pure: the address of that email: a valid one, or '' (= the admin email).
+	 * Not posted: the stored one. An empty field is posted on purpose and clears it;
+	 * an invalid address is NOT turned into "" (the admin may be the client): the
+	 * stored address stays and the caller shows an error (alert_email_error()).
+	 */
+	public static function alert_email( array $input, array $old ) {
+		$stored = self::email_or_empty( isset( $old['alert_email'] ) ? $old['alert_email'] : '' );
+		if ( ! array_key_exists( 'alert_email', $input ) ) {
+			return $stored;
+		}
+		return self::alert_email_error( $input ) ? $stored : self::email_or_empty( $input['alert_email'] );
+	}
+
+	/**
 	 * @param array $input Posted settings.
 	 * @param array $old   Stored cmp_settings: a posted appearance is merged over the
 	 *                     stored one (CMP_Appearance::from_settings), so fields not
@@ -77,6 +127,8 @@ class CMP_Sanitizer {
 			'delete_data_on_uninstall' => ! empty( $input['delete_data_on_uninstall'] ),
 			'reload_on_decision' => ! empty( $input['reload_on_decision'] ),
 			'respect_gpc'      => self::respect_gpc( $input, $old ),
+			'alert_email_on'   => self::alert_email_on( $input, $old ),
+			'alert_email'      => self::alert_email( $input, $old ),
 			'texts'            => $texts,
 		);
 		// B6: the appearance array, only when posted (the "Aspect" screen). Without it the

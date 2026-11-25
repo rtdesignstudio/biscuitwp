@@ -132,11 +132,29 @@ class CMP_Blocker {
 	}
 
 	/**
-	 * Pure: which services a page's HTML loads directly ('raw', by service id:
-	 * live <script> tags) and which this plugin has neutralized ('blocked', from
-	 * data-cmp-service on rewritten scripts and embed placeholders).
+	 * Which services a page's HTML loads directly ('raw', by service id: live
+	 * <script> tags) and which this plugin has neutralized ('blocked', from
+	 * data-cmp-service on rewritten scripts and embed placeholders). Pure, but for
+	 * the data of a bridged plugin, which is left out (keeps_bridge_data()).
 	 */
 	public static function detect_services( $html, array $services ) {
+		$html = (string) $html;
+		if ( self::keeps_bridge_data( $html, false ) ) {
+			// Live on purpose on a gated page, so not a tracker that loads without consent.
+			$page = preg_replace_callback(
+				'/<script\b([^>]*)>(.*?)<\/script>/is',
+				function ( $m ) {
+					return CMP_Bridge_PYS::is_options( $m[1], $m[2] ) ? '' : $m[0];
+				},
+				$html
+			);
+			$html = is_string( $page ) ? $page : $html; // PCRE gave up: the page as it is
+		}
+		return self::detect_in( $html, $services );
+	}
+
+	/** Pure: detect_services() on the page exactly as it is. */
+	private static function detect_in( $html, array $services ) {
 		$html    = (string) $html;
 		$raw     = array();
 		$blocked = array();
@@ -150,7 +168,7 @@ class CMP_Blocker {
 			}
 		);
 		foreach ( $scripts as $svc ) {
-			$page = $html;
+			$page = CMP_Services::without_excepted( $html, $svc );
 			// A longer host of another service (googletagmanager.com/gtag/js) is not this service's.
 			foreach ( $scripts as $other ) {
 				foreach ( (array) $other['hosts'] as $oh ) {
@@ -210,7 +228,7 @@ class CMP_Blocker {
 			}
 			$open[] = $s;
 		}
-		$d     = self::detect_services( $html, $open );
+		$d     = self::detect_in( $html, $open ); // a container named only in a plugin's options counts as found
 		$ids   = array_merge( $d['raw'], $d['blocked'] );
 		if ( preg_match_all( '/<iframe\b[^>]*?(?:^|\s)src\s*=\s*(["\'])(.*?)\1/is', (string) $html, $im ) ) {
 			foreach ( $im[2] as $src ) {
@@ -346,7 +364,7 @@ class CMP_Blocker {
 
 	/**
 	 * Pure: hosts (no paths, unique) of the script-type services, for <noscript>
-	 * stripping and resource hints.
+	 * stripping and resource hints, without the ones a custom service decides for, whole.
 	 */
 	public static function tracker_hosts( array $services ) {
 		$out = array();
@@ -357,7 +375,7 @@ class CMP_Blocker {
 			foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
 				$slash = strpos( (string) $h, '/' );
 				$h     = strtolower( false === $slash ? (string) $h : substr( (string) $h, 0, $slash ) );
-				if ( '' !== $h && ! in_array( $h, $out, true ) ) {
+				if ( '' !== $h && ! in_array( $h, $out, true ) && ! CMP_Services::excepted( 'https://' . $h . '/', $s ) ) {
 					$out[] = $h;
 				}
 			}
@@ -379,17 +397,25 @@ class CMP_Blocker {
 		$services = self::rewritable( $all );
 		// Script tags: also the services only the Advanced mode exempts, decided per tag.
 		$scripts = self::blockable( $all );
+		$options = self::keeps_bridge_data( $html, true );
 		$html    = preg_replace_callback(
 			'/<script\b([^>]*)>(.*?)<\/script>/is',
-			function ( $m ) use ( $scripts ) {
-				return self::rewrite_tag( $m, $scripts );
+			function ( $m ) use ( $scripts, $options ) {
+				return self::rewrite_tag( $m, $scripts, $options );
 			},
 			$html
 		);
 		$html = self::rewrite_embeds( (string) $html, $labels, $services, $thumb );
 		// <noscript> never gets Consent Mode and no-JS visitors cannot consent, so
 		// the GTM noscript iframe is stripped in Advanced too.
-		$html = self::strip_tracker_noscript( (string) $html, self::tracker_hosts( $scripts ) );
+		$html = self::strip_tracker_noscript( (string) $html, self::tracker_hosts( array_filter( $scripts, function ( $s ) {
+			return empty( $s['except'] );
+		} ) ) );
+		foreach ( $scripts as $s ) {
+			if ( ! empty( $s['except'] ) ) {
+				$html = self::strip_tracker_noscript( $html, self::tracker_hosts( array( $s ) ), $s );
+			}
+		}
 		return self::strip_hint_links( (string) $html, self::tracker_hosts( $services ) );
 	}
 
@@ -627,6 +653,27 @@ class CMP_Blocker {
 		return 'necessary' === $v ? false : $v;
 	}
 
+	/**
+	 * Does this page keep the printed options of PixelYourSite (data, held by the
+	 * gate of its bridge)? $pending: before the rewrite, when a data-cmp-category
+	 * is about to be blocked; a scanned page counts only what is blocked already.
+	 */
+	private static function keeps_bridge_data( string $html, bool $pending ): bool {
+		return class_exists( 'CMP_Bridge_PYS', false ) && CMP_Bridge_PYS::keeps_options(
+			$html,
+			function ( $attrs ) use ( $pending ) {
+				if ( self::is_blocked_tag( $attrs ) ) {
+					return preg_match( '/data-cmp-block\s*=\s*["\']([a-z0-9_-]+)["\']/i', $attrs, $m ) ? array( 'held', strtolower( $m[1] ) ) : null;
+				}
+				$cat = self::has_keep( $attrs ) ? false : self::tag_category( $attrs );
+				if ( false === $cat ) {
+					return array( 'live', '' );
+				}
+				return $pending && null !== $cat && '' !== $cat ? array( 'held', $cat ) : null;
+			}
+		);
+	}
+
 	/** Pure: does the attribute string carry the data-cmp-keep attribute (not just the text)? */
 	private static function has_keep( $attrs ) {
 		return 1 === preg_match( '/(?:^|\s)data-cmp-keep(?=[\s=\/>]|$)/i', (string) $attrs );
@@ -700,13 +747,15 @@ class CMP_Blocker {
 
 	/** Pure: remove <noscript> blocks whose content references a tracker host.
 	 * A <noscript> only renders without JS, where no consent is possible, so the
-	 * compliant outcome is to not load the tracker at all (no re-injection). */
-	public static function strip_tracker_noscript( $html, array $hosts ) {
+	 * compliant outcome is to not load the tracker at all (no re-injection).
+	 * $service: the hosts are of this service, without its excepted URLs. */
+	public static function strip_tracker_noscript( $html, array $hosts, array $service = array() ) {
 		return (string) preg_replace_callback(
 			'/<noscript\b[^>]*>.*?<\/noscript>/is',
-			function ( $m ) use ( $hosts ) {
+			function ( $m ) use ( $hosts, $service ) {
+				$text = CMP_Services::without_excepted( $m[0], $service );
 				foreach ( $hosts as $host ) {
-					if ( self::has_host( $m[0], $host ) ) {
+					if ( self::has_host( $text, $host ) ) {
 						return '';
 					}
 				}
@@ -732,14 +781,20 @@ class CMP_Blocker {
 			$svc = CMP_Services::script_service( '', $body, $services );
 		}
 		if ( null === $svc ) {
+			$custom = array(); // services the URLs in the body went to
 			foreach ( $services as $s ) {
 				if ( ! isset( $s['type'] ) || 'script' !== $s['type'] ) {
 					continue;
 				}
+				$text   = CMP_Services::without_excepted( $body, $s, $ids );
+				$custom = array_merge( $custom, $ids );
+				if ( isset( $s['id'] ) && in_array( $s['id'], $custom, true ) ) {
+					return $s;
+				}
 				// A host/path rule (www.google.com/recaptcha) needs its full pattern in
 				// the body; the bare host alone would catch unrelated scripts.
 				foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
-					if ( '' !== (string) $h && self::has_host( $body, (string) $h ) ) {
+					if ( '' !== (string) $h && self::has_host( $text, (string) $h ) ) {
 						return $s;
 					}
 				}
@@ -806,7 +861,7 @@ class CMP_Blocker {
 		return $out;
 	}
 
-	private static function rewrite_tag( $m, array $services ) {
+	private static function rewrite_tag( $m, array $services, $options = false ) {
 		$attrs = $m[1];
 		$body  = $m[2];
 
@@ -825,6 +880,11 @@ class CMP_Blocker {
 		}
 		if ( null !== $cat && '' !== $cat ) {
 			return self::blocked_script( $cat, null, $src, $body, $attrs );
+		}
+
+		// PixelYourSite's printed options on a gated page (keeps_bridge_data()).
+		if ( null === $cat && $options && CMP_Bridge_PYS::is_options( $attrs, $body ) ) {
+			return $m[0];
 		}
 
 		$svc = self::script_for( $src, $body, $services );

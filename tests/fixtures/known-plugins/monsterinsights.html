@@ -1,0 +1,29 @@
+<!-- Source: google-analytics-for-wordpress (MonsterInsights) 11.3.0, includes/frontend/tracking/class-tracking-gtag.php (frontend_output: the loader script tag, then an inline script that defines __gtagTracker and only pushes onto dataLayer). -->
+
+<!-- This site uses the Google Analytics by MonsterInsights plugin v11.3.0 - Using Analytics tracking - https://www.monsterinsights.com/ -->
+<script src="//www.googletagmanager.com/gtag/js?id=G-MONSTER001" data-cfasync="false" data-wpfc-render="false" async></script>
+<script data-cfasync="false" data-wpfc-render="false">
+	var mi_version = '11.3.0';
+	var mi_track_user = true;
+	var mi_no_track_reason = '';
+	var MonsterInsightsDefaultLocations = {"page_location":"https:\/\/example.test\/"};
+	var MonsterInsightsLocations = (typeof MonsterInsightsExcludeQuery === 'object') ? MonsterInsightsExcludeQuery : MonsterInsightsDefaultLocations;
+	window.dataLayer = window.dataLayer || [];
+	if (mi_track_user) {
+		function __gtagDataLayer() {
+			dataLayer.push(arguments);
+		}
+		function __gtagTracker(type, name, parameters) {
+			if (!parameters) {
+				parameters = {};
+			}
+			__gtagDataLayer.apply(null, arguments);
+		}
+		__gtagTracker('js', new Date());
+		__gtagTracker('set', {
+			'developer_id.dZGIzZG': true,
+		});
+		__gtagTracker('config', 'G-MONSTER001', {"forceSSL":"true"} );
+		window.gtag = __gtagTracker;
+	}
+</script>

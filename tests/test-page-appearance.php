@@ -256,6 +256,8 @@ $pa_nt = CMP_Appearance_Page::removed_notice( $pa_rm['removed'] );
 cmp_assert( false !== strpos( $pa_nt, 'notice-warning' ) && substr_count( $pa_nt, '<li>' ) === count( $pa_rm['removed'] ), 'css message: one list item per removed declaration/rule (' . count( $pa_rm['removed'] ) . ')' );
 cmp_assert( false !== strpos( $pa_nt, '<code>[data-cmp-action=&quot;reject&quot;]{display:none}</code>' ), 'css message: the removed rule is shown, escaped' );
 cmp_assert( false === strpos( $pa_nt, '<script' ), 'css message: no raw HTML from the CSS' );
+cmp_assert( false !== strpos( CMP_Appearance_Page::removed_notice( array( 'a{b:c}' ) ), 'Restul CSS-ului e salvat' ) && false !== strpos( CMP_Appearance_Page::removed_notice( array( 'a{b:c}' ), true ), 'Restul CSS-ului e salvat' ), 'css message: after a real save it says the rest is saved' );
+cmp_assert( false === strpos( CMP_Appearance_Page::removed_notice( array( 'a{b:c}' ), false ), 'Restul CSS-ului e salvat' ), 'css message: removed_notice( ..., false ) does not claim a save' );
 $pa_many = CMP_Appearance_Page::removed_notice( array_fill( 0, 40, 'a{b:c}' ) );
 cmp_assert( substr_count( $pa_many, '<li>' ) <= 21, 'css message: a long list is capped' );
 cmp_assert( false !== strpos( $pa_src, 'CMP_Appearance::clean_custom_css(' ) && false !== strpos( $pa_src, 'set_transient( self::REMOVED_KEY' ), 'aspect: save() keeps the removed list for the next screen' );

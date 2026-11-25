@@ -49,12 +49,22 @@ class CMP_Banner {
 	 * Pure: the Consent Mode default <script>. $advanced adds the data-cmp-default
 	 * marker, by which the blocker's output buffer moves this stub to right after
 	 * <head> (CMP_Blocker::place_consent_default). Strict markup is unmarked.
+	 * $mirror (null = PixelYourSite is loaded): PixelYourSite renames `dataLayer` in
+	 * every block with a top-level gtag helper, this one too, to its own layer. The
+	 * consent commands then also go to the real one, which a GTM container reads;
+	 * its name is written in two pieces so that the rename leaves it alone.
 	 */
-	public static function consent_default_script( array $signals, $advanced ) {
+	public static function consent_default_script( array $signals, $advanced, $mirror = null ) {
+		if ( null === $mirror ) {
+			$mirror = defined( 'PYS_FREE_VERSION' );
+		}
 		$json = function_exists( 'wp_json_encode' ) ? wp_json_encode( $signals ) : json_encode( $signals );
 		return '<script data-cmp-keep' . ( $advanced ? ' data-cmp-default' : '' ) . ">\n"
 			. "window.dataLayer = window.dataLayer || [];\n"
-			. "function gtag(){dataLayer.push(arguments);}\n"
+			. ( $mirror
+				? "window[\"data\"+\"Layer\"] = window[\"data\"+\"Layer\"] || [];\n"
+					. "function gtag(){dataLayer.push(arguments);var l=window[\"data\"+\"Layer\"];if(arguments[0]===\"consent\"&&l!==dataLayer){l.push(arguments);}}\n"
+				: "function gtag(){dataLayer.push(arguments);}\n" )
 			. 'gtag("consent","default",' . $json . ");\n"
 			. "</script>\n";
 	}

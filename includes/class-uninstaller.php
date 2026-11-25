@@ -34,6 +34,8 @@ class CMP_Uninstaller {
 			'cmp_scan_urls', 'cmp_scan_queue', 'cmp_scan_pages', 'cmp_scan_state', 'cmp_scan_aggregate', 'cmp_scan_lock', 'cmp_scan_saved_at', 'cmp_check_report',
 			// Localized Google Fonts map.
 			'cmp_fonts_map',
+			// New-domain email: the hosts seen / ignored and its lock.
+			'cmp_unknown_hosts', 'cmp_unknown_hosts_lock',
 		);
 		foreach ( $always as $option ) {
 			delete_option( $option );

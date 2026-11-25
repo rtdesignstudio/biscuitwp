@@ -99,6 +99,9 @@ class CMP_Settings_Page {
 			<?php elseif ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Setări salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
+			<?php if ( isset( $_GET['cmp_alert_email'] ) && 'invalid' === $_GET['cmp_alert_email'] ) : ?>
+				<div class="notice notice-error"><p><?php esc_html_e( 'Adresa de email pentru domenii noi nu e validă, deci nu a fost salvată. Dacă aveai deja o adresă, a rămas ea. Dacă nu aveai, salvarea aceasta nu a pornit emailul. Scrie o adresă validă sau lasă câmpul gol pentru adresa de administrator.', 'biscuitwp' ); ?></p></div>
+			<?php endif; ?>
 			<?php self::render_measurement_message(); ?>
 			<?php self::render_tracker_warnings( $s ); ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -167,6 +170,18 @@ class CMP_Settings_Page {
 							<input type="hidden" name="cmp[respect_gpc]" value="0">
 							<label><input type="checkbox" name="cmp[respect_gpc]" value="1" <?php checked( ! isset( $s['respect_gpc'] ) || ! empty( $s['respect_gpc'] ) ); ?>> <?php esc_html_e( 'Respectă semnalul Global Privacy Control (GPC)', 'biscuitwp' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Când browserul vizitatorului trimite semnalul GPC, pluginul înregistrează „Doar cele necesare” și nu mai arată bannerul (vizitatorul poate accepta oricând din „Setări cookie”). Legea din Moldova nu o cere explicit, de aceea e o opțiune, pornită implicit.', 'biscuitwp' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Email la domenii noi', 'biscuitwp' ); ?></th>
+						<td>
+							<input type="hidden" name="cmp[alert_email_on]" value="0">
+							<label><input type="checkbox" name="cmp[alert_email_on]" value="1" <?php checked( CMP_Alerts::enabled( $s ) ); ?>> <?php esc_html_e( 'Trimite un email când apare pe site un domeniu terț necunoscut', 'biscuitwp' ); ?></label>
+							<p>
+								<label><?php esc_html_e( 'Adresa', 'biscuitwp' ); ?>
+									<input type="email" name="cmp[alert_email]" value="<?php echo esc_attr( isset( $s['alert_email'] ) ? (string) $s['alert_email'] : '' ); ?>" class="regular-text" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email', '' ) ); ?>"></label>
+							</p>
+							<p class="description"><?php esc_html_e( 'Scanarea zilnică caută scripturi și iframe-uri de pe domenii care nu sunt ale site-ului și nu aparțin niciunui serviciu. Primești cel mult un email la 7 zile, cu domeniile noi, doar în text. Lasă adresa goală ca să folosești adresa administratorului. Nu vede ce adaugă JavaScript după încărcare sau Tag Manager: pentru asta folosește ecranul „Verificare”.', 'biscuitwp' ); ?></p>
 						</td>
 					</tr>
 					<tr data-cmp-mode="pro">
@@ -277,6 +292,9 @@ class CMP_Settings_Page {
 		$args = array( 'page' => CMP_Admin::SLUG, 'updated' => 1 );
 		if ( 'ack' === $meas['error'] ) {
 			$args['cmp_measurement'] = 'ack';
+		}
+		if ( CMP_Sanitizer::alert_email_error( $raw ) ) {
+			$args['cmp_alert_email'] = 'invalid'; // the stored address was kept
 		}
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
 		exit;

@@ -13,16 +13,37 @@
 	var uid = 0;
 	function nextId() { uid += 1; return 'n' + Date.now() + uid; }
 
+	// Services screen: append an empty custom service row from the template; returns it (null when the screen has none).
+	function addCustomRow() {
+		var tpl = document.getElementById('cmp-custom-template');
+		var wrap = document.querySelector('[data-cmp-customs]');
+		if (!tpl || !wrap) { return null; }
+		var div = document.createElement('div');
+		div.innerHTML = tpl.innerHTML.replace(/__i__/g, nextId());
+		var row = div.firstElementChild;
+		if (row) { wrap.appendChild(row); }
+		return row;
+	}
+
 	// Services screen: custom service rows and their cookie rows.
 	function onServicesClick(e) {
 		var add = e.target.closest('[data-cmp-add-custom]');
 		if (add) {
-			var tpl = document.getElementById('cmp-custom-template');
-			var wrap = document.querySelector('[data-cmp-customs]');
-			if (!tpl || !wrap) { return true; }
-			var div = document.createElement('div');
-			div.innerHTML = tpl.innerHTML.replace(/__i__/g, nextId());
-			if (div.firstElementChild) { wrap.appendChild(div.firstElementChild); }
+			addCustomRow();
+			return true;
+		}
+		// "Adaugă ca serviciu" on an unknown domain: a new custom row with the host filled in. Nothing is saved until "Salvează serviciile".
+		var useHost = e.target.closest('[data-cmp-use-host]');
+		if (useHost) {
+			var host = useHost.getAttribute('data-cmp-use-host') || '';
+			var added = addCustomRow();
+			if (added && host) {
+				var hostsBox = added.querySelector('textarea[name$="[hosts]"]');
+				var nameBox = added.querySelector('input[name$="[name]"]');
+				if (hostsBox) { hostsBox.value = host; }
+				if (nameBox) { nameBox.value = host; nameBox.focus(); }
+				if (added.scrollIntoView) { added.scrollIntoView({ block: 'center' }); }
+			}
 			return true;
 		}
 		var del = e.target.closest('[data-cmp-del-custom]');

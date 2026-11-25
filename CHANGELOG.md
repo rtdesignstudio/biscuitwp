@@ -2,6 +2,50 @@
 
 BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
 
+## 1.2.0 – TBD
+
+- Biblioteca de servicii are două servicii noi: Google AdSense (marketing)
+  și Cloudflare Turnstile (necesar).
+- AdSense așteaptă acum acordul pentru marketing. Pe site-urile unde e
+  prezent, el nu mai pornește înainte de acord; după prima scanare care îl
+  găsește, o notificare îți spune o singură dată, și în Servicii.
+- Dacă ai un serviciu personalizat cu un domeniu sau o adresă AdSense ori
+  Turnstile, el decide mai departe pentru ce e scris la el, cu categoria și cu
+  „nu bloca” alese de tine. Restul rămâne la serviciul din bibliotecă. Dacă nu
+  i-ai scris cookie-uri, politica le arată pe cele AdSense.
+- Cookie-urile AdSense apar în tabelul de cookie-uri, din lista Google.
+- Ecranul Servicii arată pluginurile recunoscute: Site Kit, MonsterInsights,
+  PixelYourSite, WooCommerce și Contact Form 7, cu starea fiecăruia. Un
+  plugin apare ca blocat doar dacă toate serviciile lui sunt blocate acum.
+- PixelYourSite: scriptul lui rămâne în așteptare până la acord, iar
+  evenimentele trimise de pe server pleacă doar cu acord. Cine acceptă doar
+  marketing primește Meta, nu Google Analytics; cine acceptă doar statistici
+  nu primește nimic prin el. PixelYourSite Pro nu e legat.
+- Pe site-urile cu PixelYourSite, semnalele Consent Mode ajung și în
+  dataLayer-ul real, nu doar în dataLayerPYS.
+- Unde PixelYourSite e legat, sesiunea PHP nu mai pornește fără acord. Paginile
+  pot să nu mai primească antetul no-store pe care îl punea sesiunea, deci pot
+  fi păstrate în cache de server sau CDN.
+- WooCommerce: când blocarea e pornită, atribuirea comenzilor (cookie-urile
+  sbjs_*) pornește doar după acordul pentru marketing, iar la retragere
+  cookie-urile se șterg. În modul Light rămâne oprită. Coșul,
+  plata și formularele nu sunt atinse. Fără efect cu WP Consent API.
+- După update, golește cache-ul paginilor: o pagină veche din cache nu are
+  legăturile noi.
+- Un optimizator care lipește scripturile într-un singur fișier poate ascunde
+  scriptul PixelYourSite. „Verifică în browser” rămâne proba.
+- Email la domenii noi: scanarea găsește domeniile terțe care încarcă scripturi
+  sau iframe-uri și nu aparțin niciunui serviciu. Ele apar în Servicii, cu
+  „Adaugă ca serviciu” și „Ignoră”.
+- Emailul pleacă cel mult o dată la 7 zile, doar cu domenii noi; din același
+  domeniu anunță cel mult 10, restul apar în Servicii. Ce e deja pe site la
+  prima scanare completă (prin cron) nu se anunță. E oprit pe site-urile
+  existente și pornit pe cele noi; îl pornești în Setări. O adresă greșită nu
+  îl pornește.
+- Aspect: export și import. Exportul descarcă aspectul salvat într-un fișier
+  .json; importul îl încarcă în formular, fără să salveze nimic. Cu WPML sau
+  Polylang, textele bannerului nu intră în fișier.
+
 ## 1.1.1 – 2026-11-24
 
 - Butonul de mutare merge și când pluginul stă într-un folder cu alt nume (de exemplu consent-manager-pro-main).

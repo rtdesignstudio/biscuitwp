@@ -15,6 +15,15 @@ class CMP_Services {
 	/** Services 0.4.x already blocked (before the library existed). */
 	const LEGACY_IDS = array( 'google-analytics', 'google-tag-manager', 'meta-pixel', 'youtube', 'vimeo', 'google-maps' );
 
+	/** Version => library services it made wait for consent on sites that already load them (the one-time note after the update). */
+	const ADDED_TO_BLOCKING = array( '1.2.0' => array( 'google-adsense' ) );
+
+	/** Library services added while sites may already have a custom service for them => the URL of their loader (with_except()). */
+	const YIELD = array(
+		'google-adsense'       => 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+		'cloudflare-turnstile' => 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+	);
+
 	/** Services the Advanced measurement mode always loads (Consent Mode on "denied"). */
 	const MEASUREMENT_IDS = array( 'google-analytics', 'google-tag-manager' );
 
@@ -191,6 +200,134 @@ class CMP_Services {
 		return $out;
 	}
 
+	/** Pure: the services blocked since versions newer than $old, the version updated from (false = a fresh install: none). */
+	public static function added_to_blocking( $old ) {
+		$out = array();
+		foreach ( false === $old ? array() : self::ADDED_TO_BLOCKING as $version => $ids ) {
+			if ( version_compare( (string) $old, $version, '<' ) ) {
+				$out = array_merge( $out, $ids );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Pure: the ids the note after an update names now. $notice is the stored
+	 * cmp_services_notice: a list of ids waiting to be found on the site (nothing to
+	 * name while blocking is off), or 1, the general note (everything newly_blocked()).
+	 */
+	public static function notice_ids( $notice, array $found_ids, array $services, $blocking ) {
+		if ( ! is_array( $notice ) ) {
+			return self::newly_blocked( $found_ids, $services );
+		}
+		$services = array_filter( $services, function ( $s ) {
+			return ! self::replaced( $s );
+		} );
+		return $blocking ? self::newly_blocked( array_values( array_intersect( $notice, $found_ids ) ), $services ) : array();
+	}
+
+	/** Pure: is this URL decided by a custom service instead of $s (with_except())? */
+	public static function excepted( $url, $s ) {
+		foreach ( isset( $s['except'] ) ? $s['except'] : array() as $e ) {
+			if ( self::host_matches( $url, $e['pattern'] ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Pure: a library service all of whose hosts a custom service decides for, whole. */
+	public static function replaced( $s ) {
+		if ( ! is_array( $s ) || empty( $s['except'] ) ) {
+			return false;
+		}
+		foreach ( (array) $s['hosts'] as $host ) {
+			if ( ! self::excepted( 'https://' . $host . '/', $s ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Pure: $text without the URLs a custom service decides for, to look for the
+	 * hosts of $s in a script body or a page. $ids: the custom services they went
+	 * to. JSON-escaped slashes are read too. A URL ends at the first character a
+	 * plain path does not have (a quote, a backtick, , ; | ? # & = : [ { …) or at
+	 * "//", so what follows it is looked at on its own; a pattern with such a
+	 * character frees nothing here. PCRE gave up: the text as it is.
+	 *
+	 * Limits: a path is compared as it is written ("/managed/../js/x.js" starts with
+	 * "/managed/"): only the author of the page could write it. In the scan's "raw"
+	 * list a custom host/path in JSON-escaped text or with ":443" does not count
+	 * (it is blocked all the same; it matters only with blocking off), and a library
+	 * host in the query of another URL does.
+	 */
+	public static function without_excepted( $text, $s, &$ids = array() ) {
+		$ids = array();
+		if ( empty( $s['except'] ) ) {
+			return (string) $text;
+		}
+		$out = preg_replace_callback(
+			'#(?<![a-z0-9.-])(?:[a-z0-9-]+\.)+[a-z][a-z0-9-]*(?::\d+)?(?:\\\\?/(?!\\\\?/)[a-z0-9._~%-]*)*#i',
+			function ( $m ) use ( $s, &$ids ) {
+				foreach ( $s['except'] as $e ) {
+					if ( self::host_matches( 'https://' . str_replace( '\\', '', $m[0] ), $e['pattern'] ) ) {
+						$ids[] = $e['id'];
+						return '';
+					}
+				}
+				return $m[0];
+			},
+			(string) $text
+		);
+		return is_string( $out ) ? $out : (string) $text;
+	}
+
+	/** Pure: the custom service that decides for the loader of $s (so for its cookies), or null. */
+	public static function loader_service( $s, array $services ) {
+		foreach ( ! empty( $s['except'] ) ? $services : array() as $c ) {
+			foreach ( is_array( $c ) && isset( $c['source'] ) && 'custom' === $c['source'] ? (array) $c['hosts'] : array() as $h ) {
+				if ( self::host_matches( self::YIELD[ $s['id'] ], $h ) ) {
+					return $c;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Pure: a custom service with a domain on a YIELD service decides for the URLs
+	 * its own patterns match, so the category and "nu bloca" the admin chose are
+	 * never overridden by an update; every other URL stays with the library entry.
+	 * The patterns go on that entry ('except': pattern, id and name of the custom
+	 * service); script_service(), the scan and the check skip it for their URLs.
+	 * A custom service that decides for the loader and declares no cookies lists
+	 * the ones of the library entry (policy table).
+	 */
+	private static function with_except( array $services ) {
+		foreach ( $services as $i => $s ) {
+			if ( 'library' !== $s['source'] || ! isset( $s['id'], $s['hosts'], self::YIELD[ $s['id'] ] ) ) {
+				continue;
+			}
+			foreach ( $services as $k => $c ) {
+				foreach ( 'custom' === $c['source'] ? $c['hosts'] : array() as $pattern ) {
+					$host = explode( '/', is_string( $pattern ) ? $pattern : '', 2 )[0];
+					foreach ( (array) $s['hosts'] as $own ) {
+						if ( self::host_matches( 'https://' . $own . '/', $host ) || self::host_matches( 'https://' . $host . '/', $own ) ) {
+							$services[ $i ]['except'][] = array( 'pattern' => $pattern, 'id' => $c['id'], 'name' => '' !== $c['name'] ? $c['name'] : $c['id'] );
+							break;
+						}
+					}
+					if ( empty( $c['cookies'] ) && self::host_matches( self::YIELD[ $s['id'] ], $pattern ) ) {
+						$services[ $k ]['cookies'] = $s['cookies'];
+					}
+				}
+			}
+		}
+		return $services;
+	}
+
 	/**
 	 * Pure: the library with stored overrides applied, plus custom services.
 	 * An empty $category_slugs means "unknown": categories are not remapped.
@@ -260,7 +397,7 @@ class CMP_Services {
 				}
 			}
 		}
-		return $out;
+		return self::with_except( $out );
 	}
 
 	/** Pure: union of the cumulative seen list and a fresh scan; seen order kept, no duplicates. */
@@ -491,7 +628,7 @@ class CMP_Services {
 			}
 			if ( '' !== $src ) {
 				foreach ( (array) ( isset( $s['hosts'] ) ? $s['hosts'] : array() ) as $h ) {
-					if ( self::host_matches( $src, $h ) ) {
+					if ( self::host_matches( $src, $h ) && ! self::excepted( $src, $s ) ) {
 						return $s;
 					}
 				}

@@ -93,7 +93,7 @@ $cmp_rel_mpk = base64_encode( sodium_crypto_sign_publickey( $cmp_rel_mkp ) );
 $cmp_rel_log = $cmp_rel_tmp . '/CHANGELOG.md';
 file_put_contents(
 	$cmp_rel_log,
-	"# Changelog\n\n## 9.9.10 – 2026-11-21\n\n- Fix after 9.9.9.\n\n## 9.9.9 - 2026-11-20\n\n- First **item**.\n- Second item with `code`.\n\n## 9.9.8 – 2026-11-01\n\n- Older.\n"
+	"# Changelog\n\n## 10.0.0 – TBD\n\n- Not released yet.\n\n## 9.9.10 – 2026-11-21\n\n- Fix after 9.9.9.\n\n## 9.9.9 - 2026-11-20\n\n- First **item**.\n- Second item with `code`.\n\n## 9.9.8 – 2026-11-01\n\n- Older.\n"
 );
 
 $cmp_rel_env = array(
@@ -143,6 +143,7 @@ cmp_assert_eq( isset( $cmp_rel_m['notes'][0]['version'] ) ? $cmp_rel_m['notes'][
 cmp_assert_eq( isset( $cmp_rel_m['notes'][0]['items'] ) ? $cmp_rel_m['notes'][0]['items'] : null, array( 'First item.', 'Second item with code.' ), 'release: notes items are plain text bullets' );
 cmp_assert_eq( isset( $cmp_rel_m['notes'][1]['version'] ) ? $cmp_rel_m['notes'][1]['version'] : null, '9.9.8', 'release: older versions follow, newer ones (9.9.10) left out' );
 cmp_assert_eq( count( isset( $cmp_rel_m['notes'] ) ? $cmp_rel_m['notes'] : array() ), 2, 'release: only versions up to 9.9.9 in notes' );
+cmp_assert( false === strpos( json_encode( $cmp_rel_m['notes'] ), 'Not released yet' ) && false === strpos( json_encode( $cmp_rel_m['notes'] ), 'TBD' ), 'release: a "TBD" section above the dated ones never reaches the notes' );
 cmp_assert_eq( array( $cmp_rel_m['requires_wp'], $cmp_rel_m['requires_php'], $cmp_rel_m['tested_wp'] ), array( '6.0', '7.4', '6.9' ), 'release: requirements' );
 cmp_assert_eq( strtotime( $cmp_rel_m['expires'] ) - strtotime( $cmp_rel_m['issued'] ), 60 * 86400, 'release: expires = issued + 60 days' );
 cmp_assert( is_file( $cmp_rel_tmp . '/state/manifest-beta.json' ), 'release --dry-run: state written to CMP_RELEASE_STATE' );

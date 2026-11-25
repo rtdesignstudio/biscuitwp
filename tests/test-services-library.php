@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/modules/class-blocker.php';
 
-// The bundled library: 18 services, valid, with the vendors' official loaders blocked by category.
+// The bundled library: 20 services, valid, with the vendors' official loaders blocked by category.
 
 $cmp_all = CMP_Services::library();
-cmp_assert_eq( count( $cmp_all ), 18, 'library lists 18 services' );
+cmp_assert_eq( count( $cmp_all ), 20, 'library lists 20 services' );
 $cmp_file = CMP_Services::load_file( __DIR__ . '/../data/services.json' );
 cmp_assert_eq( $cmp_file['errors'], array(), 'library passes validate()' );
 
@@ -108,3 +108,43 @@ foreach ( array(
 }
 $cmp_ev = '<script src="https://evil-hs-scripts.com/x.js"></script><script src="https://notcontentsquare.net/x.js"></script>';
 cmp_assert_eq( CMP_Blocker::rewrite( $cmp_ev ), $cmp_ev, 'look-alike hosts are not matched' );
+
+// ---- Lot A: Google AdSense (marketing) and Cloudflare Turnstile (necessary) ----
+cmp_assert( isset( $cmp_ids['google-adsense'] ) && 'marketing' === $cmp_ids['google-adsense']['category'], 'google-adsense: category is marketing' );
+cmp_assert_eq( $cmp_ids['google-adsense']['hosts'], array( 'pagead2.googlesyndication.com', 'googleads.g.doubleclick.net' ), 'google-adsense: hosts' );
+cmp_assert_eq( $cmp_ids['google-adsense']['type'], 'script', 'google-adsense: type script' );
+foreach ( array(
+	'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1" crossorigin="anonymous"></script>',
+	'<script src="https://googleads.g.doubleclick.net/pagead/viewthroughconversion/1/"></script>',
+) as $cmp_n => $cmp_html ) {
+	$cmp_o = CMP_Blocker::rewrite( $cmp_html );
+	cmp_assert( false !== strpos( $cmp_o, 'data-cmp-service="google-adsense"' ) && false !== strpos( $cmp_o, 'data-cmp-block="marketing"' ), "google-adsense: loader #{$cmp_n} is tagged and blocked as marketing" );
+}
+cmp_assert( isset( $cmp_ids['cloudflare-turnstile'] ) && 'necessary' === $cmp_ids['cloudflare-turnstile']['category'], 'cloudflare-turnstile: category is necessary' );
+cmp_assert_eq( $cmp_ids['cloudflare-turnstile']['hosts'], array( 'challenges.cloudflare.com' ), 'cloudflare-turnstile: host' );
+$cmp_ts = '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async></script>';
+cmp_assert_eq( CMP_Blocker::rewrite( $cmp_ts ), $cmp_ts, 'cloudflare-turnstile: never rewritten' );
+$cmp_tss = CMP_Services::script_service( 'https://challenges.cloudflare.com/turnstile/v0/api.js', '', $cmp_all );
+cmp_assert( null !== $cmp_tss && 'cloudflare-turnstile' === $cmp_tss['id'], 'cloudflare-turnstile: script is recognised' );
+cmp_assert_eq( CMP_Services::script_service( 'https://evil-challenges.cloudflare.com.example/x.js', '', $cmp_all ), null, 'cloudflare-turnstile: look-alike host is not matched' );
+
+// AdSense cookies: only the ones the vendor lists (business.safety.google/adscookies, read 2026-11-25).
+$cmp_ads_names = array();
+foreach ( $cmp_ids['google-adsense']['cookies'] as $cmp_c ) {
+	$cmp_ads_names[ $cmp_c['name'] ] = $cmp_c['duration']['en'];
+}
+cmp_assert_eq(
+	$cmp_ads_names,
+	array(
+		'__gads'                => '13 months',
+		'__gpi'                 => '13 months',
+		'__gpi_optout'          => '13 months',
+		'__eoi'                 => '6 months',
+		'TESTCOOKIESENABLED'    => '60 seconds',
+		'GED_PLAYLIST_ACTIVITY' => 'Session',
+		'test_cookie'           => '15 minutes',
+		'DSID'                  => '2 weeks',
+	),
+	'google-adsense: the vendor-listed cookies and nothing else (no id, IDE, NID, ACLK_DATA)'
+);
+cmp_assert_eq( $cmp_ids['cloudflare-turnstile']['cookies'], array(), 'cloudflare-turnstile: no cookies by default' );

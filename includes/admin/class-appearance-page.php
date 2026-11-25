@@ -23,6 +23,13 @@ class CMP_Appearance_Page {
 	/** At most this many removed parts are listed (the rest are counted). */
 	const REMOVED_MAX = 20;
 
+	/** Name of the upload field of the import form. */
+	const IMPORT_FIELD = 'cmp_appearance_file';
+
+	/** Test seams: is_uploaded_file and header() (the tests run without a web request). */
+	public static $upload_check = 'is_uploaded_file';
+	public static $header_fn    = 'header';
+
 	/** Appearance keys that do not apply in Light (disabled there). */
 	const LIGHT_OFF = array( 'format', 'position', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen' );
 
@@ -84,7 +91,7 @@ class CMP_Appearance_Page {
 	}
 
 	/** Pure: the notice listing the custom CSS parts removed at save ('' when none). Escaped HTML. */
-	public static function removed_notice( array $removed ) {
+	public static function removed_notice( array $removed, $saved = true ) {
 		if ( ! $removed ) {
 			return '';
 		}
@@ -98,7 +105,9 @@ class CMP_Appearance_Page {
 			$items .= '<li>' . esc_html( sprintf( __( '… și încă %d.', 'biscuitwp' ), $more ) ) . '</li>';
 		}
 		return '<div class="notice notice-warning cmp-ap-removed"><p><strong>' . esc_html__( 'Am eliminat din CSS-ul propriu:', 'biscuitwp' ) . '</strong> '
-			. esc_html__( 'regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și „Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului e salvat.', 'biscuitwp' )
+			. ( $saved
+				? esc_html__( 'regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și „Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului e salvat.', 'biscuitwp' )
+				: esc_html__( 'regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și „Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului nu e salvat încă: apasă „Salvează”.', 'biscuitwp' ) )
 			. '</p><ul>' . $items . '</ul></div>';
 	}
 
@@ -125,7 +134,146 @@ class CMP_Appearance_Page {
 			delete_transient( $key );
 			echo self::removed_notice( is_array( $removed ) ? $removed : array() ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in removed_notice().
 		}
-		self::render_form( $s, CMP_Banner::multilingual() );
+		$ml   = CMP_Banner::multilingual();
+		$form = $s;
+		// Over post_max_size PHP drops the whole request body: nothing to check or to read, only to explain.
+		if ( isset( $_SERVER['REQUEST_METHOD'], $_SERVER['CONTENT_LENGTH'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] && ! $_POST && (int) $_SERVER['CONTENT_LENGTH'] > 0 ) { // phpcs:ignore WordPress.Security.NonceVerification -- shows a message, changes nothing.
+			echo self::import_notice( array( 'status' => 'error', 'error' => 'size' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in import_notice().
+		}
+		// An import (POST to this screen): the form opens with the imported values, unsaved; nothing is written.
+		if ( isset( $_SERVER['REQUEST_METHOD'], $_POST['cmp_import_appearance'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in handle_import() (check_admin_referer below).
+			$nonce_ok = (bool) check_admin_referer( 'cmp_import_appearance' );
+			$files    = isset( $_FILES ) && is_array( $_FILES ) ? $_FILES : array(); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput -- the file is validated in CMP_Appearance_IO::read_upload().
+			$import   = self::handle_import( current_user_can( 'manage_options' ), $nonce_ok, $files, $s, $ml, self::$upload_check );
+			if ( 'denied' === $import['status'] ) {
+				wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
+			}
+			echo self::import_notice( $import ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in import_notice().
+			if ( 'ok' === $import['status'] ) {
+				$form = $import['settings'];
+			}
+		}
+		self::render_form( $form, $ml );
+	}
+
+	/**
+	 * An import request: the capability and the nonce are checked first and the
+	 * uploaded file is not touched without them. Nothing is written: the result
+	 * carries the settings the form is rendered with (unsaved).
+	 *
+	 * @param bool          $can          current_user_can( 'manage_options' ).
+	 * @param bool          $nonce_ok     The nonce check.
+	 * @param array         $files        $_FILES.
+	 * @param array         $s            Stored cmp_settings.
+	 * @param bool          $multilingual WPML or Polylang active.
+	 * @param callable|null $is_uploaded  is_uploaded_file.
+	 * @return array { status: denied|error|ok, error: string, settings: ?array, merge: array }
+	 */
+	public static function handle_import( $can, $nonce_ok, array $files, array $s, $multilingual, $is_uploaded = null ) {
+		$out = array( 'status' => 'denied', 'error' => '', 'settings' => null, 'merge' => array() );
+		if ( ! $can || ! $nonce_ok ) {
+			return $out;
+		}
+		$up = CMP_Appearance_IO::read_upload( isset( $files[ self::IMPORT_FIELD ] ) ? $files[ self::IMPORT_FIELD ] : null, $is_uploaded );
+		if ( '' !== $up['error'] ) {
+			return array_merge( $out, array( 'status' => 'error', 'error' => $up['error'] ) );
+		}
+		$parsed = CMP_Appearance_IO::parse( $up['json'] );
+		if ( '' !== $parsed['error'] ) {
+			return array_merge( $out, array( 'status' => 'error', 'error' => $parsed['error'] ) );
+		}
+		$merge = CMP_Appearance_IO::merge( $parsed['data'], $s, $multilingual );
+		return array( 'status' => 'ok', 'error' => '', 'settings' => $merge['settings'], 'merge' => $merge );
+	}
+
+	/** Pure: why an import was refused (RO source text). */
+	public static function import_error_text( $code ) {
+		switch ( $code ) {
+			case 'none':
+				return __( 'Alege un fișier .json de importat.', 'biscuitwp' );
+			case 'partial':
+				return __( 'Fișierul nu s-a încărcat complet. Încearcă din nou.', 'biscuitwp' );
+			case 'size':
+				return __( 'Fișierul e prea mare: cel mult 256 KB.', 'biscuitwp' );
+			case 'json':
+				return __( 'Fișierul nu e un JSON valid.', 'biscuitwp' );
+			case 'format':
+				return __( 'Nu e un fișier de aspect BiscuitWP.', 'biscuitwp' );
+			case 'version':
+				return __( 'Fișierul vine dintr-o versiune mai nouă de BiscuitWP. Actualizează pluginul și încearcă din nou.', 'biscuitwp' );
+		}
+		return __( 'Fișierul nu a putut fi încărcat. Încearcă din nou.', 'biscuitwp' );
+	}
+
+	/** Pure: the notice(s) after an import request. Escaped HTML. */
+	public static function import_notice( array $import ) {
+		if ( 'error' === $import['status'] ) {
+			return '<div class="notice notice-error cmp-ap-import-error"><p>' . esc_html( self::import_error_text( $import['error'] ) ) . '</p></div>';
+		}
+		if ( 'ok' !== $import['status'] ) {
+			return '';
+		}
+		$m    = $import['merge'];
+		$html = '<div class="notice notice-warning cmp-ap-import-notice"><p><strong>' . esc_html__( 'Aspectul din fișier e încărcat în formular, dar nu e salvat.', 'biscuitwp' ) . '</strong> '
+			. esc_html__( 'Apasă „Vezi pe site” ca să-l vezi întâi, apoi „Salvează aspectul” ca să-l aplici. Dacă reîncarci pagina fără să retrimiți formularul, revii la aspectul salvat.', 'biscuitwp' ) . '</p>';
+		$more = '';
+		if ( ! empty( $m['ignored'] ) ) {
+			/* translators: %d: how many keys of the file were not used */
+			$more .= '<li class="cmp-ap-import-ignored">' . esc_html( sprintf( __( 'Chei ignorate (necunoscute sau care nu se importă, ca excluderile): %d.', 'biscuitwp' ), (int) $m['ignored'] ) ) . '</li>';
+		}
+		if ( ! empty( $m['texts_skipped'] ) ) {
+			$more .= '<li class="cmp-ap-import-texts">' . esc_html__( 'Textele din fișier nu s-au importat: site-ul folosește WPML sau Polylang, iar textele se traduc acolo.', 'biscuitwp' ) . '</li>';
+		}
+		if ( ! empty( $m['light_skipped'] ) ) {
+			/* translators: %d: how many values of the file were not used because the current mode does not show them */
+			$more .= '<li class="cmp-ap-import-mode">' . esc_html( sprintf( __( 'Valori care nu se aplică modului curent (Light sau Pro): %d. Au rămas cele salvate sau, dacă fișierul aduce alt stil, cele ale stilului.', 'biscuitwp' ), (int) $m['light_skipped'] ) ) . '</li>';
+		}
+		if ( '' !== $more ) {
+			$html .= '<ul>' . $more . '</ul>';
+		}
+		$html .= '</div>';
+		return $html . self::removed_notice( isset( $m['removed_css'] ) && is_array( $m['removed_css'] ) ? $m['removed_css'] : array(), false ); // an import saves nothing
+	}
+
+	/** Pure: the "Export / Import" section (below the form, never inside it). Escaped HTML. */
+	public static function io_section_html( $import_action, $export_action ) {
+		ob_start();
+		?>
+		<div class="cmp-ap-io">
+			<h2><?php esc_html_e( 'Export și import', 'biscuitwp' ); ?></h2>
+			<form method="post" action="<?php echo esc_url( $export_action ); ?>" class="cmp-ap-export">
+				<input type="hidden" name="action" value="cmp_export_appearance">
+				<?php wp_nonce_field( 'cmp_export_appearance' ); ?>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Exportă aspectul salvat', 'biscuitwp' ); ?></button></p>
+				<p class="description"><?php esc_html_e( 'Descarcă un fișier .json cu aspectul salvat, textele bannerului și CSS-ul propriu, ca să-l folosești pe alt site. Cu WPML sau Polylang, textele bannerului nu intră în fișier: ele se traduc acolo. Modificările nesalvate din formular nu intră. Excluderile, setările, serviciile și datele operatorului nu se exportă.', 'biscuitwp' ); ?></p>
+			</form>
+			<form method="post" action="<?php echo esc_url( $import_action ); ?>" enctype="multipart/form-data" class="cmp-ap-import">
+				<input type="hidden" name="cmp_import_appearance" value="1">
+				<?php wp_nonce_field( 'cmp_import_appearance' ); ?>
+				<p><label for="cmp-ap-import-file"><?php esc_html_e( 'Importă dintr-un fișier', 'biscuitwp' ); ?></label><br>
+					<input type="file" id="cmp-ap-import-file" name="<?php echo esc_attr( self::IMPORT_FIELD ); ?>" accept=".json,application/json">
+					<button type="submit" class="button"><?php esc_html_e( 'Încarcă în formular', 'biscuitwp' ); ?></button></p>
+				<p class="description"><?php esc_html_e( 'Un fișier exportat din BiscuitWP, cel mult 256 KB. Valorile apar în formularul de mai sus, nesalvate: nu se schimbă nimic pe site până nu apeși „Salvează aspectul”. Fișierul nu se păstrează pe server.', 'biscuitwp' ); ?></p>
+			</form>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/** admin-post: download the saved appearance as a JSON file. */
+	public static function export() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_export_appearance' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
+		}
+		$s    = CMP_Consent::get_settings();
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$r    = CMP_Appearance_IO::response( is_array( $s ) ? $s : array(), CMP_VERSION, is_string( $host ) ? $host : '', gmdate( 'Y-m-d' ) );
+		nocache_headers();
+		foreach ( $r['headers'] as $h ) {
+			call_user_func( self::$header_fn, $h );
+		}
+		echo $r['body']; // phpcs:ignore WordPress.Security.EscapeOutput -- a JSON download, not HTML.
+		exit;
 	}
 
 	/**
@@ -424,6 +572,7 @@ class CMP_Appearance_Page {
 					<span class="cmp-ap-preview" data-cmp-preview-slot><?php do_action( 'cmp_appearance_actions', $s ); ?></span>
 				</p>
 			</form>
+			<?php echo self::io_section_html( admin_url( 'admin.php?page=' . self::SLUG ), admin_url( 'admin-post.php' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in io_section_html(). ?>
 		</div>
 		<?php
 	}

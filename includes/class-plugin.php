@@ -121,7 +121,9 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/class-contrast.php';
 		require_once CMP_PATH . 'includes/class-appearance.php';
 		require_once CMP_PATH . 'includes/class-sanitizer.php';
+		require_once CMP_PATH . 'includes/class-appearance-io.php';
 		require_once CMP_PATH . 'includes/class-services.php';
+		require_once CMP_PATH . 'includes/class-known-plugins.php';
 		require_once CMP_PATH . 'includes/modules/class-banner.php';
 		require_once CMP_PATH . 'includes/modules/class-audit.php';
 
@@ -143,6 +145,8 @@ class CMP_Plugin {
 		CMP_Blocker::register();
 		require_once CMP_PATH . 'includes/modules/class-scanner.php';
 		CMP_Scanner::register();
+		require_once CMP_PATH . 'includes/modules/class-alerts.php';
+		CMP_Alerts::register();
 		// B6 "Vezi pe site": the appearance preview (inert without a valid ?cmp_preview nonce).
 		require_once CMP_PATH . 'includes/modules/class-preview.php';
 		CMP_Preview::register();
@@ -153,6 +157,10 @@ class CMP_Plugin {
 		require_once CMP_PATH . 'includes/modules/class-lang.php';
 		require_once CMP_PATH . 'includes/modules/class-consent-api.php';
 		CMP_Consent_API::register();
+		require_once CMP_PATH . 'includes/modules/class-bridge-pys.php';
+		CMP_Bridge_PYS::register();
+		require_once CMP_PATH . 'includes/modules/class-bridge-wc.php';
+		CMP_Bridge_WC::register();
 		if ( is_admin() ) {
 			require_once CMP_PATH . 'includes/admin/class-admin.php';
 			new CMP_Admin();
@@ -246,6 +254,13 @@ class CMP_Plugin {
 		// installs, flag a one-time admin note (never on fresh installs).
 		if ( false !== $old && version_compare( $old, '0.5.0', '<' ) && false === get_option( 'cmp_services_seen', false ) ) {
 			update_option( 'cmp_services_notice', 1 );
+		}
+		// Lot A: what this update starts blocking (AdSense): the same note, shown only once
+		// the service is found on the site. A general note still open already covers it.
+		$added  = CMP_Services::added_to_blocking( $old );
+		$notice = $added ? get_option( 'cmp_services_notice', false ) : false;
+		if ( $added && ( ! $notice || is_array( $notice ) ) ) {
+			update_option( 'cmp_services_notice', array_values( array_unique( array_merge( $notice ? $notice : array(), $added ) ) ) );
 		}
 		// B4: the legal templates changed (Moldova texts, RO/RU/EN): flag a one-time
 		// note on "Pagini legale" for existing installs only.

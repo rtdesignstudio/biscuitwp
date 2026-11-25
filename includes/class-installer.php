@@ -64,6 +64,10 @@ class CMP_Installer {
 			'disable_gravatar' => false,
 			'delete_data_on_uninstall' => false,
 			'measurement'      => 'strict',
+			// New domain email (Task 4): on for a new install; an install updated from
+			// before it has no key and stays off (CMP_Alerts::enabled()).
+			'alert_email_on'   => true,
+			'alert_email'      => '',
 		);
 	}
 

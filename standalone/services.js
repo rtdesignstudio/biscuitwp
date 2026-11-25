@@ -829,6 +829,142 @@ window.CMP_SERVICES = {
       ],
       "transfer": "EU, NZ",
       "privacy_url": "https://matomo.org/matomo-cloud-privacy-policy/"
+    },
+    {
+      "id": "google-adsense",
+      "name": "Google AdSense",
+      "provider": "Google Ireland Ltd.",
+      "type": "script",
+      "category": "marketing",
+      "hosts": [
+        "pagead2.googlesyndication.com",
+        "googleads.g.doubleclick.net"
+      ],
+      "inline": [],
+      "gtm": false,
+      "cookies": [
+        {
+          "name": "__gads",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Folosit pentru publicitate și securitate.",
+            "ru": "Используется для рекламы и безопасности.",
+            "en": "Used for advertising and security."
+          }
+        },
+        {
+          "name": "__gpi",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Folosit pentru publicitate și securitate.",
+            "ru": "Используется для рекламы и безопасности.",
+            "en": "Used for advertising and security."
+          }
+        },
+        {
+          "name": "__gpi_optout",
+          "duration": {
+            "ro": "13 luni",
+            "ru": "13 месяцев",
+            "en": "13 months"
+          },
+          "purpose": {
+            "ro": "Folosit pentru publicitate.",
+            "ru": "Используется для рекламы.",
+            "en": "Used for advertising."
+          }
+        },
+        {
+          "name": "__eoi",
+          "duration": {
+            "ro": "6 luni",
+            "ru": "6 месяцев",
+            "en": "6 months"
+          },
+          "purpose": {
+            "ro": "Folosit pentru securitate.",
+            "ru": "Используется для безопасности.",
+            "en": "Used for security."
+          }
+        },
+        {
+          "name": "TESTCOOKIESENABLED",
+          "duration": {
+            "ro": "60 de secunde",
+            "ru": "60 секунд",
+            "en": "60 seconds"
+          },
+          "purpose": {
+            "ro": "Folosit pentru funcționalitate.",
+            "ru": "Используется для функциональности.",
+            "en": "Used for functionality."
+          }
+        },
+        {
+          "name": "GED_PLAYLIST_ACTIVITY",
+          "duration": {
+            "ro": "Sesiune",
+            "ru": "Сессия",
+            "en": "Session"
+          },
+          "purpose": {
+            "ro": "Folosit pentru publicitate.",
+            "ru": "Используется для рекламы.",
+            "en": "Used for advertising."
+          }
+        },
+        {
+          "name": "test_cookie",
+          "duration": {
+            "ro": "15 minute",
+            "ru": "15 минут",
+            "en": "15 minutes"
+          },
+          "purpose": {
+            "ro": "Folosit pentru funcționalitate (domeniul doubleclick.net).",
+            "ru": "Используется для функциональности (домен doubleclick.net).",
+            "en": "Used for functionality (doubleclick.net domain)."
+          }
+        },
+        {
+          "name": "DSID",
+          "duration": {
+            "ro": "2 săptămâni",
+            "ru": "2 недели",
+            "en": "2 weeks"
+          },
+          "purpose": {
+            "ro": "Folosit pentru securitate, funcționalitate și publicitate (domeniul doubleclick.net).",
+            "ru": "Используется для безопасности, функциональности и рекламы (домен doubleclick.net).",
+            "en": "Used for security, functionality and advertising (doubleclick.net domain)."
+          }
+        }
+      ],
+      "transfer": "US",
+      "privacy_url": "https://policies.google.com/privacy"
+    },
+    {
+      "id": "cloudflare-turnstile",
+      "name": "Cloudflare Turnstile",
+      "provider": "Cloudflare, Inc.",
+      "type": "script",
+      "category": "necessary",
+      "hosts": [
+        "challenges.cloudflare.com"
+      ],
+      "inline": [],
+      "gtm": false,
+      "cookies": [],
+      "transfer": "US",
+      "privacy_url": "https://www.cloudflare.com/privacypolicy/"
     }
   ]
 };

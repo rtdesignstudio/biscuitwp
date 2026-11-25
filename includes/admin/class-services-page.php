@@ -22,12 +22,29 @@ class CMP_Services_Page {
 		return $out;
 	}
 
+	/** State of a recognised plugin => label (RO source). Empty state: no label. */
+	private static function plugin_state_label( $state ) {
+		$labels = array(
+			'bridged'   => __( 'legat', 'biscuitwp' ),
+			'blocked'   => __( 'blocat în pagină', 'biscuitwp' ),
+			'necessary' => __( 'necesar', 'biscuitwp' ),
+			'exempt'    => __( 'excepție', 'biscuitwp' ),
+		);
+		return isset( $labels[ $state ] ) ? $labels[ $state ] : '';
+	}
+
 	private static function status_label( $svc ) {
+		if ( CMP_Services::replaced( $svc ) ) {
+			return __( 'decide serviciul tău personalizat', 'biscuitwp' );
+		}
 		if ( isset( $svc['category'] ) && 'necessary' === $svc['category'] ) {
 			return __( 'neblocat (necesar)', 'biscuitwp' );
 		}
 		if ( ! empty( $svc['exempt'] ) ) {
 			return __( 'excepție', 'biscuitwp' );
+		}
+		if ( ! empty( $svc['except'] ) ) {
+			return __( 'blocat până la acord, în afară de ce decide serviciul tău personalizat', 'biscuitwp' );
 		}
 		return __( 'blocat până la acord', 'biscuitwp' );
 	}
@@ -44,6 +61,9 @@ class CMP_Services_Page {
 		<tr class="cmp-svc-row" data-cmp-service="<?php echo esc_attr( $id ); ?>">
 			<td class="cmp-svc-name"><strong><?php echo esc_html( $svc['name'] ); ?></strong>
 				<?php if ( ! empty( $svc['provider'] ) ) : ?><br><span class="description"><?php echo esc_html( $svc['provider'] ); ?></span><?php endif; ?>
+				<?php foreach ( isset( $svc['except'] ) ? $svc['except'] : array() as $exc ) : ?>
+					<p class="description"><?php echo esc_html( sprintf( /* translators: 1: domain or address, 2: name of the custom service */ __( 'Pentru %1$s decide serviciul tău personalizat „%2$s”.', 'biscuitwp' ), $exc['pattern'], $exc['name'] ) ); ?></p>
+				<?php endforeach; ?>
 				<?php if ( 'recaptcha' === $id ) : ?>
 					<p class="description"><?php esc_html_e( 'Autoritățile din UE consideră că reCAPTCHA necesită acord. E lăsat neblocat ca să nu se strice formularele. Îl poți bloca dintr-un click.', 'biscuitwp' ); ?></p>
 				<?php endif; ?>
@@ -145,7 +165,9 @@ class CMP_Services_Page {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		// Opening this screen counts as having seen the post-update note.
+		// Opening this screen counts as having seen the post-update note; the one that names services is shown here first.
+		$note = get_option( 'cmp_services_notice' );
+		$note = is_array( $note ) ? self::notice_names( $note ) : array();
 		self::mark_seen();
 
 		$cats       = self::category_options();
@@ -162,6 +184,8 @@ class CMP_Services_Page {
 		$custom     = is_array( $stored ) && isset( $stored['custom'] ) && is_array( $stored['custom'] ) ? array_values( $stored['custom'] ) : array();
 		$can_script = current_user_can( 'unfiltered_html' );
 
+		$known_rows = CMP_Known_Plugins::current(); // active plugins we recognise: shown only, never stored
+
 		CMP_Scanner::maybe_run_inline(); // no working cron: this screen moves the scan on
 		$scan     = CMP_Blocker::scan_homepage( false );
 		$progress = CMP_Scanner::current_progress();
@@ -174,14 +198,32 @@ class CMP_Services_Page {
 				}
 			}
 		}
+		$unknown_rows = array();
+		$ignored_rows = array();
+		if ( is_array( $scan ) && isset( $scan['unknown_pages'] ) ) { // absent: a result from before the update, nothing to show yet
+			$unknown_rows = self::unknown_list( $scan, $active );
+			$ignored_rows = CMP_Alerts::ignored_list( CMP_Alerts::state() );
+		}
 		?>
 		<div class="wrap cmp-admin">
 			<h1><?php esc_html_e( 'BiscuitWP — Servicii', 'biscuitwp' ); ?> <?php echo CMP_Guide::link( 'services' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in link() ?></h1>
+			<?php if ( $note ) : ?>
+				<div class="notice notice-warning"><p><strong><?php esc_html_e( 'BiscuitWP:', 'biscuitwp' ); ?></strong> <?php echo esc_html( sprintf( /* translators: %s: service names */ __( 'Am început să blocăm până la acord: %s. Le vezi mai jos, în listă.', 'biscuitwp' ), implode( ', ', $note ) ) ); ?></p></div>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Servicii salvate.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_reset'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Lista a fost resetată.', 'biscuitwp' ); ?></p></div>
+			<?php endif; ?>
+			<?php if ( isset( $_GET['cmp_domain'] ) && 'ignored' === $_GET['cmp_domain'] ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Domeniul e ignorat: nu mai primești email despre el.', 'biscuitwp' ); ?></p></div>
+			<?php elseif ( isset( $_GET['cmp_domain'] ) && 'restored' === $_GET['cmp_domain'] ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Domeniul nu mai e ignorat.', 'biscuitwp' ); ?></p></div>
+			<?php elseif ( isset( $_GET['cmp_domain'] ) && 'refused' === $_GET['cmp_domain'] ) : ?>
+				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Domeniul nu mai e în lista de pe acest ecran, deci nu s-a schimbat nimic.', 'biscuitwp' ); ?></p></div>
+			<?php elseif ( isset( $_GET['cmp_domain'] ) && 'busy' === $_GET['cmp_domain'] ) : ?>
+				<div class="notice notice-error"><p><?php esc_html_e( 'O scanare termina chiar atunci și schimbarea nu s-a făcut. Apasă din nou.', 'biscuitwp' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['cmp_noscript'] ) ) : ?>
 				<div class="notice notice-warning is-dismissible"><p><?php esc_html_e( 'Scriptul nu a fost salvat: contul tău nu are dreptul de a adăuga cod (unfiltered_html). Restul modificărilor au fost salvate.', 'biscuitwp' ); ?></p></div>
@@ -236,6 +278,62 @@ class CMP_Services_Page {
 					</tbody></table>
 				<?php endif; ?>
 
+				<?php if ( $unknown_rows || $ignored_rows ) : ?>
+					<h3><?php esc_html_e( 'Domenii necunoscute', 'biscuitwp' ); ?></h3>
+					<p class="description"><?php esc_html_e( 'Scripturi sau iframe-uri de pe domenii care nu sunt ale site-ului și nu aparțin niciunui serviciu din listă. Ele se încarcă acum fără acord. „Adaugă ca serviciu” completează formularul de mai jos, dar nu salvează nimic până nu apeși „Salvează serviciile”.', 'biscuitwp' ); ?></p>
+					<?php if ( $unknown_rows ) : ?>
+						<table class="widefat striped cmp-svc-table cmp-unknown-hosts"><tbody>
+							<?php foreach ( $unknown_rows as $u_host => $u_paths ) : ?>
+								<tr class="cmp-svc-row">
+									<td class="cmp-svc-name"><strong><?php echo esc_html( $u_host ); ?></strong></td>
+									<td class="description"><?php echo esc_html( implode( ', ', $u_paths ) ); ?></td>
+									<td>
+										<button type="button" class="button" data-cmp-use-host="<?php echo esc_attr( $u_host ); ?>"><?php esc_html_e( 'Adaugă ca serviciu', 'biscuitwp' ); ?></button>
+										<button type="submit" class="button-link" name="host" value="<?php echo esc_attr( $u_host ); ?>" form="cmp-ignore-form"><?php esc_html_e( 'Ignoră', 'biscuitwp' ); ?></button>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody></table>
+					<?php endif; ?>
+					<?php if ( $ignored_rows ) : ?>
+						<details class="cmp-unknown-ignored">
+							<summary><?php echo esc_html( sprintf( /* translators: %d: number of ignored domains */ __( 'Domenii ignorate (%d)', 'biscuitwp' ), count( $ignored_rows ) ) ); ?></summary>
+							<table class="widefat striped cmp-svc-table"><tbody>
+								<?php foreach ( $ignored_rows as $i_host ) : ?>
+									<tr class="cmp-svc-row">
+										<td class="cmp-svc-name"><strong><?php echo esc_html( $i_host ); ?></strong></td>
+										<td><button type="submit" class="button-link" name="host" value="<?php echo esc_attr( $i_host ); ?>" form="cmp-unignore-form"><?php esc_html_e( 'Nu mai ignora', 'biscuitwp' ); ?></button></td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody></table>
+						</details>
+					<?php endif; ?>
+				<?php endif; ?>
+
+				<?php if ( $known_rows ) : ?>
+					<h3><?php esc_html_e( 'Pluginuri recunoscute', 'biscuitwp' ); ?></h3>
+					<p class="description"><?php esc_html_e( 'Pluginuri active pe care le cunoaștem. Categoria serviciilor lor se schimbă în lista de servicii.', 'biscuitwp' ); ?></p>
+					<table class="widefat striped cmp-svc-table cmp-known-plugins"><tbody>
+						<?php foreach ( $known_rows as $kp ) : ?>
+							<tr class="cmp-svc-row">
+								<td class="cmp-svc-name"><strong><?php echo esc_html( $kp['name'] ); ?></strong>
+									<?php if ( '' !== $kp['note'] ) : ?><p class="description"><?php echo esc_html( $kp['note'] ); ?></p><?php endif; ?>
+								</td>
+								<td>
+									<?php
+									$kp_list = array();
+									foreach ( $kp['services'] as $kp_s ) {
+										$kp_list[] = $kp_s['name'] . ( isset( $cats[ $kp_s['category'] ] ) ? ' (' . $cats[ $kp_s['category'] ] . ')' : '' );
+									}
+									echo esc_html( implode( ', ', $kp_list ) );
+									?>
+								</td>
+								<td class="cmp-svc-status"><?php echo esc_html( self::plugin_state_label( $kp['state'] ) ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody></table>
+				<?php endif; ?>
+
 				<details class="cmp-svc-library">
 					<summary><h2 style="display:inline"><?php echo esc_html( sprintf( /* translators: %d: number of services */ __( 'Toată biblioteca (%d)', 'biscuitwp' ), count( $library ) ) ); ?></h2></summary>
 					<table class="widefat striped cmp-svc-table"><tbody>
@@ -260,6 +358,15 @@ class CMP_Services_Page {
 				<p class="description"><span class="dashicons dashicons-info"></span> <?php esc_html_e( 'Blocăm ce apare în HTML-ul paginii. Ce adaugă Google Tag Manager sau alt JavaScript ulterior trebuie controlat din GTM (Consent Mode).', 'biscuitwp' ); ?></p>
 
 				<?php submit_button( __( 'Salvează serviciile', 'biscuitwp' ) ); ?>
+			</form>
+
+			<form id="cmp-ignore-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="cmp_ignore_domain">
+				<?php wp_nonce_field( 'cmp_ignore_domain' ); ?>
+			</form>
+			<form id="cmp-unignore-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="cmp_unignore_domain">
+				<?php wp_nonce_field( 'cmp_unignore_domain' ); ?>
 			</form>
 
 			<form id="cmp-rescan-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -359,6 +466,47 @@ class CMP_Services_Page {
 		exit;
 	}
 
+	/** The unknown domains to show: host => paths from the last scan, minus the ignored and what a service covers now. */
+	private static function unknown_list( $scan, array $active ) {
+		$home = home_url( '/' );
+		return CMP_Alerts::visible(
+			CMP_Alerts::by_host( is_array( $scan ) && isset( $scan['unknown_pages'] ) ? $scan['unknown_pages'] : array() ),
+			CMP_Alerts::state(),
+			function ( $host ) use ( $active, $home ) {
+				return CMP_Scanner::host_known( $host, $active, $home );
+			}
+		);
+	}
+
+	/** admin-post: stop telling about (and listing) a domain. Only a host the screen listed. */
+	public static function ignore_domain() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_ignore_domain' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
+		}
+		$host = isset( $_POST['host'] ) && is_string( $_POST['host'] ) ? strtolower( trim( wp_unslash( $_POST['host'] ) ) ) : '';
+		$agg  = get_option( CMP_Scanner::AGGREGATE_OPTION, array() );
+		$done = 'refused';
+		if ( CMP_Alerts::may_act( $host, self::unknown_list( $agg, CMP_Services::active() ) ) ) {
+			$done = 'busy' === CMP_Alerts::change_wp( 'ignore', $host ) ? 'busy' : 'ignored';
+		}
+		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG, 'cmp_domain' => $done ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	/** admin-post: bring an ignored domain back onto the list (it is not announced by email). */
+	public static function unignore_domain() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_unignore_domain' ) ) {
+			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
+		}
+		$host = isset( $_POST['host'] ) && is_string( $_POST['host'] ) ? strtolower( trim( wp_unslash( $_POST['host'] ) ) ) : '';
+		$done = 'refused';
+		if ( in_array( $host, CMP_Alerts::ignored_list( CMP_Alerts::state() ), true ) ) {
+			$done = 'busy' === CMP_Alerts::change_wp( 'unignore', $host ) ? 'busy' : 'restored';
+		}
+		wp_safe_redirect( add_query_arg( array( 'page' => self::SLUG, 'cmp_domain' => $done ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	public static function rescan() {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_rescan_services' ) ) {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
@@ -380,9 +528,29 @@ class CMP_Services_Page {
 		exit;
 	}
 
-	/** The post-update flag is cleared for good. */
-	private static function mark_seen() {
-		if ( get_option( 'cmp_services_notice' ) ) {
+	/** The names the post-update note lists now (CMP_Services::notice_ids()), from the cached scan only: no HTTP request on an admin page. */
+	private static function notice_names( $notice ) {
+		$scan = get_transient( 'cmp_tracker_scan' );
+		if ( ! is_array( $scan ) || ! isset( $scan['services'] ) ) {
+			return array();
+		}
+		$active = CMP_Services::active();
+		$found  = array_merge( (array) $scan['services']['raw'], (array) $scan['services']['blocked'] );
+		$s      = CMP_Consent::get_settings();
+		$ids    = CMP_Services::notice_ids( $notice, $found, $active, CMP_Blocker::blocks_trackers( is_array( $s ) ? $s : array() ) );
+		$names  = array();
+		foreach ( $active as $svc ) {
+			if ( in_array( $svc['id'], $ids, true ) ) {
+				$names[] = $svc['name'];
+			}
+		}
+		return $names;
+	}
+
+	/** The post-update flag is cleared for good. A note still waiting for its service to be found stays, unless it is closed ($force). */
+	private static function mark_seen( $force = false ) {
+		$notice = get_option( 'cmp_services_notice' );
+		if ( $notice && ( $force || ! is_array( $notice ) || self::notice_names( $notice ) ) ) {
 			delete_option( 'cmp_services_notice' );
 		}
 		if ( ! get_option( 'cmp_services_seen' ) ) {
@@ -394,7 +562,7 @@ class CMP_Services_Page {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'cmp_dismiss_services_notice' ) ) {
 			wp_die( esc_html__( 'Acțiune neautorizată.', 'biscuitwp' ) );
 		}
-		self::mark_seen();
+		self::mark_seen( true );
 		$back = wp_get_referer();
 		wp_safe_redirect( $back ? $back : admin_url() );
 		exit;
@@ -402,24 +570,16 @@ class CMP_Services_Page {
 
 	/** One-time note after an update: services that now wait for consent. */
 	public static function update_notice() {
-		if ( ! current_user_can( 'manage_options' ) || ! get_option( 'cmp_services_notice' ) ) {
+		$notice = current_user_can( 'manage_options' ) ? get_option( 'cmp_services_notice' ) : false;
+		if ( ! $notice ) {
 			return;
 		}
 		if ( isset( $_GET['page'] ) && self::SLUG === $_GET['page'] ) {
 			return;
 		}
-		$names = array();
-		$scan  = get_transient( 'cmp_tracker_scan' ); // cached only: no HTTP request on every admin page.
-		if ( is_array( $scan ) && isset( $scan['services'] ) ) {
-			$found = array_merge( (array) $scan['services']['raw'], (array) $scan['services']['blocked'] );
-			$active = CMP_Services::active();
-			foreach ( CMP_Services::newly_blocked( $found, $active ) as $id ) {
-				foreach ( $active as $s ) {
-					if ( $s['id'] === $id ) {
-						$names[] = $s['name'];
-					}
-				}
-			}
+		$names = self::notice_names( $notice );
+		if ( is_array( $notice ) && ! $names ) {
+			return; // what the update started blocking is not found on this site (yet)
 		}
 		$url     = admin_url( 'admin.php?page=' . self::SLUG );
 		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=cmp_dismiss_services_notice' ), 'cmp_dismiss_services_notice' );

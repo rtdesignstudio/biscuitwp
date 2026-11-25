@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "file": "google-site-kit/google-site-kit.php",
+      "name": "Site Kit by Google",
+      "services": ["google-analytics", "google-tag-manager", "google-adsense"],
+      "bridge": "",
+      "note": {
+        "ro": "Când blocarea e pornită, încărcătoarele Google și AdSense din HTML așteaptă acordul, iar în modul Light nu pornesc. Un serviciu pus pe „nu bloca” sau mutat la necesare rămâne exceptat. În modul Advanced, GA4 și GTM se încarcă mereu, cu Consent Mode pe „refuzat” până la acord; AdSense așteaptă.",
+        "ru": "Когда блокировка включена, загрузчики Google и AdSense в HTML ждут согласия, а в режиме Light не запускаются. Сервис с отметкой «не блокировать» или перенесённый в необходимые остаётся исключением. В режиме Advanced GA4 и GTM загружаются всегда, с Consent Mode в состоянии «отказано» до согласия; AdSense ждёт.",
+        "en": "When blocking is on, the Google and AdSense loaders in the HTML wait for consent, and in Light mode they do not start. A service set to \"don’t block\" or moved to necessary stays exempt. In Advanced mode GA4 and GTM always load, with Consent Mode set to \"denied\" until consent; AdSense waits."
+      }
+    },
+    {
+      "file": "google-analytics-for-wordpress/googleanalytics.php",
+      "name": "MonsterInsights",
+      "services": ["google-analytics"],
+      "bridge": "",
+      "note": {
+        "ro": "Când blocarea e pornită, încărcătorul gtag.js așteaptă acordul, iar în modul Light nu pornește; codul de lângă el doar pune evenimente în coadă. Google Analytics pus pe „nu bloca” sau mutat la necesare rămâne exceptat. În modul Advanced, GA4 se încarcă mereu, cu Consent Mode pe „refuzat” până la acord.",
+        "ru": "Когда блокировка включена, загрузчик gtag.js ждёт согласия, а в режиме Light не запускается; код рядом лишь ставит события в очередь. Google Analytics с отметкой «не блокировать» или перенесённый в необходимые остаётся исключением. В режиме Advanced GA4 загружается всегда, с Consent Mode в состоянии «отказано» до согласия.",
+        "en": "When blocking is on, the gtag.js loader waits for consent, and in Light mode it does not start; the code next to it only queues events. Google Analytics set to \"don’t block\" or moved to necessary stays exempt. In Advanced mode GA4 always loads, with Consent Mode set to \"denied\" until consent."
+      }
+    },
+    {
+      "file": "pixelyoursite/facebook-pixel-master.php",
+      "name": "PixelYourSite",
+      "services": ["meta-pixel", "google-analytics", "google-tag-manager"],
+      "bridge": "pys",
+      "note": {
+        "ro": "Pluginul își încarcă pixelii dintr-un script local, pe care blocarea pe domenii nu îl recunoaște. Când blocarea e pornită, legătura BiscuitWP ține scriptul în așteptare până la acordul pentru categoria lui Meta Pixel din listă, iar Google Analytics și GTM cer și acordul pentru categoria lor. Evenimentele Meta și OpenAI trimise de pe server pleacă tot numai cu acordul pentru categoria lui Meta Pixel. Un serviciu pus pe „nu bloca” sau mutat la necesare rămâne exceptat. Pixelii pentru vizitatorii fără JavaScript nu se mai tipăresc.",
+        "ru": "Плагин загружает свои пиксели из локального скрипта, который блокировка по доменам не распознаёт. Когда блокировка включена, связка BiscuitWP удерживает скрипт до согласия на категорию Meta Pixel из списка, а Google Analytics и GTM требуют ещё и согласия на свою категорию. События Meta и OpenAI, отправляемые с сервера, тоже уходят только с согласием на категорию Meta Pixel. Сервис с отметкой «не блокировать» или перенесённый в необходимые остаётся исключением. Пиксели для посетителей без JavaScript больше не выводятся.",
+        "en": "The plugin loads its pixels from a local script that blocking by domain does not recognise. When blocking is on, the BiscuitWP link holds the script back until consent to the category of Meta Pixel in the list, and Google Analytics and GTM also need consent to their own category. Meta and OpenAI events sent from the server also go out only with consent to the category of Meta Pixel. A service set to \"don’t block\" or moved to necessary stays exempt. Pixels for visitors without JavaScript are no longer printed."
+      }
+    },
+    {
+      "file": "woocommerce/woocommerce.php",
+      "name": "WooCommerce",
+      "services": [],
+      "bridge": "wc-attribution",
+      "note": {
+        "ro": "Coșul, plata și scripturile WooCommerce nu sunt blocate. Când blocarea e pornită, atribuirea comenzilor (cookie-urile sbjs_* și sursa salvată cu comanda) pornește doar după acordul pentru categoria cu identificatorul „marketing”. Dacă această categorie lipsește sau în modul Light, rămâne oprită. La retragerea acordului, atribuirea se oprește, iar cookie-urile sbjs_* ale site-ului sunt șterse. Cu pluginul WP Consent API activ, WooCommerce citește singur acordul, iar legătura nu face nimic.",
+        "ru": "Корзина, оплата и скрипты WooCommerce не блокируются. Когда блокировка включена, атрибуция заказов (cookie sbjs_* и источник, сохраняемый с заказом) запускается только после согласия на категорию с идентификатором «marketing». Если такой категории нет или в режиме Light, она остаётся выключенной. При отзыве согласия атрибуция выключается, а cookie sbjs_* сайта удаляются. Если активен плагин WP Consent API, WooCommerce сам читает согласие, а связка ничего не делает.",
+        "en": "Cart, checkout and the WooCommerce scripts are not blocked. When blocking is on, order attribution (the sbjs_* cookies and the source saved with the order) starts only after consent to the category with the identifier \"marketing\". If that category is missing, or in Light mode, it stays off. When consent is withdrawn, attribution is switched off and the site’s sbjs_* cookies are deleted. With the WP Consent API plugin active, WooCommerce reads the consent by itself and the link does nothing."
+      }
+    },
+    {
+      "file": "contact-form-7/wp-contact-form-7.php",
+      "name": "Contact Form 7",
+      "services": ["recaptcha", "cloudflare-turnstile"],
+      "bridge": "",
+      "note": {
+        "ro": "reCAPTCHA și Turnstile protejează formularele și rămân necesare, deci neblocate. Le poți muta într-o altă categorie din lista de servicii.",
+        "ru": "reCAPTCHA и Turnstile защищают формы и остаются необходимыми, то есть не блокируются. Их можно перенести в другую категорию в списке сервисов.",
+        "en": "reCAPTCHA and Turnstile protect the forms and stay necessary, so they are not blocked. You can move them to another category in the services list."
+      }
+    }
+  ]
+}
