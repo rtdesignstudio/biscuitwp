@@ -123,6 +123,7 @@ and `palette` replaces `preset` (default: `preset` when it is a palette name).
 | `gap` | 0–40 (px, distance from the screen edge) | 24 |
 | `density` | `"compact"` (about a third less spacing inside the banner, same text size), `"normal"`, `"comfortable"` (about a third more spacing, body text 1px larger); all formats, phones included; the buttons stay equal and at least 24×24 px | `"normal"` |
 | `buttons` | `"solid"`, `"outline"`, `"text"` (one look for both decision buttons) | the style's |
+| `image` | a picture on a top corner, `{ src, side, size, out, phone, alt }`: `src` a path or an http(s) address (self-host it), `side` `"right"` / `"left"`, `size` 48–160, `out` (sticks out of the banner, default `true`; inside at a top position), `phone` `"small"` / `"none"`, `alt` (empty = decorative). Never over the text or the buttons, not in the preferences | none |
 | `anim` | `"none"`, `"fade"`, `"slide"` (none with reduced motion) | the style's |
 | `font` | `"system"`, `"inherit"` (the page's font) | `"system"` |
 | `delay` | 0–2 (seconds before the banner shows; trackers stay blocked meanwhile) | 0 |

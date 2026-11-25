@@ -31,7 +31,7 @@ class CMP_Appearance_Page {
 	public static $header_fn    = 'header';
 
 	/** Appearance keys that do not apply in Light (disabled there). */
-	const LIGHT_OFF = array( 'format', 'position', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen' );
+	const LIGHT_OFF = array( 'format', 'position', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen', 'image', 'image_id', 'image_alt', 'image_side', 'image_size', 'image_out', 'image_phone' );
 
 	/** Texts per mode: the Light card shows only light_intro and accept. */
 	const TEXT_MODES = array(
@@ -86,8 +86,16 @@ class CMP_Appearance_Page {
 				/* translators: 1: contrast ratio, 2: proposed colour (#rrggbb), 3: its contrast ratio */
 				'fail'         => __( 'Contrast %1$s:1, sub 4,5:1. Nuanța propusă: %2$s (%3$s:1).', 'biscuitwp' ),
 				'invalid'      => __( 'Scrie o culoare în forma #rrggbb.', 'biscuitwp' ),
+				'imageTitle'   => __( 'Imaginea din banner', 'biscuitwp' ),
+				'imageUse'     => __( 'Folosește imaginea', 'biscuitwp' ),
 			),
 		);
+	}
+
+	/** The thumbnail of a chosen media library image ('' when none). */
+	public static function image_thumb( $id ) {
+		$src = $id > 0 && function_exists( 'wp_get_attachment_image_src' ) ? wp_get_attachment_image_src( $id, 'thumbnail' ) : false;
+		return is_array( $src ) && isset( $src[0] ) ? (string) $src[0] : '';
 	}
 
 	/** Pure: the notice listing the custom CSS parts removed at save ('' when none). Escaped HTML. */
@@ -499,6 +507,50 @@ class CMP_Appearance_Page {
 								<?php endforeach; ?>
 							</fieldset>
 							<p class="description"><?php esc_html_e( '„Accept” și „Refuz” arată mereu la fel: același stil, aceeași mărime. Nu există setare separată pe buton.', 'biscuitwp' ); ?></p>
+							<?php echo wp_kses_post( $light_note ); ?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Imagine', 'biscuitwp' ); ?></th>
+						<td data-cmp-ap-image="<?php echo esc_attr( $a['image'] ); ?>">
+							<fieldset<?php echo esc_attr( $off( 'image' ) ); ?>>
+								<?php
+								foreach ( array(
+									'none'   => __( 'Fără', 'biscuitwp' ),
+									'shield' => __( 'Biscuit cu scut', 'biscuitwp' ),
+									'wp'     => __( 'Biscuit WP', 'biscuitwp' ),
+									'own'    => __( 'Imaginea mea', 'biscuitwp' ),
+								) as $k => $lbl ) :
+									?>
+									<label class="cmp-ap-choice"><input type="radio" name="<?php echo esc_attr( $n( 'image' ) ); ?>" value="<?php echo esc_attr( $k ); ?>" data-cmp-ap-key="image"<?php checked( $a['image'], $k ); ?>> <?php echo esc_html( $lbl ); ?></label>
+								<?php endforeach; ?>
+								<p data-cmp-ap-image-own<?php echo 'own' === $a['image'] ? '' : ' hidden'; ?>>
+									<input type="hidden" name="<?php echo esc_attr( $n( 'image_id' ) ); ?>" value="<?php echo esc_attr( (string) $a['image_id'] ); ?>" data-cmp-ap-image-id>
+									<button type="button" class="button" data-cmp-ap-image-pick><?php esc_html_e( 'Alege din biblioteca media', 'biscuitwp' ); ?></button>
+									<img src="<?php echo esc_url( self::image_thumb( (int) $a['image_id'] ) ); ?>" alt="" width="48" height="48" class="cmp-ap-image__thumb" data-cmp-ap-image-thumb<?php echo '' === self::image_thumb( (int) $a['image_id'] ) ? ' hidden' : ''; ?>>
+									<span class="description"><?php esc_html_e( 'PNG sau WebP cu fundal transparent. Doar imagini de pe acest site.', 'biscuitwp' ); ?></span>
+								</p>
+								<p data-cmp-ap-image-more<?php echo 'none' === $a['image'] ? ' hidden' : ''; ?>>
+									<label class="cmp-ap-inline"><?php esc_html_e( 'Poziție', 'biscuitwp' ); ?>
+										<select name="<?php echo esc_attr( $n( 'image_side' ) ); ?>">
+											<option value="right"<?php selected( $a['image_side'], 'right' ); ?>><?php esc_html_e( 'Dreapta sus', 'biscuitwp' ); ?></option>
+											<option value="left"<?php selected( $a['image_side'], 'left' ); ?>><?php esc_html_e( 'Stânga sus', 'biscuitwp' ); ?></option>
+										</select>
+									</label>
+									<label class="cmp-ap-inline"><?php esc_html_e( 'Mărime', 'biscuitwp' ); ?> <input type="number" name="<?php echo esc_attr( $n( 'image_size' ) ); ?>" min="48" max="160" step="4" class="small-text" value="<?php echo esc_attr( (string) $a['image_size'] ); ?>"> px</label>
+									<input type="hidden" name="<?php echo esc_attr( $n( 'image_out' ) ); ?>" value="0">
+									<label class="cmp-ap-inline"><input type="checkbox" name="<?php echo esc_attr( $n( 'image_out' ) ); ?>" value="1"<?php checked( $a['image_out'] ); ?>> <?php esc_html_e( 'Iese din banner', 'biscuitwp' ); ?></label>
+									<label class="cmp-ap-inline"><?php esc_html_e( 'Pe telefon', 'biscuitwp' ); ?>
+										<select name="<?php echo esc_attr( $n( 'image_phone' ) ); ?>">
+											<option value="small"<?php selected( $a['image_phone'], 'small' ); ?>><?php esc_html_e( 'Mai mică', 'biscuitwp' ); ?></option>
+											<option value="none"<?php selected( $a['image_phone'], 'none' ); ?>><?php esc_html_e( 'Ascunsă', 'biscuitwp' ); ?></option>
+										</select>
+									</label>
+									<br>
+									<label class="cmp-ap-inline"><?php esc_html_e( 'Text alternativ', 'biscuitwp' ); ?> <input type="text" name="<?php echo esc_attr( $n( 'image_alt' ) ); ?>" class="regular-text" maxlength="300" value="<?php echo esc_attr( $a['image_alt'] ); ?>"></label>
+								</p>
+							</fieldset>
+							<p class="description"><?php esc_html_e( 'Stă într-un colț de sus al bannerului și nu acoperă textul sau butoanele. Text alternativ gol = imagine decorativă. Nu apare în preferințe și se descarcă doar când apare bannerul.', 'biscuitwp' ); ?></p>
 							<?php echo wp_kses_post( $light_note ); ?>
 						</td>
 					</tr>

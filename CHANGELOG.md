@@ -53,6 +53,10 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
 - Linkurile preload, prefetch, modulepreload și prerender spre ce e blocat se
   scot din pagină, ca dns-prefetch și preconnect. Foile de stil rămân.
 - O pagină cu un script foarte lung scris în ea (peste 1 MB) nu mai iese goală.
+- Imagine în banner, din Aspect: un biscuit gata făcut (cu scut sau cu WP) ori o
+  imagine din biblioteca media, într-un colț de sus, ieșită puțin din banner.
+  Oprită implicit. Nu acoperă textul sau butoanele, nu apare în preferințe și în
+  Light și nu se descarcă pentru cine a decis deja.
 - Nota despre WP Consent API spune când ai nevoie de el.
 - Politicile generate spun că, înainte de acord, pot porni și serviciile pe care
   instrumentul le arată așa (de exemplu harta, cât comutatorul e oprit).

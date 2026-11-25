@@ -30,7 +30,7 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 	<?php /* One signal for "does not block the page" (policy pages, backdrop "none"): aria-modal="false"; the JS blocking() reads it. */ ?>
 	<div class="cmp__modal" role="dialog" aria-modal="<?php echo $cmp_no_overlay || 'none' === $cmp_a['backdrop'] ? 'false' : 'true'; ?>" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>
 
-		<!-- View 1: main message + actions -->
+		<?php echo CMP_Banner::image_html( $cmp_a ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside; '' without a picture. ?><!-- View 1: main message + actions -->
 		<div class="cmp__main" data-cmp-view="main">
 			<h2 id="cmp-title" class="cmp__title"><?php echo esc_html( $cmp_text( 'title', CMP_Lang::text( 'title' ) ) ); ?></h2>
 			<p id="cmp-intro" class="cmp__text">

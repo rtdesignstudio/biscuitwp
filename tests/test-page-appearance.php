@@ -351,7 +351,7 @@ foreach ( $pa_sub[1] as $pa_args ) {
 cmp_assert_eq( isset( $pa_slugs[1] ) ? $pa_slugs[1] : '', 'cmp-appearance', 'menu: Aspect right after Setări' );
 cmp_assert( 1 === preg_match( "/__\( 'Aspect', 'biscuitwp' \).*'manage_options',\s*CMP_Appearance_Page::SLUG/s", $pa_admin ), 'menu: Aspect needs manage_options' );
 cmp_assert( false !== strpos( $pa_admin, "admin_post_cmp_save_appearance" ), 'menu: save handler registered' );
-cmp_assert( 1 === preg_match( "/CMP_Appearance_Page::SLUG\s*\)\s*\)\s*\{[^}]*admin-appearance\.js/s", $pa_admin ), 'assets: admin-appearance.js only on the Aspect screen' );
+cmp_assert( 1 === preg_match( "/CMP_Appearance_Page::SLUG\s*\)\s*\)\s*\{\s*if \( current_user_can\( 'upload_files' \) \) \{[^}]*\}[^}]*admin-appearance\.js/s", $pa_admin ), 'assets: admin-appearance.js only on the Aspect screen' );
 cmp_assert( false !== strpos( $pa_admin, "wp_localize_script( 'cmp-appearance', 'CMP_APPEARANCE', CMP_Appearance_Page::script_data() )" ), 'assets: style defaults passed via wp_localize_script' );
 cmp_assert( in_array( 'appearance', CMP_Guide::ANCHORS, true ), 'guide: anchor appearance' );
 cmp_assert( false !== strpos( $pa_src, "CMP_Guide::link( 'appearance' )" ), 'guide: the Aspect screen links to #appearance' );

@@ -219,7 +219,7 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 /* The biscuit (#755): layers of the same picture along the Z axis give it an edge
    (assets/site.js); it turns twice when it comes on screen, under 5 seconds, then rests. */
 .hero-demo { position: relative; }
-.coin { position: absolute; top: -78px; right: -30px; width: 132px; height: 132px; perspective: 700px; z-index: 1; }
+.coin { position: absolute; top: -70px; right: -26px; width: 118px; height: 118px; perspective: 700px; z-index: 1; }
 .coin > img, .coin-in, .coin-in img { display: block; width: 100%; height: 100%; }
 .coin-in { position: relative; transform-style: preserve-3d; transform: rotateX(8deg) rotateY(-24deg); }
 .coin-in img { position: absolute; inset: 0; }
@@ -247,7 +247,7 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 @media (max-width: 1100px) {
 	.hero .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "eye" "title" "check" "urgent" "foot" "demo" "facts"; }
 	.hero-demo { max-width: 520px; margin-top: clamp(72px, 9vh, 96px); }
-	.coin { top: -62px; right: 12px; width: 104px; height: 104px; }
+	.coin { top: -56px; right: 12px; width: 94px; height: 94px; }
 	.hero-foot { flex-direction: column; align-items: flex-start; }
 	.hero-cta { align-items: flex-start; }
 }

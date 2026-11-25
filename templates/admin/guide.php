@@ -90,6 +90,9 @@ CMPCODE;
 			<li><?php esc_html_e( 'În modul Light, câmpurile care nu se aplică cardului Light sunt dezactivate.', 'biscuitwp' ); ?></li>
 			<li><?php esc_html_e( 'Fără WPML sau Polylang, textele bannerului se scriu pe limbi (RO, RU, EN). Cu unul dintre ele, scrii textele de bază și le traduci în pluginul de traduceri.', 'biscuitwp' ); ?></li>
 		</ul>
+		<h3><?php esc_html_e( 'Imagine în banner', 'biscuitwp' ); ?></h3>
+		<p><?php esc_html_e( 'Din Aspect, la „Imagine”, alegi un biscuit gata făcut sau o imagine din biblioteca media (PNG sau WebP, cu fundal transparent). Stă într-un colț de sus și iese puțin din banner; la poziția de sus rămâne înăuntru. Pe telefon e mai mică sau ascunsă. Nu acoperă textul sau butoanele și nu apare în preferințe ori în Light. Imaginile de pe alt domeniu (de exemplu un CDN) nu se afișează, ca să nu plece date înainte de acord.', 'biscuitwp' ); ?></p>
+
 		<h3><?php esc_html_e( 'Export și import', 'biscuitwp' ); ?></h3>
 		<p><?php esc_html_e( 'Ai făcut aspectul pe un site și îl vrei pe altul? „Exportă aspectul salvat” descarcă un fișier .json cu aspectul salvat, textele bannerului și CSS-ul propriu. Cu WPML sau Polylang, textele bannerului nu intră în fișier: ele se traduc acolo. Ce nu e salvat încă în formular nu intră nici el. Excluderile, setările, serviciile și datele operatorului nu se exportă, fiindcă țin de fiecare site.', 'biscuitwp' ); ?></p>
 		<p><?php esc_html_e( '„Importă dintr-un fișier” citește fișierul (cel mult 256 KB), îl curăță ca la o salvare, inclusiv CSS-ul propriu, și deschide formularul completat cu valorile din fișier. Nu se salvează nimic: „Vezi pe site” îți arată cum ar arăta, iar „Salvează aspectul” le aplică. Până atunci site-ul rămâne cum era.', 'biscuitwp' ); ?></p>

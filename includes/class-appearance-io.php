@@ -27,7 +27,7 @@ class CMP_Appearance_IO {
 	const MAX_DEPTH = 8;
 
 	/** Appearance keys that belong to the site, not to the look: never exported, never imported. */
-	const SITE_KEYS = array( 'exclude' );
+	const SITE_KEYS = array( 'exclude', 'image_id' );
 
 	/**
 	 * The file content for the saved settings.
@@ -40,6 +40,10 @@ class CMP_Appearance_IO {
 		// Reopen button off in the old key = the banner shows none, whatever the stored shape (as the form shows it).
 		if ( array_key_exists( 'reopen_button', $settings ) && empty( $settings['reopen_button'] ) ) {
 			$a['reopen'] = 'none';
+		}
+		// The site's own picture stays on its site.
+		if ( 'own' === $a['image'] ) {
+			$a['image'] = 'none';
 		}
 		foreach ( self::SITE_KEYS as $k ) {
 			unset( $a[ $k ] );

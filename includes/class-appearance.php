@@ -83,6 +83,7 @@ class CMP_Appearance {
 		'dim'    => array( 0, 80 ),
 		'blur'   => array( 0, 10 ),
 		'delay'  => array( 0, 2 ),
+		'image_size' => array( 48, 160 ),
 	);
 
 	/** Shadow name => CSS value. 'medium' is today's .cmp__modal shadow. */
@@ -188,6 +189,13 @@ class CMP_Appearance {
 			'gap'           => 24,
 			'density'       => 'normal',
 			'buttons'       => $s['buttons'],
+			'image'         => 'none',
+			'image_id'      => 0,
+			'image_alt'     => '',
+			'image_side'    => 'right',
+			'image_size'    => 96,
+			'image_out'     => true,
+			'image_phone'   => 'small',
 			'anim'          => $s['anim'],
 			'delay'         => 0.0,
 			'reopen'        => 'none',
@@ -354,6 +362,33 @@ class CMP_Appearance {
 		if ( isset( self::DENSITY_CSS[ $a['density'] ] ) ) {
 			$css .= self::DENSITY_CSS[ $a['density'] ];
 		}
+		return $css . self::image_css( $a );
+	}
+
+	/** The picture of the banner (#727): none, one of ours, or the site's own (image_id, from the media library). */
+	const IMAGES = array( 'none', 'shield', 'wp', 'own' );
+
+	/**
+	 * Pure: the rules of the banner picture, '' without one (so no other site gets a
+	 * byte). It sits on a top corner of the banner, outside it by default (the part
+	 * inside is at most 56px, beside the title, which makes room for it), inside at a
+	 * top position (nothing above the screen). Never on the preferences view, under
+	 * 360px, or on a low screen. Where the banner scrolls by itself (no overlay) the
+	 * main view lets it out. Mirrored in standalone/cmp.js (image-parity.json).
+	 */
+	public static function image_css( array $a ) {
+		if ( 'none' === $a['image'] ) {
+			return '';
+		}
+		$z    = (int) $a['image_size'];
+		$e    = 'left' === $a['image_side'] ? 'left' : 'right';
+		$in   = ! $a['image_out'] || 0 === strpos( $a['position'], 'top' );
+		$p    = min( $z, 64 );
+		$css  = '.cmp__modal{position:relative}.cmp__img{position:absolute;z-index:1;top:' . ( $in ? 20 : min( 0, 56 - $z ) ) . 'px;' . $e . ':24px;width:' . $z . 'px;height:' . $z . 'px;object-fit:contain;pointer-events:none}.cmp__modal.is-prefs-open .cmp__img{display:none}';
+		$css .= '@media (min-width:576px){.cmp--fmt-bar .cmp__img{' . $e . ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' . ( $in ? ',.cmp__main .cmp__text' : '' ) . '{padding-' . $e . ':' . ( $z + 12 ) . 'px}}';
+		$css .= '@media (max-width:575px){.cmp__img{' . ( 'none' === $a['image_phone'] ? 'display:none' : 'top:' . ( 14 - $p ) . 'px;' . $e . ':16px;width:' . $p . 'px;height:' . $p . 'px' ) . '}}';
+		$css .= '@media (max-width:359px),(max-height:480px){.cmp__img{display:none}}';
+		$css .= '@media (min-height:481px){.cmp.cmp--no-overlay .cmp__modal:not(.is-prefs-open),.cmp.cmp--backdrop-none .cmp__modal:not(.is-prefs-open){overflow:visible}}';
 		return $css;
 	}
 
@@ -693,6 +728,9 @@ class CMP_Appearance {
 			'anim'     => self::ANIMS,
 			'reopen'   => self::REOPEN,
 			'density'  => self::DENSITIES,
+			'image'    => self::IMAGES,
+			'image_side'  => array( 'right', 'left' ),
+			'image_phone' => array( 'small', 'none' ),
 		);
 		if ( isset( $enums[ $k ] ) ) {
 			return is_scalar( $v ) && in_array( (string) $v, $enums[ $k ], true ) ? (string) $v : $fallback;
@@ -700,6 +738,11 @@ class CMP_Appearance {
 		switch ( $k ) {
 			case 'position':
 				return is_scalar( $v ) && in_array( (string) $v, self::FORMATS[ $out['format'] ], true ) ? (string) $v : $fallback;
+			case 'image_id':
+				return is_numeric( $v ) ? max( 0, (int) $v ) : $fallback;
+			case 'image_alt':
+				return is_scalar( $v ) ? substr( self::text( $v ), 0, 300 ) : $fallback;
+			case 'image_out':
 			case 'theme_colors':
 				return true === $v || 1 === $v || in_array( $v, array( '1', 'on', 'true', 'yes' ), true );
 			case 'accent':
@@ -716,6 +759,7 @@ class CMP_Appearance {
 			case 'radius':
 			case 'maxw':
 			case 'gap':
+			case 'image_size':
 				return is_numeric( $v ) ? self::clamp( (int) round( (float) $v ), $k ) : $fallback;
 			case 'delay':
 				return is_numeric( $v ) ? round( (float) self::clamp( (float) $v, 'delay' ), 1 ) : $fallback;

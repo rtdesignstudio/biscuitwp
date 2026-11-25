@@ -740,7 +740,7 @@
 		modal: { center: 'middle-center', top: 'top-center', bottom: 'bottom-center' }
 	};
 	var AP_DIM = { neutral: 55, warm: 50, dark: 60, egov: 60 };
-	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10] };
+	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10], image: [48, 160] };
 	var AP_DARK_SEL = '.dark, [data-theme="dark"], .is-dark-theme';
 	var AP_SCOPE = '.cmp,.cmp-light,.cmp-reopen,.cmp-embed';
 	// Density rules (CMP_Appearance::DENSITY_CSS): only for compact / comfortable; normal = none.
@@ -753,6 +753,29 @@
 	function apNum(v, k, d) {
 		var n = typeof v === 'number' || typeof v === 'string' ? parseFloat(v) : NaN;
 		return isNaN(n) ? d : Math.max(AP_RANGES[k][0], Math.min(AP_RANGES[k][1], Math.round(n)));
+	}
+	// The banner picture: { src, side, size, out, phone, alt }; src = a path or an http(s) address.
+	function apImage(v) {
+		var src = v && typeof v === 'object' && typeof v.src === 'string' ? v.src.trim() : '';
+		if (!/^(?:https?:\/\/|\/(?!\/)|\.{0,2}\/)?[^\s"'<>\\:]+$/.test(src)) { return null; }
+		return {
+			src: src,
+			side: apPick(v.side, ['right', 'left'], 'right'),
+			size: apNum(v.size, 'image', 96),
+			out: v.out !== false,
+			phone: apPick(v.phone, ['small', 'none'], 'small'),
+			alt: typeof v.alt === 'string' ? v.alt.slice(0, 300) : ''
+		};
+	}
+	// Pure: its rules, as CMP_Appearance::image_css().
+	function apImageCss(a) {
+		if (!a.image) { return ''; }
+		var z = a.image.size, e = a.image.side, ins = !a.image.out || a.position.indexOf('top') === 0, p = Math.min(z, 64);
+		return '.cmp__modal{position:relative}.cmp__img{position:absolute;z-index:1;top:' + (ins ? 20 : Math.min(0, 56 - z)) + 'px;' + e + ':24px;width:' + z + 'px;height:' + z + 'px;object-fit:contain;pointer-events:none}.cmp__modal.is-prefs-open .cmp__img{display:none}' +
+			'@media (min-width:576px){.cmp--fmt-bar .cmp__img{' + e + ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' + (ins ? ',.cmp__main .cmp__text' : '') + '{padding-' + e + ':' + (z + 12) + 'px}}' +
+			'@media (max-width:575px){.cmp__img{' + (a.image.phone === 'none' ? 'display:none' : 'top:' + (14 - p) + 'px;' + e + ':16px;width:' + p + 'px;height:' + p + 'px') + '}}' +
+			'@media (max-width:359px),(max-height:480px){.cmp__img{display:none}}' +
+			'@media (min-height:481px){.cmp.cmp--no-overlay .cmp__modal:not(.is-prefs-open),.cmp.cmp--backdrop-none .cmp__modal:not(.is-prefs-open){overflow:visible}}';
 	}
 	function apHex(v) {
 		var m = typeof v === 'string' && v.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -788,6 +811,7 @@
 			gap: apNum(raw.gap, 'gap', 24),
 			density: apPick(raw.density, ['compact', 'normal', 'comfortable'], 'normal'),
 			buttons: apPick(raw.buttons, ['solid', 'outline', 'text'], sd[2]),
+			image: apImage(raw.image),
 			anim: apPick(raw.anim, ['none', 'fade', 'slide'], sd[3]),
 			delay: delay > 0 ? Math.round(Math.min(delay, 2) * 10) / 10 : 0,
 			reopen: apPick(raw.reopen, ['none', 'icon', 'text', 'both'], 'icon')
@@ -873,7 +897,7 @@
 			if (a.theme === 'auto') { css += '@media (prefers-color-scheme:dark){.cmp--theme-auto{' + dv + '}}'; }
 		}
 		if (Object.prototype.hasOwnProperty.call(AP_DENSITY, a.density)) { css += AP_DENSITY[a.density]; }
-		return css;
+		return css + apImageCss(a);
 	}
 
 	if (typeof document !== 'undefined') {
@@ -929,6 +953,7 @@
 
 			root.innerHTML =
 				'<div class="cmp__modal" role="dialog" aria-modal="' + (noOverlay || (cfg.appearance && cfg.appearance.backdrop === 'none') ? 'false' : 'true') + '" aria-labelledby="cmp-title" aria-describedby="cmp-intro" tabindex="-1" data-cmp-modal>' +
+				(cfg.appearance && cfg.appearance.image ? '<img class="cmp__img" src="' + escapeHtml(cfg.appearance.image.src) + '" alt="' + escapeHtml(cfg.appearance.image.alt) + '" width="' + cfg.appearance.image.size + '" height="' + cfg.appearance.image.size + '" loading="lazy" decoding="async">' : '') +
 				'<div class="cmp__main" data-cmp-view="main">' +
 				'<h2 id="cmp-title" class="cmp__title">' + escapeHtml(cfg.texts.title) + '</h2>' +
 				'<p id="cmp-intro" class="cmp__text">' + escapeHtml(cfg.texts.intro) + privacyLink + '</p>' +

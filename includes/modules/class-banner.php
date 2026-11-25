@@ -303,9 +303,59 @@ class CMP_Banner {
 		static $cache = array();
 		$key = md5( serialize( $settings ) );
 		if ( ! isset( $cache[ $key ] ) ) {
-			$cache[ $key ] = CMP_Appearance::from_settings( $settings );
+			$a = CMP_Appearance::from_settings( $settings );
+			// No picture in Light, nor when its file is gone or not on this site: no rules for it either.
+			if ( 'none' !== $a['image'] && ( ( isset( $settings['mode'] ) && 'light' === $settings['mode'] ) || '' === self::image_src( $a ) ) ) {
+				$a['image'] = 'none';
+			}
+			$cache[ $key ] = $a;
 		}
 		return $cache[ $key ];
+	}
+
+	/**
+	 * The address of the banner picture: ours (bundled), or the chosen media library
+	 * image, only when it is served by this site (no third party before consent).
+	 * '' when there is none.
+	 */
+	public static function image_src( array $a ) {
+		if ( 'shield' === $a['image'] || 'wp' === $a['image'] ) {
+			return CMP_URL . 'assets/img/biscuit-' . $a['image'] . '.webp';
+		}
+		if ( 'own' !== $a['image'] || $a['image_id'] < 1 || ! function_exists( 'wp_get_attachment_image_src' ) ) {
+			return '';
+		}
+		$img = wp_get_attachment_image_src( $a['image_id'], 'medium' );
+		$src = is_array( $img ) && isset( $img[0] ) && is_string( $img[0] ) ? $img[0] : '';
+		return self::is_local_url( $src, array( home_url(), site_url() ) ) ? $src : '';
+	}
+
+	/** Pure: is $url on the host of one of $bases (or a path without a host)? */
+	public static function is_local_url( $url, array $bases ) {
+		$url = (string) $url;
+		if ( '' === $url || preg_match( '/[\s"\'<>]/', $url ) || preg_match( '#^(?!https?:)[a-z][a-z0-9+.-]*:#i', $url ) ) {
+			return false;
+		}
+		$host = strtolower( (string) parse_url( $url, PHP_URL_HOST ) );
+		if ( '' === $host ) {
+			return '/' === $url[0];
+		}
+		foreach ( $bases as $b ) {
+			if ( strtolower( (string) parse_url( (string) $b, PHP_URL_HOST ) ) === $host ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The picture's tag, '' without one. Lazy: the hidden banner of a visitor who decided never loads it. */
+	public static function image_html( array $a ) {
+		$src = 'none' === $a['image'] ? '' : self::image_src( $a );
+		if ( '' === $src ) {
+			return '';
+		}
+		$z = (int) $a['image_size'];
+		return '<img class="cmp__img" src="' . esc_url( $src ) . '" alt="' . esc_attr( $a['image_alt'] ) . '" width="' . $z . '" height="' . $z . '" loading="lazy" decoding="async">';
 	}
 
 	/**

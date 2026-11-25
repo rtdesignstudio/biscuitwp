@@ -380,6 +380,39 @@
 		}
 	}
 
+	// The banner picture: show its fields, choose an image from the media library.
+	function initImage() {
+		var box = document.querySelector('[data-cmp-ap-image]');
+		if (!box) { return; }
+		var own = box.querySelector('[data-cmp-ap-image-own]'), more = box.querySelector('[data-cmp-ap-image-more]');
+		var id = box.querySelector('[data-cmp-ap-image-id]'), thumb = box.querySelector('[data-cmp-ap-image-thumb]');
+		var pick = box.querySelector('[data-cmp-ap-image-pick]'), frame = null;
+		box.addEventListener('change', function (e) {
+			if (!e.target || e.target.getAttribute('data-cmp-ap-key') !== 'image') { return; }
+			own.hidden = e.target.value !== 'own';
+			more.hidden = e.target.value === 'none';
+		});
+		if (!window.wp || !window.wp.media) { pick.disabled = true; return; }
+		pick.addEventListener('click', function () {
+			var t = (window.CMP_APPEARANCE && window.CMP_APPEARANCE.i18n) || {};
+			if (!frame) {
+				frame = window.wp.media({ title: t.imageTitle, button: { text: t.imageUse }, library: { type: 'image' }, multiple: false });
+				frame.on('select', function () {
+					var m = frame.state().get('selection').first().toJSON();
+					id.value = m.id;
+					thumb.src = m.sizes && m.sizes.thumbnail ? m.sizes.thumbnail.url : m.url;
+					thumb.hidden = false;
+				});
+			}
+			frame.open();
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initImage);
+	} else {
+		initImage();
+	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);
 	} else {

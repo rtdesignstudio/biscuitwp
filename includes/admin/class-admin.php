@@ -117,6 +117,9 @@ class CMP_Admin {
 			wp_localize_script( 'cmp-check', 'CMP_CHECK', CMP_Check_Page::script_data() );
 		}
 		if ( false !== strpos( (string) $hook, CMP_Appearance_Page::SLUG ) ) {
+			if ( current_user_can( 'upload_files' ) ) {
+				wp_enqueue_media(); // The picture of the banner.
+			}
 			wp_enqueue_script( 'cmp-appearance', CMP_URL . 'assets/js/admin-appearance.js', array(), CMP_Plugin::asset_ver( 'assets/js/admin-appearance.js' ), true );
 			wp_localize_script( 'cmp-appearance', 'CMP_APPEARANCE', CMP_Appearance_Page::script_data() );
 		}
