@@ -18,6 +18,21 @@
 		b.addEventListener('click', function () { window.print(); });
 	});
 
+	/* "Copiază" next to a block of code: hidden without clipboard access. */
+	Array.prototype.forEach.call(doc.querySelectorAll('[data-copy]'), function (b) {
+		var code = b.parentNode.querySelector('code');
+		var label = b.textContent;
+		if (!code || !navigator.clipboard) { return; }
+		b.hidden = false;
+		b.addEventListener('click', function () {
+			var say = function (text) {
+				b.textContent = text;
+				window.setTimeout(function () { b.textContent = label; }, 2500);
+			};
+			navigator.clipboard.writeText(code.textContent).then(function () { say(b.getAttribute('data-done')); }, function () { say(b.getAttribute('data-fail')); });
+		});
+	});
+
 	/* A link to a folded block (<details id>, e.g. #cum-verifici) opens it, on click and
 	   when the page loads with that address. */
 	function openFolded(hash) {

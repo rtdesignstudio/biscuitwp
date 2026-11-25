@@ -1,0 +1,34 @@
+BiscuitWP standalone: banner de cookie-uri fără WordPress
+Pagina cu pași și coduri de copiat: https://biscuitwp.rt.md/standalone/
+
+1. Urcă folderul "biscuitwp" pe serverul tău.
+2. Înainte de </head> pune cele trei rânduri din exemplu.html: cmp.min.css, window.CMP_CONFIG, cmp.min.js.
+3. Marchează scripturile de urmărire: type="text/plain" data-cmp-block="statistics" (sau "marketing").
+   Bannerul blochează DOAR ce marchezi tu. generator.html face marcajul pentru tine.
+4. Pune în footer: <a href="#cmp-settings" data-cmp-settings>Setări cookie</a>
+5. Verifică: https://biscuitwp.rt.md/#verifica
+
+
+BiscuitWP standalone: a cookie banner without WordPress
+Steps with code to copy: https://biscuitwp.rt.md/en/standalone/
+
+1. Upload the "biscuitwp" folder to your server.
+2. Before </head> add the three lines from exemplu.html: cmp.min.css, window.CMP_CONFIG, cmp.min.js.
+3. Mark the tracking scripts: type="text/plain" data-cmp-block="statistics" (or "marketing").
+   The banner blocks ONLY what you mark. generator.html (in Romanian) writes the markup for you.
+4. In the footer: <a href="#cmp-settings" data-cmp-settings>Cookie settings</a>
+5. Check: https://biscuitwp.rt.md/en/#verifica
+
+
+BiscuitWP standalone: баннер cookie без WordPress
+Шаги и готовый код: https://biscuitwp.rt.md/ru/standalone/
+
+1. Загрузите папку "biscuitwp" на свой сервер.
+2. Перед </head> добавьте три строки из exemplu.html: cmp.min.css, window.CMP_CONFIG, cmp.min.js.
+3. Отметьте скрипты отслеживания: type="text/plain" data-cmp-block="statistics" (или "marketing").
+   Баннер блокирует ТОЛЬКО то, что вы отметили. generator.html (на румынском) создаёт разметку за вас.
+4. В подвале сайта: <a href="#cmp-settings" data-cmp-settings>Настройки cookie</a>
+5. Проверьте: https://biscuitwp.rt.md/ru/#verifica
+
+
+Licență / License / Лицензия: GPL-2.0-or-later (LICENSE)

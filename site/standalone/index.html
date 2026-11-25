@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>BiscuitWP fără WordPress · BiscuitWP</title>
+<meta name="description" content="Bannerul BiscuitWP pentru site-uri fără WordPress: descarcă arhiva și instaleaz-o în 5 pași.">
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<!-- HEADER ro=/standalone/ en=/en/standalone/ ru=/ru/standalone/ -->
+<main id="main" class="wrap">
+<h1>BiscuitWP fără WordPress</h1>
+<p class="lead">Același banner, pentru un site static sau pe altă platformă, unde poți edita codul paginilor.</p>
+<p class="notice"><strong>De știut înainte:</strong> fără WordPress, bannerul blochează doar ce marchezi tu în cod. Dacă nu umbli în codul site-ului, dă pagina asta celui care îl întreține.</p>
+<p class="actions"><a class="btn" href="/standalone/biscuitwp-standalone.zip" download>Descarcă biscuitwp-standalone.zip</a></p>
+<p class="muted small">Versiunea {{VERSION}}, {{STANDALONE_KB}} KB, licență GPL. SHA-256: <code>{{STANDALONE_SHA256}}</code></p>
+<p>În arhivă: bannerul (<code>cmp.min.js</code>, <code>cmp.min.css</code>), <code>exemplu.html</code>, pe care îl deschizi cu dublu clic, <code>generator.html</code> și pașii de mai jos în <code>CITESTE.txt</code>.</p>
+
+<h2 id="fisiere">1. Urcă fișierele</h2>
+<p>Dezarhivează și urcă folderul <code>biscuitwp</code> în rădăcina site-ului, ca fișierele să se deschidă la <code>site-ul-tau.md/biscuitwp/cmp.min.js</code>.</p>
+
+<h2 id="cod">2. Pune bannerul în pagină</h2>
+<p>Lipește codul înainte de <code>&lt;/head&gt;</code>, pe fiecare pagină (de obicei într-un singur șablon). Schimbă adresa politicii de cookie-uri.</p>
+<div class="code"><pre><code>&lt;link rel="stylesheet" href="/biscuitwp/cmp.min.css"&gt;
+&lt;script&gt;
+window.CMP_CONFIG = {
+  lang: 'ro', // limba: ro, en, ru
+  privacyUrl: '/politica-cookie/', // adresa politicii tale
+  categories: ['necessary', 'statistics', 'marketing']
+};
+&lt;/script&gt;
+&lt;script src="/biscuitwp/cmp.min.js" defer&gt;&lt;/script&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copiat" data-fail="Selectează și copiază" hidden>Copiază</button></div>
+
+<h2 id="marcare">3. Marchează scripturile de urmărire</h2>
+<p>Adaugă <code>type="text/plain"</code> și categoria: <code>statistics</code> pentru statistici, <code>marketing</code> pentru reclame. La scripturile cu adresă, <code>src</code> devine <code>data-cmp-src</code>.</p>
+<h3>Google Analytics</h3>
+<p class="code-cap">Înainte</p>
+<div class="code"><pre><code>&lt;script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+&lt;/script&gt;</code></pre></div>
+<p class="code-cap">După</p>
+<div class="code"><pre><code>&lt;script type="text/plain" data-cmp-block="statistics" data-cmp-src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"&gt;&lt;/script&gt;
+&lt;script type="text/plain" data-cmp-block="statistics"&gt;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+&lt;/script&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copiat" data-fail="Selectează și copiază" hidden>Copiază</button></div>
+<h3>Meta Pixel</h3>
+<p>Codul din interior rămâne neschimbat; se schimbă doar prima etichetă. Șterge și partea <code>&lt;noscript&gt;</code> a pixelului: ea trimite date fără acord.</p>
+<div class="code"><pre><code>&lt;script type="text/plain" data-cmp-block="marketing"&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copiat" data-fail="Selectează și copiază" hidden>Copiază</button></div>
+<p>Pentru YouTube, Google Maps și alte conținuturi încorporate, deschide <code>generator.html</code> din arhivă: alegi serviciul și îți dă codul.</p>
+
+<h2 id="footer">4. Pune linkul „Setări cookie” în footer</h2>
+<p>Vizitatorul trebuie să-și poată schimba alegerea oricând.</p>
+<div class="code"><pre><code>&lt;a href="#cmp-settings" data-cmp-settings&gt;Setări cookie&lt;/a&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copiat" data-fail="Selectează și copiază" hidden>Copiază</button></div>
+
+<h2 id="verificare">5. Verifică</h2>
+<p>Deschide site-ul într-o fereastră privată: bannerul apare, iar trackerele nu pornesc înainte de acord. Apoi <a href="/#verifica">verifică adresa aici</a>.</p>
+
+<h2 id="limite">Ce nu are față de pluginul WordPress</h2>
+<ul>
+<li>blocare automată și scanarea site-ului;</li>
+<li>registrul de consimțăminte: nu rămâne o dovadă pe serverul tău;</li>
+<li>generarea politicilor: textele legale le scrii tu;</li>
+<li>actualizări automate: descarci din nou arhiva.</li>
+</ul>
+<p>Toate opțiunile (aspect, texte, reluarea acordului la servicii noi) sunt în <a href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">ghidul complet de pe GitHub</a>, în engleză.</p>
+</main>
+<!-- FOOTER -->
+</body>
+</html>

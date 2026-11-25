@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BiscuitWP standalone: exemplu</title>
+<link rel="stylesheet" href="cmp.min.css">
+<script>
+window.CMP_CONFIG = {
+  lang: 'ro',                         // 'ro', 'en', 'ru'
+  privacyUrl: '#politica',            // adresa politicii tale de cookie-uri
+  categories: ['necessary', 'statistics', 'marketing'],
+  appearance: { style: 'brand', format: 'card', accent: '#0a6b53' }
+};
+</script>
+<script src="cmp.min.js" defer></script>
+<style>
+body { max-width: 640px; margin: 48px auto; padding: 0 20px; font: 17px/1.6 system-ui, sans-serif; color: #1a1a1a; }
+li { margin: 8px 0; }
+b { font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Exemplu</h1>
+<p>Bannerul real. Pagina nu încarcă niciun tracker: două scripturi de probă scriu mai jos când pornesc.</p>
+<ul>
+<li>Statistică: <b id="s">blocat</b></li>
+<li>Marketing: <b id="m">blocat</b></li>
+</ul>
+<p>Deschisă direct de pe calculator, pagina te întreabă la fiecare reîncărcare, fiindcă browserul nu păstrează cookie-uri pentru fișiere. Pe server ține minte alegerea.</p>
+<p><a href="#cmp-settings" data-cmp-settings>Setări cookie</a></p>
+
+<!-- Așa arată un script marcat: type="text/plain" și categoria. Pornește doar după acord. -->
+<script type="text/plain" data-cmp-block="statistics">document.getElementById('s').textContent = 'pornit';</script>
+<script type="text/plain" data-cmp-block="marketing">document.getElementById('m').textContent = 'pornit';</script>
+</body>
+</html>

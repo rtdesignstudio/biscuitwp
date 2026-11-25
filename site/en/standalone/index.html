@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>BiscuitWP without WordPress · BiscuitWP</title>
+<meta name="description" content="The BiscuitWP banner for sites without WordPress: download the archive and install it in 5 steps.">
+<link rel="stylesheet" href="../../style.css">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/rt-favicon-512.png">
+<link rel="apple-touch-icon" href="/assets/favicon/rt-favicon-512.png">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<!-- HEADER ro=/standalone/ en=/en/standalone/ ru=/ru/standalone/ -->
+<main id="main" class="wrap">
+<h1>BiscuitWP without WordPress</h1>
+<p class="lead">The same banner, for a static site or another platform where you can edit the page code.</p>
+<p class="notice"><strong>Before you start:</strong> without WordPress, the banner blocks only what you mark in the code. If you do not edit your site's code, pass this page to whoever maintains it.</p>
+<p class="actions"><a class="btn" href="/standalone/biscuitwp-standalone.zip" download>Download biscuitwp-standalone.zip</a></p>
+<p class="muted small">Version {{VERSION}}, {{STANDALONE_KB}} KB, GPL license. SHA-256: <code>{{STANDALONE_SHA256}}</code></p>
+<p>In the archive: the banner (<code>cmp.min.js</code>, <code>cmp.min.css</code>), <code>exemplu.html</code>, an example you open with a double click, <code>generator.html</code> (in Romanian) and the steps below in <code>CITESTE.txt</code>.</p>
+
+<h2 id="fisiere">1. Upload the files</h2>
+<p>Unzip and upload the <code>biscuitwp</code> folder to the root of your site, so the files open at <code>your-site.com/biscuitwp/cmp.min.js</code>.</p>
+
+<h2 id="cod">2. Add the banner to the page</h2>
+<p>Paste the code before <code>&lt;/head&gt;</code>, on every page (usually in one template). Change the address of your cookie policy.</p>
+<div class="code"><pre><code>&lt;link rel="stylesheet" href="/biscuitwp/cmp.min.css"&gt;
+&lt;script&gt;
+window.CMP_CONFIG = {
+  lang: 'en', // language: ro, en, ru
+  privacyUrl: '/cookie-policy/', // the address of your policy
+  categories: ['necessary', 'statistics', 'marketing']
+};
+&lt;/script&gt;
+&lt;script src="/biscuitwp/cmp.min.js" defer&gt;&lt;/script&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copied" data-fail="Select and copy" hidden>Copy</button></div>
+
+<h2 id="marcare">3. Mark the tracking scripts</h2>
+<p>Add <code>type="text/plain"</code> and the category: <code>statistics</code> for analytics, <code>marketing</code> for ads. For scripts with an address, <code>src</code> becomes <code>data-cmp-src</code>.</p>
+<h3>Google Analytics</h3>
+<p class="code-cap">Before</p>
+<div class="code"><pre><code>&lt;script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+&lt;/script&gt;</code></pre></div>
+<p class="code-cap">After</p>
+<div class="code"><pre><code>&lt;script type="text/plain" data-cmp-block="statistics" data-cmp-src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"&gt;&lt;/script&gt;
+&lt;script type="text/plain" data-cmp-block="statistics"&gt;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+&lt;/script&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copied" data-fail="Select and copy" hidden>Copy</button></div>
+<h3>Meta Pixel</h3>
+<p>The code inside stays the same; only the first tag changes. Delete the pixel's <code>&lt;noscript&gt;</code> part too: it sends data without consent.</p>
+<div class="code"><pre><code>&lt;script type="text/plain" data-cmp-block="marketing"&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copied" data-fail="Select and copy" hidden>Copy</button></div>
+<p>For YouTube, Google Maps and other embeds, open <code>generator.html</code> from the archive (in Romanian): choose the service and it gives you the code. The markup is also in the GitHub guide.</p>
+
+<h2 id="footer">4. Put the "Cookie settings" link in the footer</h2>
+<p>Visitors must be able to change their choice at any time.</p>
+<div class="code"><pre><code>&lt;a href="#cmp-settings" data-cmp-settings&gt;Cookie settings&lt;/a&gt;</code></pre><button type="button" class="btn btn-ghost" data-copy data-done="Copied" data-fail="Select and copy" hidden>Copy</button></div>
+
+<h2 id="verificare">5. Check</h2>
+<p>Open the site in a private window: the banner shows, and no tracker starts before consent. Then <a href="/en/#verifica">check the address here</a>.</p>
+
+<h2 id="limite">What it lacks compared with the WordPress plugin</h2>
+<ul>
+<li>automatic blocking and the site scan;</li>
+<li>the consent log: no proof is kept on your server;</li>
+<li>policy generation: you write the legal texts;</li>
+<li>automatic updates: you download the archive again.</li>
+</ul>
+<p>Every option (appearance, texts, asking again for new services) is in the <a href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">full guide on GitHub</a>.</p>
+</main>
+<!-- FOOTER -->
+</body>
+</html>

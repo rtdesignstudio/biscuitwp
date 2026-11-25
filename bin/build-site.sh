@@ -12,6 +12,8 @@
 #                          <!-- REVOKED --> (the `revoked` list of the stable manifest);
 #   .well-known/security.txt from security.txt.in ({{EXPIRES}} = now + 180 days);
 #   api/services.json      a copy of data/services.json, for api/verifica.php;
+#   standalone/biscuitwp-standalone.zip   the banner without WordPress, for /standalone/; its
+#                          pages get {{VERSION}} (biscuitwp.php), {{STANDALONE_KB}}, {{STANDALONE_SHA256}};
 #   demo/cmp.min.{js,css}  copies of standalone/cmp.min.{js,css}, for the live demo;
 #   every page      <!-- DOWNLOAD_URL --> (any number of times): the download link,
 #                   https://github.com/rtdesignstudio/biscuitwp/releases/latest/download/biscuitwp.zip
@@ -88,6 +90,7 @@ ROOT="$(pwd -P)"
 NOW="${CMP_BUILD_NOW:-$(date +%s)}"
 
 command -v php >/dev/null 2>&1 || die "php not found"
+command -v zip >/dev/null 2>&1 || die "zip not found"
 echo "$NOW" | grep -Eq '^[0-9]+$' || die "CMP_BUILD_NOW must be a Unix timestamp"
 [ -d "$ROOT/site" ] || die "site/ not found"
 for f in assets/site.js assets/verifica.js assets/favicon/rt-favicon-512.png; do
@@ -144,6 +147,15 @@ cp "$ROOT/data/services.json" "$TMP/api/services.json"
 # The live demo (site/demo/) runs the standalone banner, served from this site.
 [ -d "$TMP/demo" ] || die "site/demo/ not found"
 cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$TMP/demo/"
+
+# The standalone package (/standalone/): the same inputs give the same archive.
+PKG="$TMP/.pkg"
+mkdir -p "$PKG/biscuitwp" "$TMP/standalone"
+cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$ROOT/standalone/services.js" "$ROOT/standalone/pachet/exemplu.html" "$ROOT/standalone/pachet/CITESTE.txt" "$ROOT/LICENSE" "$PKG/biscuitwp/"
+cp "$ROOT/standalone/marker-generator.html" "$PKG/biscuitwp/generator.html"
+find "$PKG" -exec chmod u=rwX,go=rX {} + -exec env TZ=UTC touch -t 202601010000 {} +
+( cd "$PKG" && find biscuitwp | LC_ALL=C sort | TZ=UTC zip -qX9 "$TMP/standalone/biscuitwp-standalone.zip" -@ )
+rm -rf "$PKG"
 
 # ---- Generator (PHP 7.4+) --------------------------------------------------
 read -r -d '' PHP_GEN <<'PHP' || true
@@ -400,9 +412,12 @@ foreach ( array( "header", "footer" ) as $kind ) {
 }
 $nav_keys = array( "home", "security", "privacy", "changelog" );
 $lang_names = array( "ro" => "Română", "en" => "English", "ru" => "Русский" );
+$zip = $dir . "/standalone/biscuitwp-standalone.zip";
+if ( ! preg_match( "/define\( *.CMP_VERSION., *.([0-9.]+(?:-[a-z0-9.]+)?). *\)/", rd( dirname( $updater, 3 ) . "/biscuitwp.php" ), $vm ) ) { fail( "CMP_VERSION not found in biscuitwp.php" ); }
+$standalone = array( $vm[1], (string) max( 1, (int) round( filesize( $zip ) / 1024 ) ), hash_file( "sha256", $zip ) );
 // Version the local CSS and JS a page links, from its folder or the root.
 function versioned( $html, $dir, $rel ) {
-	return preg_replace_callback( '#\b(href|src)="([^":?\#]+\.(?:css|js))"#', function ( $m ) use ( $dir, $rel ) {
+	return preg_replace_callback( '#(<(?:link|script)\b[^<>]*\b(?:href|src))="([^":?\#]+\.(?:css|js))"#', function ( $m ) use ( $dir, $rel ) {
 		$f = "/" === $m[2][0] ? $dir . $m[2] : dirname( $dir . "/" . $rel ) . "/" . $m[2];
 		if ( ! is_file( $f ) ) { fail( $rel . ": missing " . $m[2] ); }
 		return $m[1] . "=\"" . $m[2] . "?v=" . substr( hash_file( "sha256", $f ), 0, 8 ) . "\"";
@@ -445,6 +460,7 @@ foreach ( $pages as $f ) {
 	$html   = preg_replace_callback( '/<!-- HEADER( [^>]*?)? -->/', function () use ( $header ) { return $header; }, $html );
 	$html   = fill( $html, "<!-- FOOTER -->", str_replace( "{{LANGS_LI}}", "<li>" . implode( "</li>\n<li>", $links ) . "</li>", $partials["footer"][ $l ] ), $rel );
 	$html   = str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html );
+	$html   = str_replace( array( "{{VERSION}}", "{{STANDALONE_KB}}", "{{STANDALONE_SHA256}}" ), $standalone, $html );
 	wr( $p, versioned( $html, $dir, $rel ) );
 }
 foreach ( $pit as $f ) { $f->isDir() ? rmdir( $f->getPathname() ) : unlink( $f->getPathname() ); }

@@ -351,6 +351,7 @@ foreach ( array( 'site' => $cmp_site_root . '/site', 'out' => $cmp_site_out1 ) a
 		$c = (string) file_get_contents( $dir . '/' . $f );
 		// The one allowed inline script: the RT team's feedback widget loader (exact text; loads nothing for visitors).
 		$c = str_replace( $cmp_site_widget, '', $c );
+		$c = (string) preg_replace( '#<pre><code>[^<]*</code></pre>#', '', $c ); // Code shown as text (/standalone/).
 		foreach ( $cmp_site_ext as $what => $re ) {
 			cmp_assert( 0 === preg_match( $re, $c ), "{$label}/{$f}: no {$what}" );
 		}
@@ -377,7 +378,7 @@ foreach ( cmp_site_files( $cmp_site_root . '/site' ) as $f ) {
 // Privacy pages: every outgoing host the plugin can contact is declared.
 foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html', 'ru/privacy/index.html' ) as $page ) {
 	$html = $cmp_site_read( $page );
-	foreach ( array( 'biscuitwp.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/README.md' ) as $needle ) {
+	foreach ( array( 'biscuitwp.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/">' ) as $needle ) {
 		cmp_assert( false !== strpos( $html, $needle ), "{$page}: mentions {$needle}" );
 	}
 }
@@ -588,7 +589,7 @@ if ( '' === $cmp_site_node ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
 	}
 	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
-		cmp_assert( 1 === preg_match( '#<a data-standalone href="https://github\.com/rtdesignstudio/biscuitwp/blob/main/standalone/README\.md">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
+		cmp_assert( 1 === preg_match( '#<a data-standalone href="/(?:en/|ru/)?standalone/">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
 	}
 	// The counter line under the form: from 100 successful checks, +1 after a check that read the site.
 	$r = $cmp_site_dom( 'ro', 'clean', true, 1239 );
@@ -702,7 +703,7 @@ foreach ( array(
 	$hero = 1 === preg_match( '#<section class="hero".*?</section>#s', $html, $hsm ) ? $hsm[0] : '';
 	cmp_assert( false !== strpos( $hero, '<p class="lead"><strong>' . $t[0] . '</strong>' ), "{$page}: the lead starts by saying it is a free WordPress plugin" );
 	cmp_assert( 1 === preg_match( '#id="verifica-buton">.*<p class="actions">\s*<a class="btn btn-ghost" data-download href="[^"]*">' . preg_quote( $t[2], '#' ) . '</a>#s', $hero ) && false !== strpos( $hero, $t[1] ), "{$page}: the check comes first, the download second" );
-	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="https://github\.com/rtdesignstudio/biscuitwp/blob/main/standalone/README\.md">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
+	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="/(?:en/|ru/)?standalone/">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
 	cmp_assert( 1 === preg_match( '#</h1>\s*<figure class="hero-demo" aria-labelledby="hero-demo-cap">.*?</figure>\s*<p class="urgent"><strong>' . preg_quote( $t[3], '#' ) . '</strong>#s', $hero ), "{$page}: after the title, the product picture and the law line" );
 	$fig = 1 === preg_match( '#<figure class="hero-demo".*?</figure>#s', $hero, $fgm ) ? $fgm[0] : '';
 	cmp_assert( false !== strpos( $fig, '<figcaption id="hero-demo-cap">' ) && false !== strpos( $fig, $t[4] ) && false !== strpos( $fig, $t[5] ), "{$page}: the picture shows before and after consent, with a caption" );
@@ -1070,7 +1071,7 @@ foreach ( array( 'ru/index.html', 'ru/privacy/index.html', 'ru/security/index.ht
 	cmp_assert( 0 === preg_match( '/[ăâîșțĂÂÎȘȚ]/u', str_replace( 'München', '', $text ) ), "site/{$f}: no Romanian text left" );
 }
 $cmp_site_ru = (string) @file_get_contents( $cmp_site_root . '/site/ru/index.html' );
-foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">', 'Проверьте свой сайт' ) as $need ) {
+foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="/ru/standalone/">', 'Проверьте свой сайт' ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_ru, $need ), "ru/index.html: has {$need}" );
 }
 cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/demo/demo.js' ), "ru: '/ru/privacy/'" ), 'demo.js: the Russian demo banner links the Russian privacy page' );

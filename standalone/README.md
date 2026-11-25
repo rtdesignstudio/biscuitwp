@@ -2,6 +2,8 @@
 
 A standalone, plugin-independent consent management solution for cookie consent, preferences, and tracking control.
 
+**Just want to install it?** Download the archive and follow 5 steps: https://biscuitwp.rt.md/en/standalone/ (RO: https://biscuitwp.rt.md/standalone/). This file is the full reference for developers.
+
 ## Quick Start
 
 ### Step 1: Link the stylesheet
