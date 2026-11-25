@@ -1,13 +1,13 @@
 <?php
 /**
  * The link-preview pictures (Open Graph, 1200×630) of the landing pages, one per language:
- * site/assets/og/og-{ro,en,ru}.png. Writes one HTML page per language (fonts inlined, nothing
+ * site/assets/og/og-{ro,en}.png. Writes one HTML page per language (fonts inlined, nothing
  * loaded from the network) and prints its path; bin/build-og.sh screenshots it with Chrome.
  *
  *   php bin/build-og.php <lang> <out.html>
  */
-if ( 3 !== $argc || ! in_array( $argv[1], array( 'ro', 'en', 'ru' ), true ) ) {
-	fwrite( STDERR, "Usage: php bin/build-og.php ro|en|ru <out.html>\n" );
+if ( 3 !== $argc || ! in_array( $argv[1], array( 'ro', 'en' ), true ) ) {
+	fwrite( STDERR, "Usage: php bin/build-og.php ro|en <out.html>\n" );
 	exit( 2 );
 }
 $lang = $argv[1];
@@ -35,17 +35,6 @@ $t = array(
 		'banner'  => 'We use cookies for statistics and ads.',
 		'no'      => 'Reject',
 		'yes'     => 'Accept',
-	),
-	'ru' => array(
-		'title'   => 'Cookie с согласия,<br>а не на удачу.',
-		'sub'     => 'Бесплатный плагин для WordPress, сделанный для Закона № 195/2024. Проверьте свой сайт за несколько секунд.',
-		'before'  => 'До согласия',
-		'after'   => 'После «Принять»',
-		'blocked' => 'заблокирован',
-		'on'      => 'загружен',
-		'banner'  => 'Мы используем cookie для статистики и рекламы.',
-		'no'      => 'Отклонить',
-		'yes'     => 'Принять',
 	),
 );
 $t = $t[ $lang ];

@@ -119,9 +119,6 @@ $cmp_site_pages = array(
 	'confidentialitate/index.html' => 'ro',
 	'en/privacy/index.html'       => 'en',
 	'changelog/index.html'        => 'ro',
-	'ru/index.html'               => 'ru',
-	'ru/security/index.html'      => 'ru',
-	'ru/privacy/index.html'       => 'ru',
 );
 foreach ( array_merge( array_keys( $cmp_site_pages ), array( 'changelog/feed.xml', 'style.css', '.well-known/security.txt' ) ) as $f ) {
 	cmp_assert( is_file( $cmp_site_out1 . '/' . $f ), "build-site: writes {$f}" );
@@ -137,7 +134,7 @@ $cmp_site_read = function ( $f ) use ( $cmp_site_out1 ) {
 	// Without the cache version of local CSS / JS (checked once below), so the tests read plain paths.
 	return is_file( $p ) ? (string) preg_replace( '#(\.(?:css|js))\?v=[0-9a-f]{8}"#', '$1"', (string) file_get_contents( $p ) ) : '';
 };
-preg_match_all( '#(?:href|src)="(/[^":?]+\.(?:css|js))(\?v=([0-9a-f]{8}))?"#', (string) @file_get_contents( $cmp_site_out1 . '/demo/embed/index.html' ) . (string) @file_get_contents( $cmp_site_out1 . '/ru/index.html' ), $cmp_site_vm, PREG_SET_ORDER );
+preg_match_all( '#(?:href|src)="(/[^":?]+\.(?:css|js))(\?v=([0-9a-f]{8}))?"#', (string) @file_get_contents( $cmp_site_out1 . '/demo/embed/index.html' ) . (string) @file_get_contents( $cmp_site_out1 . '/en/index.html' ), $cmp_site_vm, PREG_SET_ORDER );
 cmp_assert( count( $cmp_site_vm ) >= 5, 'versions: local CSS and JS found' );
 foreach ( $cmp_site_vm as $m ) {
 	cmp_assert( isset( $m[3] ) && substr( hash_file( 'sha256', $cmp_site_out1 . $m[1] ), 0, 8 ) === $m[3], "versions: {$m[1]} carries the hash of its content" );
@@ -225,7 +222,7 @@ foreach ( array( 'securitate/index.html' => 'niciuna', 'en/security/index.html' 
 }
 
 // Security pages: biscuitwp.zip (new installs) is checked by its own .sig; its hash is not in the manifest.
-foreach ( array( 'securitate/index.html', 'en/security/index.html', 'ru/security/index.html' ) as $page ) {
+foreach ( array( 'securitate/index.html', 'en/security/index.html' ) as $page ) {
 	$html = $cmp_site_read( $page );
 	cmp_assert( false !== strpos( $html, '<code>biscuitwp.zip.sig</code>' ), "{$page}: explains verifying biscuitwp.zip with biscuitwp.zip.sig" );
 	cmp_assert( 1 === preg_match( '#</ol>\s*<p>[^<]*<code>biscuitwp\.zip</code>#u', $html ), "{$page}: the biscuitwp.zip note follows the verification steps" );
@@ -242,25 +239,21 @@ foreach ( $cmp_site_pages as $page => $lang ) {
 
 // ---- Shared header and footer, style assets (Task 1 of the landing) ---------------
 // page => [ lang, current nav key, language switch: lang => target ]
-$cmp_site_home  = array( 'ro' => '/', 'en' => '/en/', 'ru' => '/ru/' );
-$cmp_site_sec   = array( 'ro' => '/securitate/', 'en' => '/en/security/', 'ru' => '/ru/security/' );
-$cmp_site_priv  = array( 'ro' => '/confidentialitate/', 'en' => '/en/privacy/', 'ru' => '/ru/privacy/' );
+$cmp_site_home  = array( 'ro' => '/', 'en' => '/en/' );
+$cmp_site_sec   = array( 'ro' => '/securitate/', 'en' => '/en/security/' );
+$cmp_site_priv  = array( 'ro' => '/confidentialitate/', 'en' => '/en/privacy/' );
 $cmp_site_frame = array(
 	'index.html'                   => array( 'ro', 'home', $cmp_site_home ),
 	'en/index.html'                => array( 'en', 'home', $cmp_site_home ),
-	'ru/index.html'                => array( 'ru', 'home', $cmp_site_home ),
 	'securitate/index.html'        => array( 'ro', 'security', $cmp_site_sec ),
 	'en/security/index.html'       => array( 'en', 'security', $cmp_site_sec ),
-	'ru/security/index.html'       => array( 'ru', 'security', $cmp_site_sec ),
 	'confidentialitate/index.html' => array( 'ro', 'privacy', $cmp_site_priv ),
 	'en/privacy/index.html'        => array( 'en', 'privacy', $cmp_site_priv ),
-	'ru/privacy/index.html'        => array( 'ru', 'privacy', $cmp_site_priv ),
-	'changelog/index.html'         => array( 'ro', 'changelog', array( 'ro' => '/changelog/', 'en' => '/en/', 'ru' => '/ru/' ) ),
+	'changelog/index.html'         => array( 'ro', 'changelog', array( 'ro' => '/changelog/', 'en' => '/en/' ) ),
 );
 $cmp_site_nav = array(
 	'ro' => array( 'home' => '/', 'security' => '/securitate/', 'privacy' => '/confidentialitate/', 'changelog' => '/changelog/' ),
 	'en' => array( 'home' => '/en/', 'security' => '/en/security/', 'privacy' => '/en/privacy/', 'changelog' => '/changelog/' ),
-	'ru' => array( 'home' => '/ru/', 'security' => '/ru/security/', 'privacy' => '/ru/privacy/', 'changelog' => '/changelog/' ),
 );
 foreach ( $cmp_site_frame as $page => $fr ) {
 	list( $lang, $cur, $alts ) = $fr;
@@ -301,7 +294,7 @@ foreach ( $cmp_site_frame as $page => $fr ) {
 		cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$page}: no em dash in {$lang} text" );
 	}
 }
-foreach ( array( 'header.ro.html', 'footer.ro.html', 'header.en.html', 'footer.en.html', 'header.ru.html', 'footer.ru.html' ) as $f ) {
+foreach ( array( 'header.ro.html', 'footer.ro.html', 'header.en.html', 'footer.en.html' ) as $f ) {
 	cmp_assert( is_file( $cmp_site_root . '/site/partials/' . $f ), "site/partials/{$f} exists" );
 }
 foreach ( array( 'partials/header.ro.html', 'partials/footer.ro.html', 'demo/index.html', 'demo/embed/index.html' ) as $f ) {
@@ -376,7 +369,7 @@ foreach ( cmp_site_files( $cmp_site_root . '/site' ) as $f ) {
 }
 
 // Privacy pages: every outgoing host the plugin can contact is declared.
-foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html', 'ru/privacy/index.html' ) as $page ) {
+foreach ( array( 'confidentialitate/index.html', 'en/privacy/index.html' ) as $page ) {
 	$html = $cmp_site_read( $page );
 	foreach ( array( 'biscuitwp.rt.md', 'github.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'i.ytimg.com', 'youtube-nocookie.com', 'cmp_consent', 'cmp_svc', 'SHA-256', '13', 'security@rt.md', 'rt.md/cmp/', 'standalone/">' ) as $needle ) {
 		cmp_assert( false !== strpos( $html, $needle ), "{$page}: mentions {$needle}" );
@@ -408,7 +401,7 @@ file_put_contents( $cmp_site_badbeta, json_encode( array( 'version' => '1.0"><sc
 list( $rc, $out ) = cmp_site_run( 'bash bin/build-site.sh --out ' . escapeshellarg( $cmp_site_tmp . '/out8' ), array_merge( $cmp_site_env, array( 'CMP_BETA_MANIFEST' => $cmp_site_badbeta ) ) );
 cmp_assert( 0 !== $rc, 'build-site: a beta manifest with an invalid version fails' );
 
-foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en', 'ru/index.html' => 'ru' ) as $page => $lang ) {
+foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $lang ) {
 	$html = $cmp_site_read( $page );
 	foreach ( array( 'verifica', 'legea', 'functii', 'demo', 'comparatie', 'resurse' ) as $id ) {
 		cmp_assert( false !== strpos( $html, 'id="' . $id . '"' ), "{$page}: section #{$id}" );
@@ -589,7 +582,7 @@ if ( '' === $cmp_site_node ) {
 		cmp_assert( false !== strpos( $r['text'], $need ), "render issues (en): shows „{$need}”" );
 	}
 	foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
-		cmp_assert( 1 === preg_match( '#<a data-standalone href="/(?:en/|ru/)?standalone/">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
+		cmp_assert( 1 === preg_match( '#<a data-standalone href="/(?:en/)?standalone/">#', (string) file_get_contents( $cmp_site_root . '/' . $f ) ), "{$f}: the standalone link is marked data-standalone for the report" );
 	}
 	// The counter line under the form: from 100 successful checks, +1 after a check that read the site.
 	$r = $cmp_site_dom( 'ro', 'clean', true, 1239 );
@@ -697,13 +690,12 @@ foreach ( array( 'index.html' => array( 'Cookie-uri cu acord, nu cu noroc.', 'Co
 foreach ( array(
 	'index.html'    => array( 'Plugin gratuit pentru WordPress.', 'Verifică-ți site-ul', 'Descarcă pentru WordPress', 'Legea 195/2024 e în vigoare din 23 august 2026.', 'Înainte de acord', 'După „Accept”', 'Repară asta cu pluginul' ),
 	'en/index.html' => array( 'A free WordPress plugin.', 'Check your site', 'Download for WordPress', 'Law 195/2024 has been in force since 23 August 2026.', 'Before consent', 'After “Accept”', 'Fix this with the plugin' ),
-	'ru/index.html' => array( 'Бесплатный плагин для WordPress.', 'Проверьте свой сайт', 'Скачать для WordPress', 'Закон № 195/2024 действует с 23 августа 2026 года.', 'До согласия', 'После «Принять»', 'Исправить с помощью плагина' ),
 ) as $page => $t ) {
 	$html = $cmp_site_read( $page );
 	$hero = 1 === preg_match( '#<section class="hero".*?</section>#s', $html, $hsm ) ? $hsm[0] : '';
 	cmp_assert( false !== strpos( $hero, '<p class="lead"><strong>' . $t[0] . '</strong>' ), "{$page}: the lead starts by saying it is a free WordPress plugin" );
 	cmp_assert( 1 === preg_match( '#id="verifica-buton">.*<p class="actions">\s*<a class="btn btn-ghost" data-download href="[^"]*">' . preg_quote( $t[2], '#' ) . '</a>#s', $hero ) && false !== strpos( $hero, $t[1] ), "{$page}: the check comes first, the download second" );
-	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="/(?:en/|ru/)?standalone/">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
+	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="/(?:en/)?standalone/">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
 	cmp_assert( 1 === preg_match( '#</h1>\s*<figure class="hero-demo" aria-labelledby="hero-demo-cap">.*?</figure>\s*<p class="urgent"><strong>' . preg_quote( $t[3], '#' ) . '</strong>#s', $hero ), "{$page}: after the title, the product picture and the law line" );
 	$fig = 1 === preg_match( '#<figure class="hero-demo".*?</figure>#s', $hero, $fgm ) ? $fgm[0] : '';
 	cmp_assert( false !== strpos( $fig, '<figcaption id="hero-demo-cap">' ) && false !== strpos( $fig, $t[4] ) && false !== strpos( $fig, $t[5] ), "{$page}: the picture shows before and after consent, with a caption" );
@@ -717,7 +709,7 @@ foreach ( array(
 }
 cmp_assert( false !== strpos( $cmp_site_js, "[[downloadHref(), T.fixCta, 'btn'], ['#functii', T.features, 'btn btn-ghost']]" ), 'verifica.js: a WordPress site with issues gets the fix button to the download' );
 // #728 lot 2: link previews (Open Graph) per language, and the comparison as cards on a phone.
-foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' => array( 'en', '/en/', 'en_US' ), 'ru/index.html' => array( 'ru', '/ru/', 'ru_RU' ) ) as $page => $og ) {
+foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' => array( 'en', '/en/', 'en_US' ) ) as $page => $og ) {
 	$html  = $cmp_site_read( $page );
 	$title = 1 === preg_match( '#<title>([^<]+)</title>#', $html, $tm3 ) ? $tm3[1] : '';
 	$desc  = 1 === preg_match( '#<meta name="description" content="([^"]+)">#', $html, $dm3 ) ? $dm3[1] : '';
@@ -743,7 +735,7 @@ foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' =>
 }
 cmp_assert( is_executable( $cmp_site_root . '/bin/build-og.sh' ) && is_readable( $cmp_site_root . '/bin/build-og.php' ), 'bin/build-og.sh makes the preview pictures again' );
 // #728 lot 3: three screenshots from the plugin in #functii, and the 16 sites (a number only, no client names).
-foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldova' ), 'en/index.html' => array( 'en', 'Used on 16 sites in Moldova' ), 'ru/index.html' => array( 'ru', 'Используется на 16 сайтах в Молдове' ) ) as $page => $l3 ) {
+foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldova' ), 'en/index.html' => array( 'en', 'Used on 16 sites in Moldova' ) ) as $page => $l3 ) {
 	$html = $cmp_site_read( $page );
 	cmp_assert( false !== strpos( $html, '<ul class="facts">' . "\n" . '<li>' . $l3[1] . '</li>' ), "{$page}: the first fact is the 16 sites" );
 	$fn = 1 === preg_match( '#<section id="functii".*?</section>#s', $html, $fsm ) ? $fsm[0] : '';
@@ -761,7 +753,7 @@ foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldov
 }
 // The screenshots open in a lightbox (a native <dialog>); without it the link opens the picture.
 $cmp_site_lb = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
-foreach ( array( "querySelectorAll('.shot a')", "typeof HTMLDialogElement !== 'function'", 'dlg.showModal()', "e.metaKey || e.ctrlKey || e.shiftKey || e.altKey", "'ArrowLeft'", "'ArrowRight'", 'opener.focus()', "a.getAttribute('href')", "['Închide', 'Anterioara', 'Următoarea'", "['Close', 'Previous', 'Next'", "['Закрыть', 'Предыдущий', 'Следующий'" ) as $need ) {
+foreach ( array( "querySelectorAll('.shot a')", "typeof HTMLDialogElement !== 'function'", 'dlg.showModal()', "e.metaKey || e.ctrlKey || e.shiftKey || e.altKey", "'ArrowLeft'", "'ArrowRight'", 'opener.focus()', "a.getAttribute('href')", "['Închide', 'Anterioara', 'Următoarea'", "['Close', 'Previous', 'Next'" ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_lb, $need ), "site.js lightbox: has {$need}" );
 }
 cmp_assert( false === strpos( $cmp_site_lb, 'innerHTML' ), 'site.js: the lightbox builds its DOM without innerHTML' );
@@ -810,7 +802,7 @@ foreach ( array( 'site/assets/verifica.js', 'site/assets/site.js', 'site/index.h
 
 // The demo: pages under /demo/, only local files. The embed pages (in the landing's
 // iframe) are bare: no site header or footer and no style switch of their own.
-foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html' => array( 'en', false ), 'demo/embed/index.html' => array( 'ro', true ), 'demo/en/embed/index.html' => array( 'en', true ), 'demo/ru/index.html' => array( 'ru', false ), 'demo/ru/embed/index.html' => array( 'ru', true ) ) as $page => $dm ) {
+foreach ( array( 'demo/index.html' => array( 'ro', false ), 'demo/en/index.html' => array( 'en', false ), 'demo/embed/index.html' => array( 'ro', true ), 'demo/en/embed/index.html' => array( 'en', true ) ) as $page => $dm ) {
 	list( $lang, $bare ) = $dm;
 	$html = $cmp_site_read( $page );
 	cmp_assert( '' !== $html, "build-site: writes {$page}" );
@@ -981,8 +973,7 @@ $cmp_f_ro = $cmp_site_read( 'index.html' );
 $cmp_f_en = $cmp_site_read( 'en/index.html' );
 cmp_assert( false !== strpos( $cmp_f_ro, '<title>BiscuitWP. Cookie-uri cu acord, nu cu noroc.</title>' ), 'landing RO: the title is the slogan with the product name' );
 cmp_assert( false !== strpos( $cmp_f_en, '<title>BiscuitWP. Cookies by consent, not by luck.</title>' ), 'landing EN: the title is the slogan with the product name' );
-cmp_assert( false !== strpos( $cmp_site_read( 'ru/index.html' ), '<title>BiscuitWP. Cookie с согласия, а не на удачу.</title>' ), 'landing RU: the title is the slogan with the product name' );
-foreach ( array( 'index.html', 'en/index.html', 'ru/index.html' ) as $cmp_f_page ) {
+foreach ( array( 'index.html', 'en/index.html' ) as $cmp_f_page ) {
 	$cmp_f_html = $cmp_site_read( $cmp_f_page );
 	cmp_assert( false === strpos( $cmp_f_html, 'Consent Manager Pro' ) && 0 === preg_match( '#<summary>[^<]*(?:„Pro”|"Pro"|«Pro»)#u', $cmp_f_html ), "{$cmp_f_page}: only the BiscuitWP name, no FAQ about \"Pro\"" );
 }
@@ -1062,29 +1053,14 @@ foreach ( cmp_site_files( $cmp_site_out1 ) as $f ) {
 	cmp_assert_eq( substr_count( $h, $cmp_site_widget ), false !== strpos( $h, '<footer class="site">' ) ? 1 : 0, "out/{$f}: feedback widget loader with the footer only" );
 }
 
-// ---- The Russian version: same hooks as the Romanian pages, no Romanian or em dash left ----
-foreach ( array( 'ru/index.html', 'ru/privacy/index.html', 'ru/security/index.html', 'demo/ru/index.html', 'demo/ru/embed/index.html', 'partials/header.ru.html', 'partials/footer.ru.html' ) as $f ) {
-	$src = (string) @file_get_contents( $cmp_site_root . '/site/' . $f );
-	cmp_assert( '' !== $src, "site/{$f} exists" );
-	cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$f}: no em dash" );
-	$text = preg_replace( '/<[^>]*>/', ' ', preg_replace( '#<(script|style)\b.*?</\1>#s', '', $src ) );
-	cmp_assert( 0 === preg_match( '/[ăâîșțĂÂÎȘȚ]/u', str_replace( 'München', '', $text ) ), "site/{$f}: no Romanian text left" );
-}
-$cmp_site_ru = (string) @file_get_contents( $cmp_site_root . '/site/ru/index.html' );
-foreach ( array( '<html lang="ru"', 'id="verifica-form"', 'action="/api/verifica.php"', 'id="verifica-contor"', 'id="verifica-gasim"', 'id="verifica-rezultat"', '<a data-standalone href="/ru/standalone/">', 'Проверьте свой сайт' ) as $need ) {
-	cmp_assert( false !== strpos( $cmp_site_ru, $need ), "ru/index.html: has {$need}" );
-}
-cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/demo/demo.js' ), "ru: '/ru/privacy/'" ), 'demo.js: the Russian demo banner links the Russian privacy page' );
-cmp_assert( 1 === preg_match( '/@font-face\s*\{[^}]*inter-tight-normal-cyrillic\.woff2[^}]*U\+0400-045F/s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: Inter Tight Cyrillic for the Russian pages' );
-
-// ---- „Legea 195/2024 pe scurt”: the checklist page in three languages ----------------
-$cmp_site_law = array( 'legea-195/index.html' => 'ro', 'en/law-195/index.html' => 'en', 'ru/law-195/index.html' => 'ru' );
+// ---- „Legea 195/2024 pe scurt”: the checklist page in two languages ----------------
+$cmp_site_law = array( 'legea-195/index.html' => 'ro', 'en/law-195/index.html' => 'en' );
 $cmp_site_law_n = null;
 foreach ( $cmp_site_law as $f => $lang ) {
 	$src = (string) @file_get_contents( $cmp_site_root . '/site/' . $f );
 	cmp_assert( '' !== $src, "site/{$f} exists" );
 	cmp_assert( false !== strpos( $src, '<html lang="' . $lang . '"' ) && false !== strpos( $src, '<body class="checklist">' ), "site/{$f}: lang {$lang}, checklist body" );
-	cmp_assert( false !== strpos( $src, '<!-- HEADER ro=/legea-195/ en=/en/law-195/ ru=/ru/law-195/ -->' ) && 1 === substr_count( $src, '<!-- FOOTER -->' ), "site/{$f}: header and footer markers" );
+	cmp_assert( false !== strpos( $src, '<!-- HEADER ro=/legea-195/ en=/en/law-195/ -->' ) && 1 === substr_count( $src, '<!-- FOOTER -->' ), "site/{$f}: header and footer markers" );
 	cmp_assert( false === strpos( $src, "\xe2\x80\x94" ), "site/{$f}: no em dash" );
 	cmp_assert( 1 === preg_match( '#<button type="button" class="btn btn-ghost" data-print>[^<]+</button>#', $src ), "site/{$f}: the Save as PDF button" );
 	preg_match_all( '#<li><label><input type="checkbox"> <strong>[^<]+</strong></label>.*?<p class="law">[^<]+</p>.*?</li>#s', $src, $items );
@@ -1096,8 +1072,16 @@ foreach ( $cmp_site_law as $f => $lang ) {
 		cmp_assert( false !== strpos( $src, $need ), "site/{$f}: has {$need}" );
 	}
 }
-foreach ( array( 'index.html' => '/legea-195/', 'en/index.html' => '/en/law-195/', 'ru/index.html' => '/ru/law-195/' ) as $f => $href ) {
+foreach ( array( 'index.html' => '/legea-195/', 'en/index.html' => '/en/law-195/' ) as $f => $href ) {
 	cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/' . $f ), '<p class="law-link">' ) && false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/' . $f ), 'href="' . $href . '"' ), "site/{$f}: the law section links {$href}" );
 }
 cmp_assert( false !== strpos( (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' ), "querySelectorAll('[data-print]')" ), 'site.js: data-print buttons open the print dialog' );
 cmp_assert( 1 === preg_match( '/@media print\s*\{[^@]*\.checklist header\.site/s', (string) @file_get_contents( $cmp_site_root . '/site/style.css' ) ), 'style.css: the checklist prints without header and footer' );
+
+// The Russian pages are gone (#754): nothing links to them and their addresses redirect.
+foreach ( cmp_site_files( ( $cmp_site_root . '/site' ) ) as $f ) {
+	if ( preg_match( '/\.(html|js)$/', $f ) ) {
+		cmp_assert( 0 === preg_match( '#(href|src)="[^"]*/ru/|hreflang="ru"#', (string) file_get_contents( ( $cmp_site_root . '/site' ) . '/' . $f ) ), "site/{$f}: no link to a Russian page" );
+	}
+}
+cmp_assert( is_file( ( $cmp_site_root . '/site' ) . '/.htaccess' ) && ! is_dir( ( $cmp_site_root . '/site' ) . '/ru' ) && ! is_dir( ( $cmp_site_root . '/site' ) . '/demo/ru' ), 'site: the redirects of the old Russian addresses, no Russian pages' );

@@ -1,4 +1,4 @@
-/* BiscuitWP, biscuitwp.rt.md: the live demo (/demo/, /demo/en/ and /demo/ru/).
+/* BiscuitWP, biscuitwp.rt.md: the live demo (/demo/, and /demo/en/).
    Sets window.CMP_CONFIG for the standalone banner (cmp.min.js, loaded next, with
    defer) from ?style=minimal|brand|friendly. The demo loads no trackers.
    Its only cookie, cmp_consent, is strictly necessary and kept on /demo/ only:
@@ -10,7 +10,7 @@
 	var PATH = '/demo/';
 	var m = /[?&]style=(minimal|brand|friendly)(?:&|$)/.exec(window.location.search);
 	var style = m ? m[1] : 'brand';
-	var lang = d.documentElement.lang === 'en' || d.documentElement.lang === 'ru' ? d.documentElement.lang : 'ro';
+	var lang = d.documentElement.lang === 'en' ? 'en' : 'ro';
 
 	// The native document.cookie accessor (Document.prototype; HTMLDocument in older Safari).
 	var desc = Object.getOwnPropertyDescriptor(window.Document.prototype, 'cookie') ||
@@ -22,7 +22,7 @@
 		mode: 'pro',
 		lang: lang,
 		categories: ['necessary', 'statistics', 'marketing'],
-		privacyUrl: { ro: '/confidentialitate/', en: '/en/privacy/', ru: '/ru/privacy/' }[lang],
+		privacyUrl: { ro: '/confidentialitate/', en: '/en/privacy/' }[lang],
 		cookieDays: 1,
 		appearance: { style: style, theme: 'light', format: 'modal', position: 'center' }
 	};

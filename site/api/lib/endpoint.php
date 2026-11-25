@@ -11,7 +11,7 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * (cmp_check_main).
  *
  * Request: POST, form-encoded or JSON, fields url (required, at most 2048
- * characters) and lang (ro|en|ru, default ro); an older page also sends owner,
+ * characters) and lang (ro|en, default ro); an older page also sends owner,
  * which is ignored. Response: JSON
  * { status, findings[], cmp, checked_url, engine: "html-v2", pages{}, passed[], top[] },
  * and for errors { status: "error", code, message, findings: [], cmp: null,
@@ -101,22 +101,6 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'unavailable'        => 'The check is not available right now. Try again later.',
 			'busy'               => 'There are a lot of checks right now. Try again in a few minutes.',
 			'forbidden'          => 'The check can only be started from the biscuitwp.rt.md page.',
-		),
-		'ru' => array(
-			'method_not_allowed' => 'Проверка запускается из формы на странице.',
-			'bad_request'        => 'Введите адрес сайта, который хотите проверить.',
-			'bad_url'            => 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-			'blocked_address'    => 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
-			'fetch_failed'       => 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
-			'timeout'            => 'Сайт ответил слишком медленно (более 10 секунд). Попробуйте ещё раз позже.',
-			'too_large'          => 'Главная страница больше 2 МБ, это слишком много для автоматической проверки.',
-			'too_many_redirects' => 'Сайт перенаправляет слишком много раз (более 3).',
-			'http_status'        => 'Сайт ответил ошибкой HTTP %d, поэтому мы не смогли прочитать страницу.',
-			'not_html'           => 'Адрес не ведёт на веб-страницу (HTML).',
-			'rate_limited'       => 'Вы сделали много проверок за короткое время. Попробуйте ещё раз через минуту.',
-			'unavailable'        => 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
-			'busy'               => 'Сейчас идёт очень много проверок. Попробуйте ещё раз через несколько минут.',
-			'forbidden'          => 'Проверку можно запустить только со страницы biscuitwp.rt.md.',
 		),
 	);
 	$lang = cmp_check_lang( $lang );

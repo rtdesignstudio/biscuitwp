@@ -6,9 +6,9 @@
 	'use strict';
 
 	var doc = document;
-	// 'ro' (default), 'en' or 'ru', from <html lang>; anything else reads as Romanian.
-	var LANG = doc.documentElement.lang === 'en' || doc.documentElement.lang === 'ru' ? doc.documentElement.lang : 'ro';
-	// 1240 -> "1.240" (ro), "1,240" (en) or "1 240" (ru, a no-break space): fixed, not left to the browser's locale data.
+	// 'ro' (default) or 'en', from <html lang>; anything else reads as Romanian.
+	var LANG = doc.documentElement.lang === 'en' ? 'en' : 'ro';
+	// 1240 -> "1.240" (ro), "1,240" (en): fixed, not left to the browser's locale data.
 	function group(n, sep) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep); }
 	var T = LANG === 'en' ? {
 		empty: 'Enter your site\'s address, for example example.com.',
@@ -103,100 +103,6 @@
 			method_not_allowed: 'Reload this page and try again.',
 			network: 'We could not reach our server. Check your connection and try again.',
 			slow: 'The check took too long. Try again later.'
-		}
-	} : LANG === 'ru' ? {
-		empty: 'Введите адрес сайта, например example.md.',
-		checking: 'Проверяем сайт, до 10 страниц. Это может занять до 45 секунд.',
-		steps: [
-			'Открываем главную страницу как новый посетитель',
-			'Ищем страницы сайта (sitemap)',
-			'Проверяем до 10 страниц',
-			'Ищем трекеры: Google Analytics, Meta Pixel, Yandex, Clarity и другие',
-			'Проверяем файлы cookie, установленные до согласия',
-			'Ищем ресурсы, которые передают IP-адрес: Google Fonts, CDN, Gravatar',
-			'Ищем баннер cookie и ссылку на политику'
-		],
-		cancelled: 'Вы отменили проверку.',
-		law: 'Правовая основа: ',
-		cleanVerdict: 'На проверенных страницах мы не нашли проблем.',
-		cleanLimits: 'Чего мы не видим отсюда: что загружают скрипты после запуска страницы, что сайт делает с данными и что написано в его политике.',
-		issuesTitle: function (n) { return n === 1 ? 'Мы нашли одну проблему' : 'Мы нашли ' + n + ' ' + ru(n, 'проблему', 'проблемы', 'проблем'); },
-		unsureTitle: 'Мы не можем быть уверены',
-		unsureText: 'На сайте есть что-то, что может загружать трекеры, которых мы не видим отсюда. Проверьте сами, за 5 минут, с помощью DevTools.',
-		facts: [function (n) { return ru(n, 'проблема', 'проблемы', 'проблем'); }, function () { return 'нужно проверить'; }, function () { return 'в порядке'; }],
-		stopped: {
-			requests: function (n) { return 'Мы остановились после ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + ': на сайте много перенаправлений или файлов, а у проверки есть лимит запросов.'; },
-			time: function (n) { return 'Мы остановились после ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + ', чтобы проверка не длилась слишком долго.'; }
-		},
-		pagesChecked: function (n) { return n === 1 ? 'Мы проверили одну страницу.' : 'Мы проверили ' + n + ' ' + ru(n, 'страницу', 'страницы', 'страниц') + '.'; },
-		more: {
-			sitemap: function (n, c) { return 'На сайте ' + n + ' ' + ru(n, 'страница', 'страницы', 'страниц') + '; мы проверили первые ' + c + '. Полная проверка сейчас недоступна.'; },
-			links: function (n, c) { return 'На сайте не менее ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + '; мы проверили первые ' + c + '. Полная проверка сейчас недоступна.'; }
-		},
-		failed: 'Не удалось прочитать: ',
-		failCodes: {
-			timeout: 'не ответила вовремя',
-			too_large: 'страница слишком большая',
-			other_host: 'ведёт на другой сайт',
-			limit: 'достигнут лимит запросов',
-			fetch_failed: 'не удалось прочитать',
-			http_status: 'не удалось прочитать',
-			not_html: 'не удалось прочитать'
-		},
-		failOther: 'не удалось прочитать',
-		badAddress: 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-		first: 'С чего начать',
-		issuesList: 'Проблемы',
-		unsureList: 'Нужно проверить',
-		found: 'Что мы нашли',
-		onPages: 'На каких страницах',
-		why: 'Почему это важно',
-		howFix: 'Как исправить',
-		withCmp: 'С BiscuitWP: ',
-		passed: 'В порядке',
-		info: 'Полезно знать',
-		howto: 'Как проверить самостоятельно',
-		fixTitle: 'BiscuitWP это исправляет',
-		fixCta: 'Исправить с помощью плагина',
-		fixText: 'Блокирует трекеры до согласия, переносит Google Fonts на ваш сервер и даёт вам правовые тексты для Молдовы. Бесплатно.',
-		oursTitle: 'Вы уже используете BiscuitWP',
-		oursText: 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.',
-		checks: function (n) { return group(n, ' ') + ' ' + ru(n, 'проверка', 'проверки', 'проверок') + ' с момента запуска'; },
-		foundTitle: 'Что мы находим чаще всего',
-		another: 'Проверить другой сайт',
-		savePdf: 'Сохранить как PDF',
-		copy: 'Скопировать отчёт',
-		copied: 'Мы скопировали отчёт. Вставьте его в письмо или сообщение.',
-		copyFailed: 'Не удалось скопировать отчёт. Используйте «Сохранить как PDF».',
-		months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
-		printHead: function (d) { return 'Отчёт «Проверьте свой сайт» с biscuitwp.rt.md, ' + d; },
-		copyFoot: function (d, url) { return 'Отчёт сделан с помощью «Проверьте свой сайт», ' + url + ', ' + d + '.'; },
-		foundKinds: { 'tracker': 'Трекер запущен до согласия', 'google-fonts': 'Google Fonts загружаются с Google', 'ip-resources': 'Другие ресурсы, передающие IP-адрес посетителя', 'no-banner': 'Трекеры вообще без баннера cookie', 'no-policy': 'Нет ссылки на политику конфиденциальности' },
-		foundNote: function (n) { return 'Из ' + group(n, ' ') + ' ' + ru(n, 'проверки, сделанной', 'проверок, сделанных', 'проверок, сделанных') + ' с помощью инструмента. Сайт, проверенный несколько раз, учитывается каждый раз.'; },
-		otherTitle: 'Ваш сайт, похоже, сделан не на WordPress',
-		otherText: 'Проблемы выше актуальны на любой платформе и исправляются в коде сайта. BiscuitWP является плагином для WordPress; для других сайтов есть автономная версия (standalone): два файла, а скрипты, которые ждут согласия, вы помечаете сами.',
-		standalone: 'Автономная версия',
-		download: 'Скачать',
-		latest: 'Последняя версия',
-		features: 'Что он умеет',
-		errorTitle: 'Мы не смогли проверить сайт',
-		errors: {
-			bad_request: 'Введите адрес сайта, например example.md.',
-			bad_url: 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-			blocked_address: 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
-			fetch_failed: 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
-			timeout: 'Сайт ответил слишком медленно. Попробуйте ещё раз позже.',
-			too_large: 'Главная страница больше 2 МБ, это слишком много для автоматической проверки.',
-			too_many_redirects: 'Сайт перенаправляет слишком много раз.',
-			http_status: 'Сайт ответил ошибкой, поэтому мы не смогли прочитать страницу.',
-			not_html: 'Адрес не ведёт на веб-страницу.',
-			rate_limited: 'Вы сделали много проверок за короткое время. Попробуйте через минуту.',
-			busy: 'Сейчас очень много проверок. Попробуйте ещё раз через несколько минут.',
-			unavailable: 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
-			forbidden: 'Перезагрузите страницу и попробуйте ещё раз.',
-			method_not_allowed: 'Перезагрузите страницу и попробуйте ещё раз.',
-			network: 'Мы не смогли связаться с нашим сервером. Проверьте подключение и попробуйте ещё раз.',
-			slow: 'Проверка заняла слишком много времени. Попробуйте ещё раз позже.'
 		}
 	} : {
 		empty: 'Scrie adresa site-ului, de exemplu exemplu.md.',
@@ -295,11 +201,6 @@
 	};
 	// Romanian numerals: „20 de pagini”, but „5 pagini” and „101 pagini” (n % 100 from 1 to 19).
 	function de(n, word) { var r = n % 100; return (r >= 1 && r <= 19 ? ' ' : ' de ') + word; }
-	// Russian plurals: 1, 21 проверка (one); 2-4, 22-24 проверки (few); 0, 5-20, 25 проверок (many).
-	function ru(n, one, few, many) {
-		var a = n % 10, b = n % 100;
-		return a === 1 && b !== 11 ? one : (a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many);
-	}
 
 	/* The visitor's field, checked like the server does (site/api/lib/fetch.php,
 	   cmp_check_normalize_input): a bare domain only. Returns the host (punycode

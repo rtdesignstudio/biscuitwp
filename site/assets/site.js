@@ -8,7 +8,7 @@
 
 	var doc = document;
 	var root = doc.documentElement;
-	var en = root.lang === 'en', ru = root.lang === 'ru';
+	var en = root.lang === 'en';
 	var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	root.classList.add('js');
@@ -55,7 +55,7 @@
 	(function () {
 		var links = Array.prototype.slice.call(doc.querySelectorAll('.shot a'));
 		if (!links.length || typeof HTMLDialogElement !== 'function') { return; }
-		var L = en ? ['Close', 'Previous', 'Next', 'Screenshot'] : ru ? ['Закрыть', 'Предыдущий', 'Следующий', 'Снимок экрана'] : ['Închide', 'Anterioara', 'Următoarea', 'Captură de ecran'];
+		var L = en ? ['Close', 'Previous', 'Next', 'Screenshot'] : ['Închide', 'Anterioara', 'Următoarea', 'Captură de ecran'];
 
 		var dlg = doc.createElement('dialog');
 		dlg.className = 'lb';
@@ -141,7 +141,7 @@
 		var nav = header && header.querySelector('nav');
 		var bar = header && header.querySelector('.wrap');
 		if (!nav || !bar) { return; }
-		var L = en ? ['Menu', 'Close'] : ru ? ['Меню', 'Закрыть'] : ['Meniu', 'Închide'];
+		var L = en ? ['Menu', 'Close'] : ['Meniu', 'Închide'];
 
 		var btn = doc.createElement('button');
 		btn.className = 'menu-btn';

@@ -20,12 +20,12 @@
 #                   (the new-install zip of the latest stable release) when a stable
 #                   manifest of 1.1.0 or later exists (an older one: releases/latest), else releases/tag/v<version> of the beta manifest,
 #                   else the releases page;
-#   every page      <!-- HEADER page=<key> ro=<url> en=<url> ru=<url> --> and <!-- FOOTER -->
+#   every page      <!-- HEADER page=<key> ro=<url> en=<url> --> and <!-- FOOTER -->
 #                   are replaced by site/partials/{header,footer}.<lang>.html (lang = the
-#                   page's <html lang>: ro, en or ru); page = the current nav item (home,
-#                   security, privacy, changelog); ro / en / ru = this page in each
-#                   language, for the language switch ({{LANGS}} in the header: links to
-#                   the two other languages; {{LANGS_LI}} in the footer: the same, as <li>).
+#                   page's <html lang>: ro or en); page = the current nav item (home,
+#                   security, privacy, changelog); ro / en = this page in each
+#                   language, for the language switch ({{LANGS}} in the header: a link to
+#                   the other language; {{LANGS_LI}} in the footer: the same, as <li>).
 #                   site/partials/ itself is not copied to the output.
 #                   A page with <!-- BARE --> instead (the demo embedded in the
 #                   landing's iframe) gets neither; it must not carry the other two.
@@ -266,15 +266,6 @@ $txt = array(
 		"unset"               => "not set yet",
 		"none"                => "Currently none.",
 	),
-	"ru" => array(
-		"SIGN_PUBLIC_KEY"     => array( "Ключ релизов", "Подписывает zip-пакеты." ),
-		"MANIFEST_PUBLIC_KEY" => array( "Ключ манифестов", "Подписывает манифесты обновлений." ),
-		"RESCUE_PUBLIC_KEY"   => array( "Резервный ключ", "Хранится офлайн. Может подписывать и пакеты, и манифесты, если один из других ключей нужно заменить." ),
-		"pub"                 => "Открытый ключ (base64)",
-		"fp"                  => "Отпечаток SHA-256",
-		"unset"               => "ещё не задан",
-		"none"                => "Пока нет.",
-	),
 );
 
 function keys_html( array $keys, array $t ) {
@@ -315,7 +306,7 @@ function revoked_html( array $revoked, array $t ) {
 	return $out . "</ul>";
 }
 
-foreach ( array( "securitate/index.html" => "ro", "en/security/index.html" => "en", "ru/security/index.html" => "ru" ) as $f => $lang ) {
+foreach ( array( "securitate/index.html" => "ro", "en/security/index.html" => "en" ) as $f => $lang ) {
 	$p    = $dir . "/" . $f;
 	$html = rd( $p );
 	$html = fill( $html, "<!-- KEYS -->", keys_html( $keys, $txt[ $lang ] ), $f );
@@ -406,12 +397,12 @@ if ( is_file( $manifest ) ) {
 // ---- Shared header and footer (site/partials) -------------------------------------
 $partials = array();
 foreach ( array( "header", "footer" ) as $kind ) {
-	foreach ( array( "ro", "en", "ru" ) as $l ) {
+	foreach ( array( "ro", "en" ) as $l ) {
 		$partials[ $kind ][ $l ] = rtrim( rd( $dir . "/partials/" . $kind . "." . $l . ".html" ), "\n" );
 	}
 }
 $nav_keys = array( "home", "security", "privacy", "changelog" );
-$lang_names = array( "ro" => "Română", "en" => "English", "ru" => "Русский" );
+$lang_names = array( "ro" => "Română", "en" => "English" );
 $zip = $dir . "/standalone/biscuitwp-standalone.zip";
 if ( ! preg_match( "/define\( *.CMP_VERSION., *.([0-9.]+(?:-[a-z0-9.]+)?). *\)/", rd( dirname( $updater, 3 ) . "/biscuitwp.php" ), $vm ) ) { fail( "CMP_VERSION not found in biscuitwp.php" ); }
 $standalone = array( $vm[1], (string) max( 1, (int) round( filesize( $zip ) / 1024 ) ), hash_file( "sha256", $zip ) );
@@ -430,7 +421,7 @@ foreach ( $pages as $f ) {
 	$p    = $f->getPathname();
 	$rel  = substr( $p, strlen( $dir ) + 1 );
 	$html = rd( $p );
-	if ( ! preg_match( '/<html lang="(ro|en|ru)"/', $html, $lm ) ) { fail( $rel . ": <html lang> must be ro, en or ru" ); }
+	if ( ! preg_match( '/<html lang="(ro|en)"/', $html, $lm ) ) { fail( $rel . ": <html lang> must be ro or en" ); }
 	$l = $lm[1];
 	if ( false !== strpos( $html, "<!-- BARE" ) ) {
 		// A bare page: no shared header or footer at all.

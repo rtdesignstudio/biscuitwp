@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The link-preview pictures (Open Graph) of the landing pages:
-#   site/assets/og/og-ro.png, og-en.png, og-ru.png (1200×630, committed)
+#   site/assets/og/og-ro.png, og-en.png (1200×630, committed)
 # Each one is a page made by bin/build-og.php (fonts inlined, nothing from the network),
 # screenshotted by headless Chrome. Run it after changing the title, the lead or the hero
 # picture; the PNGs are committed, the site build only copies them.
@@ -16,7 +16,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p site/assets/og
 
-for lang in ro en ru; do
+for lang in ro en; do
 	php bin/build-og.php "$lang" "$TMP/og-$lang.html" >/dev/null
 	"$CHROME" --headless=new --disable-gpu --hide-scrollbars --no-first-run --no-default-browser-check \
 		--user-data-dir="$TMP/profile" --force-device-scale-factor=1 --window-size=1200,630 \

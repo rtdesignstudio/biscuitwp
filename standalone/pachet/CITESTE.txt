@@ -20,15 +20,4 @@ Steps with code to copy: https://biscuitwp.rt.md/en/standalone/
 5. Check: https://biscuitwp.rt.md/en/#verifica
 
 
-BiscuitWP standalone: баннер cookie без WordPress
-Шаги и готовый код: https://biscuitwp.rt.md/ru/standalone/
-
-1. Загрузите папку "biscuitwp" на свой сервер.
-2. Перед </head> добавьте три строки из exemplu.html: cmp.min.css, window.CMP_CONFIG, cmp.min.js.
-3. Отметьте скрипты отслеживания: type="text/plain" data-cmp-block="statistics" (или "marketing").
-   Баннер блокирует ТОЛЬКО то, что вы отметили. generator.html (на румынском) создаёт разметку за вас.
-4. В подвале сайта: <a href="#cmp-settings" data-cmp-settings>Настройки cookie</a>
-5. Проверьте: https://biscuitwp.rt.md/ru/#verifica
-
-
-Licență / License / Лицензия: GPL-2.0-or-later (LICENSE)
+Licență / License: GPL-2.0-or-later (LICENSE)
