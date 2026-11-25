@@ -1,5 +1,5 @@
 # The Russian pages are gone (2026-11-25): their addresses lead to the Romanian ones.
-# mod_rewrite, like the redirects of consent.rt.md.
+# mod_rewrite, like the redirects of the old host.
 RewriteEngine On
 RewriteRule ^ru/privacy/?$ /confidentialitate/ [R=301,L]
 RewriteRule ^ru/security/?$ /securitate/ [R=301,L]
