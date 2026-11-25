@@ -88,8 +88,6 @@ $r = $cmp_ctr_run(
 cmp_assert( 'error' === $r['body']['status'] && 2 === cmp_check_total_read( $cmp_ctr_hd ), 'counter: a site that does not answer does not count' );
 $r = $cmp_ctr_run( $cmp_ctr_page( '<html>x</html>' ), array( 'url' => 'file:///etc/passwd' ) );
 cmp_assert( 400 === $r['code'] && 2 === cmp_check_total_read( $cmp_ctr_hd ), 'counter: a bad address does not count' );
-$r = $cmp_ctr_run( $cmp_ctr_page( '<html>x</html>' ), array( 'owner' => '' ) );
-cmp_assert( 'owner_required' === $r['body']['code'] && 2 === cmp_check_total_read( $cmp_ctr_hd ), 'counter: no owner box, no count' );
 
 // GET /api/contor.php.
 $r = cmp_check_counter_handle( 'GET', $cmp_ctr_hd, '' );
@@ -113,7 +111,7 @@ foreach ( array( 'error_log', '$_GET', '$_POST', '$_REQUEST', '$_COOKIE', 'REMOT
 
 // The pages: the line under the form, hidden until the script fills it.
 foreach ( array( 'site/index.html', 'site/en/index.html' ) as $f ) {
-	cmp_assert( 1 === preg_match( '#<p id="verifica-contor" class="muted small" hidden></p>\s*</form>#', (string) file_get_contents( __DIR__ . '/../' . $f ) ), "{$f}: an empty, hidden counter line closes the form" );
+	cmp_assert( 1 === preg_match( '#<p id="verifica-contor" class="muted small" hidden></p>#', (string) file_get_contents( __DIR__ . '/../' . $f ) ), "{$f}: an empty, hidden counter line" );
 }
 // The privacy pages say what the total is.
 cmp_assert( false !== strpos( (string) file_get_contents( __DIR__ . '/../site/confidentialitate/index.html' ), 'un total al verificărilor reușite: un singur număr, fără nimic despre site sau despre tine' ), 'confidentialitate: names the total of checks' );

@@ -322,11 +322,11 @@
 
 	/* ---- Text lights up on scroll (rt.md .fd): each block of text in <main> goes from
 	   opacity .3 to 1 while it rises from the bottom of the screen towards the middle.
-	   Never the hero, the section headings, the tool (#verifica: form and results), the
+	   Never the hero, the section headings, the report (#raport), the
 	   tables or the demo. Only opacity and blur change: nothing moves. ----------------- */
 	(function () {
 		var SEL = 'main p, main li, main h3, main h4, main figure, main blockquote, main summary, main dt, main dd';
-		var SKIP = '.hero, .sh, #verifica, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
+		var SKIP = '.hero, .sh, #raport, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
 		var all = [].slice.call(doc.querySelectorAll(SEL)).filter(function (el) { return !el.closest(SKIP); });
 		var set = new Set(all);
 		var els = all.filter(function (el) {

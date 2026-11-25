@@ -773,11 +773,7 @@ if ( $cmp_cf_eport > 0 ) {
 	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', 'url=exemplu.md', 'application/x-www-form-urlencoded', array( 'Sec-Fetch-Site' => 'cross-site' ) );
 	cmp_assert( 403 === $st, 'endpoint: Sec-Fetch-Site cross-site -> 403' );
 
-	// Without the owner box: 400 owner_required, nothing counted.
-	list( $st, $h, $b ) = cmp_cf_http( $cmp_cf_eport, 'POST', '/verifica.php', json_encode( array( 'url' => 'exemplu.md', 'lang' => 'en' ) ), 'application/json' );
-	$j = json_decode( $b, true );
-	cmp_assert( 400 === $st && is_array( $j ) && 'owner_required' === $j['code'] && "Tick that you own the site or have the owner's permission." === $j['message'] && 'html-v2' === $j['engine'], 'endpoint: no owner -> 400 owner_required (EN message)' );
-	cmp_assert( ! file_exists( $cmp_cf_erd ), 'endpoint: refused requests (owner, bad URLs, origin) wrote nothing' );
+	cmp_assert( ! file_exists( $cmp_cf_erd ), 'endpoint: refused requests (bad URLs, origin) wrote nothing' );
 	// The 429 path over HTTP without any network: 127.0.0.1's per-IP counter is filled in advance
 	// (5 checks this minute, keyed like cmp_check_rate_check does), so the next valid request is refused.
 	mkdir( $cmp_cf_erd, 0700, true );

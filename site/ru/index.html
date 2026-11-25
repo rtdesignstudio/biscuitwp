@@ -38,11 +38,22 @@
 <div class="hd-cols"><div class="hd-col"><p class="hd-h">До согласия</p><ul class="hd-req"><li class="off"><code>google-analytics.<wbr>com</code><span>заблокирован</span></li><li class="off"><code>connect.<wbr>facebook.<wbr>net</code><span>заблокирован</span></li><li class="off"><code>clarity.ms</code><span>заблокирован</span></li></ul></div><div class="hd-col"><p class="hd-h">После «Принять»</p><ul class="hd-req"><li class="on"><code>google-analytics.<wbr>com</code><span>загружен</span></li><li class="on"><code>connect.<wbr>facebook.<wbr>net</code><span>загружен</span></li><li class="on"><code>clarity.ms</code><span>загружен</span></li></ul></div></div>
 </figure>
 <p class="urgent"><strong>Закон № 195/2024 действует с 23 августа 2026 года.</strong> Штрафы до 2 000 000 леев или 2% оборота.</p>
+<div id="verifica" class="hero-check">
+<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
+<label for="verifica-url">Проверьте свой сайт: введите адрес</label>
+<div class="tool-row">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="primer.md" required maxlength="300" aria-describedby="verifica-eroare verifica-nota">
+<button type="submit" class="btn" id="verifica-buton">Проверить</button>
+</div>
+<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
+<p id="verifica-nota" class="muted small">Только домен, без путей и параметров. Мы откроем до 10 публичных страниц и не сохраним ни адрес, ни результат. <a href="/ru/privacy/#instrument">Подробнее</a></p>
+</form>
+<noscript><p class="notice">Для проверки нужен JavaScript. Включите его в браузере и перезагрузите страницу или <a href="#cum-verifici">проверьте сайт сами за 5 минут</a>.</p></noscript>
+</div>
 <div class="hero-foot">
 <p class="lead"><strong>Бесплатный плагин для WordPress.</strong> Не пускает трекеры, пока посетитель не скажет «Да», хранит доказательство его выбора и дает вам юридические тексты для Молдовы. С открытым кодом, без передачи данных нам.</p>
 <div class="hero-cta">
 <p class="actions">
-<a class="btn" href="#verifica">Проверьте свой сайт</a>
 <a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Скачать для WordPress</a>
 </p>
 <p class="alt small">Сайт не на WordPress? Используйте <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">автономную версию</a>.</p>
@@ -58,27 +69,14 @@
 </div>
 </section>
 
-<section id="verifica" aria-labelledby="verifica-titlu">
+<section id="raport" aria-labelledby="raport-titlu">
 <div class="wrap">
 <div class="sh"><p class="n">01 · Проверка</p>
-<h2 id="verifica-titlu">Проверьте свой сайт</h2></div>
-<p>Введите адрес сайта. Мы откроем до 10 публичных страниц как новый посетитель, без файлов cookie, и покажем, что запускается до согласия.</p>
-<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
-<label for="verifica-url">Адрес сайта</label>
-<div class="tool-row">
-<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="primer.md" required maxlength="300" aria-describedby="verifica-ajutor verifica-eroare verifica-nota">
-<button type="submit" class="btn" id="verifica-buton">Проверить</button>
-<button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Отменить</button>
-</div>
-<p id="verifica-ajutor" class="muted small">Только домен, без путей и параметров.</p>
-<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
-<p class="tool-owner"><input id="verifica-owner" name="owner" type="checkbox" value="1" required aria-describedby="verifica-owner-eroare"> <label for="verifica-owner">Подтверждаю, что сайт принадлежит мне или что владелец разрешил мне его проверить.</label></p>
-<p id="verifica-owner-eroare" class="field-error" hidden></p>
-<p id="verifica-nota" class="muted small">Мы не сохраняем ни адрес, ни результат. Подробнее в разделе <a href="/ru/privacy/#instrument">Конфиденциальность</a>.</p>
+<h2 id="raport-titlu">Что мы проверяем</h2></div>
+<p>Мы открываем до 10 публичных страниц как новый посетитель, без файлов cookie, и показываем, что запускается до согласия. Отчёт появится здесь.</p>
+<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
+<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Отменить</button></p>
 <p id="verifica-contor" class="muted small" hidden></p>
-</form>
-<noscript><p class="notice">Для проверки нужен JavaScript. Включите его в браузере и перезагрузите страницу или проверьте сайт сами по шагам ниже.</p></noscript>
-<div id="verifica-rezultat" class="result" aria-live="polite"></div>
 <div id="verifica-gasim" class="found" hidden></div>
 
 <details class="limits">

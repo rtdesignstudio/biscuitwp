@@ -3,7 +3,7 @@
    the server's answer and prints what the visitor would read, as JSON (for
    tests/test-site.php). innerHTML, outerHTML and insertAdjacentHTML throw here.
 
-   node run.js <ro|en|ru> <fixture name> <owner 1|0> [<checks: a number, or "fail">]
+   node run.js <ro|en|ru> <fixture name> <address 1|0 (0 = the field is empty)> [<checks: a number, or "fail">]
    The counter endpoint answers {"checks": N}, or 404 when no number is given; a JSON
    object instead of the number is sent as the whole answer.
    [<share: "" | "noclip">]: after the report, its "Copy" and "Save as PDF" buttons are
@@ -14,7 +14,7 @@ var vm = require('vm');
 
 var lang = process.argv[2] === 'en' || process.argv[2] === 'ru' ? process.argv[2] : 'ro';
 var fixture = JSON.parse(fs.readFileSync(path.join(__dirname, process.argv[3] + '.json'), 'utf8'));
-var ownerTicked = process.argv[4] !== '0';
+var hasAddress = process.argv[4] !== '0';
 var counterArg = process.argv[5] || 'fail';
 var counterFetches = 0;
 var shareArg = process.argv[6] || '';
@@ -81,16 +81,15 @@ var doc = {
 	getElementById: function (id) { return byId[id] || null; }
 };
 var byId = {};
-['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-owner', 'verifica-owner-eroare', 'verifica-contor', 'verifica-gasim'].forEach(function (id) {
+['verifica-form', 'verifica-rezultat', 'verifica-url', 'verifica-buton', 'verifica-anuleaza', 'verifica-eroare', 'verifica-contor', 'verifica-gasim'].forEach(function (id) {
 	byId[id] = new El(id === 'verifica-form' ? 'form' : (id === 'verifica-rezultat' ? 'div' : (id.indexOf('eroare') > 0 || id === 'verifica-contor' ? 'p' : 'input')));
 	byId[id].id = id;
 });
 byId['verifica-form'].hidden = true;
-byId['verifica-owner-eroare'].hidden = true;
+byId['verifica-eroare'].hidden = true;
 byId['verifica-contor'].hidden = true;
 byId['verifica-gasim'].hidden = true;
-byId['verifica-url'].value = 'exemplu.md';
-byId['verifica-owner'].checked = ownerTicked;
+byId['verifica-url'].value = hasAddress ? 'exemplu.md' : '';
 
 var fetches = 0, sentBody = null, errors = [];
 var pending = 0;
@@ -195,8 +194,8 @@ function finish() {
 			};
 		}()),
 		confetti: canvases,
-		ownerError: byId['verifica-owner-eroare'].hidden ? '' : byId['verifica-owner-eroare'].textContent,
-		ownerInvalid: byId['verifica-owner'].getAttribute('aria-invalid'),
+		urlError: byId['verifica-eroare'].hidden ? '' : byId['verifica-eroare'].textContent,
+		urlInvalid: byId['verifica-url'].getAttribute('aria-invalid'),
 		error: errors.join('\n')
 	}));
 }

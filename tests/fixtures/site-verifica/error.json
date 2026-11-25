@@ -1,6 +1,6 @@
 {
  "status": "error",
- "code": "owner_required",
+ "code": "bad_request",
  "message": "x",
  "findings": [],
  "cmp": null,

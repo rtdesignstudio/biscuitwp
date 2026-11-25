@@ -38,11 +38,22 @@
 <div class="hd-cols"><div class="hd-col"><p class="hd-h">Before consent</p><ul class="hd-req"><li class="off"><code>google-analytics.<wbr>com</code><span>blocked</span></li><li class="off"><code>connect.<wbr>facebook.<wbr>net</code><span>blocked</span></li><li class="off"><code>clarity.ms</code><span>blocked</span></li></ul></div><div class="hd-col"><p class="hd-h">After “Accept”</p><ul class="hd-req"><li class="on"><code>google-analytics.<wbr>com</code><span>loaded</span></li><li class="on"><code>connect.<wbr>facebook.<wbr>net</code><span>loaded</span></li><li class="on"><code>clarity.ms</code><span>loaded</span></li></ul></div></div>
 </figure>
 <p class="urgent"><strong>Law 195/2024 has been in force since 23 August 2026.</strong> Fines of up to MDL 2,000,000 or 2% of turnover.</p>
+<div id="verifica" class="hero-check">
+<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
+<label for="verifica-url">Check your site: type its address</label>
+<div class="tool-row">
+<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="example.com" required maxlength="300" aria-describedby="verifica-eroare verifica-nota">
+<button type="submit" class="btn" id="verifica-buton">Check</button>
+</div>
+<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
+<p id="verifica-nota" class="muted small">Domain only, no paths or parameters. We read up to 10 public pages and keep neither the address nor the result. <a href="/en/privacy/#instrument">Details</a></p>
+</form>
+<noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or <a href="#cum-verifici">check it yourself, in 5 minutes</a>.</p></noscript>
+</div>
 <div class="hero-foot">
 <p class="lead"><strong>A free WordPress plugin.</strong> It keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Open-source, no data sent to us.</p>
 <div class="hero-cta">
 <p class="actions">
-<a class="btn" href="#verifica">Check your site</a>
 <a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Download for WordPress</a>
 </p>
 <p class="alt small">Not on WordPress? Use the <a data-standalone href="https://github.com/rtdesignstudio/biscuitwp/blob/main/standalone/README.md">standalone version</a>.</p>
@@ -58,27 +69,14 @@
 </div>
 </section>
 
-<section id="verifica" aria-labelledby="verifica-titlu">
+<section id="raport" aria-labelledby="raport-titlu">
 <div class="wrap">
 <div class="sh"><p class="n">01 · Check</p>
-<h2 id="verifica-titlu">Check your site</h2></div>
-<p>Enter your site's address. We read up to 10 public pages as a new visitor would, without cookies, and tell you what starts before consent.</p>
-<form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
-<label for="verifica-url">Site address</label>
-<div class="tool-row">
-<input id="verifica-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="example.com" required maxlength="300" aria-describedby="verifica-ajutor verifica-eroare verifica-nota">
-<button type="submit" class="btn" id="verifica-buton">Check</button>
-<button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button>
-</div>
-<p id="verifica-ajutor" class="muted small">Domain only, no paths or parameters.</p>
-<p id="verifica-eroare" class="field-error" role="alert" hidden></p>
-<p class="tool-owner"><input id="verifica-owner" name="owner" type="checkbox" value="1" required aria-describedby="verifica-owner-eroare"> <label for="verifica-owner">I confirm I own this site or have the owner's permission to check it.</label></p>
-<p id="verifica-owner-eroare" class="field-error" hidden></p>
-<p id="verifica-nota" class="muted small">We keep neither the address nor the result. Details in <a href="/en/privacy/#instrument">Privacy</a>.</p>
+<h2 id="raport-titlu">What we check</h2></div>
+<p>We read up to 10 public pages as a new visitor would, without cookies, and tell you what starts before consent. The report appears here.</p>
+<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
+<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button></p>
 <p id="verifica-contor" class="muted small" hidden></p>
-</form>
-<noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or check it yourself with the steps below.</p></noscript>
-<div id="verifica-rezultat" class="result" aria-live="polite"></div>
 <div id="verifica-gasim" class="found" hidden></div>
 
 <details class="limits">

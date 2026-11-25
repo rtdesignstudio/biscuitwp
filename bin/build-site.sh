@@ -27,6 +27,8 @@
 #                   site/partials/ itself is not copied to the output.
 #                   A page with <!-- BARE --> instead (the demo embedded in the
 #                   landing's iframe) gets neither; it must not carry the other two.
+#   every page      local CSS and JS get ?v=<first 8 hex of the file's sha256>, so a change is
+#                   seen at once (they are cached for a week).
 #   assets/         site.js (phone menu, motion), verifica.js and favicon/rt-favicon-512.png
 #                   are copied as they are (every page links the favicon).
 #   junk            .DS_Store, ._*, *.swp and *~ files are left out of the output.
@@ -398,6 +400,14 @@ foreach ( array( "header", "footer" ) as $kind ) {
 }
 $nav_keys = array( "home", "security", "privacy", "changelog" );
 $lang_names = array( "ro" => "Română", "en" => "English", "ru" => "Русский" );
+// Version the local CSS and JS a page links, from its folder or the root.
+function versioned( $html, $dir, $rel ) {
+	return preg_replace_callback( '#\b(href|src)="([^":?\#]+\.(?:css|js))"#', function ( $m ) use ( $dir, $rel ) {
+		$f = "/" === $m[2][0] ? $dir . $m[2] : dirname( $dir . "/" . $rel ) . "/" . $m[2];
+		if ( ! is_file( $f ) ) { fail( $rel . ": missing " . $m[2] ); }
+		return $m[1] . "=\"" . $m[2] . "?v=" . substr( hash_file( "sha256", $f ), 0, 8 ) . "\"";
+	}, $html );
+}
 $pit      = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir . "/partials", FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 $pages    = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $pages as $f ) {
@@ -413,7 +423,7 @@ foreach ( $pages as $f ) {
 			fail( $rel . ": a bare page has <!-- BARE --> exactly once and no header or footer marker" );
 		}
 		$html = str_replace( "<!-- BARE -->\n", "", str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html ) );
-		wr( $p, str_replace( "<!-- BARE -->", "", $html ) );
+		wr( $p, versioned( str_replace( "<!-- BARE -->", "", $html ), $dir, $rel ) );
 		continue;
 	}
 	if ( 1 !== preg_match_all( '/<!-- HEADER( [^>]*?)? -->/', $html, $hm ) ) { fail( $rel . ": expected the marker <!-- HEADER ... --> exactly once" ); }
@@ -435,7 +445,7 @@ foreach ( $pages as $f ) {
 	$html   = preg_replace_callback( '/<!-- HEADER( [^>]*?)? -->/', function () use ( $header ) { return $header; }, $html );
 	$html   = fill( $html, "<!-- FOOTER -->", str_replace( "{{LANGS_LI}}", "<li>" . implode( "</li>\n<li>", $links ) . "</li>", $partials["footer"][ $l ] ), $rel );
 	$html   = str_replace( "<!-- DOWNLOAD_URL -->", h( $download ), $html );
-	wr( $p, $html );
+	wr( $p, versioned( $html, $dir, $rel ) );
 }
 foreach ( $pit as $f ) { $f->isDir() ? rmdir( $f->getPathname() ) : unlink( $f->getPathname() ); }
 if ( ! rmdir( $dir . "/partials" ) ) { fail( "could not remove " . $dir . "/partials" ); }

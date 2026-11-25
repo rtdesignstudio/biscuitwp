@@ -565,57 +565,25 @@ $cmp_cd_req = function ( array $over ) {
 	return array_merge( array( 'method' => 'POST', 'content_type' => 'application/x-www-form-urlencoded', 'body' => '', 'post' => array(), 'ip' => '192.0.2.10' ), $over );
 };
 
-// Owner missing or wrong: 400 owner_required, nothing written at all.
-$cmp_cd_od = $cmp_cd_tmp . '/owner-counters';
-foreach ( array(
-	'form, no owner'    => array( 'post' => array( 'url' => 'exemplu.md' ) ),
-	'form, owner on'    => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => 'on' ) ),
-	'form, owner 0'     => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => '0' ) ),
-	'form, owner array' => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => array( '1' ) ) ),
-	'JSON, no owner'    => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md"}' ),
-	'JSON, owner 0'     => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":0}' ),
-	'JSON, owner false' => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":false}' ),
-	'JSON, owner "yes"' => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":"yes"}' ),
-	'JSON, owner 2'     => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":2}' ),
-	'JSON, owner 1.0'   => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":1.0}' ),
-	'JSON, owner "true"' => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":"true"}' ),
-	'bad URL, no owner' => array( 'post' => array( 'url' => 'http://127.0.0.1/' ) ),
-) as $label => $over ) {
-	$called = 0;
-	$r      = cmp_check_handle(
-		$cmp_cd_req( $over ),
-		$cmp_cd_od,
-		$cmp_cd_svc,
-		1700000000,
-		function ( $u ) use ( &$called, $cmp_cd_ok ) {
-			$called++;
-			return $cmp_cd_ok( $u );
-		}
-	);
-	cmp_assert( 400 === $r['code'] && 'owner_required' === $r['body']['code'] && 'error' === $r['body']['status'] && 0 === $called, "owner: {$label} -> 400 owner_required, nothing fetched" );
-}
-cmp_assert( ! file_exists( $cmp_cd_od ), 'owner: refused requests create no counter folder or file at all' );
-$r = cmp_check_handle( $cmp_cd_req( array( 'post' => array( 'url' => 'exemplu.md' ) ) ), $cmp_cd_od, $cmp_cd_svc, 1700000000, $cmp_cd_ok );
-cmp_assert_eq( $r['body']['message'], 'Bifează că deții site-ul sau ai permisiunea proprietarului.', 'owner: Romanian message' );
-$r = cmp_check_handle( $cmp_cd_req( array( 'post' => array( 'url' => 'exemplu.md', 'lang' => 'en' ) ) ), $cmp_cd_od, $cmp_cd_svc, 1700000000, $cmp_cd_ok );
-cmp_assert_eq( $r['body']['message'], "Tick that you own the site or have the owner's permission.", 'owner: English message' );
-$r = cmp_check_handle( $cmp_cd_req( array( 'post' => array( 'owner' => '1' ) ) ), $cmp_cd_od, $cmp_cd_svc, 1700000000, $cmp_cd_ok );
-cmp_assert( 400 === $r['code'] && 'bad_request' === $r['body']['code'], 'owner: no url -> bad_request first' );
-cmp_assert( ! file_exists( $cmp_cd_od ), 'owner: still nothing written' );
-
-// Accepted forms: JSON 1, "1", true; form "1".
+// The owner box is gone (#748): the check runs without it, and ignores it when an old page still sends it.
 $i = 0;
 foreach ( array(
-	'JSON 1'    => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":1}' ),
-	'JSON "1"'  => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":"1"}' ),
-	'JSON true' => array( 'content_type' => 'application/json; charset=utf-8', 'body' => '{"url":"exemplu.md","owner":true}' ),
-	'form "1"'  => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => '1' ) ),
+	'form, no owner'    => array( 'post' => array( 'url' => 'exemplu.md' ) ),
+	'form, owner 1'     => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => '1' ) ),
+	'form, owner array' => array( 'post' => array( 'url' => 'exemplu.md', 'owner' => array( '1' ) ) ),
+	'JSON, no owner'    => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md"}' ),
+	'JSON, owner false' => array( 'content_type' => 'application/json', 'body' => '{"url":"exemplu.md","owner":false}' ),
 ) as $label => $over ) {
 	$i++;
 	$r = cmp_check_handle( $cmp_cd_req( array_merge( $over, array( 'ip' => '192.0.2.' . ( 100 + $i ) ) ) ), $cmp_cd_tmp . '/owner-ok', $cmp_cd_svc, 1700000000, $cmp_cd_ok );
 	cmp_assert( 200 === $r['code'] && 'html-v2' === $r['body']['engine'], "owner: {$label} accepted" );
 }
-cmp_assert( 'owner_required' === cmp_check_error( 'owner_required', 'ro' )['body']['code'] && 400 === cmp_check_error_status( 'owner_required' ), 'owner: error code 400' );
+// Refused before any counter: no address, a private one.
+$cmp_cd_od = $cmp_cd_tmp . '/refused-counters';
+foreach ( array( 'bad_request' => array(), 'bad_url' => array( 'url' => 'http://127.0.0.1/' ) ) as $code => $post ) {
+	$r = cmp_check_handle( $cmp_cd_req( array( 'post' => $post ) ), $cmp_cd_od, $cmp_cd_svc, 1700000000, $cmp_cd_ok );
+	cmp_assert( 400 === $r['code'] && $code === $r['body']['code'] && ! file_exists( $cmp_cd_od ), "refused: {$code}, no counter folder" );
+}
 
 // The injected fetcher path: links found, the sub-page analysed; the response shape.
 $r = cmp_check_handle( $cmp_cd_req( array( 'post' => array( 'url' => 'exemplu.md', 'owner' => '1' ), 'ip' => '192.0.2.150' ) ), $cmp_cd_tmp . '/shape', $cmp_cd_svc, 1700000000, $cmp_cd_ok );

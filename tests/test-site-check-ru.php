@@ -289,7 +289,7 @@ $rf  = new ReflectionFunction( 'cmp_check_error_message' );
 $src = implode( '', array_slice( file( $rf->getFileName() ), $rf->getStartLine() - 1, $rf->getEndLine() - $rf->getStartLine() + 1 ) );
 preg_match_all( "/^\t\t\t'([a-z_]+)'\s*=> /m", $src, $m );
 $codes = array_values( array_unique( $m[1] ) );
-cmp_assert( count( $codes ) >= 15 && in_array( 'http_status', $codes, true ), 'ru: the error codes are enumerated (' . count( $codes ) . ')' );
+cmp_assert( count( $codes ) >= 14 && in_array( 'http_status', $codes, true ), 'ru: the error codes are enumerated (' . count( $codes ) . ')' );
 $bad = array();
 foreach ( $codes as $code ) {
 	$ru = cmp_check_error_message( $code, 'ru', 418 );
@@ -315,8 +315,6 @@ $handle = function ( $body ) {
 };
 $r = $handle( '{"url":"","lang":"ru","owner":1}' );
 cmp_assert( 'bad_request' === $r['body']['code'] && 'Введите адрес сайта, который хотите проверить.' === $r['body']['message'], 'ru: the endpoint answers bad_request in Russian' );
-$r = $handle( '{"url":"exemplu.md","lang":"ru"}' );
-cmp_assert( 'owner_required' === $r['body']['code'] && '' === cmp_ru_bad( $r['body']['message'] ), 'ru: the endpoint answers owner_required in Russian' );
 $r = $handle( '{"url":"","lang":"zz","owner":1}' );
 cmp_assert( 'bad_request' === $r['body']['code'] && 'Scrie adresa site-ului pe care vrei să-l verifici.' === $r['body']['message'], 'ru: the endpoint answers in Romanian for an unknown lang' );
 
@@ -393,13 +391,13 @@ $months = '(?:января|февраля|марта|апреля|мая|июн�
 // issues-sitemap: three issues, 10 of 84 pages, a page that could not be read.
 $r = $cmp_ru_dom( 'ru', 'issues-sitemap', true, '1239' );
 cmp_assert( empty( $r['error'] ), 'render (ru): issues-sitemap runs without errors' . ( empty( $r['error'] ) ? '' : ': ' . $r['error'] ) );
-cmp_assert( isset( $r['body']['lang'] ) && 'ru' === $r['body']['lang'] && 1 === $r['body']['owner'], 'render (ru): the request body sends lang=ru' );
+cmp_assert( isset( $r['body']['lang'] ) && 'ru' === $r['body']['lang'], 'render (ru): the request body sends lang=ru' );
 $text = isset( $r['text'] ) ? $r['text'] : '';
 foreach ( array( 'Мы нашли 3 проблемы', 'С чего начать', 'Проблемы', 'Нужно проверить', 'Что мы нашли', 'На каких страницах (7)', 'Почему это важно', 'Как исправить', 'Правовая основа: ', 'С BiscuitWP: ', 'В порядке', 'Полезно знать', 'Мы проверили 10 страниц. На сайте 84 страницы; мы проверили первые 10. Полная проверка сейчас недоступна.', 'Не удалось прочитать: /lent/ (не ответила вовремя).', 'BiscuitWP это исправляет', 'Исправить с помощью плагина', 'Что он умеет' ) as $need ) {
 	cmp_assert( false !== strpos( $text, $need ), "render (ru): issues-sitemap shows „{$need}”" );
 }
 cmp_assert_eq( isset( $r['facts'] ) ? $r['facts'] : '', '3|проблемы,1|нужно проверить,4|в порядке', 'render (ru): the counters with Russian plurals' );
-cmp_assert_eq( isset( $r['buttons'] ) ? $r['buttons'] : array(), array( 'Сохранить как PDF', 'Скопировать отчёт' ), 'render (ru): the share buttons' );
+cmp_assert_eq( isset( $r['buttons'] ) ? $r['buttons'] : array(), array( 'Сохранить как PDF', 'Скопировать отчёт', 'Проверить другой сайт' ), 'render (ru): the share buttons' );
 cmp_assert( isset( $r['counter']['text'] ) && "1\xc2\xa0240 проверок с момента запуска" === $r['counter']['text'], 'render (ru): the counter groups thousands with a no-break space and uses the genitive plural' );
 cmp_assert( 1 === preg_match( '/Отчёт «Проверьте свой сайт» с biscuitwp\.rt\.md, \d{1,2} ' . $months . ' \d{4}/u', $text ), 'render (ru): the print header with a Russian date' );
 cmp_assert( isset( $r['copied'] ) && 1 === preg_match( '/Отчёт сделан с помощью «Проверьте свой сайт», https:\/\/biscuitwp\.rt\.md\/, \d{1,2} ' . $months . ' \d{4}\.$/u', (string) $r['copied'] ), 'render (ru): the copied report ends with the Russian footer' );
@@ -429,10 +427,10 @@ cmp_assert_eq( isset( $r['facts'] ) ? $r['facts'] : '', '0|проблем,1|ну
 cmp_assert( isset( $r['counter']['text'] ) && '122 проверки с момента запуска' === $r['counter']['text'], 'render (ru): 122 проверки (few form)' );
 cmp_assert_eq( $cmp_ru_ui_leftovers( $cmp_ru_own( $text, 'unsure' ) ), array(), 'render (ru): unsure has no Romanian or English UI text' );
 
-// The owner box unticked: the client-side message in Russian; "found" stats in Russian.
+// An empty address: the client-side message in Russian; "found" stats in Russian.
 $found = json_encode( array( 'checks' => 160, 'found' => array( 'of' => 151, 'tracker' => 101, 'google-fonts' => 92, 'ip-resources' => 55, 'no-policy' => 28, 'no-banner' => 36 ) ) );
-$r     = $cmp_ru_dom( 'ru', 'owner-required', false, $found );
-cmp_assert( isset( $r['ownerError'] ) && 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.' === $r['ownerError'], 'render (ru): the owner error in Russian' );
+$r     = $cmp_ru_dom( 'ru', 'error', false, $found );
+cmp_assert( isset( $r['urlError'] ) && 'Введите адрес сайта, например example.md.' === $r['urlError'], 'render (ru): the empty-address error in Russian' );
 cmp_assert( isset( $r['found']['text'][0] ) && 'Что мы находим чаще всего' === $r['found']['text'][0] && 'Трекер запущен до согласия' === $r['found']['text'][1], 'render (ru): the "found" block title and first row' );
 cmp_assert( isset( $r['found']['text'] ) && 'Из 151 проверки, сделанной с помощью инструмента. Сайт, проверенный несколько раз, учитывается каждый раз.' === end( $r['found']['text'] ), 'render (ru): the "found" note with the genitive singular (151 проверки)' );
 cmp_assert( isset( $r['counter']['text'] ) && '160 проверок с момента запуска' === $r['counter']['text'], 'render (ru): 160 проверок (many form)' );

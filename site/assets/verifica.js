@@ -12,7 +12,6 @@
 	function group(n, sep) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep); }
 	var T = LANG === 'en' ? {
 		empty: 'Enter your site\'s address, for example example.com.',
-		owner: "Tick that you own the site or have the owner's permission.",
 		checking: 'Checking the site, up to 10 pages. It can take up to 45 seconds.',
 		steps: [
 			'Opening the homepage as a new visitor',
@@ -70,6 +69,7 @@
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
 		checks: function (n) { return group(n, ',') + ' checks so far'; },
 		foundTitle: 'What we find most often',
+		another: 'Check another site',
 		savePdf: 'Save as PDF',
 		copy: 'Copy the report',
 		copied: 'Report copied. Paste it into an email or a message.',
@@ -88,7 +88,6 @@
 		errorTitle: 'We could not check the site',
 		errors: {
 			bad_request: 'Enter your site\'s address, for example example.com.',
-			owner_required: "Tick that you own the site or have the owner's permission.",
 			bad_url: 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.',
 			blocked_address: 'This address leads to a private or reserved network. We can only check public sites.',
 			fetch_failed: 'We could not open the site. Check the address or try again later.',
@@ -107,7 +106,6 @@
 		}
 	} : LANG === 'ru' ? {
 		empty: 'Введите адрес сайта, например example.md.',
-		owner: 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
 		checking: 'Проверяем сайт, до 10 страниц. Это может занять до 45 секунд.',
 		steps: [
 			'Открываем главную страницу как новый посетитель',
@@ -165,6 +163,7 @@
 		oursText: 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.',
 		checks: function (n) { return group(n, ' ') + ' ' + ru(n, 'проверка', 'проверки', 'проверок') + ' с момента запуска'; },
 		foundTitle: 'Что мы находим чаще всего',
+		another: 'Проверить другой сайт',
 		savePdf: 'Сохранить как PDF',
 		copy: 'Скопировать отчёт',
 		copied: 'Мы скопировали отчёт. Вставьте его в письмо или сообщение.',
@@ -183,7 +182,6 @@
 		errorTitle: 'Мы не смогли проверить сайт',
 		errors: {
 			bad_request: 'Введите адрес сайта, например example.md.',
-			owner_required: 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
 			bad_url: 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
 			blocked_address: 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
 			fetch_failed: 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
@@ -202,7 +200,6 @@
 		}
 	} : {
 		empty: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-		owner: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
 		checking: 'Verificăm site-ul, până la 10 pagini. Poate dura până la 45 de secunde.',
 		steps: [
 			'Deschidem pagina principală, ca un vizitator nou',
@@ -260,6 +257,7 @@
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
 		checks: function (n) { return group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
 		foundTitle: 'Ce găsim cel mai des',
+		another: 'Verifică alt site',
 		savePdf: 'Salvează ca PDF',
 		copy: 'Copiază raportul',
 		copied: 'Am copiat raportul. Lipește-l într-un email sau mesaj.',
@@ -278,7 +276,6 @@
 		errorTitle: 'Nu am putut verifica site-ul',
 		errors: {
 			bad_request: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-			owner_required: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
 			bad_url: 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.',
 			blocked_address: 'Adresa duce spre o rețea privată sau rezervată. Putem verifica doar site-uri publice.',
 			fetch_failed: 'Nu am putut deschide site-ul. Verifică adresa sau încearcă din nou mai târziu.',
@@ -393,23 +390,14 @@
 
 	var form = doc.getElementById('verifica-form');
 	var out = doc.getElementById('verifica-rezultat');
-	if (!form || !out || !window.fetch || !window.AbortController || !doc.getElementById('verifica-owner')) { return; }
+	if (!form || !out || !window.fetch || !window.AbortController) { return; }
 	form.hidden = false; // Without JS (or fetch) the form stays hidden; the <noscript> text explains.
 	var input = doc.getElementById('verifica-url');
 	var submit = doc.getElementById('verifica-buton');
 	var cancel = doc.getElementById('verifica-anuleaza');
-	var owner = doc.getElementById('verifica-owner');
-	var ownerErr = doc.getElementById('verifica-owner-eroare');
 	var urlErr = doc.getElementById('verifica-eroare');
 	var ctrl = null, timer = null, slow = false;
 
-	// The owner box: required. Unticked, the message sits right under it.
-	function ownerError() {
-		if (!owner) { return; }
-		owner.setAttribute('aria-invalid', 'true');
-		if (ownerErr) { ownerErr.textContent = T.owner; ownerErr.hidden = false; }
-		owner.focus();
-	}
 	// The counter line under the form: the total of successful checks, from 100 on.
 	var counter = doc.getElementById('verifica-contor');
 	var checks = -1;
@@ -456,12 +444,6 @@
 		box.appendChild(el('p', 'muted small', T.foundNote(of)));
 		box.hidden = false;
 	}
-	function ownerOk() {
-		if (!owner) { return; }
-		owner.removeAttribute('aria-invalid');
-		if (ownerErr) { ownerErr.textContent = ''; ownerErr.hidden = true; }
-	}
-	if (owner) { owner.addEventListener('change', function () { if (owner.checked) { ownerOk(); } }); }
 
 	function clear() {
 		while (out.firstChild) { out.removeChild(out.firstChild); }
@@ -575,9 +557,20 @@
 		});
 		wrap.appendChild(pdf);
 		wrap.appendChild(cp);
+		wrap.appendChild(another());
 		wrap.appendChild(msg);
 		r.box.appendChild(wrap);
 		markHtml('has-report', true);
+	}
+	// „Verifică alt site”: back to the field, in the hero.
+	function another() {
+		var b = el('button', 'btn btn-ghost r-again', T.another);
+		b.setAttribute('type', 'button');
+		b.addEventListener('click', function () {
+			input.value = '';
+			input.focus();
+		});
+		return b;
 	}
 	function busy(on) {
 		submit.disabled = on;
@@ -762,10 +755,12 @@
 		var msg = T.errors[code] || str(serverMessage) || T.errors.unavailable;
 		if (code === 'http_status' && str(serverMessage)) { msg = str(serverMessage); }
 		r.box.appendChild(el('p', null, msg));
-		if (code === 'owner_required') { ownerError(); }
-		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request' && code !== 'owner_required') {
+		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request') {
 			actions(r.box, [['#cum-verifici', T.howto, 'btn btn-ghost']]);
 		}
+		var again = el('p', 'actions');
+		again.appendChild(another());
+		r.box.appendChild(again);
 		show(r);
 	}
 
@@ -898,6 +893,13 @@
 		busy(false);
 	}
 
+	// The report opens under the hero: bring it into view, and move the focus off the
+	// button that just got disabled (to the block itself, so Enter cannot hit Cancel).
+	function toReport() {
+		if (out.scrollIntoView) { out.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); }
+		out.focus({ preventScroll: true });
+	}
+
 	cancel.addEventListener('click', function () {
 		if (ctrl) { ctrl.abort(); }
 	});
@@ -908,30 +910,17 @@
 		var url = (input.value || '').trim();
 		if (urlErr) { urlErr.textContent = ''; urlErr.hidden = true; }
 		input.removeAttribute('aria-invalid');
-		if (url && !siteAddress(url)) {
-			// Not a bare domain: say so next to the field, send nothing.
-			clear();
+		if (!url || !siteAddress(url)) {
+			// Nothing to check: say so next to the field, send nothing, stay in the hero.
 			input.setAttribute('aria-invalid', 'true');
-			if (urlErr) { urlErr.textContent = T.badAddress; urlErr.hidden = false; } else { clear(); out.appendChild(el('p', 'r-loading', T.badAddress)); }
+			if (urlErr) { urlErr.textContent = url ? T.badAddress : T.empty; urlErr.hidden = false; }
 			input.focus();
 			return;
 		}
-		if (!url) {
-			var r0 = box('error', T.errorTitle);
-			r0.box.appendChild(el('p', null, T.empty));
-			show(r0);
-			input.focus();
-			return;
-		}
-		if (!owner.checked) {
-			clear();
-			ownerError();
-			return;
-		}
-		ownerOk();
 		status(T.checking);
 		stepsStart();
 		busy(true);
+		toReport();
 		ctrl = new window.AbortController();
 		slow = false;
 		var mine = ctrl;
@@ -939,7 +928,7 @@
 		window.fetch('/api/verifica.php', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-			body: JSON.stringify({ url: url, lang: LANG, owner: 1 }),
+			body: JSON.stringify({ url: url, lang: LANG }),
 			credentials: 'same-origin',
 			cache: 'no-store',
 			signal: mine.signal
