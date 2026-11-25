@@ -769,7 +769,7 @@ foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldov
 		cmp_assert( is_readable( $f ) && filesize( $f ) < 300 * 1024, "site/assets/shots/{$m[2]}-{$m[3]}.webp: under 300 KB" );
 	}
 	cmp_assert( false !== strpos( $fn, 'example.com' ) && 1 === preg_match( '#<p class="muted small shots-note">[^<]*example\.com[^<]*</p>#', $fn ), "{$page}: the note says the screenshots come from a test site" );
-	cmp_assert( 1 === preg_match( '#</div>\s*<p class="muted small shots-note">[^<]*</p>\s*<p class="actions"><a class="btn" data-download#', $fn ), "{$page}: the download button still closes #functii" );
+	cmp_assert( 1 === preg_match( '#</div>\s*<p class="muted small shots-note">[^<]*</p>\s*<p class="actions actions-center"><a class="btn" data-download#', $fn ), "{$page}: the download button still closes #functii" );
 }
 // The screenshots open in a lightbox (a native <dialog>); without it the link opens the picture.
 $cmp_site_lb = (string) @file_get_contents( $cmp_site_root . '/site/assets/site.js' );
