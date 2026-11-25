@@ -263,12 +263,19 @@
 	(function () {
 		var header = doc.querySelector('header.site');
 		if (!header) { return; }
-		var on = null;
+		var on = null, over = false;
+		var darks = [].slice.call(doc.querySelectorAll('section.dark'));
 		var upd = function () {
 			var s = window.scrollY > 40;
 			if (s !== on) { on = s; header.classList.toggle('scrolled', s); }
+			if (darks.length) {
+				var y = header.querySelector('.wrap').getBoundingClientRect().top + 40;
+				var dk = darks.some(function (el) { var r = el.getBoundingClientRect(); return r.top <= y && r.bottom >= y; });
+				if (dk !== over) { over = dk; header.classList.toggle('on-dark', dk); }
+			}
 		};
 		window.addEventListener('scroll', upd, { passive: true });
+		window.addEventListener('resize', upd);
 		upd();
 	})();
 
@@ -376,7 +383,7 @@
 	   tables or the demo. Only opacity and blur change: nothing moves. ----------------- */
 	(function () {
 		var SEL = 'main p, main li, main h3, main h4, main figure, main blockquote, main summary, main dt, main dd';
-		var SKIP = '.hero, .sh, #raport, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
+		var SKIP = '.hero, .sh, #raport, #demo, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
 		var all = [].slice.call(doc.querySelectorAll(SEL)).filter(function (el) { return !el.closest(SKIP); });
 		var set = new Set(all);
 		var els = all.filter(function (el) {

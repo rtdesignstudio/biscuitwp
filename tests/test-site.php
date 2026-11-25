@@ -487,7 +487,7 @@ cmp_assert( $cmp_site_js === (string) @file_get_contents( $cmp_site_out1 . '/ass
 foreach ( array( 'innerHTML', 'outerHTML', 'insertAdjacentHTML', 'document.write', 'eval(', 'new Function', 'setAttribute(\'on', 'createContextualFragment', 'DOMParser' ) as $bad ) {
 	cmp_assert( false === strpos( $cmp_site_js, $bad ), "verifica.js: does not use {$bad}" );
 }
-foreach ( array( 'textContent', 'AbortController', '/api/verifica.php', 'prefers-reduced-motion', '#functii', '#cum-verifici', 'aria-current', 'rate_limited', 'busy', "'clean'", "'issues'", "'unsure'", "'error'", 'BiscuitWP' ) as $need ) {
+foreach ( array( 'textContent', 'AbortController', '/api/verifica.php', 'prefers-reduced-motion', '#functii', '#cum-verifici', 'rate_limited', 'busy', "'clean'", "'issues'", "'unsure'", "'error'", 'BiscuitWP' ) as $need ) {
 	cmp_assert( false !== strpos( $cmp_site_js, $need ), "verifica.js: uses {$need}" );
 }
 cmp_assert( false === strpos( $cmp_site_js, "\xe2\x80\x94" ), 'verifica.js: no em dash' );

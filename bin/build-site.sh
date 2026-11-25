@@ -151,7 +151,7 @@ cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$TMP/demo/"
 # The standalone package (/standalone/): the same inputs give the same archive.
 PKG="$TMP/.pkg"
 mkdir -p "$PKG/biscuitwp" "$TMP/standalone"
-cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$ROOT/standalone/services.js" "$ROOT/standalone/pachet/exemplu.html" "$ROOT/standalone/pachet/CITESTE.txt" "$ROOT/LICENSE" "$PKG/biscuitwp/"
+cp "$ROOT/standalone/cmp.min.js" "$ROOT/standalone/cmp.min.css" "$ROOT/standalone/services.js" "$ROOT/standalone/pachet/exemplu.html" "$ROOT/standalone/pachet/CITESTE.txt" "$ROOT/assets/img/biscuit-shield.webp" "$ROOT/assets/img/biscuit-wp.webp" "$ROOT/LICENSE" "$PKG/biscuitwp/"
 cp "$ROOT/standalone/marker-generator.html" "$PKG/biscuitwp/generator.html"
 find "$PKG" -exec chmod u=rwX,go=rX {} + -exec env TZ=UTC touch -t 202601010000 {} +
 ( cd "$PKG" && find biscuitwp | LC_ALL=C sort | TZ=UTC zip -qX9 "$TMP/standalone/biscuitwp-standalone.zip" -@ )

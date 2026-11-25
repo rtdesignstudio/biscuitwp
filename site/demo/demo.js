@@ -1,6 +1,7 @@
 /* BiscuitWP, biscuitwp.rt.md: the live demo (/demo/, and /demo/en/).
    Sets window.CMP_CONFIG for the standalone banner (cmp.min.js, loaded next, with
-   defer) from ?style=minimal|brand|friendly. The demo loads no trackers.
+   defer) from ?style=minimal|brand|friendly, or from ?c= (the panel of the landing page,
+   panel.js: { lang, appearance }, validated by cmp.js). The demo loads no trackers.
    Its only cookie, cmp_consent, is strictly necessary and kept on /demo/ only:
    cmp.js writes it with path=/, so writes from this page are moved to /demo/. */
 (function () {
@@ -36,6 +37,22 @@
 			set: function (v) { desc.set.call(d, String(v).replace(/;\s*path=\/(?=\s*;|\s*$)/i, ';path=' + PATH)); }
 		});
 	} catch (e) { cfg.mode = 'light'; }
+	// The choices of the panel: always a fresh banner, and no focus taken from the panel
+	// until the visitor does something here. A picture only from our own icons.
+	var c = null, mc = /[?&]c=([^&]+)/.exec(window.location.search);
+	if (mc) { try { c = JSON.parse(decodeURIComponent(mc[1])); } catch (e3) { c = null; } }
+	if (c && typeof c === 'object' && c.appearance && typeof c.appearance === 'object') {
+		var a0 = c.appearance;
+		if (a0.image && !(typeof a0.image.src === 'string' && /^\/assets\/icon\/[a-z0-9-]+\.webp$/.test(a0.image.src))) { delete a0.image; }
+		cfg.appearance = a0;
+		cfg.lang = c.lang === 'en' || c.lang === 'ru' ? c.lang : 'ro';
+		cfg.reopenButton = typeof a0.reopen === 'string' && a0.reopen !== 'none';
+		d.documentElement.className += ' is-stage';
+		write('cmp_consent=; path=' + PATH + '; max-age=0; SameSite=Lax');
+		var focus = window.HTMLElement.prototype.focus, used = false;
+		['pointerdown', 'keydown'].forEach(function (t) { window.addEventListener(t, function () { used = true; }, true); });
+		window.HTMLElement.prototype.focus = function () { if (used) { focus.apply(this, arguments); } };
+	}
 	window.CMP_CONFIG = cfg;
 
 	d.addEventListener('DOMContentLoaded', function () {

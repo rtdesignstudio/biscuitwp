@@ -141,18 +141,19 @@
 </div>
 </section>
 
-<section id="demo" aria-labelledby="demo-titlu">
+<section id="demo" class="dark" aria-labelledby="demo-titlu">
 <div class="wrap">
 <div class="sh"><p class="n">03 · Demo</p>
 <h2 id="demo-titlu">Încearcă bannerul</h2></div>
-<p>E bannerul real, în versiunea fără WordPress. Alege un stil. Demo-ul nu încarcă niciun tracker.</p>
+<p>E bannerul real, în versiunea fără WordPress. Alege un stil, apoi schimbă orice. Demo-ul nu încarcă niciun tracker.</p>
 <p class="switch" role="group" aria-label="Stilul bannerului">
-<a href="/demo/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
-<a href="/demo/embed/?style=brand" target="cmp-demo" data-style="brand" aria-current="true">Brand</a>
-<a href="/demo/embed/?style=friendly" target="cmp-demo" data-style="friendly">Prietenos</a>
+<a href="/demo/embed/?style=minimal" target="cmp-demo" data-style="minimal"><strong>Minimal</strong> <span>Sobru, fără culoare</span></a>
+<a href="/demo/embed/?style=brand" target="cmp-demo" data-style="brand"><strong>Brand</strong> <span>În culoarea ta</span></a>
+<a href="/demo/embed/?style=friendly" target="cmp-demo" data-style="friendly" aria-current="true"><strong>Prietenos</strong> <span>Rotunjit, cu imagine</span></a>
 </p>
-<div class="frame"><iframe src="/demo/embed/?style=brand" name="cmp-demo" title="Demo: bannerul BiscuitWP" loading="lazy"></iframe></div>
 </div>
+<div class="stage"><iframe src="/demo/embed/?style=friendly" name="cmp-demo" title="Demo: bannerul BiscuitWP" loading="lazy"></iframe></div>
+<div class="wrap" data-demo-panel></div>
 </section>
 
 <section id="instalare" aria-labelledby="instalare-titlu">
@@ -330,5 +331,6 @@
 </main>
 <!-- FOOTER -->
 <script src="/assets/verifica.js" defer></script>
+<script src="/demo/panel.js" defer></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /* BiscuitWP, biscuitwp.rt.md: the "Verifică-ți site-ul" tool, its confetti
-   and the demo style switch. No libraries, nothing loaded from other sites.
+   No libraries, nothing loaded from other sites.
    Everything that comes from the server (titles, explanations, the checked address)
    is written with textContent only, never parsed as HTML. */
 (function () {
@@ -280,14 +280,6 @@
 		window.requestAnimationFrame(frame);
 	}
 	/* /confetti */
-
-	/* The demo style switch: links target the demo iframe; we only mark the current one. */
-	Array.prototype.forEach.call(doc.querySelectorAll('.switch a[data-style]'), function (a) {
-		a.addEventListener('click', function () {
-			Array.prototype.forEach.call(doc.querySelectorAll('.switch a[data-style]'), function (b) { b.removeAttribute('aria-current'); });
-			a.setAttribute('aria-current', 'true');
-		});
-	});
 
 	var form = doc.getElementById('verifica-form');
 	var out = doc.getElementById('verifica-rezultat');

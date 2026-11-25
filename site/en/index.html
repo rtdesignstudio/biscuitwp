@@ -141,18 +141,19 @@
 </div>
 </section>
 
-<section id="demo" aria-labelledby="demo-titlu">
+<section id="demo" class="dark" aria-labelledby="demo-titlu">
 <div class="wrap">
 <div class="sh"><p class="n">03 · Demo</p>
 <h2 id="demo-titlu">Try the banner</h2></div>
-<p>This is the real banner, in its version without WordPress. Pick a style. The demo loads no trackers.</p>
+<p>This is the real banner, in its version without WordPress. Pick a style, then change anything. The demo loads no trackers.</p>
 <p class="switch" role="group" aria-label="Banner style">
-<a href="/demo/en/embed/?style=minimal" target="cmp-demo" data-style="minimal">Minimal</a>
-<a href="/demo/en/embed/?style=brand" target="cmp-demo" data-style="brand" aria-current="true">Brand</a>
-<a href="/demo/en/embed/?style=friendly" target="cmp-demo" data-style="friendly">Friendly</a>
+<a href="/demo/en/embed/?style=minimal" target="cmp-demo" data-style="minimal"><strong>Minimal</strong> <span>Sober, no colour</span></a>
+<a href="/demo/en/embed/?style=brand" target="cmp-demo" data-style="brand"><strong>Brand</strong> <span>In your colour</span></a>
+<a href="/demo/en/embed/?style=friendly" target="cmp-demo" data-style="friendly" aria-current="true"><strong>Friendly</strong> <span>Rounded, with a picture</span></a>
 </p>
-<div class="frame"><iframe src="/demo/en/embed/?style=brand" name="cmp-demo" title="Demo: the BiscuitWP banner" loading="lazy"></iframe></div>
 </div>
+<div class="stage"><iframe src="/demo/en/embed/?style=friendly" name="cmp-demo" title="Demo: the BiscuitWP banner" loading="lazy"></iframe></div>
+<div class="wrap" data-demo-panel></div>
 </section>
 
 <section id="instalare" aria-labelledby="instalare-titlu">
@@ -330,5 +331,6 @@
 </main>
 <!-- FOOTER -->
 <script src="/assets/verifica.js" defer></script>
+<script src="/demo/panel.js" defer></script>
 </body>
 </html>
