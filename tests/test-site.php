@@ -739,8 +739,8 @@ foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldov
 	$html = $cmp_site_read( $page );
 	cmp_assert( false !== strpos( $html, '<ul class="facts">' . "\n" . '<li>' . $l3[1] . '</li>' ), "{$page}: the first fact is the 16 sites" );
 	$fn = 1 === preg_match( '#<section id="functii".*?</section>#s', $html, $fsm ) ? $fsm[0] : '';
-	preg_match_all( '#<figure class="shot shot-([a-z]+)"><a href="/assets/shots/[a-z]+-[a-z]+\.webp"><img src="/assets/shots/([a-z]+)-([a-z]+)\.webp" width="(\d+)" height="(\d+)" alt="([^"]{60,})" loading="lazy" decoding="async"></a><figcaption>[^<]{30,}</figcaption></figure>#', $fn, $shm, PREG_SET_ORDER );
-	cmp_assert_eq( array_map( function ( $m ) { return $m[1]; }, $shm ), array( 'gasite', 'registru', 'verificare' ), "{$page}: three captioned screenshots with alt text in #functii" );
+	preg_match_all( '#<figure class="shot shot-[a-z]+"><a href="/assets/shots/[a-z]+-([a-z0-9]+)\.webp"><img src="/assets/shots/([a-z]+)-([a-z0-9]+)\.webp" width="(\d+)" height="(\d+)" alt="([^"]{50,})" loading="lazy" decoding="async"></a><figcaption>[^<]{20,}</figcaption></figure>#', $fn, $shm, PREG_SET_ORDER );
+	cmp_assert_eq( array_map( function ( $m ) { return $m[1]; }, $shm ), array( 'aspect', 'stil1', 'stil2', 'stil3', 'gasite', 'registru', 'verificare' ), "{$page}: seven captioned screenshots with alt text in #functii" );
 	foreach ( $shm as $m ) {
 		cmp_assert( $m[2] === $l3[0] && $m[3] === $m[1], "{$page}: screenshot {$m[1]} is the {$l3[0]} one" );
 		$f = $cmp_site_root . '/site/assets/shots/' . $m[2] . '-' . $m[3] . '.webp';

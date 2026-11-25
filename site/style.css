@@ -275,11 +275,16 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .shot { margin: 0; }
 .shot a { display: block; cursor: zoom-in; }
 .shot-verificare { grid-column: 2; grid-row: 1 / span 2; }
+/* the Appearance screen on the left, three results of it on the right (#751) */
+.shots-look { grid-template-rows: auto auto 1fr; margin-bottom: clamp(48px, 8vh, 88px); }
+.shot-aspect { grid-column: 1; grid-row: 1 / span 3; }
+.shot-stil { grid-column: 2; }
 .shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 2px; background: #f0f0f1; }
 .shot figcaption { margin-top: 10px; font-size: 15px; line-height: 1.45; color: var(--mute-text); }
 @media (max-width: 900px) {
 	.shots { grid-template-columns: 1fr; }
-	.shot-verificare { grid-column: auto; grid-row: auto; }
+	.shot-verificare, .shot-aspect, .shot-stil { grid-column: auto; grid-row: auto; }
+	.shots-look { grid-template-rows: none; }
 }
 
 /* Lightbox for the screenshots (assets/site.js): a dark full-screen <dialog>, the picture
