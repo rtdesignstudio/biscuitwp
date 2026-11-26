@@ -70,9 +70,20 @@
 
 	/* A link to a folded block (<details id>, e.g. #cum-verifici) opens it, on click and
 	   when the page loads with that address. */
+	/* "Detalii" under the check field opens the panel with what the check reads and
+	   what it misses; a link to a block inside it (#cum-verifici) opens it too. */
+	var more = doc.querySelector('[aria-controls="verifica-detalii"]');
+	var morePanel = doc.getElementById('verifica-detalii');
+	function showMore(on) {
+		if (!more || !morePanel) { return; }
+		morePanel.hidden = !on;
+		more.setAttribute('aria-expanded', on ? 'true' : 'false');
+	}
+	if (more) { more.addEventListener('click', function () { showMore(morePanel.hidden); }); }
 	function openFolded(hash) {
 		var id = hash && hash.charAt(0) === '#' ? hash.slice(1) : '';
 		var t = id ? doc.getElementById(id) : null;
+		if (t && morePanel && morePanel.contains(t)) { showMore(true); }
 		if (t && t.tagName === 'DETAILS') { t.open = true; }
 	}
 	openFolded(window.location.hash);

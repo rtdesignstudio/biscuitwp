@@ -30,6 +30,7 @@
 <main id="main">
 
 <section class="hero" aria-labelledby="titlu">
+<img class="hero-bg" src="/assets/icon/biscuit-shield-400.webp" width="400" height="400" alt="" aria-hidden="true">
 <div class="wrap">
 <p class="eyebrow">Plugin WordPress pentru cookie-uri · Legea 195/2024</p>
 <h1 id="titlu" class="big" aria-label="Cookie-uri cu acord, nu cu noroc."><span class="row" aria-hidden="true"><span>Cookie-uri cu acord,</span></span> <span class="row" aria-hidden="true"><span>nu cu noroc.</span></span></h1>
@@ -40,6 +41,8 @@
 <div class="hd-cols"><div class="hd-col"><p class="hd-h">Înainte de acord</p><ul class="hd-req"><li class="off"><code>google-analytics.<wbr>com</code><span>blocat</span></li><li class="off"><code>connect.<wbr>facebook.<wbr>net</code><span>blocat</span></li><li class="off"><code>clarity.ms</code><span>blocat</span></li></ul></div><div class="hd-col"><p class="hd-h">După „Accept”</p><ul class="hd-req"><li class="on"><code>google-analytics.<wbr>com</code><span>pornit</span></li><li class="on"><code>connect.<wbr>facebook.<wbr>net</code><span>pornit</span></li><li class="on"><code>clarity.ms</code><span>pornit</span></li></ul></div></div>
 </figure>
 <p class="urgent"><strong>Legea 195/2024 e în vigoare din 23 august 2026.</strong> Amenzi de până la 2 000 000 MDL sau 2% din cifra de afaceri.</p>
+<p class="lead hero-lead"><strong>Plugin gratuit pentru WordPress.</strong> Oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Open-source, fără date trimise nouă.</p>
+<div class="hero-foot">
 <div id="verifica" class="hero-check">
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Verifică-ți site-ul: scrie adresa</label>
@@ -48,39 +51,10 @@
 <button type="submit" class="btn" id="verifica-buton">Verifică</button>
 </div>
 <p id="verifica-eroare" class="field-error" role="alert" hidden></p>
-<p id="verifica-nota" class="muted small">Doar domeniul, fără căi sau parametri. Citim până la 10 pagini publice și nu păstrăm nici adresa, nici rezultatul. <a href="/confidentialitate/#instrument">Detalii</a></p>
+<p id="verifica-nota" class="muted small">Doar domeniul, fără căi sau parametri. Citim până la 10 pagini publice și nu păstrăm nici adresa, nici rezultatul. <button type="button" class="more" aria-expanded="false" aria-controls="verifica-detalii">Detalii</button></p>
 </form>
-<noscript><p class="notice">Verificarea are nevoie de JavaScript. Pornește-l în browser și reîncarcă pagina, sau <a href="#cum-verifici">verifică singur, în 5 minute</a>.</p></noscript>
-</div>
-<div class="hero-foot">
-<p class="lead"><strong>Plugin gratuit pentru WordPress.</strong> Oprește trackerele până spune vizitatorul „Da”, ține dovada alegerii lui și îți dă textele legale pentru Moldova. Open-source, fără date trimise nouă.</p>
-<div class="hero-cta">
-<p class="actions">
-<a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Descarcă pentru WordPress</a>
-</p>
-<p class="alt small">Site-ul tău nu e pe WordPress? Folosește <a data-standalone href="/standalone/">versiunea standalone</a>.</p>
-</div>
-</div>
-<ul class="facts">
-<li>Folosit pe 16 site-uri din Moldova</li>
-<li>Gratuit, fără versiune plătită</li>
-<li>Licență GPL</li>
-<li>Română, rusă, engleză</li>
-<li>WordPress 6.0+ și PHP 7.4+</li>
-</ul>
-</div>
-</section>
-
-<section id="raport" aria-labelledby="raport-titlu">
-<div class="wrap">
-<div class="sh"><p class="n">01 · Verificare</p>
-<h2 id="raport-titlu">Ce verificăm</h2></div>
-<p>Citim până la 10 pagini publice ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord. Raportul apare aici.</p>
-<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
-<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Anulează</button></p>
-<p id="verifica-contor" class="muted small" hidden></p>
-<div id="verifica-gasim" class="found" hidden></div>
-
+<div id="verifica-detalii" class="check-more" hidden>
+<p>Citim până la 10 pagini publice ca un vizitator nou, fără cookie-uri, și îți spunem ce pornește înainte de acord.</p>
 <details class="limits">
 <summary>Ce nu vedem de aici</summary>
 <p>Verificarea citește codul paginii principale și al altor pagini, până la 10 pagini în total. Nu vede:</p>
@@ -106,12 +80,36 @@
 <li>Apasă „Acceptă” în banner. Acum cererile și cookie-urile trebuie să apară. Așa știi că blocarea ține exact până la acord.</li>
 </ol>
 </details>
+<p class="muted small">Ce facem cu adresa: <a href="/confidentialitate/#instrument">Confidențialitate</a>.</p>
+</div>
+<noscript><p class="notice">Verificarea are nevoie de JavaScript. Pornește-l în browser și reîncarcă pagina, sau <a href="#cum-verifici">verifică singur, în 5 minute</a>.</p></noscript>
+</div>
+<div class="hero-cta">
+<p class="actions">
+<a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Descarcă pentru WordPress</a>
+</p>
+<p class="alt small">Site-ul tău nu e pe WordPress? Folosește <a data-standalone href="/standalone/">versiunea standalone</a>.</p>
+</div>
+</div>
+<div id="raport" class="hero-report">
+<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
+<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Anulează</button></p>
+<p id="verifica-contor" class="muted small" hidden></p>
+<div id="verifica-gasim" class="found" hidden></div>
+</div>
+<ul class="facts">
+<li>Folosit pe 16 site-uri din Moldova</li>
+<li>Gratuit, fără versiune plătită</li>
+<li>Licență GPL</li>
+<li>Română, rusă, engleză</li>
+<li>WordPress 6.0+ și PHP 7.4+</li>
+</ul>
 </div>
 </section>
 
 <section id="functii" aria-labelledby="functii-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">02 · Pluginul</p>
+<div class="sh"><p class="n">01 · Pluginul</p>
 <h2 id="functii-titlu">Ce face pluginul</h2></div>
 <ul class="feat">
 <li><h3>Blochează până la acord</h3><p>Scripturile și embed-urile (YouTube, Vimeo, Google Maps) stau oprite până alege vizitatorul. Cu Google Consent Mode v2 și un mod de măsurare Strict sau Advanced.</p></li>
@@ -143,7 +141,7 @@
 
 <section id="demo" class="dark" aria-labelledby="demo-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">03 · Demo</p>
+<div class="sh"><p class="n">02 · Demo</p>
 <h2 id="demo-titlu">Încearcă bannerul</h2></div>
 <p>E bannerul real, în versiunea fără WordPress. Alege un stil, apoi schimbă orice. Demo-ul nu încarcă niciun tracker.</p>
 <p class="switch" role="group" aria-label="Stilul bannerului">
@@ -158,7 +156,7 @@
 
 <section id="instalare" aria-labelledby="instalare-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">04 · Instalare</p>
+<div class="sh"><p class="n">03 · Instalare</p>
 <h2 id="instalare-titlu">Pornit în 5 minute</h2></div>
 <ol class="steps">
 <li><a data-download href="<!-- DOWNLOAD_URL -->">Descarcă</a> <code>biscuitwp.zip</code>. În WordPress, la Module, încarcă fișierul zip și activează pluginul.</li>
@@ -174,7 +172,7 @@
 
 <section id="legea" aria-labelledby="legea-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">05 · Legea</p>
+<div class="sh"><p class="n">04 · Legea</p>
 <h2 id="legea-titlu">Ce cere legea</h2></div>
 <p>În Moldova, regula despre cookie-uri vine din două legi. <strong>Legea nr. 72/2025 a comunicațiilor electronice</strong>, art. 116, în vigoare din 1 ianuarie 2026, spune când ai voie să scrii sau să citești ceva pe dispozitivul vizitatorului. <strong>Legea nr. 195/2024 privind protecția datelor cu caracter personal</strong>, în vigoare din 23 august 2026, spune cum trebuie să arate acordul și ce trebuie să poți dovedi. Pe scurt:</p>
 <ol class="rules">
@@ -194,7 +192,7 @@
 
 <section id="comparatie" aria-labelledby="comparatie-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">06 · Comparație</p>
+<div class="sh"><p class="n">05 · Comparație</p>
 <h2 id="comparatie-titlu">Cum se compară</h2></div>
 <p>Am citit paginile oficiale ale celorlalte trei pluginuri pe 20 noiembrie 2026. Fiecare afirmație are sursa în note. Unde n-am găsit informații, scrie asta.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
@@ -286,7 +284,7 @@
 
 <section id="resurse" aria-labelledby="resurse-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">07 · Resurse externe</p>
+<div class="sh"><p class="n">06 · Resurse externe</p>
 <h2 id="resurse-titlu">Google Fonts și alte resurse care trimit IP-ul</h2></div>
 <p>Când o pagină încarcă un font de la Google, browserul vizitatorului se conectează la serverele Google și le trimite adresa IP. Fără să-l fi întrebat cineva. IP-ul e o dată personală.</p>
 <p>În ianuarie 2022, un tribunal din München (Landgericht München I, dosarul 3 O 17493/20) a decis că un site care încărca Google Fonts de pe serverele Google a încălcat GDPR, pentru că fonturile se pot folosi și local, fără să plece IP-ul vizitatorului. Site-ul a fost obligat să plătească 100 € despăgubire vizitatorului care a reclamat. Decizia e a unui tribunal german, nu face lege în Moldova, dar arată cum e citit GDPR-ul în UE.</p>
@@ -303,7 +301,7 @@
 
 <section id="incredere" aria-labelledby="incredere-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">08 · Încredere</p>
+<div class="sh"><p class="n">07 · Încredere</p>
 <h2 id="incredere-titlu">Poți verifica tot</h2></div>
 <ul class="checks">
 <li><strong>Open-source.</strong> Tot codul e pe <a href="https://github.com/rtdesignstudio/biscuitwp">GitHub</a>, sub licența GPL-2.0-or-later.</li>
@@ -316,7 +314,7 @@
 
 <section id="intrebari" aria-labelledby="intrebari-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">09 · Întrebări</p>
+<div class="sh"><p class="n">08 · Întrebări</p>
 <h2 id="intrebari-titlu">Întrebări frecvente</h2></div>
 <details><summary>De ce e gratuit?</summary><p>Pentru că vrem ca orice site din Moldova să poată cere acordul corect, fără să plătească pentru asta. Codul e public, sub licența GPL. Nu există cheie de licență, abonament sau funcții ascunse.</p></details>
 <details><summary>Merge fără WordPress?</summary><p>Da. Pentru site-urile statice există <a href="/standalone/">versiunea standalone</a>: două fișiere, <code>cmp.js</code> și <code>cmp.css</code>. Marchezi singur scripturile care așteaptă acordul. Nu are registru de consimțăminte.</p></details>

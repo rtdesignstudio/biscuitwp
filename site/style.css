@@ -199,24 +199,40 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .js .big .row > span.in { opacity: 1; filter: none; animation: none; font-variation-settings: "wght" 600; }
 @keyframes cmp-bin { to { opacity: 1; filter: blur(0); } }
 @keyframes cmp-weight { to { font-variation-settings: "wght" 600; } }
-.hero-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; margin-top: clamp(32px, 5vh, 64px); }
+.hero-foot { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px 48px; margin-top: clamp(32px, 5vh, 64px); }
 .hero-foot .lead { max-width: 640px; margin: 0; }
 /* The hero grid (#728): the title with the product picture on its right, then the law
    line; the text, buttons and facts below span the page. One column under 1100px, with
    the picture after the buttons so they stay on the first screen of a phone. */
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); column-gap: clamp(32px, 4vw, 72px); grid-template-areas: "eye eye" "title demo" "urgent demo" "check check" "foot foot" "facts facts"; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); column-gap: clamp(32px, 4vw, 72px); grid-template-areas: "eye eye" "title demo" "urgent demo" "lead lead" "foot foot" "report report" "facts facts"; }
 .hero .eyebrow { grid-area: eye; }
+/* A big biscuit behind the hero, on the right and cut by the edge; it rocks a little,
+   never a full turn, and stands still with reduced motion. */
+.landing section.hero { position: relative; overflow: clip; isolation: isolate; }
+.hero-bg { position: absolute; z-index: -1; top: clamp(40px, 8vh, 120px); right: clamp(-320px, -16vw, -120px); width: clamp(440px, 56vw, 900px); height: auto; opacity: .2; pointer-events: none; user-select: none; animation: cmp-rock 9s ease-in-out infinite alternate; }
+@keyframes cmp-rock { from { transform: rotate(-9deg) translateY(0); } to { transform: rotate(7deg) translateY(-18px); } }
+@media (prefers-reduced-motion: reduce) { .hero-bg { animation: none; } }
 .hero h1 { grid-area: title; align-self: end; }
 .hero .urgent { grid-area: urgent; align-self: start; }
 .hero-demo { grid-area: demo; align-self: end; }
-/* The check (#748): the first thing to do on the page; its report opens in the section below. */
-.hero-check { grid-area: check; max-width: 880px; margin-top: clamp(24px, 4vh, 48px); }
+/* The intro where the check was, the check under it next to the download button; "Detalii"
+   opens what the check reads and what it misses; the report opens under them. */
+.hero-lead { grid-area: lead; max-width: 640px; margin: clamp(24px, 4vh, 48px) 0 0; }
+.hero-check { flex: 1 1 auto; max-width: 640px; }
+.hero-report { grid-area: report; max-width: 880px; }
+.hero-report .result:empty { display: none; }
+.more { padding: 0; border: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
+.more[aria-expanded="true"] { text-decoration-thickness: 2px; }
+.check-more { margin-top: 24px; padding-top: 8px; border-top: 1px solid var(--line); }
+.check-more > p:first-child { margin-top: 12px; }
+.check-more details { margin-top: 0; }
+html:not(.js) #verifica-detalii[hidden] { display: block; }
 .hero-check .tool { margin: 0; }
 .hero-check .tool label { font-size: clamp(18px, 1.5vw, 21px); letter-spacing: -.01em; }
 .hero-foot { grid-area: foot; }
 .hero .facts { grid-area: facts; }
 .urgent { margin: clamp(20px, 3vh, 32px) 0 0; padding-left: 14px; border-left: 2px solid #b3261e; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.4; }
-.hero-cta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.hero-cta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; padding-top: 36px; }
 .hero-cta .actions { margin: 0; }
 .hero-cta .alt { margin: 0; color: var(--mute-text); }
 /* The biscuit (#755): layers of the same picture along the Z axis give it an edge
@@ -248,11 +264,12 @@ button.btn[disabled] { opacity: .5; cursor: progress; }
 .hd-req .on span { color: var(--ink); }
 .hd-req .on span::before { border-radius: 50%; background: var(--ink); }
 @media (max-width: 1100px) {
-	.hero .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "eye" "title" "check" "urgent" "foot" "demo" "facts"; }
+	.hero .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "eye" "title" "urgent" "lead" "foot" "report" "demo" "facts"; }
 	.hero-demo { max-width: 520px; margin-top: clamp(72px, 9vh, 96px); }
 	.coin { top: -56px; right: 12px; width: 94px; height: 94px; }
 	.hero-foot { flex-direction: column; align-items: flex-start; }
-	.hero-cta { align-items: flex-start; }
+	.hero-cta { align-items: flex-start; padding-top: 0; }
+	.hero-check { width: 100%; }
 }
 
 /* facts: a row of cells that stands on the line of the next section (#749) */
@@ -359,10 +376,11 @@ main.wrap > .law-check { max-width: 820px; list-style: none; margin: 0 0 8px; pa
 .r-print-head { display: none; }
 @media print {
 	.print-report body { background: #fff; }
-	.print-report header.site, .print-report footer.site, .print-report main > section:not(#raport),
-	.print-report #raport .wrap > :not(.result), .print-report .r-share, .print-report .r .actions,
+	.print-report header.site, .print-report footer.site, .print-report main > section:not(.hero),
+	.print-report .hero .wrap > :not(#raport), .print-report #raport > :not(.result), .print-report .hero-bg,
+	.print-report .r-share, .print-report .r .actions,
 	.print-report .sheet, .print-report .skip, .print-report canvas { display: none !important; }
-	.print-report main > section#raport { padding: 0; border: 0; }
+	.print-report main > section.hero { padding: 0; border: 0; }
 	.print-report .r-print-head { display: block; margin: 0 0 12px; font-size: 12px; color: #444; }
 	.print-report .r { border-top-width: 1px; }
 	.print-report .r li, .print-report .r dd { break-inside: avoid; }
@@ -470,8 +488,6 @@ details > summary::after { content: "+"; flex: none; font-weight: 300; color: va
 details[open] > summary::after { content: "\2212"; }
 details > :not(summary) { max-width: 760px; }
 details[open] > :last-child { margin-bottom: 24px; }
-#raport details { margin-top: 32px; }
-#raport details.howto { margin-top: 0; }
 
 /* ---- Demo ------------------------------------------------------------------- */
 .switch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0 0; }

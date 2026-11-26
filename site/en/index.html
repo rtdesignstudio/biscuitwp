@@ -30,6 +30,7 @@
 <main id="main">
 
 <section class="hero" aria-labelledby="titlu">
+<img class="hero-bg" src="/assets/icon/biscuit-shield-400.webp" width="400" height="400" alt="" aria-hidden="true">
 <div class="wrap">
 <p class="eyebrow">WordPress cookie plugin · Law 195/2024</p>
 <h1 id="titlu" class="big" aria-label="Cookies by consent, not by luck."><span class="row" aria-hidden="true"><span>Cookies by consent,</span></span> <span class="row" aria-hidden="true"><span>not by luck.</span></span></h1>
@@ -40,6 +41,8 @@
 <div class="hd-cols"><div class="hd-col"><p class="hd-h">Before consent</p><ul class="hd-req"><li class="off"><code>google-analytics.<wbr>com</code><span>blocked</span></li><li class="off"><code>connect.<wbr>facebook.<wbr>net</code><span>blocked</span></li><li class="off"><code>clarity.ms</code><span>blocked</span></li></ul></div><div class="hd-col"><p class="hd-h">After “Accept”</p><ul class="hd-req"><li class="on"><code>google-analytics.<wbr>com</code><span>loaded</span></li><li class="on"><code>connect.<wbr>facebook.<wbr>net</code><span>loaded</span></li><li class="on"><code>clarity.ms</code><span>loaded</span></li></ul></div></div>
 </figure>
 <p class="urgent"><strong>Law 195/2024 has been in force since 23 August 2026.</strong> Fines of up to MDL 2,000,000 or 2% of turnover.</p>
+<p class="lead hero-lead"><strong>A free WordPress plugin.</strong> It keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Open-source, no data sent to us.</p>
+<div class="hero-foot">
 <div id="verifica" class="hero-check">
 <form id="verifica-form" class="tool" action="/api/verifica.php" method="post" novalidate hidden>
 <label for="verifica-url">Check your site: type its address</label>
@@ -48,39 +51,10 @@
 <button type="submit" class="btn" id="verifica-buton">Check</button>
 </div>
 <p id="verifica-eroare" class="field-error" role="alert" hidden></p>
-<p id="verifica-nota" class="muted small">Domain only, no paths or parameters. We read up to 10 public pages and keep neither the address nor the result. <a href="/en/privacy/#instrument">Details</a></p>
+<p id="verifica-nota" class="muted small">Domain only, no paths or parameters. We read up to 10 public pages and keep neither the address nor the result. <button type="button" class="more" aria-expanded="false" aria-controls="verifica-detalii">Details</button></p>
 </form>
-<noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or <a href="#cum-verifici">check it yourself, in 5 minutes</a>.</p></noscript>
-</div>
-<div class="hero-foot">
-<p class="lead"><strong>A free WordPress plugin.</strong> It keeps trackers off until the visitor says yes, keeps proof of that choice and gives you the legal texts for Moldova. Open-source, no data sent to us.</p>
-<div class="hero-cta">
-<p class="actions">
-<a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Download for WordPress</a>
-</p>
-<p class="alt small">Not on WordPress? Use the <a data-standalone href="/en/standalone/">standalone version</a>.</p>
-</div>
-</div>
-<ul class="facts">
-<li>Used on 16 sites in Moldova</li>
-<li>Free, no paid version</li>
-<li>GPL licence</li>
-<li>Romanian, Russian, English</li>
-<li>WordPress 6.0+ and PHP 7.4+</li>
-</ul>
-</div>
-</section>
-
-<section id="raport" aria-labelledby="raport-titlu">
-<div class="wrap">
-<div class="sh"><p class="n">01 · Check</p>
-<h2 id="raport-titlu">What we check</h2></div>
-<p>We read up to 10 public pages as a new visitor would, without cookies, and tell you what starts before consent. The report appears here.</p>
-<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
-<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button></p>
-<p id="verifica-contor" class="muted small" hidden></p>
-<div id="verifica-gasim" class="found" hidden></div>
-
+<div id="verifica-detalii" class="check-more" hidden>
+<p>We read up to 10 public pages as a new visitor would, without cookies, and tell you what starts before consent.</p>
 <details class="limits">
 <summary>What we cannot see from here</summary>
 <p>The check reads the code of the homepage and of other pages, up to 10 pages in all. It does not see:</p>
@@ -106,12 +80,36 @@
 <li>Click "Accept" in the banner. Now the requests and cookies should appear. That shows blocking holds exactly until consent.</li>
 </ol>
 </details>
+<p class="muted small">What we do with the address: <a href="/en/privacy/#instrument">Privacy</a>.</p>
+</div>
+<noscript><p class="notice">The check needs JavaScript. Turn it on in your browser and reload the page, or <a href="#cum-verifici">check it yourself, in 5 minutes</a>.</p></noscript>
+</div>
+<div class="hero-cta">
+<p class="actions">
+<a class="btn btn-ghost" data-download href="<!-- DOWNLOAD_URL -->">Download for WordPress</a>
+</p>
+<p class="alt small">Not on WordPress? Use the <a data-standalone href="/en/standalone/">standalone version</a>.</p>
+</div>
+</div>
+<div id="raport" class="hero-report">
+<div id="verifica-rezultat" class="result" aria-live="polite" tabindex="-1"></div>
+<p class="run-cancel"><button type="button" class="btn btn-ghost" id="verifica-anuleaza" hidden>Cancel</button></p>
+<p id="verifica-contor" class="muted small" hidden></p>
+<div id="verifica-gasim" class="found" hidden></div>
+</div>
+<ul class="facts">
+<li>Used on 16 sites in Moldova</li>
+<li>Free, no paid version</li>
+<li>GPL licence</li>
+<li>Romanian, Russian, English</li>
+<li>WordPress 6.0+ and PHP 7.4+</li>
+</ul>
 </div>
 </section>
 
 <section id="functii" aria-labelledby="functii-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">02 · The plugin</p>
+<div class="sh"><p class="n">01 · The plugin</p>
 <h2 id="functii-titlu">What the plugin does</h2></div>
 <ul class="feat">
 <li><h3>Blocks until consent</h3><p>Scripts and embeds (YouTube, Vimeo, Google Maps) stay off until the visitor chooses. With Google Consent Mode v2 and a Strict or Advanced measurement mode.</p></li>
@@ -143,7 +141,7 @@
 
 <section id="demo" class="dark" aria-labelledby="demo-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">03 · Demo</p>
+<div class="sh"><p class="n">02 · Demo</p>
 <h2 id="demo-titlu">Try the banner</h2></div>
 <p>This is the real banner, in its version without WordPress. Pick a style, then change anything. The demo loads no trackers.</p>
 <p class="switch" role="group" aria-label="Banner style">
@@ -158,7 +156,7 @@
 
 <section id="instalare" aria-labelledby="instalare-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">04 · Install</p>
+<div class="sh"><p class="n">03 · Install</p>
 <h2 id="instalare-titlu">Running in 5 minutes</h2></div>
 <ol class="steps">
 <li><a data-download href="<!-- DOWNLOAD_URL -->">Download</a> <code>biscuitwp.zip</code>. In WordPress, under Plugins, upload the zip file and activate the plugin.</li>
@@ -174,7 +172,7 @@
 
 <section id="legea" aria-labelledby="legea-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">05 · The law</p>
+<div class="sh"><p class="n">04 · The law</p>
 <h2 id="legea-titlu">What the law asks</h2></div>
 <p>In Moldova, the cookie rule comes from two laws. <strong>Law No. 72/2025 on electronic communications</strong>, art. 116, in force since 1 January 2026, says when you may store or read anything on a visitor's device. <strong>Law No. 195/2024 on personal data protection</strong>, in force since 23 August 2026, says what consent must look like and what you must be able to prove. In short:</p>
 <ol class="rules">
@@ -194,7 +192,7 @@
 
 <section id="comparatie" aria-labelledby="comparatie-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">06 · Comparison</p>
+<div class="sh"><p class="n">05 · Comparison</p>
 <h2 id="comparatie-titlu">How it compares</h2></div>
 <p>We read the official pages of the other three plugins on 20 November 2026. Every claim has its source in the notes. Where we found no information, we say so.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="comparatie-titlu">
@@ -286,7 +284,7 @@
 
 <section id="resurse" aria-labelledby="resurse-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">07 · External resources</p>
+<div class="sh"><p class="n">06 · External resources</p>
 <h2 id="resurse-titlu">Google Fonts and other resources that send the IP address</h2></div>
 <p>When a page loads a font from Google, the visitor's browser connects to Google's servers and sends them its IP address. Nobody asked the visitor. The IP address is personal data.</p>
 <p>In January 2022 a court in Munich (Landgericht München I, case 3 O 17493/20) ruled that a site loading Google Fonts from Google's servers breached the GDPR, because the fonts can also be used locally without the visitor's IP address leaving. The site had to pay €100 in damages to the visitor who complained. It is a German court's decision and is not law in Moldova, but it shows how the GDPR is read in the EU.</p>
@@ -303,7 +301,7 @@
 
 <section id="incredere" aria-labelledby="incredere-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">08 · Trust</p>
+<div class="sh"><p class="n">07 · Trust</p>
 <h2 id="incredere-titlu">You can check everything</h2></div>
 <ul class="checks">
 <li><strong>Open-source.</strong> All the code is on <a href="https://github.com/rtdesignstudio/biscuitwp">GitHub</a>, under GPL-2.0-or-later.</li>
@@ -316,7 +314,7 @@
 
 <section id="intrebari" aria-labelledby="intrebari-titlu">
 <div class="wrap">
-<div class="sh"><p class="n">09 · Questions</p>
+<div class="sh"><p class="n">08 · Questions</p>
 <h2 id="intrebari-titlu">Frequently asked questions</h2></div>
 <details><summary>Why is it free?</summary><p>Because we want every site in Moldova to be able to ask for consent properly without paying for it. The code is public, under the GPL. There is no licence key, no subscription and no hidden features.</p></details>
 <details><summary>Does it work without WordPress?</summary><p>Yes. For static sites there is the <a href="/en/standalone/">standalone version</a>: two files, <code>cmp.js</code> and <code>cmp.css</code>. You mark the scripts that wait for consent yourself. It keeps no consent log.</p></details>

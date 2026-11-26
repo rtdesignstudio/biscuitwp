@@ -422,7 +422,7 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $la
 	cmp_assert( 1 === preg_match( '#<a data-download href="[^"]*">[^<]+</a> <code>biscuitwp\.zip</code>#', $html ), "{$page}: the install step names biscuitwp.zip" );
 	cmp_assert( false === strpos( $html, '<code>consent-manager-pro.zip</code>' ), "{$page}: the install step no longer names consent-manager-pro.zip" );
 	// The tool.
-	// The form in the hero (#verifica), the report in the next section (#raport).
+	// The form in the hero (#verifica), what it reads behind "Detalii", the report under it (#raport), all in the hero.
 	cmp_assert( 1 === preg_match( '#<section class="hero".*?</section>#s', $html, $sm ) && false !== strpos( $sm[0], '<div id="verifica" class="hero-check">' ) && 1 === substr_count( $html, 'id="verifica"' ), "{$page}: the check is in the hero" );
 	cmp_assert( false === strpos( $html, 'verifica-owner' ), "{$page}: no owner box" );
 	$sec = isset( $sm[0] ) ? $sm[0] : '';
@@ -432,8 +432,9 @@ foreach ( array( 'index.html' => 'ro', 'en/index.html' => 'en' ) as $page => $la
 	cmp_assert( 1 === preg_match( '#<input\b[^>]*\bname="url"[^>]*>#', $sec, $im ) && false !== strpos( $im[0], 'required' ), "{$page}: a required url field" );
 	cmp_assert( 1 === preg_match( '#<label\b[^>]*\bfor="verifica-url"#', $sec ) && false !== strpos( $sec, 'id="verifica-url"' ), "{$page}: the url field has a label" );
 	cmp_assert( 1 === preg_match( '#<noscript>(.*?)</noscript>#s', $sec, $nm ) && strlen( trim( strip_tags( $nm[1] ) ) ) > 20, "{$page}: <noscript> message for the tool" );
-	cmp_assert( 1 === preg_match( '#<section id="raport".*?</section>#s', $html, $sm ), "{$page}: #raport is a section" );
-	$sec = isset( $sm[0] ) ? $sm[0] : '';
+	cmp_assert( false === strpos( $html, '<section id="raport"' ) && 1 === preg_match( '#<div id="raport" class="hero-report">.*?</div>\n<ul class="facts">#s', $sec, $rpm ), "{$page}: the report opens in the hero, above the facts" );
+	cmp_assert( 1 === preg_match( '#<button type="button" class="more" aria-expanded="false" aria-controls="verifica-detalii">[^<]+</button></p>#', $sec ) && 1 === preg_match( '#<div id="verifica-detalii" class="check-more" hidden>#', $sec ), "{$page}: \"Detalii\" under the field opens the folded panel" );
+	cmp_assert( 1 === preg_match( '#<p class="lead hero-lead">.*?</p>\n<div class="hero-foot">\n<div id="verifica" class="hero-check">#s', $sec ), "{$page}: the intro above the check, the check next to the download" );
 	cmp_assert( 1 === preg_match( '#<div\b[^>]*\bid="verifica-rezultat"[^>]*>#', $sec, $rm ) && false !== strpos( $rm[0], 'aria-live="polite"' ), "{$page}: result region with aria-live=polite" );
 	cmp_assert( false !== strpos( $html, '<script src="/assets/verifica.js" defer></script>' ), "{$page}: loads /assets/verifica.js" );
 	cmp_assert( false !== strpos( $sec, 'id="cum-verifici"' ), "{$page}: how to check it yourself (#cum-verifici)" );
@@ -693,7 +694,7 @@ foreach ( array(
 ) as $page => $t ) {
 	$html = $cmp_site_read( $page );
 	$hero = 1 === preg_match( '#<section class="hero".*?</section>#s', $html, $hsm ) ? $hsm[0] : '';
-	cmp_assert( false !== strpos( $hero, '<p class="lead"><strong>' . $t[0] . '</strong>' ), "{$page}: the lead starts by saying it is a free WordPress plugin" );
+	cmp_assert( false !== strpos( $hero, '<p class="lead hero-lead"><strong>' . $t[0] . '</strong>' ), "{$page}: the lead starts by saying it is a free WordPress plugin" );
 	cmp_assert( 1 === preg_match( '#id="verifica-buton">.*<p class="actions">\s*<a class="btn btn-ghost" data-download href="[^"]*">' . preg_quote( $t[2], '#' ) . '</a>#s', $hero ) && false !== strpos( $hero, $t[1] ), "{$page}: the check comes first, the download second" );
 	cmp_assert( 1 === preg_match( '#<p class="alt small">[^<]*<a data-standalone href="/(?:en/)?standalone/">#', $hero ), "{$page}: right under the buttons, the line for sites without WordPress" );
 	cmp_assert( 1 === preg_match( '#</h1>\s*<figure class="hero-demo" aria-labelledby="hero-demo-cap">.*?</figure>\s*<p class="urgent"><strong>' . preg_quote( $t[3], '#' ) . '</strong>#s', $hero ), "{$page}: after the title, the product picture and the law line" );
@@ -702,8 +703,8 @@ foreach ( array(
 	cmp_assert_eq( substr_count( $fig, '<li class="off">' ), substr_count( $fig, '<li class="on">' ), "{$page}: the same requests before (blocked) and after (loaded)" );
 	cmp_assert( 1 === preg_match( '#<div class="hd-banner" aria-hidden="true">#', $fig ) && false === strpos( $fig, '<button' ) && false === strpos( $fig, '<a ' ), "{$page}: the small banner is a picture, with nothing to click" );
 	preg_match_all( '#<section id="([a-z]+)"[^>]*>\s*<div class="wrap">\s*<div class="sh"><p class="n">(\d\d) · #', $html, $om );
-	cmp_assert_eq( $om[1], array( 'raport', 'functii', 'demo', 'instalare', 'legea', 'comparatie', 'resurse', 'incredere', 'intrebari' ), "{$page}: check, what it does, demo, install, then the law and the comparison" );
-	cmp_assert_eq( $om[2], array( '01', '02', '03', '04', '05', '06', '07', '08', '09' ), "{$page}: the section numbers follow the new order" );
+	cmp_assert_eq( $om[1], array( 'functii', 'demo', 'instalare', 'legea', 'comparatie', 'resurse', 'incredere', 'intrebari' ), "{$page}: what it does, demo, install, then the law and the comparison" );
+	cmp_assert_eq( $om[2], array( '01', '02', '03', '04', '05', '06', '07', '08' ), "{$page}: the section numbers follow the new order" );
 	cmp_assert( 1 === preg_match( '#<details id="cum-verifici" class="howto">\s*<summary>[^<]+</summary>\s*<ol>#', $html ), "{$page}: the manual how-to is folded" );
 	cmp_assert( false !== strpos( $cmp_site_js, "fixCta: '" . $t[6] . "'" ), "verifica.js ({$page}): the report ends with „{$t[6]}”" );
 }
