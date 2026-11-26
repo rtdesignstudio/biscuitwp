@@ -11,9 +11,8 @@ if ( ! defined( 'CMP_CHECK' ) ) {
  * (cmp_check_main).
  *
  * Request: POST, form-encoded or JSON, fields url (required, at most 2048
- * characters), lang (ro|en|ru, default ro) and owner (required: the visitor
- * confirms owning the site or having the owner's permission; JSON 1, "1" or
- * true, form "1"). Response: JSON
+ * characters) and lang (ro|en, default ro); an older page also sends owner,
+ * which is ignored. Response: JSON
  * { status, findings[], cmp, checked_url, engine: "html-v2", pages{}, passed[], top[] },
  * and for errors { status: "error", code, message, findings: [], cmp: null,
  * checked_url, engine }. The visitor's input is never echoed back; the URL is
@@ -58,7 +57,6 @@ function cmp_check_error_status( string $code ): int {
 	$map = array(
 		'method_not_allowed' => 405,
 		'bad_request'        => 400,
-		'owner_required'     => 400,
 		'bad_url'            => 400,
 		'blocked_address'    => 400,
 		'rate_limited'       => 429,
@@ -75,7 +73,6 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 		'ro' => array(
 			'method_not_allowed' => 'Verificarea se pornește din formularul de pe pagină.',
 			'bad_request'        => 'Scrie adresa site-ului pe care vrei să-l verifici.',
-			'owner_required'     => 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
 			'bad_url'            => 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.',
 			'blocked_address'    => 'Adresa duce spre o rețea privată sau rezervată. Putem verifica doar site-uri publice.',
 			'fetch_failed'       => 'Nu am putut deschide site-ul. Verifică adresa sau încearcă din nou mai târziu.',
@@ -92,7 +89,6 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 		'en' => array(
 			'method_not_allowed' => 'Start the check from the form on the page.',
 			'bad_request'        => 'Enter the address of the site you want to check.',
-			'owner_required'     => "Tick that you own the site or have the owner's permission.",
 			'bad_url'            => 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.',
 			'blocked_address'    => 'This address leads to a private or reserved network. We can only check public sites.',
 			'fetch_failed'       => 'We could not open the site. Check the address or try again later.',
@@ -105,23 +101,6 @@ function cmp_check_error_message( string $code, string $lang, int $status = 0 ):
 			'unavailable'        => 'The check is not available right now. Try again later.',
 			'busy'               => 'There are a lot of checks right now. Try again in a few minutes.',
 			'forbidden'          => 'The check can only be started from the biscuitwp.rt.md page.',
-		),
-		'ru' => array(
-			'method_not_allowed' => 'Проверка запускается из формы на странице.',
-			'bad_request'        => 'Введите адрес сайта, который хотите проверить.',
-			'owner_required'     => 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
-			'bad_url'            => 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-			'blocked_address'    => 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
-			'fetch_failed'       => 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
-			'timeout'            => 'Сайт ответил слишком медленно (более 10 секунд). Попробуйте ещё раз позже.',
-			'too_large'          => 'Главная страница больше 2 МБ, это слишком много для автоматической проверки.',
-			'too_many_redirects' => 'Сайт перенаправляет слишком много раз (более 3).',
-			'http_status'        => 'Сайт ответил ошибкой HTTP %d, поэтому мы не смогли прочитать страницу.',
-			'not_html'           => 'Адрес не ведёт на веб-страницу (HTML).',
-			'rate_limited'       => 'Вы сделали много проверок за короткое время. Попробуйте ещё раз через минуту.',
-			'unavailable'        => 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
-			'busy'               => 'Сейчас идёт очень много проверок. Попробуйте ещё раз через несколько минут.',
-			'forbidden'          => 'Проверку можно запустить только со страницы biscuitwp.rt.md.',
 		),
 	);
 	$lang = cmp_check_lang( $lang );
@@ -153,9 +132,8 @@ function cmp_check_is_html( array $headers ): bool {
 }
 
 /**
- * The request fields: array( url, lang, owner ) or null for a malformed
- * request. url is '' when missing. owner is true only for JSON 1, "1" or true
- * and form "1"; anything else (missing, 0, "on", "yes"...) is false.
+ * The request fields: array( url, lang ) or null for a malformed
+ * request. url is '' when missing.
  */
 function cmp_check_read_request( string $content_type, string $raw, array $post ) {
 	$json = 0 === stripos( ltrim( $content_type ), 'application/json' );
@@ -171,15 +149,13 @@ function cmp_check_read_request( string $content_type, string $raw, array $post 
 		$data = $post;
 	}
 	$url  = isset( $data['url'] ) ? $data['url'] : '';
-	$lang  = isset( $data['lang'] ) ? $data['lang'] : 'ro';
-	$owner = isset( $data['owner'] ) ? $data['owner'] : null;
+	$lang = isset( $data['lang'] ) ? $data['lang'] : 'ro';
 	if ( ! is_string( $url ) ) {
 		return null;
 	}
 	return array(
-		'url'   => trim( $url ),
-		'lang'  => cmp_check_lang( $lang ),
-		'owner' => '1' === $owner || ( $json && ( 1 === $owner || true === $owner ) ),
+		'url'  => trim( $url ),
+		'lang' => cmp_check_lang( $lang ),
 	);
 }
 
@@ -194,8 +170,7 @@ function cmp_check_allowed_origins(): array {
  * Order (cheapest and most restrictive first; nothing is written for a request
  * refused before its step):
  *  1. method (405), browser cross-site requests (403);
- *  2. request fields (400 bad_request), the owner confirmation (400
- *     owner_required), counter folder not inside the web root (503);
+ *  2. request fields (400 bad_request), counter folder not inside the web root (503);
  *  3. URL validation (400 bad_url): a bare site address only
  *     (cmp_check_normalize_input), checked on https; invalid input creates no
  *     counter file at all;
@@ -245,10 +220,6 @@ function cmp_check_handle( array $req, string $rate_dir, string $services_path, 
 	}
 	if ( null === $in || '' === $in['url'] ) {
 		return cmp_check_error( 'bad_request', $lang );
-	}
-	// The visitor must confirm owning the site (or the owner's permission): before any counter.
-	if ( true !== $in['owner'] ) {
-		return cmp_check_error( 'owner_required', $lang );
 	}
 	if ( cmp_check_dir_inside( $rate_dir, $get( 'docroot' ) ) ) {
 		return cmp_check_error( 'unavailable', $lang ); // Counters must never be web-reachable.

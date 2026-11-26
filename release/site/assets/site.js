@@ -8,7 +8,7 @@
 
 	var doc = document;
 	var root = doc.documentElement;
-	var en = root.lang === 'en', ru = root.lang === 'ru';
+	var en = root.lang === 'en';
 	var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	root.classList.add('js');
@@ -18,11 +18,72 @@
 		b.addEventListener('click', function () { window.print(); });
 	});
 
+	/* "Copiază" next to a block of code: hidden without clipboard access. */
+	Array.prototype.forEach.call(doc.querySelectorAll('[data-copy]'), function (b) {
+		var code = b.parentNode.querySelector('code');
+		var label = b.textContent;
+		if (!code || !navigator.clipboard) { return; }
+		b.hidden = false;
+		b.addEventListener('click', function () {
+			var say = function (text) {
+				b.textContent = text;
+				window.setTimeout(function () { b.textContent = label; }, 2500);
+			};
+			navigator.clipboard.writeText(code.textContent).then(function () { say(b.getAttribute('data-done')); }, function () { say(b.getAttribute('data-fail')); });
+		});
+	});
+
+	/* The biscuit of the hero: the shield in front, WP on the back, in layers (depth as a share of the width), and
+	   two turns when it comes on screen or under the pointer. Without this, a still picture. */
+	(function () {
+		var box = doc.querySelector('[data-coin]');
+		var pic = box && box.querySelector('img');
+		if (!pic || !window.IntersectionObserver) { return; }
+		var N = 9, DEPTH = 0.055;
+		var coin = doc.createElement('div');
+		coin.className = 'coin-in';
+		var backSrc = box.getAttribute('data-back');
+		var layer = function (z, cls, back) {
+			var im = pic.cloneNode(false);
+			if (backSrc && z < 0 || backSrc && back) { im.src = backSrc; }
+			im.className = cls;
+			im.style.transform = (back ? 'rotateY(180deg) ' : '') + 'translateZ(' + z.toFixed(2) + 'px)';
+			coin.appendChild(im);
+		};
+		var build = function () {
+			var t = box.offsetWidth * DEPTH / 2;
+			while (coin.firstChild) { coin.removeChild(coin.firstChild); }
+			for (var i = 0; i < N; i++) { layer((-t + 2 * t * i / (N - 1)) * 0.94, 'side', false); }
+			layer(t, 'face', true);
+			layer(t, 'face', false);
+		};
+		build();
+		box.replaceChild(coin, pic);
+		window.addEventListener('resize', build);
+		var spin = function () { box.classList.add('spin'); };
+		coin.addEventListener('animationend', function () { box.classList.remove('spin'); });
+		box.addEventListener('pointerenter', spin);
+		new IntersectionObserver(function (es) {
+			es.forEach(function (e) { if (e.isIntersecting) { spin(); } else { box.classList.remove('spin'); } });
+		}, { threshold: 0.4 }).observe(box);
+	})();
+
 	/* A link to a folded block (<details id>, e.g. #cum-verifici) opens it, on click and
 	   when the page loads with that address. */
+	/* "Detalii" under the check field opens the panel with what the check reads and
+	   what it misses; a link to a block inside it (#cum-verifici) opens it too. */
+	var more = doc.querySelector('[aria-controls="verifica-detalii"]');
+	var morePanel = doc.getElementById('verifica-detalii');
+	function showMore(on) {
+		if (!more || !morePanel) { return; }
+		morePanel.hidden = !on;
+		more.setAttribute('aria-expanded', on ? 'true' : 'false');
+	}
+	if (more) { more.addEventListener('click', function () { showMore(morePanel.hidden); }); }
 	function openFolded(hash) {
 		var id = hash && hash.charAt(0) === '#' ? hash.slice(1) : '';
 		var t = id ? doc.getElementById(id) : null;
+		if (t && morePanel && morePanel.contains(t)) { showMore(true); }
 		if (t && t.tagName === 'DETAILS') { t.open = true; }
 	}
 	openFolded(window.location.hash);
@@ -40,7 +101,7 @@
 	(function () {
 		var links = Array.prototype.slice.call(doc.querySelectorAll('.shot a'));
 		if (!links.length || typeof HTMLDialogElement !== 'function') { return; }
-		var L = en ? ['Close', 'Previous', 'Next', 'Screenshot'] : ru ? ['Закрыть', 'Предыдущий', 'Следующий', 'Снимок экрана'] : ['Închide', 'Anterioara', 'Următoarea', 'Captură de ecran'];
+		var L = en ? ['Close', 'Previous', 'Next', 'Screenshot'] : ['Închide', 'Anterioara', 'Următoarea', 'Captură de ecran'];
 
 		var dlg = doc.createElement('dialog');
 		dlg.className = 'lb';
@@ -126,7 +187,7 @@
 		var nav = header && header.querySelector('nav');
 		var bar = header && header.querySelector('.wrap');
 		if (!nav || !bar) { return; }
-		var L = en ? ['Menu', 'Close'] : ru ? ['Меню', 'Закрыть'] : ['Meniu', 'Închide'];
+		var L = en ? ['Menu', 'Close'] : ['Meniu', 'Închide'];
 
 		var btn = doc.createElement('button');
 		btn.className = 'menu-btn';
@@ -213,12 +274,19 @@
 	(function () {
 		var header = doc.querySelector('header.site');
 		if (!header) { return; }
-		var on = null;
+		var on = null, over = false;
+		var darks = [].slice.call(doc.querySelectorAll('section.dark'));
 		var upd = function () {
 			var s = window.scrollY > 40;
 			if (s !== on) { on = s; header.classList.toggle('scrolled', s); }
+			if (darks.length) {
+				var y = header.querySelector('.wrap').getBoundingClientRect().top + 40;
+				var dk = darks.some(function (el) { var r = el.getBoundingClientRect(); return r.top <= y && r.bottom >= y; });
+				if (dk !== over) { over = dk; header.classList.toggle('on-dark', dk); }
+			}
 		};
 		window.addEventListener('scroll', upd, { passive: true });
+		window.addEventListener('resize', upd);
 		upd();
 	})();
 
@@ -322,11 +390,11 @@
 
 	/* ---- Text lights up on scroll (rt.md .fd): each block of text in <main> goes from
 	   opacity .3 to 1 while it rises from the bottom of the screen towards the middle.
-	   Never the hero, the section headings, the tool (#verifica: form and results), the
+	   Never the hero, the section headings, the report (#raport), the
 	   tables or the demo. Only opacity and blur change: nothing moves. ----------------- */
 	(function () {
 		var SEL = 'main p, main li, main h3, main h4, main figure, main blockquote, main summary, main dt, main dd';
-		var SKIP = '.hero, .sh, #verifica, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
+		var SKIP = '.hero, .sh, #raport, #demo, table, .table-scroll, .frame, iframe, .switch, nav, [aria-hidden="true"]';
 		var all = [].slice.call(doc.querySelectorAll(SEL)).filter(function (el) { return !el.closest(SKIP); });
 		var set = new Set(all);
 		var els = all.filter(function (el) {

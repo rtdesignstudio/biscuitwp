@@ -1,0 +1,10 @@
+# The Russian pages are gone (2026-11-25): their addresses lead to the Romanian ones.
+# mod_rewrite, like the redirects of the old host.
+AddType application/manifest+json .webmanifest
+RewriteEngine On
+RewriteRule ^ru/privacy/?$ /confidentialitate/ [R=301,L]
+RewriteRule ^ru/security/?$ /securitate/ [R=301,L]
+RewriteRule ^ru/law-195/?$ /legea-195/ [R=301,L]
+RewriteRule ^ru/standalone/?$ /standalone/ [R=301,L]
+RewriteRule ^demo/ru(/.*)?$ /demo/ [R=301,L]
+RewriteRule ^ru(/.*)?$ / [R=301,L]

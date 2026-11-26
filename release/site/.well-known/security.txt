@@ -1,6 +1,6 @@
 Contact: mailto:security@rt.md
 Contact: https://github.com/rtdesignstudio/biscuitwp/security/advisories/new
-Expires: 2027-05-23T14:37:54Z
+Expires: 2027-05-25T09:58:20Z
 Preferred-Languages: ro, en, ru
 Canonical: https://biscuitwp.rt.md/.well-known/security.txt
 Policy: https://biscuitwp.rt.md/en/security/

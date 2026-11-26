@@ -280,7 +280,6 @@ function cmp_check_extra_services() {
 			'name'      => array(
 				'ro' => 'Google Ads',
 				'en' => 'Google Ads',
-				'ru' => 'Google Ads',
 			),
 			'type'      => 'script',
 			'category'  => 'marketing',
@@ -294,7 +293,6 @@ function cmp_check_extra_services() {
 			'name'      => array(
 				'ro' => 'Yandex Metrica',
 				'en' => 'Yandex Metrica',
-				'ru' => 'Яндекс Метрика',
 			),
 			'type'      => 'script',
 			'category'  => 'statistics',

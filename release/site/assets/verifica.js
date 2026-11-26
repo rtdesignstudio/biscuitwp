@@ -1,18 +1,17 @@
 /* BiscuitWP, biscuitwp.rt.md: the "Verifică-ți site-ul" tool, its confetti
-   and the demo style switch. No libraries, nothing loaded from other sites.
+   No libraries, nothing loaded from other sites.
    Everything that comes from the server (titles, explanations, the checked address)
    is written with textContent only, never parsed as HTML. */
 (function () {
 	'use strict';
 
 	var doc = document;
-	// 'ro' (default), 'en' or 'ru', from <html lang>; anything else reads as Romanian.
-	var LANG = doc.documentElement.lang === 'en' || doc.documentElement.lang === 'ru' ? doc.documentElement.lang : 'ro';
-	// 1240 -> "1.240" (ro), "1,240" (en) or "1 240" (ru, a no-break space): fixed, not left to the browser's locale data.
+	// 'ro' (default) or 'en', from <html lang>; anything else reads as Romanian.
+	var LANG = doc.documentElement.lang === 'en' ? 'en' : 'ro';
+	// 1240 -> "1.240" (ro), "1,240" (en): fixed, not left to the browser's locale data.
 	function group(n, sep) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep); }
 	var T = LANG === 'en' ? {
 		empty: 'Enter your site\'s address, for example example.com.',
-		owner: "Tick that you own the site or have the owner's permission.",
 		checking: 'Checking the site, up to 10 pages. It can take up to 45 seconds.',
 		steps: [
 			'Opening the homepage as a new visitor',
@@ -70,6 +69,7 @@
 		oursText: 'Check script blocking and the service list in its settings, then update the plugin to the latest version.',
 		checks: function (n) { return group(n, ',') + ' checks so far'; },
 		foundTitle: 'What we find most often',
+		another: 'Check another site',
 		savePdf: 'Save as PDF',
 		copy: 'Copy the report',
 		copied: 'Report copied. Paste it into an email or a message.',
@@ -88,7 +88,6 @@
 		errorTitle: 'We could not check the site',
 		errors: {
 			bad_request: 'Enter your site\'s address, for example example.com.',
-			owner_required: "Tick that you own the site or have the owner's permission.",
 			bad_url: 'Enter only the site address, for example example.md. We check the homepage and the other pages ourselves.',
 			blocked_address: 'This address leads to a private or reserved network. We can only check public sites.',
 			fetch_failed: 'We could not open the site. Check the address or try again later.',
@@ -105,104 +104,8 @@
 			network: 'We could not reach our server. Check your connection and try again.',
 			slow: 'The check took too long. Try again later.'
 		}
-	} : LANG === 'ru' ? {
-		empty: 'Введите адрес сайта, например example.md.',
-		owner: 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
-		checking: 'Проверяем сайт, до 10 страниц. Это может занять до 45 секунд.',
-		steps: [
-			'Открываем главную страницу как новый посетитель',
-			'Ищем страницы сайта (sitemap)',
-			'Проверяем до 10 страниц',
-			'Ищем трекеры: Google Analytics, Meta Pixel, Yandex, Clarity и другие',
-			'Проверяем файлы cookie, установленные до согласия',
-			'Ищем ресурсы, которые передают IP-адрес: Google Fonts, CDN, Gravatar',
-			'Ищем баннер cookie и ссылку на политику'
-		],
-		cancelled: 'Вы отменили проверку.',
-		law: 'Правовая основа: ',
-		cleanVerdict: 'На проверенных страницах мы не нашли проблем.',
-		cleanLimits: 'Чего мы не видим отсюда: что загружают скрипты после запуска страницы, что сайт делает с данными и что написано в его политике.',
-		issuesTitle: function (n) { return n === 1 ? 'Мы нашли одну проблему' : 'Мы нашли ' + n + ' ' + ru(n, 'проблему', 'проблемы', 'проблем'); },
-		unsureTitle: 'Мы не можем быть уверены',
-		unsureText: 'На сайте есть что-то, что может загружать трекеры, которых мы не видим отсюда. Проверьте сами, за 5 минут, с помощью DevTools.',
-		facts: [function (n) { return ru(n, 'проблема', 'проблемы', 'проблем'); }, function () { return 'нужно проверить'; }, function () { return 'в порядке'; }],
-		stopped: {
-			requests: function (n) { return 'Мы остановились после ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + ': на сайте много перенаправлений или файлов, а у проверки есть лимит запросов.'; },
-			time: function (n) { return 'Мы остановились после ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + ', чтобы проверка не длилась слишком долго.'; }
-		},
-		pagesChecked: function (n) { return n === 1 ? 'Мы проверили одну страницу.' : 'Мы проверили ' + n + ' ' + ru(n, 'страницу', 'страницы', 'страниц') + '.'; },
-		more: {
-			sitemap: function (n, c) { return 'На сайте ' + n + ' ' + ru(n, 'страница', 'страницы', 'страниц') + '; мы проверили первые ' + c + '. Полная проверка сейчас недоступна.'; },
-			links: function (n, c) { return 'На сайте не менее ' + n + ' ' + ru(n, 'страницы', 'страниц', 'страниц') + '; мы проверили первые ' + c + '. Полная проверка сейчас недоступна.'; }
-		},
-		failed: 'Не удалось прочитать: ',
-		failCodes: {
-			timeout: 'не ответила вовремя',
-			too_large: 'страница слишком большая',
-			other_host: 'ведёт на другой сайт',
-			limit: 'достигнут лимит запросов',
-			fetch_failed: 'не удалось прочитать',
-			http_status: 'не удалось прочитать',
-			not_html: 'не удалось прочитать'
-		},
-		failOther: 'не удалось прочитать',
-		badAddress: 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-		first: 'С чего начать',
-		issuesList: 'Проблемы',
-		unsureList: 'Нужно проверить',
-		found: 'Что мы нашли',
-		onPages: 'На каких страницах',
-		why: 'Почему это важно',
-		howFix: 'Как исправить',
-		withCmp: 'С BiscuitWP: ',
-		passed: 'В порядке',
-		info: 'Полезно знать',
-		howto: 'Как проверить самостоятельно',
-		fixTitle: 'BiscuitWP это исправляет',
-		fixCta: 'Исправить с помощью плагина',
-		fixText: 'Блокирует трекеры до согласия, переносит Google Fonts на ваш сервер и даёт вам правовые тексты для Молдовы. Бесплатно.',
-		oursTitle: 'Вы уже используете BiscuitWP',
-		oursText: 'Проверьте в настройках блокировку скриптов и список сервисов, затем обновите плагин до последней версии.',
-		checks: function (n) { return group(n, ' ') + ' ' + ru(n, 'проверка', 'проверки', 'проверок') + ' с момента запуска'; },
-		foundTitle: 'Что мы находим чаще всего',
-		savePdf: 'Сохранить как PDF',
-		copy: 'Скопировать отчёт',
-		copied: 'Мы скопировали отчёт. Вставьте его в письмо или сообщение.',
-		copyFailed: 'Не удалось скопировать отчёт. Используйте «Сохранить как PDF».',
-		months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
-		printHead: function (d) { return 'Отчёт «Проверьте свой сайт» с biscuitwp.rt.md, ' + d; },
-		copyFoot: function (d, url) { return 'Отчёт сделан с помощью «Проверьте свой сайт», ' + url + ', ' + d + '.'; },
-		foundKinds: { 'tracker': 'Трекер запущен до согласия', 'google-fonts': 'Google Fonts загружаются с Google', 'ip-resources': 'Другие ресурсы, передающие IP-адрес посетителя', 'no-banner': 'Трекеры вообще без баннера cookie', 'no-policy': 'Нет ссылки на политику конфиденциальности' },
-		foundNote: function (n) { return 'Из ' + group(n, ' ') + ' ' + ru(n, 'проверки, сделанной', 'проверок, сделанных', 'проверок, сделанных') + ' с помощью инструмента. Сайт, проверенный несколько раз, учитывается каждый раз.'; },
-		otherTitle: 'Ваш сайт, похоже, сделан не на WordPress',
-		otherText: 'Проблемы выше актуальны на любой платформе и исправляются в коде сайта. BiscuitWP является плагином для WordPress; для других сайтов есть автономная версия (standalone): два файла, а скрипты, которые ждут согласия, вы помечаете сами.',
-		standalone: 'Автономная версия',
-		download: 'Скачать',
-		latest: 'Последняя версия',
-		features: 'Что он умеет',
-		errorTitle: 'Мы не смогли проверить сайт',
-		errors: {
-			bad_request: 'Введите адрес сайта, например example.md.',
-			owner_required: 'Отметьте, что сайт принадлежит вам или у вас есть разрешение владельца.',
-			bad_url: 'Введите только адрес сайта, например example.md. Главную и остальные страницы мы проверяем сами.',
-			blocked_address: 'Адрес ведёт в частную или зарезервированную сеть. Мы можем проверять только публичные сайты.',
-			fetch_failed: 'Мы не смогли открыть сайт. Проверьте адрес или попробуйте ещё раз позже.',
-			timeout: 'Сайт ответил слишком медленно. Попробуйте ещё раз позже.',
-			too_large: 'Главная страница больше 2 МБ, это слишком много для автоматической проверки.',
-			too_many_redirects: 'Сайт перенаправляет слишком много раз.',
-			http_status: 'Сайт ответил ошибкой, поэтому мы не смогли прочитать страницу.',
-			not_html: 'Адрес не ведёт на веб-страницу.',
-			rate_limited: 'Вы сделали много проверок за короткое время. Попробуйте через минуту.',
-			busy: 'Сейчас очень много проверок. Попробуйте ещё раз через несколько минут.',
-			unavailable: 'Проверка сейчас недоступна. Попробуйте ещё раз позже.',
-			forbidden: 'Перезагрузите страницу и попробуйте ещё раз.',
-			method_not_allowed: 'Перезагрузите страницу и попробуйте ещё раз.',
-			network: 'Мы не смогли связаться с нашим сервером. Проверьте подключение и попробуйте ещё раз.',
-			slow: 'Проверка заняла слишком много времени. Попробуйте ещё раз позже.'
-		}
 	} : {
 		empty: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-		owner: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
 		checking: 'Verificăm site-ul, până la 10 pagini. Poate dura până la 45 de secunde.',
 		steps: [
 			'Deschidem pagina principală, ca un vizitator nou',
@@ -260,6 +163,7 @@
 		oursText: 'Verifică în setări blocarea scripturilor și lista de servicii, apoi actualizează pluginul la ultima versiune.',
 		checks: function (n) { return group(n, '.') + (n % 100 === 0 || n % 100 >= 20 ? ' de verificări' : ' verificări') + ' făcute până acum'; },
 		foundTitle: 'Ce găsim cel mai des',
+		another: 'Verifică alt site',
 		savePdf: 'Salvează ca PDF',
 		copy: 'Copiază raportul',
 		copied: 'Am copiat raportul. Lipește-l într-un email sau mesaj.',
@@ -278,7 +182,6 @@
 		errorTitle: 'Nu am putut verifica site-ul',
 		errors: {
 			bad_request: 'Scrie adresa site-ului, de exemplu exemplu.md.',
-			owner_required: 'Bifează că deții site-ul sau ai permisiunea proprietarului.',
 			bad_url: 'Scrie doar adresa site-ului, de exemplu exemplu.md. Verificăm singuri pagina principală și celelalte pagini.',
 			blocked_address: 'Adresa duce spre o rețea privată sau rezervată. Putem verifica doar site-uri publice.',
 			fetch_failed: 'Nu am putut deschide site-ul. Verifică adresa sau încearcă din nou mai târziu.',
@@ -298,11 +201,6 @@
 	};
 	// Romanian numerals: „20 de pagini”, but „5 pagini” and „101 pagini” (n % 100 from 1 to 19).
 	function de(n, word) { var r = n % 100; return (r >= 1 && r <= 19 ? ' ' : ' de ') + word; }
-	// Russian plurals: 1, 21 проверка (one); 2-4, 22-24 проверки (few); 0, 5-20, 25 проверок (many).
-	function ru(n, one, few, many) {
-		var a = n % 10, b = n % 100;
-		return a === 1 && b !== 11 ? one : (a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many);
-	}
 
 	/* The visitor's field, checked like the server does (site/api/lib/fetch.php,
 	   cmp_check_normalize_input): a bare domain only. Returns the host (punycode
@@ -383,33 +281,16 @@
 	}
 	/* /confetti */
 
-	/* The demo style switch: links target the demo iframe; we only mark the current one. */
-	Array.prototype.forEach.call(doc.querySelectorAll('.switch a[data-style]'), function (a) {
-		a.addEventListener('click', function () {
-			Array.prototype.forEach.call(doc.querySelectorAll('.switch a[data-style]'), function (b) { b.removeAttribute('aria-current'); });
-			a.setAttribute('aria-current', 'true');
-		});
-	});
-
 	var form = doc.getElementById('verifica-form');
 	var out = doc.getElementById('verifica-rezultat');
-	if (!form || !out || !window.fetch || !window.AbortController || !doc.getElementById('verifica-owner')) { return; }
+	if (!form || !out || !window.fetch || !window.AbortController) { return; }
 	form.hidden = false; // Without JS (or fetch) the form stays hidden; the <noscript> text explains.
 	var input = doc.getElementById('verifica-url');
 	var submit = doc.getElementById('verifica-buton');
 	var cancel = doc.getElementById('verifica-anuleaza');
-	var owner = doc.getElementById('verifica-owner');
-	var ownerErr = doc.getElementById('verifica-owner-eroare');
 	var urlErr = doc.getElementById('verifica-eroare');
 	var ctrl = null, timer = null, slow = false;
 
-	// The owner box: required. Unticked, the message sits right under it.
-	function ownerError() {
-		if (!owner) { return; }
-		owner.setAttribute('aria-invalid', 'true');
-		if (ownerErr) { ownerErr.textContent = T.owner; ownerErr.hidden = false; }
-		owner.focus();
-	}
 	// The counter line under the form: the total of successful checks, from 100 on.
 	var counter = doc.getElementById('verifica-contor');
 	var checks = -1;
@@ -456,12 +337,6 @@
 		box.appendChild(el('p', 'muted small', T.foundNote(of)));
 		box.hidden = false;
 	}
-	function ownerOk() {
-		if (!owner) { return; }
-		owner.removeAttribute('aria-invalid');
-		if (ownerErr) { ownerErr.textContent = ''; ownerErr.hidden = true; }
-	}
-	if (owner) { owner.addEventListener('change', function () { if (owner.checked) { ownerOk(); } }); }
 
 	function clear() {
 		while (out.firstChild) { out.removeChild(out.firstChild); }
@@ -575,9 +450,20 @@
 		});
 		wrap.appendChild(pdf);
 		wrap.appendChild(cp);
+		wrap.appendChild(another());
 		wrap.appendChild(msg);
 		r.box.appendChild(wrap);
 		markHtml('has-report', true);
+	}
+	// „Verifică alt site”: back to the field, in the hero.
+	function another() {
+		var b = el('button', 'btn btn-ghost r-again', T.another);
+		b.setAttribute('type', 'button');
+		b.addEventListener('click', function () {
+			input.value = '';
+			input.focus();
+		});
+		return b;
 	}
 	function busy(on) {
 		submit.disabled = on;
@@ -762,10 +648,12 @@
 		var msg = T.errors[code] || str(serverMessage) || T.errors.unavailable;
 		if (code === 'http_status' && str(serverMessage)) { msg = str(serverMessage); }
 		r.box.appendChild(el('p', null, msg));
-		if (code === 'owner_required') { ownerError(); }
-		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request' && code !== 'owner_required') {
+		if (code !== 'rate_limited' && code !== 'busy' && code !== 'bad_url' && code !== 'bad_request') {
 			actions(r.box, [['#cum-verifici', T.howto, 'btn btn-ghost']]);
 		}
+		var again = el('p', 'actions');
+		again.appendChild(another());
+		r.box.appendChild(again);
 		show(r);
 	}
 
@@ -898,6 +786,13 @@
 		busy(false);
 	}
 
+	// The report opens under the hero: bring it into view, and move the focus off the
+	// button that just got disabled (to the block itself, so Enter cannot hit Cancel).
+	function toReport() {
+		if (out.scrollIntoView) { out.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); }
+		out.focus({ preventScroll: true });
+	}
+
 	cancel.addEventListener('click', function () {
 		if (ctrl) { ctrl.abort(); }
 	});
@@ -908,30 +803,17 @@
 		var url = (input.value || '').trim();
 		if (urlErr) { urlErr.textContent = ''; urlErr.hidden = true; }
 		input.removeAttribute('aria-invalid');
-		if (url && !siteAddress(url)) {
-			// Not a bare domain: say so next to the field, send nothing.
-			clear();
+		if (!url || !siteAddress(url)) {
+			// Nothing to check: say so next to the field, send nothing, stay in the hero.
 			input.setAttribute('aria-invalid', 'true');
-			if (urlErr) { urlErr.textContent = T.badAddress; urlErr.hidden = false; } else { clear(); out.appendChild(el('p', 'r-loading', T.badAddress)); }
+			if (urlErr) { urlErr.textContent = url ? T.badAddress : T.empty; urlErr.hidden = false; }
 			input.focus();
 			return;
 		}
-		if (!url) {
-			var r0 = box('error', T.errorTitle);
-			r0.box.appendChild(el('p', null, T.empty));
-			show(r0);
-			input.focus();
-			return;
-		}
-		if (!owner.checked) {
-			clear();
-			ownerError();
-			return;
-		}
-		ownerOk();
 		status(T.checking);
 		stepsStart();
 		busy(true);
+		toReport();
 		ctrl = new window.AbortController();
 		slow = false;
 		var mine = ctrl;
@@ -939,7 +821,7 @@
 		window.fetch('/api/verifica.php', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-			body: JSON.stringify({ url: url, lang: LANG, owner: 1 }),
+			body: JSON.stringify({ url: url, lang: LANG }),
 			credentials: 'same-origin',
 			cache: 'no-store',
 			signal: mine.signal
