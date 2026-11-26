@@ -30,7 +30,7 @@ $_POST = isset( $in['post'] ) ? $in['post'] : array();
 
 function cmp_pr_done() {
 	$p = $GLOBALS['pr'];
-	echo json_encode( array( 'status' => $p['status'], 'body' => $p['body'], 'transients' => $p['transients'], 'options' => $p['options'], 'cookies' => $p['cookies'], 'registered' => $p['registered'] ) );
+	echo json_encode( array( 'status' => $p['status'], 'body' => $p['body'], 'transients' => $p['transients'], 'options' => $p['options'], 'cookies' => $p['cookies'], 'registered' => $p['registered'], 'wpml_after' => isset( $p['wpml_lang'] ) ? $p['wpml_lang'] : null, 'switches' => isset( $p['switches'] ) ? $p['switches'] : array() ) );
 	exit;
 }
 function current_user_can( $c ) { return 'manage_options' === $c && $GLOBALS['pr']['cap']; }
@@ -92,6 +92,19 @@ function esc_attr__( $t, $d = null ) { return esc_attr( $t ); }
 if ( ! empty( $in['wpml'] ) ) {
 	function icl_register_string( $c, $n, $v ) { $GLOBALS['pr']['registered'][] = $n; }
 	function icl_t( $c, $n, $v ) { return $v; }
+	$GLOBALS['pr']['wpml_lang'] = array_key_exists( 'wpml_current', $in ) ? $in['wpml_current'] : 'ro';
+	define( 'ICL_LANGUAGE_CODE', null === $GLOBALS['pr']['wpml_lang'] ? 'ro' : $GLOBALS['pr']['wpml_lang'] );
+	if ( empty( $in['pll_compat'] ) ) {
+		define( 'ICL_SITEPRESS_VERSION', '4.7.0' );
+	} else {
+		// Polylang's WPML compatibility layer: the WPML constant and filters, no WPML.
+		function pll_current_language() { return $GLOBALS['pr']['wpml_lang']; }
+	}
+	function do_action( $h, $v = null ) {
+		if ( 'wpml_switch_language' === $h ) { $GLOBALS['pr']['wpml_lang'] = $v; $GLOBALS['pr']['switches'][] = $v; }
+	}
+	add_filter( 'wpml_default_language', function () use ( $in ) { return isset( $in['wpml_default'] ) ? $in['wpml_default'] : 'ro'; } );
+	add_filter( 'wpml_current_language', function () { return $GLOBALS['pr']['wpml_lang']; } );
 }
 $root = dirname( __DIR__, 2 );
 foreach ( array( 'class-assets.php', 'class-consent.php', 'class-contrast.php', 'class-appearance.php', 'class-sanitizer.php', 'modules/class-lang.php', 'modules/class-i18n.php', 'modules/class-scanner.php', 'modules/class-banner.php', 'modules/class-preview.php' ) as $f ) {

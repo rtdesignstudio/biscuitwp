@@ -268,6 +268,21 @@ class CMP_Preview {
 		$cmp_a           = CMP_Banner::appearance( $settings );
 		$no_overlay      = false;
 		$level           = ob_get_level();
+		// WPML: its current language in the admin is the admin's; show the site's default.
+		// Only real WPML: Polylang's WPML layer defines the same constant and filters.
+		$switched = false;
+		$wpml_cur = null;
+		if ( '' === (string) $lang && defined( 'ICL_SITEPRESS_VERSION' ) && ! function_exists( 'pll_current_language' ) && function_exists( 'apply_filters' ) && function_exists( 'do_action' ) ) {
+			$wpml_def = apply_filters( 'wpml_default_language', null );
+			$wpml_cur = apply_filters( 'wpml_current_language', null );
+			if ( is_string( $wpml_def ) && '' !== $wpml_def && $wpml_def !== $wpml_cur ) {
+				do_action( 'wpml_switch_language', $wpml_def );
+				$switched = true;
+			}
+			if ( is_string( $wpml_def ) && '' !== $wpml_def ) {
+				CMP_Lang::$force = $wpml_def;
+			}
+		}
 		try {
 			ob_start();
 			include CMP_PATH . ( 'light' === $mode ? 'templates/banner-light.php' : 'templates/banner-bottom.php' );
@@ -277,7 +292,12 @@ class CMP_Preview {
 			while ( ob_get_level() > $level ) {
 				ob_end_clean();
 			}
-			CMP_I18n::$dry = $dry;
+			CMP_I18n::$dry   = $dry;
+			CMP_Lang::$force = null;
+			if ( $switched ) {
+				// null resets WPML to its own language for the request ('' would be an invalid code).
+				do_action( 'wpml_switch_language', is_string( $wpml_cur ) && '' !== $wpml_cur ? $wpml_cur : null );
+			}
 			remove_filter( 'determine_locale', $force, PHP_INT_MAX );
 		}
 		return array(

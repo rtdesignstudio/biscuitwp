@@ -82,3 +82,22 @@ $pr_js = (string) file_get_contents( __DIR__ . '/../assets/js/admin-appearance.j
 cmp_assert( 1 === preg_match( "/id\\.value = m\\.id;\\s*id\\.dispatchEvent\\(new Event\\('change', \\{ bubbles: true \\}\\)\\);/", $pr_js ), 'live preview: choosing a picture or logo refreshes it' );
 cmp_assert( 1 === preg_match( "/accent\\.value = proposed;[^\\n]*accent\\.dispatchEvent\\(new Event\\('input', \\{ bubbles: true \\}\\)\\)/", $pr_js ), 'live preview: the proposed accent refreshes it' );
 cmp_assert( false !== strpos( $pr_js, "form.querySelector('[name*=\"[theme]\"]:checked')" ) && false !== strpos( $pr_js, "base === 'light'" ) && false !== strpos( $pr_js, "classList.remove('cmp--theme-auto')" ), 'live preview: the dark switch follows the theme chosen in the form' );
+
+// 1.2.1: the details left from the review.
+$pr_js = (string) file_get_contents( __DIR__ . '/../assets/js/admin-appearance.js' );
+cmp_assert( false !== strpos( $pr_js, '.cmp a,.cmp-light a{pointer-events:none}' ), 'live preview 1.2.1: links in the frame do nothing (the privacy link no longer loads a page in it)' );
+cmp_assert( 1 === preg_match( '/if \(key === sent\) \{ return; \}/', $pr_js ), 'live preview 1.2.1: the same form is never sent twice (input then change on blur)' );
+cmp_assert( false !== strpos( $pr_js, "langSel.addEventListener('change', later)" ) && false === strpos( $pr_js, "langSel.addEventListener('change', request)" ), 'live preview 1.2.1: the language select waits like the rest' );
+cmp_assert( false !== strpos( $pr_js, 'if (!root.open) { return; }' ) && false !== strpos( $pr_js, "root.addEventListener('toggle'" ), 'live preview 1.2.1: no request while the panel is folded; one when it opens' );
+
+// With WPML, by default the site's default language, not the admin's WPML language.
+$r = $pr_run( array( 'cap' => true, 'wpml' => true, 'wpml_current' => 'en', 'wpml_default' => 'ru', 'post' => array( 'nonce' => 'good-render', 'lang' => '', 'cmp' => $pr_form ) ) );
+cmp_assert( false !== strpos( isset( $r['body']['data']['html'] ) ? $r['body']['data']['html'] : '', 'lang="ru"' ), 'live preview 1.2.1: with WPML, the default language of the site' );
+cmp_assert( isset( $r['wpml_after'] ) && 'en' === $r['wpml_after'], 'live preview 1.2.1: the WPML language is switched back after the render' );
+
+// 1.2.1 review fixes.
+cmp_assert( false !== strpos( $pr_js, ".replace(/\\shref=\"[^\"]*\"/g, '')" ), 'live preview 1.2.1: links in the frame have no address (not even the keyboard opens them)' );
+$r = $pr_run( array( 'cap' => true, 'wpml' => true, 'pll_compat' => true, 'wpml_current' => 'en', 'wpml_default' => 'ru', 'post' => array( 'nonce' => 'good-render', 'lang' => '', 'cmp' => $pr_form ) ) );
+cmp_assert( ! empty( $r['body']['success'] ) && array() === ( isset( $r['switches'] ) ? $r['switches'] : null ) && false === strpos( isset( $r['body']['data']['html'] ) ? $r['body']['data']['html'] : '', 'lang="ru"' ), 'live preview 1.2.1: Polylang with its WPML layer is left alone' );
+$r = $pr_run( array( 'cap' => true, 'wpml' => true, 'wpml_current' => null, 'wpml_default' => 'ru', 'post' => array( 'nonce' => 'good-render', 'lang' => '', 'cmp' => $pr_form ) ) );
+cmp_assert_eq( isset( $r['switches'] ) ? $r['switches'] : null, array( 'ru', null ), 'live preview 1.2.1: with no WPML language before, it is reset with null (not an empty code)' );

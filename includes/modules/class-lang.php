@@ -180,8 +180,14 @@ class CMP_Lang {
 		);
 	}
 
+	/** Set only for one render (the Aspect live preview): wins over WPML / Polylang / the locale. */
+	public static $force = null;
+
 	/** Current page language (WPML → Polylang → locale → ro). */
 	public static function current() {
+		if ( is_string( self::$force ) && '' !== self::$force ) {
+			return self::normalize( self::$force );
+		}
 		if ( defined( 'ICL_LANGUAGE_CODE' ) && ICL_LANGUAGE_CODE ) {
 			return self::normalize( ICL_LANGUAGE_CODE );
 		}

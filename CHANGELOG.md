@@ -2,6 +2,14 @@
 
 BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
 
+## 1.2.1 – TBD
+
+- Previzualizarea din Aspect: linkurile din banner nu mai deschid pagini în
+  cadru, același formular nu se mai trimite de două ori, iar cât panoul e
+  pliat nu se mai cere nimic.
+- Cu WPML, previzualizarea arată implicit limba principală a site-ului, nu
+  limba aleasă de admin în WPML.
+
 ## 1.2.0 – 2026-11-26
 
 - Biblioteca de servicii are două servicii noi: Google AdSense (marketing)

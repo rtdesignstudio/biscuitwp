@@ -421,7 +421,7 @@
 		var status = root.querySelector('[data-cmp-live-status]'), langSel = root.querySelector('[data-cmp-live-lang]');
 		var light = (document.querySelector('[data-cmp-ap]') || root).getAttribute('data-cmp-ap-mode') === 'light';
 		var st = { view: 'desktop', theme: 'light', pane: 'banner' }, SIZES = { desktop: [1280, 800], phone: [375, 667] };
-		var seq = 0, xhr = null, timer = null;
+		var seq = 0, xhr = null, timer = null, sent = '';
 		root.hidden = false;
 		if (light) {
 			var pg = root.querySelector('[data-cmp-live-pane]');
@@ -464,15 +464,22 @@
 				'<style>html,body{margin:0;min-height:100%}body{background:#eef0f3;font:16px/1.5 system-ui,sans-serif}body.dark{background:#16181d}' +
 				'.fake{max-width:720px;margin:0 auto;padding:48px 24px}.fake b{display:block;height:28px;width:60%;margin:0 0 24px;background:#d5d9e0;border-radius:4px}' +
 				'.fake i{display:block;height:12px;margin:0 0 14px;background:#dde1e7;border-radius:4px}.dark .fake b,.dark .fake i{background:#2a2e36}' +
-				'.cmp,.cmp *,.cmp-light,.cmp-light *{animation:none!important;transition:none!important}</style></head>' +
-				'<body><div class="fake" aria-hidden="true"><b></b>' + lines + '</div>' + (p.html || '') + '</body></html>';
+				'.cmp,.cmp *,.cmp-light,.cmp-light *{animation:none!important;transition:none!important}.cmp a,.cmp-light a{pointer-events:none}</style></head>' +
+				'<body><div class="fake" aria-hidden="true"><b></b>' + lines + '</div>' + String(p.html || '').replace(/\shref="[^"]*"/g, '') + '</body></html>';
 		}
 		function request() {
-			var my = ++seq, fd = new FormData(form);
-			if (xhr) { xhr.abort(); }
+			// Folded (narrow screens): nothing to show, nothing to ask; it renders when opened.
+			if (!root.open) { return; }
+			var fd = new FormData(form), key = '';
 			fd.set('action', 'cmp_preview_render');
 			fd.set('nonce', root.getAttribute('data-cmp-live-nonce') || '');
 			fd.set('lang', langSel ? langSel.value : '');
+			fd.forEach(function (v, k) { key += k + '=' + (typeof v === 'string' ? v : '') + '&'; });
+			// A text field fires input, then change on blur: the same form once only.
+			if (key === sent) { return; }
+			sent = key;
+			var my = ++seq;
+			if (xhr) { xhr.abort(); }
 			status.textContent = root.getAttribute('data-cmp-live-busy') || '';
 			xhr = new XMLHttpRequest();
 			xhr.open('POST', root.getAttribute('data-cmp-live-ajax') || '', true);
@@ -480,11 +487,11 @@
 				if (my !== seq) { return; }
 				var r = null;
 				try { r = JSON.parse(xhr.responseText); } catch (e) { r = null; }
-				if (!r || !r.success || !r.data) { status.textContent = root.getAttribute('data-cmp-live-error') || ''; return; }
+				if (!r || !r.success || !r.data) { sent = ''; status.textContent = root.getAttribute('data-cmp-live-error') || ''; return; }
 				status.textContent = '';
 				frame.srcdoc = page(r.data);
 			};
-			xhr.onerror = function () { if (my === seq) { status.textContent = root.getAttribute('data-cmp-live-error') || ''; } };
+			xhr.onerror = function () { if (my === seq) { sent = ''; status.textContent = root.getAttribute('data-cmp-live-error') || ''; } };
 			xhr.send(fd);
 		}
 		function later() {
@@ -495,11 +502,12 @@
 		frame.addEventListener('load', apply);
 		form.addEventListener('input', later);
 		form.addEventListener('change', later);
-		if (langSel) { langSel.addEventListener('change', request); }
+		if (langSel) { langSel.addEventListener('change', later); }
+		root.addEventListener('toggle', function () { if (root.open) { fit(); request(); } });
 		// The texts tab opened (RO / RU / EN) is the language shown.
 		document.addEventListener('click', function (e) {
 			var tab = e.target && e.target.closest ? e.target.closest('[data-cmp-ap-tab]') : null;
-			if (tab && langSel) { langSel.value = tab.getAttribute('data-cmp-ap-tab'); request(); }
+			if (tab && langSel) { langSel.value = tab.getAttribute('data-cmp-ap-tab'); later(); }
 		});
 		root.addEventListener('click', function (e) {
 			var b = e.target && e.target.closest ? e.target.closest('.cmp-live__sw') : null;
