@@ -2,18 +2,26 @@
     "format": 1,
     "slug": "consent-manager-pro",
     "channel": "beta",
-    "version": "1.2.0",
-    "package": "https://github.com/rtdesignstudio/consent-manager-pro/releases/download/v1.2.0/consent-manager-pro.zip",
-    "sha256": "cb400d251c8d17d7ebdb1d6b2901516ce942c2bf62ba938eb0c7eda7eea31837",
-    "signature": "eln7c6x0V5UWOIxUNPP6nP5RQ+o52m28snA33vYrSSwVG79AMgrTLCtOOqI1HIFxosEnyEhthL7DWI7T9FphAA==",
+    "version": "1.2.1",
+    "package": "https://github.com/rtdesignstudio/consent-manager-pro/releases/download/v1.2.1/consent-manager-pro.zip",
+    "sha256": "2c485bf695c6fadb8021dbc51aa605dc620125f3fe20439e3d2476f2e436537a",
+    "signature": "778Beb2mbRP9+pBneTo+qfToXgIITJYCxSWoIF+d3T/q2wQsQkuXsNn9HRcqPvqYaH5RKuBbKI3/Z4yP4aDpDQ==",
     "requires_wp": "6.0",
     "requires_php": "7.4",
     "tested_wp": "6.9",
-    "released": "2026-11-26T10:29:04Z",
-    "issued": "2026-11-26T10:29:04Z",
-    "expires": "2027-01-25T10:29:04Z",
+    "released": "2026-11-26T13:02:35Z",
+    "issued": "2026-11-26T13:02:35Z",
+    "expires": "2027-01-25T13:02:35Z",
     "revoked": [],
     "notes": [
+        {
+            "version": "1.2.1",
+            "date": "2026-11-26",
+            "items": [
+                "Previzualizarea din Aspect: linkurile din banner nu mai deschid pagini în cadru, același formular nu se mai trimite de două ori, iar cât panoul e pliat nu se mai cere nimic.",
+                "Cu WPML, previzualizarea arată implicit limba principală a site-ului, nu limba aleasă de admin în WPML."
+            ]
+        },
         {
             "version": "1.2.0",
             "date": "2026-11-26",

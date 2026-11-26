@@ -8,6 +8,13 @@
 <language>ro</language>
 <lastBuildDate>Thu, 26 Nov 2026 00:00:00 +0000</lastBuildDate>
 <item>
+<title>BiscuitWP 1.2.1</title>
+<link>https://biscuitwp.rt.md/changelog/#v1-2-1</link>
+<guid isPermaLink="true">https://biscuitwp.rt.md/changelog/#v1-2-1</guid>
+<pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
+<description>&lt;ul&gt;&lt;li&gt;Previzualizarea din Aspect: linkurile din banner nu mai deschid pagini în cadru, același formular nu se mai trimite de două ori, iar cât panoul e pliat nu se mai cere nimic.&lt;/li&gt;&lt;li&gt;Cu WPML, previzualizarea arată implicit limba principală a site-ului, nu limba aleasă de admin în WPML.&lt;/li&gt;&lt;/ul&gt;</description>
+</item>
+<item>
 <title>BiscuitWP 1.2.0</title>
 <link>https://biscuitwp.rt.md/changelog/#v1-2-0</link>
 <guid isPermaLink="true">https://biscuitwp.rt.md/changelog/#v1-2-0</guid>
