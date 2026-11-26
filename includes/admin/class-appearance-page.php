@@ -31,7 +31,7 @@ class CMP_Appearance_Page {
 	public static $header_fn    = 'header';
 
 	/** Appearance keys that do not apply in Light (disabled there). */
-	const LIGHT_OFF = array( 'format', 'position', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen', 'image', 'image_id', 'image_alt', 'image_side', 'image_size', 'image_out', 'image_phone' );
+	const LIGHT_OFF = array( 'format', 'position', 'backdrop', 'dim', 'blur', 'maxw', 'buttons', 'reopen', 'image', 'image_id', 'image_alt', 'image_side', 'image_size', 'image_out', 'image_phone', 'logo', 'logo_id' );
 
 	/** Texts per mode: the Light card shows only light_intro and accept. */
 	const TEXT_MODES = array(
@@ -88,6 +88,7 @@ class CMP_Appearance_Page {
 				'invalid'      => __( 'Scrie o culoare în forma #rrggbb.', 'biscuitwp' ),
 				'imageTitle'   => __( 'Imaginea din banner', 'biscuitwp' ),
 				'imageUse'     => __( 'Folosește imaginea', 'biscuitwp' ),
+				'logoTitle'    => __( 'Logo-ul din setări', 'biscuitwp' ),
 			),
 		);
 	}
@@ -551,6 +552,29 @@ class CMP_Appearance_Page {
 								</p>
 							</fieldset>
 							<p class="description"><?php esc_html_e( 'Stă într-un colț de sus al bannerului și nu acoperă textul sau butoanele. Text alternativ gol = imagine decorativă. Nu apare în preferințe și se descarcă doar când apare bannerul.', 'biscuitwp' ); ?></p>
+							<?php echo wp_kses_post( $light_note ); ?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Logo în setări', 'biscuitwp' ); ?></th>
+						<td data-cmp-ap-logo="<?php echo esc_attr( $a['logo'] ); ?>">
+							<fieldset<?php echo esc_attr( $off( 'logo' ) ); ?>>
+								<?php
+								foreach ( array(
+									'none'  => __( 'Fără', 'biscuitwp' ),
+									'theme' => __( 'Logo-ul temei', 'biscuitwp' ),
+									'own'   => __( 'Altă imagine', 'biscuitwp' ),
+								) as $k => $lbl ) :
+									?>
+									<label class="cmp-ap-choice"><input type="radio" name="<?php echo esc_attr( $n( 'logo' ) ); ?>" value="<?php echo esc_attr( $k ); ?>" data-cmp-ap-key="logo"<?php checked( $a['logo'], $k ); ?>> <?php echo esc_html( $lbl ); ?></label>
+								<?php endforeach; ?>
+								<p data-cmp-ap-logo-own<?php echo 'own' === $a['logo'] ? '' : ' hidden'; ?>>
+									<input type="hidden" name="<?php echo esc_attr( $n( 'logo_id' ) ); ?>" value="<?php echo esc_attr( (string) $a['logo_id'] ); ?>" data-cmp-ap-logo-id>
+									<button type="button" class="button" data-cmp-ap-logo-pick><?php esc_html_e( 'Alege din biblioteca media', 'biscuitwp' ); ?></button>
+									<img src="<?php echo esc_url( self::image_thumb( (int) $a['logo_id'] ) ); ?>" alt="" width="48" height="48" class="cmp-ap-image__thumb" data-cmp-ap-logo-thumb<?php echo '' === self::image_thumb( (int) $a['logo_id'] ) ? ' hidden' : ''; ?>>
+								</p>
+							</fieldset>
+							<p class="description"><?php esc_html_e( 'Apare deasupra titlului din fereastra de setări, cu înălțimea de 32 px. „Logo-ul temei” e cel din Personalizare → Identitatea site-ului. Doar imagini de pe acest site; se descarcă doar când vizitatorul deschide setările.', 'biscuitwp' ); ?></p>
 							<?php echo wp_kses_post( $light_note ); ?>
 						</td>
 					</tr>

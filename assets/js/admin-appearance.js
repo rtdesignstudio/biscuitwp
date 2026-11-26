@@ -380,23 +380,24 @@
 		}
 	}
 
-	// The banner picture: show its fields, choose an image from the media library.
-	function initImage() {
-		var box = document.querySelector('[data-cmp-ap-image]');
+	// The banner picture and the logo of the settings window: show their fields,
+	// choose an image from the media library.
+	function initPicker(key, title) {
+		var box = document.querySelector('[data-cmp-ap-' + key + ']');
 		if (!box) { return; }
-		var own = box.querySelector('[data-cmp-ap-image-own]'), more = box.querySelector('[data-cmp-ap-image-more]');
-		var id = box.querySelector('[data-cmp-ap-image-id]'), thumb = box.querySelector('[data-cmp-ap-image-thumb]');
-		var pick = box.querySelector('[data-cmp-ap-image-pick]'), frame = null;
+		var own = box.querySelector('[data-cmp-ap-' + key + '-own]'), more = box.querySelector('[data-cmp-ap-' + key + '-more]');
+		var id = box.querySelector('[data-cmp-ap-' + key + '-id]'), thumb = box.querySelector('[data-cmp-ap-' + key + '-thumb]');
+		var pick = box.querySelector('[data-cmp-ap-' + key + '-pick]'), frame = null;
 		box.addEventListener('change', function (e) {
-			if (!e.target || e.target.getAttribute('data-cmp-ap-key') !== 'image') { return; }
+			if (!e.target || e.target.getAttribute('data-cmp-ap-key') !== key) { return; }
 			own.hidden = e.target.value !== 'own';
-			more.hidden = e.target.value === 'none';
+			if (more) { more.hidden = e.target.value === 'none'; }
 		});
 		if (!window.wp || !window.wp.media) { pick.disabled = true; return; }
 		pick.addEventListener('click', function () {
 			var t = (window.CMP_APPEARANCE && window.CMP_APPEARANCE.i18n) || {};
 			if (!frame) {
-				frame = window.wp.media({ title: t.imageTitle, button: { text: t.imageUse }, library: { type: 'image' }, multiple: false });
+				frame = window.wp.media({ title: t[title], button: { text: t.imageUse }, library: { type: 'image' }, multiple: false });
 				frame.on('select', function () {
 					var m = frame.state().get('selection').first().toJSON();
 					id.value = m.id;
@@ -408,10 +409,14 @@
 		});
 	}
 
+	function initPickers() {
+		initPicker('image', 'imageTitle');
+		initPicker('logo', 'logoTitle');
+	}
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initImage);
+		document.addEventListener('DOMContentLoaded', initPickers);
 	} else {
-		initImage();
+		initPickers();
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);

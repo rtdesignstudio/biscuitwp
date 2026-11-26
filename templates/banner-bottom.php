@@ -54,6 +54,7 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 
 		<!-- View 2: granular preferences -->
 		<div class="cmp__prefs" data-cmp-view="prefs">
+			<?php echo CMP_Banner::logo_html( $cmp_a ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside; '' without a logo. ?>
 			<div class="cmp__prefs-header">
 				<?php // Re-consent (B4): JS swaps this title for data-cmp-reconsent-title and shows the text below. ?>
 				<h2 id="cmp-prefs-title" class="cmp__title" tabindex="-1" data-cmp-prefs-title data-cmp-reconsent-title="<?php echo esc_attr( CMP_Lang::text( 'reconsent_title' ) ); ?>"><?php echo esc_html( $cmp_text( 'prefs_title', CMP_Lang::text( 'prefs_title' ) ) ); ?></h2>

@@ -196,6 +196,8 @@ class CMP_Appearance {
 			'image_size'    => 96,
 			'image_out'     => true,
 			'image_phone'   => 'small',
+			'logo'          => 'none',
+			'logo_id'       => 0,
 			'anim'          => $s['anim'],
 			'delay'         => 0.0,
 			'reopen'        => 'none',
@@ -365,7 +367,7 @@ class CMP_Appearance {
 		if ( 'minimal' === $a['style'] ) {
 			$css .= self::MINIMAL_CSS;
 		}
-		return $css . self::image_css( $a );
+		return $css . self::image_css( $a ) . self::logo_css( $a );
 	}
 
 	/**
@@ -375,6 +377,19 @@ class CMP_Appearance {
 	 * Mirrored in standalone/cmp.js (AP_MINIMAL).
 	 */
 	const MINIMAL_CSS = '@media (min-width:576px){.cmp--style-minimal .cmp__actions,.cmp--style-minimal .cmp__choices{flex-wrap:nowrap}.cmp--style-minimal .cmp__btn{white-space:nowrap}}';
+
+	/** The site logo in the settings window (#727 step 7): none, the theme's (Customizer), or an image from the media library (logo_id). */
+	const LOGOS = array( 'none', 'theme', 'own' );
+
+	/**
+	 * Pure: the rule of the logo, '' without one. It sits above the settings title,
+	 * 32px high, at most 160px wide. Mirrored in standalone/cmp.js (AP_LOGO).
+	 */
+	public static function logo_css( array $a ) {
+		return isset( $a['logo'] ) && 'none' !== $a['logo'] ? self::LOGO_CSS : '';
+	}
+
+	const LOGO_CSS = '.cmp__logo{display:block;width:auto;height:32px;max-width:160px;margin:0 0 16px;object-fit:contain;object-position:left center}';
 
 	/** The picture of the banner (#727): none, one of ours, or the site's own (image_id, from the media library). */
 	const IMAGES = array( 'none', 'shield', 'wp', 'own' );
@@ -741,6 +756,7 @@ class CMP_Appearance {
 			'reopen'   => self::REOPEN,
 			'density'  => self::DENSITIES,
 			'image'    => self::IMAGES,
+			'logo'     => self::LOGOS,
 			'image_side'  => array( 'right', 'left' ),
 			'image_phone' => array( 'small', 'none' ),
 		);
@@ -751,6 +767,7 @@ class CMP_Appearance {
 			case 'position':
 				return is_scalar( $v ) && in_array( (string) $v, self::FORMATS[ $out['format'] ], true ) ? (string) $v : $fallback;
 			case 'image_id':
+			case 'logo_id':
 				return is_numeric( $v ) ? max( 0, (int) $v ) : $fallback;
 			case 'image_alt':
 				return is_scalar( $v ) ? ( function_exists( 'mb_substr' ) ? mb_substr( self::text( $v ), 0, 300, 'UTF-8' ) : self::text( $v ) ) : $fallback;

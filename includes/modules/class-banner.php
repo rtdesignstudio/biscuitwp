@@ -308,6 +308,10 @@ class CMP_Banner {
 			if ( 'none' !== $a['image'] && ( ( isset( $settings['mode'] ) && 'light' === $settings['mode'] ) || '' === self::image_src( $a ) ) ) {
 				$a['image'] = 'none';
 			}
+			// The logo is in the settings window, which Light has not; none either when its image is gone or not on this site.
+			if ( 'none' !== $a['logo'] && ( ( isset( $settings['mode'] ) && 'light' === $settings['mode'] ) || '' === self::logo_src( $a ) ) ) {
+				$a['logo'] = 'none';
+			}
 			$cache[ $key ] = $a;
 		}
 		return $cache[ $key ];
@@ -328,6 +332,41 @@ class CMP_Banner {
 		$img = wp_get_attachment_image_src( $a['image_id'], 'medium' );
 		$src = is_array( $img ) && isset( $img[0] ) && is_string( $img[0] ) ? $img[0] : '';
 		return self::is_local_url( $src, array( home_url(), site_url() ) ) ? $src : '';
+	}
+
+	/**
+	 * The address of the logo in the settings window: the theme's (Customizer, "Site
+	 * Identity") or the chosen media library image, only when served by this site.
+	 * '' when there is none.
+	 */
+	public static function logo_src( array $a ) {
+		if ( ! function_exists( 'wp_get_attachment_image_src' ) ) {
+			return '';
+		}
+		$id = 'own' === $a['logo'] ? (int) $a['logo_id'] : ( 'theme' === $a['logo'] && function_exists( 'get_theme_mod' ) ? (int) get_theme_mod( 'custom_logo' ) : 0 );
+		if ( $id < 1 ) {
+			return '';
+		}
+		$img = wp_get_attachment_image_src( $id, 'medium' );
+		$src = is_array( $img ) && isset( $img[0] ) && is_string( $img[0] ) ? $img[0] : '';
+		return self::is_local_url( $src, array( home_url(), site_url() ) ) ? $src : '';
+	}
+
+	/** Pure: the logo tag, '' without an address. Lazy: the settings window is hidden until opened. */
+	public static function logo_tag( $src, $alt ) {
+		if ( '' === (string) $src ) {
+			return '';
+		}
+		$e = function_exists( 'esc_url' ) ? esc_url( $src ) : htmlspecialchars( (string) $src, ENT_QUOTES, 'UTF-8' );
+		return '<img class="cmp__logo" src="' . $e . '" alt="' . htmlspecialchars( (string) $alt, ENT_QUOTES, 'UTF-8' ) . '" loading="lazy" decoding="async">';
+	}
+
+	/** The logo tag of these appearance settings, '' when off. Its alt is the site name. */
+	public static function logo_html( array $a ) {
+		if ( empty( $a['logo'] ) || 'none' === $a['logo'] ) {
+			return '';
+		}
+		return self::logo_tag( self::logo_src( $a ), function_exists( 'get_bloginfo' ) ? get_bloginfo( 'name' ) : '' );
 	}
 
 	/** Pure: is $url on the host of one of $bases (or a path without a host)? */

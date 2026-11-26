@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: BiscuitWP\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/consent-manager-"
 "pro-public\n"
-"POT-Creation-Date: 2026-11-25T15:39:49+00:00\n"
+"POT-Creation-Date: 2026-11-26T08:15:36+00:00\n"
 "PO-Revision-Date: 2026-11-19 12:25+0000\n"
 "Last-Translator: BiscuitWP\n"
 "Language-Team: en_US\n"
@@ -90,9 +90,9 @@ msgid "Ghid"
 msgstr "Guide"
 
 #: includes/admin/class-admin.php:131
-#: includes/admin/class-appearance-page.php:157
-#: includes/admin/class-appearance-page.php:274
-#: includes/admin/class-appearance-page.php:715
+#: includes/admin/class-appearance-page.php:158
+#: includes/admin/class-appearance-page.php:275
+#: includes/admin/class-appearance-page.php:739
 #: includes/admin/class-audit-page.php:106
 #: includes/admin/class-audit-page.php:127
 #: includes/admin/class-categories-page.php:112
@@ -181,7 +181,7 @@ msgstr "Contrast %s:1, passes."
 
 #. translators: 1: contrast ratio, 2: proposed colour (#rrggbb), 3: its contrast ratio
 #: includes/admin/class-appearance-page.php:87
-#: includes/admin/class-appearance-page.php:321
+#: includes/admin/class-appearance-page.php:322
 #, php-format
 msgid "Contrast %1$s:1, sub 4,5:1. Nuanța propusă: %2$s (%3$s:1)."
 msgstr "Contrast %1$s:1, below 4.5:1. Proposed shade: %2$s (%3$s:1)."
@@ -198,17 +198,21 @@ msgstr "Picture in the banner"
 msgid "Folosește imaginea"
 msgstr "Use the picture"
 
+#: includes/admin/class-appearance-page.php:91
+msgid "Logo-ul din setări"
+msgstr "Settings window logo"
+
 #. translators: %d: how many more removed parts are not listed
-#: includes/admin/class-appearance-page.php:113
+#: includes/admin/class-appearance-page.php:114
 #, php-format
 msgid "… și încă %d."
 msgstr "… and %d more."
 
-#: includes/admin/class-appearance-page.php:115
+#: includes/admin/class-appearance-page.php:116
 msgid "Am eliminat din CSS-ul propriu:"
 msgstr "Removed from your custom CSS:"
 
-#: includes/admin/class-appearance-page.php:117
+#: includes/admin/class-appearance-page.php:118
 msgid ""
 "regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și "
 "„Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului e salvat."
@@ -217,7 +221,7 @@ msgstr ""
 "buttons, addresses pointing to other sites, and @import. The rest of the CSS "
 "is saved."
 
-#: includes/admin/class-appearance-page.php:118
+#: includes/admin/class-appearance-page.php:119
 msgid ""
 "regulile care ar putea ascunde, micșora sau deosebi butoanele „Accept” și "
 "„Refuz”, adresele spre alte site-uri și @import. Restul CSS-ului nu e salvat "
@@ -227,31 +231,31 @@ msgstr ""
 "buttons, addresses pointing to other sites, and @import. The rest of the CSS "
 "is not saved yet: press “Save”."
 
-#: includes/admin/class-appearance-page.php:137
+#: includes/admin/class-appearance-page.php:138
 msgid "Aspect salvat."
 msgstr "Appearance saved."
 
-#: includes/admin/class-appearance-page.php:201
+#: includes/admin/class-appearance-page.php:202
 msgid "Alege un fișier .json de importat."
 msgstr "Choose a .json file to import."
 
-#: includes/admin/class-appearance-page.php:203
+#: includes/admin/class-appearance-page.php:204
 msgid "Fișierul nu s-a încărcat complet. Încearcă din nou."
 msgstr "The file was not uploaded completely. Try again."
 
-#: includes/admin/class-appearance-page.php:205
+#: includes/admin/class-appearance-page.php:206
 msgid "Fișierul e prea mare: cel mult 256 KB."
 msgstr "The file is too large: 256 KB at most."
 
-#: includes/admin/class-appearance-page.php:207
+#: includes/admin/class-appearance-page.php:208
 msgid "Fișierul nu e un JSON valid."
 msgstr "The file is not valid JSON."
 
-#: includes/admin/class-appearance-page.php:209
+#: includes/admin/class-appearance-page.php:210
 msgid "Nu e un fișier de aspect BiscuitWP."
 msgstr "This is not a BiscuitWP appearance file."
 
-#: includes/admin/class-appearance-page.php:211
+#: includes/admin/class-appearance-page.php:212
 msgid ""
 "Fișierul vine dintr-o versiune mai nouă de BiscuitWP. Actualizează pluginul "
 "și încearcă din nou."
@@ -259,16 +263,16 @@ msgstr ""
 "The file comes from a newer version of BiscuitWP. Update the plugin and try "
 "again."
 
-#: includes/admin/class-appearance-page.php:213
+#: includes/admin/class-appearance-page.php:214
 msgid "Fișierul nu a putut fi încărcat. Încearcă din nou."
 msgstr "The file could not be uploaded. Try again."
 
-#: includes/admin/class-appearance-page.php:225
+#: includes/admin/class-appearance-page.php:226
 msgid "Aspectul din fișier e încărcat în formular, dar nu e salvat."
 msgstr ""
 "The appearance from the file is loaded into the form, but it is not saved."
 
-#: includes/admin/class-appearance-page.php:226
+#: includes/admin/class-appearance-page.php:227
 msgid ""
 "Apasă „Vezi pe site” ca să-l vezi întâi, apoi „Salvează aspectul” ca să-l "
 "aplici. Dacă reîncarci pagina fără să retrimiți formularul, revii la "
@@ -279,12 +283,12 @@ msgstr ""
 "appearance."
 
 #. translators: %d: how many keys of the file were not used
-#: includes/admin/class-appearance-page.php:230
+#: includes/admin/class-appearance-page.php:231
 #, php-format
 msgid "Chei ignorate (necunoscute sau care nu se importă, ca excluderile): %d."
 msgstr "Ignored keys (unknown, or not imported, like the exclusions): %d."
 
-#: includes/admin/class-appearance-page.php:233
+#: includes/admin/class-appearance-page.php:234
 msgid ""
 "Textele din fișier nu s-au importat: site-ul folosește WPML sau Polylang, "
 "iar textele se traduc acolo."
@@ -293,7 +297,7 @@ msgstr ""
 "the texts are translated there."
 
 #. translators: %d: how many values of the file were not used because the current mode does not show them
-#: includes/admin/class-appearance-page.php:237
+#: includes/admin/class-appearance-page.php:238
 #, php-format
 msgid ""
 "Valori care nu se aplică modului curent (Light sau Pro): %d. Au rămas cele "
@@ -302,15 +306,15 @@ msgstr ""
 "Values that do not apply to the current mode (Light or Pro): %d. The saved "
 "ones stay or, if the file brings another style, the ones of that style."
 
-#: includes/admin/class-appearance-page.php:251 templates/admin/guide.php:96
+#: includes/admin/class-appearance-page.php:252 templates/admin/guide.php:96
 msgid "Export și import"
 msgstr "Export and import"
 
-#: includes/admin/class-appearance-page.php:255
+#: includes/admin/class-appearance-page.php:256
 msgid "Exportă aspectul salvat"
 msgstr "Export the saved appearance"
 
-#: includes/admin/class-appearance-page.php:256
+#: includes/admin/class-appearance-page.php:257
 msgid ""
 "Descarcă un fișier .json cu aspectul salvat, textele bannerului și CSS-ul "
 "propriu, ca să-l folosești pe alt site. Cu WPML sau Polylang, textele "
@@ -324,15 +328,15 @@ msgstr ""
 "are not included. Exclusions, settings, services and operator data are not "
 "exported."
 
-#: includes/admin/class-appearance-page.php:261
+#: includes/admin/class-appearance-page.php:262
 msgid "Importă dintr-un fișier"
 msgstr "Import from a file"
 
-#: includes/admin/class-appearance-page.php:263
+#: includes/admin/class-appearance-page.php:264
 msgid "Încarcă în formular"
 msgstr "Load into the form"
 
-#: includes/admin/class-appearance-page.php:264
+#: includes/admin/class-appearance-page.php:265
 msgid ""
 "Un fișier exportat din BiscuitWP, cel mult 256 KB. Valorile apar în "
 "formularul de mai sus, nesalvate: nu se schimbă nimic pe site până nu apeși "
@@ -342,16 +346,16 @@ msgstr ""
 "form above, unsaved: nothing changes on the site until you press “Save "
 "appearance”. The file is not kept on the server."
 
-#: includes/admin/class-appearance-page.php:304
-#: includes/admin/class-appearance-page.php:654
+#: includes/admin/class-appearance-page.php:305
+#: includes/admin/class-appearance-page.php:678
 msgid "Nu se aplică în modul Light."
 msgstr "Does not apply in Light mode."
 
-#: includes/admin/class-appearance-page.php:315
+#: includes/admin/class-appearance-page.php:316
 msgid "BiscuitWP — Aspect"
 msgstr "BiscuitWP — Appearance"
 
-#: includes/admin/class-appearance-page.php:316
+#: includes/admin/class-appearance-page.php:317
 msgid ""
 "Cum arată bannerul pe site. Ce alegi aici nu poate face bannerul neconform: "
 "„Accept” și „Refuz” rămân la fel de vizibile."
@@ -359,7 +363,7 @@ msgstr ""
 "How the banner looks on the site. Nothing you choose here can make the "
 "banner non-compliant: “Accept” and “Reject” stay equally visible."
 
-#: includes/admin/class-appearance-page.php:318
+#: includes/admin/class-appearance-page.php:319
 msgid ""
 "Ești în modul Light. Câmpurile care nu se aplică cardului Light sunt "
 "dezactivate: formatul și poziția, fundalul, lățimea, butoanele, "
@@ -370,7 +374,7 @@ msgstr ""
 "the Pro button texts. Their saved values are kept."
 
 #. translators: 1: contrast ratio, 2: proposed colour (#rrggbb), 3: its contrast ratio
-#: includes/admin/class-appearance-page.php:321
+#: includes/admin/class-appearance-page.php:322
 msgid ""
 "Accentul ales e greu de citit. Bannerul îl folosește oricum, dar îți "
 "recomandăm nuanța propusă."
@@ -378,7 +382,7 @@ msgstr ""
 "The chosen accent is hard to read. The banner uses it anyway, but we "
 "recommend the proposed shade."
 
-#: includes/admin/class-appearance-page.php:324
+#: includes/admin/class-appearance-page.php:325
 msgid ""
 "Tema nu declară culori cu nume cunoscute (background sau base, foreground "
 "sau contrast, primary sau accent). Bannerul folosește paleta aleasă."
@@ -388,7 +392,7 @@ msgstr ""
 "palette."
 
 #. translators: 1: the theme's colour (#rrggbb), 2: contrast ratio, 3: proposed colour (#rrggbb), 4: its contrast ratio
-#: includes/admin/class-appearance-page.php:326
+#: includes/admin/class-appearance-page.php:327
 #, php-format
 msgid ""
 "Culoarea principală a temei (%1$s) are contrast %2$s:1, sub 4,5:1, așa că "
@@ -399,23 +403,23 @@ msgstr ""
 "banner uses the palette's colour. For a colour close to the theme's, set the "
 "proposed shade as the accent: %3$s (%4$s:1)."
 
-#: includes/admin/class-appearance-page.php:333
+#: includes/admin/class-appearance-page.php:334
 msgid "Stil"
 msgstr "Style"
 
-#: includes/admin/class-appearance-page.php:338
+#: includes/admin/class-appearance-page.php:339
 msgid "Minimal"
 msgstr "Minimal"
 
-#: includes/admin/class-appearance-page.php:339
+#: includes/admin/class-appearance-page.php:340
 msgid "Brand"
 msgstr "Brand"
 
-#: includes/admin/class-appearance-page.php:340
+#: includes/admin/class-appearance-page.php:341
 msgid "Prietenos"
 msgstr "Friendly"
 
-#: includes/admin/class-appearance-page.php:346
+#: includes/admin/class-appearance-page.php:347
 msgid ""
 "Stilul dă forma: colțurile, umbra, lățimea, butoanele și animația. Brand e "
 "aspectul de până acum. Schimbarea stilului reîncarcă aceste valori; le poți "
@@ -425,19 +429,19 @@ msgstr ""
 "Brand is the look you had so far. Switching the style reloads these values; "
 "you can then adjust them below."
 
-#: includes/admin/class-appearance-page.php:350
+#: includes/admin/class-appearance-page.php:351
 msgid "Culori"
 msgstr "Colours"
 
-#: includes/admin/class-appearance-page.php:352
+#: includes/admin/class-appearance-page.php:353
 msgid "Paletă"
 msgstr "Palette"
 
-#: includes/admin/class-appearance-page.php:360
+#: includes/admin/class-appearance-page.php:361
 msgid "Preia din temă"
 msgstr "Use the theme's colours"
 
-#: includes/admin/class-appearance-page.php:361
+#: includes/admin/class-appearance-page.php:362
 msgid ""
 "„Preia din temă” citește paleta temei (theme.json): fundalul, textul și "
 "culoarea principală. Folosește doar culorile care trec verificarea de "
@@ -449,15 +453,15 @@ msgstr ""
 "check (4.5:1) are used; the rest stay from the chosen palette. It applies "
 "only with the “Light” theme."
 
-#: includes/admin/class-appearance-page.php:363
+#: includes/admin/class-appearance-page.php:364
 msgid "Accent"
 msgstr "Accent"
 
-#: includes/admin/class-appearance-page.php:367
+#: includes/admin/class-appearance-page.php:368
 msgid "Folosește nuanța propusă"
 msgstr "Use the proposed shade"
 
-#: includes/admin/class-appearance-page.php:369
+#: includes/admin/class-appearance-page.php:370
 msgid ""
 "Opțional: culoarea butoanelor și a linkurilor. Verificăm contrastul cu "
 "textul butonului și cu fundalul (minimum 4,5:1). Gol = culoarea paletei."
@@ -466,39 +470,39 @@ msgstr ""
 "the button text and with the background (at least 4.5:1). Empty = the "
 "palette's colour."
 
-#: includes/admin/class-appearance-page.php:373
+#: includes/admin/class-appearance-page.php:374
 msgid "Font"
 msgstr "Font"
 
-#: includes/admin/class-appearance-page.php:376
+#: includes/admin/class-appearance-page.php:377
 msgid "Fontul sistemului (ca până acum)"
 msgstr "System font (as before)"
 
-#: includes/admin/class-appearance-page.php:377
+#: includes/admin/class-appearance-page.php:378
 msgid "Fontul temei"
 msgstr "Theme font"
 
-#: includes/admin/class-appearance-page.php:382
+#: includes/admin/class-appearance-page.php:383
 msgid "Temă"
 msgstr "Theme"
 
-#: includes/admin/class-appearance-page.php:387
+#: includes/admin/class-appearance-page.php:388
 msgid "Luminos"
 msgstr "Light"
 
-#: includes/admin/class-appearance-page.php:388
+#: includes/admin/class-appearance-page.php:389
 msgid "Întunecat"
 msgstr "Dark"
 
-#: includes/admin/class-appearance-page.php:389
+#: includes/admin/class-appearance-page.php:390
 msgid "Automat"
 msgstr "Automatic"
 
-#: includes/admin/class-appearance-page.php:390
+#: includes/admin/class-appearance-page.php:391
 msgid "Ca site-ul"
 msgstr "Like the site"
 
-#: includes/admin/class-appearance-page.php:396
+#: includes/admin/class-appearance-page.php:397
 msgid ""
 "Automat urmează setarea de culoare a dispozitivului vizitatorului. „Ca site-"
 "ul” face bannerul întunecat când pagina are clasa sau atributul de mai jos "
@@ -508,100 +512,100 @@ msgstr ""
 "site” makes the banner dark when the page has the class or attribute below "
 "on html or body; otherwise it stays light."
 
-#: includes/admin/class-appearance-page.php:398
+#: includes/admin/class-appearance-page.php:399
 msgid "Selector pentru tema întunecată a site-ului"
 msgstr "Selector for the site's dark theme"
 
-#: includes/admin/class-appearance-page.php:404
+#: includes/admin/class-appearance-page.php:405
 msgid "Format și poziție"
 msgstr "Format and position"
 
-#: includes/admin/class-appearance-page.php:406
+#: includes/admin/class-appearance-page.php:407
 msgid "Format"
 msgstr "Format"
 
-#: includes/admin/class-appearance-page.php:408
+#: includes/admin/class-appearance-page.php:409
 msgid "Bară pe toată lățimea"
 msgstr "Full-width bar"
 
-#: includes/admin/class-appearance-page.php:409
+#: includes/admin/class-appearance-page.php:410
 msgid "Card într-un colț"
 msgstr "Card in a corner"
 
-#: includes/admin/class-appearance-page.php:410
+#: includes/admin/class-appearance-page.php:411
 msgid "Fereastră"
 msgstr "Window"
 
-#: includes/admin/class-appearance-page.php:416
+#: includes/admin/class-appearance-page.php:417
 msgid "Jos"
 msgstr "Bottom"
 
-#: includes/admin/class-appearance-page.php:417
+#: includes/admin/class-appearance-page.php:418
 msgid "Sus"
 msgstr "Top"
 
-#: includes/admin/class-appearance-page.php:420
+#: includes/admin/class-appearance-page.php:421
 msgid "Dreapta jos"
 msgstr "Bottom right"
 
-#: includes/admin/class-appearance-page.php:421
+#: includes/admin/class-appearance-page.php:422
 msgid "Stânga jos"
 msgstr "Bottom left"
 
-#: includes/admin/class-appearance-page.php:422
-#: includes/admin/class-appearance-page.php:536
+#: includes/admin/class-appearance-page.php:423
+#: includes/admin/class-appearance-page.php:537
 msgid "Dreapta sus"
 msgstr "Top right"
 
-#: includes/admin/class-appearance-page.php:423
-#: includes/admin/class-appearance-page.php:537
+#: includes/admin/class-appearance-page.php:424
+#: includes/admin/class-appearance-page.php:538
 msgid "Stânga sus"
 msgstr "Top left"
 
-#: includes/admin/class-appearance-page.php:426
+#: includes/admin/class-appearance-page.php:427
 msgid "Mijloc centru"
 msgstr "Middle center"
 
-#: includes/admin/class-appearance-page.php:427
+#: includes/admin/class-appearance-page.php:428
 msgid "Sus centru"
 msgstr "Top center"
 
-#: includes/admin/class-appearance-page.php:428
+#: includes/admin/class-appearance-page.php:429
 msgid "Jos centru"
 msgstr "Bottom center"
 
-#: includes/admin/class-appearance-page.php:434
-#: includes/admin/class-appearance-page.php:534
+#: includes/admin/class-appearance-page.php:435
+#: includes/admin/class-appearance-page.php:535
 msgid "Poziție"
 msgstr "Position"
 
-#: includes/admin/class-appearance-page.php:442
+#: includes/admin/class-appearance-page.php:443
 msgid "Pe telefon, bannerul apare ca bandă jos, indiferent de format."
 msgstr ""
 "On phones the banner shows as a strip at the bottom, whatever the format."
 
-#: includes/admin/class-appearance-page.php:447
+#: includes/admin/class-appearance-page.php:448
 msgid "Fundal"
 msgstr "Backdrop"
 
-#: includes/admin/class-appearance-page.php:450
+#: includes/admin/class-appearance-page.php:451
 msgid "Întunecare și blur"
 msgstr "Dim and blur"
 
-#: includes/admin/class-appearance-page.php:451
-#: includes/admin/class-appearance-page.php:454
+#: includes/admin/class-appearance-page.php:452
+#: includes/admin/class-appearance-page.php:455
 msgid "Întunecare"
 msgstr "Dim"
 
-#: includes/admin/class-appearance-page.php:452
+#: includes/admin/class-appearance-page.php:453
 msgid "Fără fundal (pagina rămâne folosibilă)"
 msgstr "No backdrop (the page stays usable)"
 
-#: includes/admin/class-appearance-page.php:457
+#: includes/admin/class-appearance-page.php:458
 msgid "Blur"
 msgstr "Blur"
 
-#: includes/admin/class-appearance-page.php:460
+#: includes/admin/class-appearance-page.php:461
 msgid ""
 "Întunecarea: 0–80%; gol = valoarea paletei. Blurul: 0–10 px; pe telefoane "
 "rămâne doar întunecarea."
@@ -609,61 +613,62 @@ msgstr ""
 "Dim: 0–80%; empty = the palette's value. Blur: 0–10 px; on phones only the "
 "dim remains."
 
-#: includes/admin/class-appearance-page.php:465
+#: includes/admin/class-appearance-page.php:466
 msgid "Detalii"
 msgstr "Details"
 
-#: includes/admin/class-appearance-page.php:467
+#: includes/admin/class-appearance-page.php:468
 msgid "Colțuri"
 msgstr "Corners"
 
-#: includes/admin/class-appearance-page.php:471
+#: includes/admin/class-appearance-page.php:472
 msgid "Umbră"
 msgstr "Shadow"
 
-#: includes/admin/class-appearance-page.php:473
-#: includes/admin/class-appearance-page.php:519
-#: includes/admin/class-appearance-page.php:567
+#: includes/admin/class-appearance-page.php:474
+#: includes/admin/class-appearance-page.php:520
+#: includes/admin/class-appearance-page.php:564
+#: includes/admin/class-appearance-page.php:591
 msgid "Fără"
 msgstr "None"
 
-#: includes/admin/class-appearance-page.php:474
+#: includes/admin/class-appearance-page.php:475
 msgid "Mică"
 msgstr "Small"
 
-#: includes/admin/class-appearance-page.php:475
+#: includes/admin/class-appearance-page.php:476
 msgid "Medie"
 msgstr "Medium"
 
-#: includes/admin/class-appearance-page.php:476
+#: includes/admin/class-appearance-page.php:477
 msgid "Mare"
 msgstr "Large"
 
-#: includes/admin/class-appearance-page.php:479
+#: includes/admin/class-appearance-page.php:480
 msgid "Lățime max"
 msgstr "Max width"
 
-#: includes/admin/class-appearance-page.php:482
+#: includes/admin/class-appearance-page.php:483
 msgid "Margine"
 msgstr "Margin"
 
-#: includes/admin/class-appearance-page.php:485
+#: includes/admin/class-appearance-page.php:486
 msgid "Densitate"
 msgstr "Density"
 
-#: includes/admin/class-appearance-page.php:487
+#: includes/admin/class-appearance-page.php:488
 msgid "Compact"
 msgstr "Compact"
 
-#: includes/admin/class-appearance-page.php:488
+#: includes/admin/class-appearance-page.php:489
 msgid "Normal"
 msgstr "Normal"
 
-#: includes/admin/class-appearance-page.php:489
+#: includes/admin/class-appearance-page.php:490
 msgid "Extins"
 msgstr "Comfortable"
 
-#: includes/admin/class-appearance-page.php:492
+#: includes/admin/class-appearance-page.php:493
 msgid ""
 "Colțuri 0–24 px, lățimea maximă 360–960 px (doar în Pro), distanța față de "
 "marginea ecranului 0–40 px."
@@ -671,24 +676,24 @@ msgstr ""
 "Corners 0–24 px, max width 360–960 px (Pro only), distance from the screen "
 "edge 0–40 px."
 
-#: includes/admin/class-appearance-page.php:496
+#: includes/admin/class-appearance-page.php:497
 msgid "Butoane"
 msgstr "Buttons"
 
-#: includes/admin/class-appearance-page.php:501
+#: includes/admin/class-appearance-page.php:502
 msgid "Plin"
 msgstr "Solid"
 
-#: includes/admin/class-appearance-page.php:502
+#: includes/admin/class-appearance-page.php:503
 msgid "Contur"
 msgstr "Outline"
 
-#: includes/admin/class-appearance-page.php:503
-#: includes/admin/class-appearance-page.php:584
+#: includes/admin/class-appearance-page.php:504
+#: includes/admin/class-appearance-page.php:608
 msgid "Text"
 msgstr "Text"
 
-#: includes/admin/class-appearance-page.php:509
+#: includes/admin/class-appearance-page.php:510
 msgid ""
 "„Accept” și „Refuz” arată mereu la fel: același stil, aceeași mărime. Nu "
 "există setare separată pe buton."
@@ -696,55 +701,56 @@ msgstr ""
 "“Accept” and “Reject” always look the same: same style, same size. There is "
 "no separate setting per button."
 
-#: includes/admin/class-appearance-page.php:514
+#: includes/admin/class-appearance-page.php:515
 msgid "Imagine"
 msgstr "Picture"
 
-#: includes/admin/class-appearance-page.php:520
+#: includes/admin/class-appearance-page.php:521
 msgid "Biscuit cu scut"
 msgstr "Biscuit with a shield"
 
-#: includes/admin/class-appearance-page.php:521
+#: includes/admin/class-appearance-page.php:522
 msgid "Biscuit WP"
 msgstr "WP biscuit"
 
-#: includes/admin/class-appearance-page.php:522
+#: includes/admin/class-appearance-page.php:523
 msgid "Imaginea mea"
 msgstr "My picture"
 
-#: includes/admin/class-appearance-page.php:529
+#: includes/admin/class-appearance-page.php:530
+#: includes/admin/class-appearance-page.php:573
 msgid "Alege din biblioteca media"
 msgstr "Choose from the media library"
 
-#: includes/admin/class-appearance-page.php:531
+#: includes/admin/class-appearance-page.php:532
 msgid "PNG sau WebP cu fundal transparent. Doar imagini de pe acest site."
 msgstr "PNG or WebP with a transparent background. Only images from this site."
 
-#: includes/admin/class-appearance-page.php:540
+#: includes/admin/class-appearance-page.php:541
 msgid "Mărime"
 msgstr "Size"
 
-#: includes/admin/class-appearance-page.php:542
+#: includes/admin/class-appearance-page.php:543
 msgid "Iese din banner"
 msgstr "Sticks out of the banner"
 
-#: includes/admin/class-appearance-page.php:543
+#: includes/admin/class-appearance-page.php:544
 msgid "Pe telefon"
 msgstr "On phones"
 
-#: includes/admin/class-appearance-page.php:545
+#: includes/admin/class-appearance-page.php:546
 msgid "Mai mică"
 msgstr "Smaller"
 
-#: includes/admin/class-appearance-page.php:546
+#: includes/admin/class-appearance-page.php:547
 msgid "Ascunsă"
 msgstr "Hidden"
 
-#: includes/admin/class-appearance-page.php:550
+#: includes/admin/class-appearance-page.php:551
 msgid "Text alternativ"
 msgstr "Alternative text"
 
-#: includes/admin/class-appearance-page.php:553
+#: includes/admin/class-appearance-page.php:554
 msgid ""
 "Stă într-un colț de sus al bannerului și nu acoperă textul sau butoanele. "
 "Text alternativ gol = imagine decorativă. Nu apare în preferințe și se "
@@ -754,27 +760,47 @@ msgstr ""
 "buttons. Empty alternative text = decorative picture. It does not show in "
 "the preferences and loads only when the banner shows."
 
-#: includes/admin/class-appearance-page.php:558
+#: includes/admin/class-appearance-page.php:559
+msgid "Logo în setări"
+msgstr "Logo in settings"
+
+#: includes/admin/class-appearance-page.php:565
+msgid "Logo-ul temei"
+msgstr "Theme logo"
+
+#: includes/admin/class-appearance-page.php:566
+msgid "Altă imagine"
+msgstr "Another image"
+
+#: includes/admin/class-appearance-page.php:577
+msgid ""
+"Apare deasupra titlului din fereastra de setări, cu înălțimea de 32 px. "
+"„Logo-ul temei” e cel din Personalizare → Identitatea site-ului. Doar "
+"imagini de pe acest site; se descarcă doar când vizitatorul deschide "
+"setările."
+msgstr "Shown above the title of the settings window, 32 px high. “Theme logo” is the one in Customize → Site Identity. Only images from this site; it downloads only when the visitor opens the settings."
+
+#: includes/admin/class-appearance-page.php:582
 msgid "Texte"
 msgstr "Texts"
 
-#: includes/admin/class-appearance-page.php:564
+#: includes/admin/class-appearance-page.php:588
 msgid "Animație"
 msgstr "Animation"
 
-#: includes/admin/class-appearance-page.php:568
+#: includes/admin/class-appearance-page.php:592
 msgid "Apariție"
 msgstr "Fade in"
 
-#: includes/admin/class-appearance-page.php:569
+#: includes/admin/class-appearance-page.php:593
 msgid "Alunecare"
 msgstr "Slide"
 
-#: includes/admin/class-appearance-page.php:571
+#: includes/admin/class-appearance-page.php:595
 msgid "Întârziere"
 msgstr "Delay"
 
-#: includes/admin/class-appearance-page.php:574
+#: includes/admin/class-appearance-page.php:598
 msgid ""
 "Vizitatorii care cer mișcare redusă nu văd animația. Întârzierea (0–2 s) "
 "amână doar afișarea: trackerele rămân blocate de la început."
@@ -782,23 +808,23 @@ msgstr ""
 "Visitors who ask for reduced motion do not see the animation. The delay (0–2 "
 "s) only postpones the display: trackers stay blocked from the start."
 
-#: includes/admin/class-appearance-page.php:578
+#: includes/admin/class-appearance-page.php:602
 msgid "Redeschidere"
 msgstr "Reopen button"
 
-#: includes/admin/class-appearance-page.php:583
+#: includes/admin/class-appearance-page.php:607
 msgid "Iconiță"
 msgstr "Icon"
 
-#: includes/admin/class-appearance-page.php:585
+#: includes/admin/class-appearance-page.php:609
 msgid "Ambele"
 msgstr "Both"
 
-#: includes/admin/class-appearance-page.php:586
+#: includes/admin/class-appearance-page.php:610
 msgid "Deloc"
 msgstr "None"
 
-#: includes/admin/class-appearance-page.php:592
+#: includes/admin/class-appearance-page.php:616
 msgid ""
 "Un buton plutitor (jos-stânga) care redeschide preferințele, după ce "
 "vizitatorul a ales. Recomandat: „Deloc”, cu un link „Setări cookie” în "
@@ -810,11 +836,11 @@ msgstr ""
 "the footer: the [cmp_cookie_settings_link] shortcode or a menu link with the "
 "URL #cmp-settings."
 
-#: includes/admin/class-appearance-page.php:597
+#: includes/admin/class-appearance-page.php:621
 msgid "Excluderi"
 msgstr "Exclusions"
 
-#: includes/admin/class-appearance-page.php:600
+#: includes/admin/class-appearance-page.php:624
 msgid ""
 "Paginile pe care bannerul nu se deschide singur: o adresă pe rând, de "
 "exemplu /contact/. Pune * la final pentru toate paginile care încep așa, de "
@@ -826,7 +852,7 @@ msgstr ""
 "example /landing/*. On a site with the language in the address, write one "
 "line per language (/ru/landing/*)."
 
-#: includes/admin/class-appearance-page.php:601
+#: includes/admin/class-appearance-page.php:625
 msgid ""
 "Blocarea rămâne activă și acolo: fără acord, trackerele nu se încarcă. "
 "Vizitatorul își poate deschide setările din linkul din footer sau din "
@@ -835,11 +861,11 @@ msgstr ""
 "Blocking stays on there too: without consent, trackers do not load. Visitors "
 "can open their settings from the footer link or the reopen button."
 
-#: includes/admin/class-appearance-page.php:605
+#: includes/admin/class-appearance-page.php:629
 msgid "CSS propriu"
 msgstr "Custom CSS"
 
-#: includes/admin/class-appearance-page.php:608
+#: includes/admin/class-appearance-page.php:632
 msgid ""
 "Se adaugă după CSS-ul bannerului, în ambele moduri. La salvare eliminăm "
 "@import, adresele spre alte site-uri și regulile care ar putea ascunde, "
@@ -852,57 +878,57 @@ msgstr ""
 "apart the “Accept” and “Reject” buttons (for example rules on .cmp__btn--"
 "primary or [data-cmp-action=\"reject\"]). We show you what we removed."
 
-#: includes/admin/class-appearance-page.php:610
+#: includes/admin/class-appearance-page.php:634
 msgid "Variabile disponibile"
 msgstr "Available variables"
 
 #. translators: %s: example CSS rule
-#: includes/admin/class-appearance-page.php:611
+#: includes/admin/class-appearance-page.php:635
 #, php-format
 msgid "Le setezi pe .cmp (sau .cmp-light pentru modul Light), de exemplu %s."
 msgstr "Set them on .cmp (or .cmp-light for Light mode), for example %s."
 
-#: includes/admin/class-appearance-page.php:622
+#: includes/admin/class-appearance-page.php:646
 msgid "Salvează aspectul"
 msgstr "Save appearance"
 
-#: includes/admin/class-appearance-page.php:635
+#: includes/admin/class-appearance-page.php:659
 msgid "Titlu banner"
 msgstr "Banner title"
 
-#: includes/admin/class-appearance-page.php:636
+#: includes/admin/class-appearance-page.php:660
 msgid "Text introductiv"
 msgstr "Intro text"
 
-#: includes/admin/class-appearance-page.php:637
+#: includes/admin/class-appearance-page.php:661
 msgid "Text notice (Light)"
 msgstr "Notice text (Light)"
 
-#: includes/admin/class-appearance-page.php:638
+#: includes/admin/class-appearance-page.php:662
 msgid "Buton „Accept\""
 msgstr "“Accept” button"
 
-#: includes/admin/class-appearance-page.php:639
+#: includes/admin/class-appearance-page.php:663
 msgid "Buton „Doar necesare\""
 msgstr "“Necessary only” button"
 
-#: includes/admin/class-appearance-page.php:640
+#: includes/admin/class-appearance-page.php:664
 msgid "Buton „Gestionează\""
 msgstr "“Manage” button"
 
-#: includes/admin/class-appearance-page.php:641
+#: includes/admin/class-appearance-page.php:665
 msgid "Buton „Confirmă selecția\""
 msgstr "“Confirm selection” button"
 
-#: includes/admin/class-appearance-page.php:642
+#: includes/admin/class-appearance-page.php:666
 msgid "Titlu preferințe"
 msgstr "Preferences title"
 
-#: includes/admin/class-appearance-page.php:654
+#: includes/admin/class-appearance-page.php:678
 msgid "Doar în modul Light."
 msgstr "Light mode only."
 
-#: includes/admin/class-appearance-page.php:661
+#: includes/admin/class-appearance-page.php:685
 msgid ""
 "Site-ul folosește WPML sau Polylang. Textele de mai jos sunt cele de bază; "
 "le traduci în pluginul de traduceri, ca până acum."
@@ -910,38 +936,38 @@ msgstr ""
 "The site uses WPML or Polylang. The texts below are the base texts; you "
 "translate them in the translation plugin, as before."
 
-#: includes/admin/class-appearance-page.php:662
+#: includes/admin/class-appearance-page.php:686
 msgid "Deschide traducerile textelor"
 msgstr "Open the text translations"
 
-#: includes/admin/class-appearance-page.php:665
+#: includes/admin/class-appearance-page.php:689
 msgid "(implicit)"
 msgstr "(default)"
 
-#: includes/admin/class-appearance-page.php:671
+#: includes/admin/class-appearance-page.php:695
 msgid "Câmp gol = textul implicit al limbii (arătat în câmp, estompat)."
 msgstr ""
 "Empty field = the language's default text (shown greyed out in the field)."
 
-#: includes/admin/class-appearance-page.php:672
+#: includes/admin/class-appearance-page.php:696
 msgid "Limba textelor"
 msgstr "Language of the texts"
 
-#: includes/admin/class-appearance-page.php:698
+#: includes/admin/class-appearance-page.php:722
 msgid ""
 "Previzualizarea nu a putut fi pregătită. Reîncarcă pagina și încearcă din "
 "nou."
 msgstr "The preview could not be prepared. Reload the page and try again."
 
-#: includes/admin/class-appearance-page.php:699
+#: includes/admin/class-appearance-page.php:723
 msgid "Deschide previzualizarea"
 msgstr "Open the preview"
 
-#: includes/admin/class-appearance-page.php:700
+#: includes/admin/class-appearance-page.php:724
 msgid "Vezi pe site"
 msgstr "View on site"
 
-#: includes/admin/class-appearance-page.php:701
+#: includes/admin/class-appearance-page.php:725
 msgid "(se deschide într-o filă nouă, cu setările nesalvate)"
 msgstr "(opens in a new tab, with the unsaved settings)"
 
@@ -3375,7 +3401,14 @@ msgid ""
 "e mai mică sau ascunsă. Nu acoperă textul sau butoanele și nu apare în "
 "preferințe ori în Light. Imaginile de pe alt domeniu (de exemplu un CDN) nu "
 "se afișează, ca să nu plece date înainte de acord."
-msgstr "In Appearance, under \"Picture\", choose a ready-made biscuit or an image from the media library (PNG or WebP, with a transparent background). It sits on a top corner and sticks out of the banner a little; at a top position it stays inside. On phones it is smaller or hidden. It covers neither the text nor the buttons and does not show in the preferences or in Light. Images from another domain (a CDN, for example) are not shown, so that no data leaves before consent."
+msgstr ""
+"In Appearance, under \"Picture\", choose a ready-made biscuit or an image "
+"from the media library (PNG or WebP, with a transparent background). It sits "
+"on a top corner and sticks out of the banner a little; at a top position it "
+"stays inside. On phones it is smaller or hidden. It covers neither the text "
+"nor the buttons and does not show in the preferences or in Light. Images "
+"from another domain (a CDN, for example) are not shown, so that no data "
+"leaves before consent."
 
 #: templates/admin/guide.php:97
 msgid ""
@@ -4868,4 +4901,3 @@ msgstr ""
 #~ "The move is retried automatically, once a day. You do not need to do "
 #~ "anything; if you want to complete it, ask whoever manages the server to "
 #~ "allow writing to the plugins folder."
-

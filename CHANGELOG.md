@@ -57,6 +57,10 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
   imagine din biblioteca media, într-un colț de sus, ieșită puțin din banner.
   Oprită implicit. Nu acoperă textul sau butoanele, nu apare în preferințe și în
   Light și nu se descarcă pentru cine a decis deja.
+- Logo în fereastra de setări, din Aspect: logo-ul temei sau o imagine din
+  biblioteca media, deasupra titlului, de 32 px înălțime. Oprit implicit. Doar
+  imagini de pe site-ul tău, descărcate doar când vizitatorul deschide setările.
+  Nu apare în Light.
 - Stilul Minimal: butonul de preferințe se numește „Setări”, iar pe ecranele
   de la 576 px în sus toate butoanele stau pe un singur rând. Pe site-urile
   cu Minimal bannerul arată puțin altfel după update. Un text propriu pentru

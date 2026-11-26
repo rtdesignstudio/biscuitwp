@@ -71,14 +71,14 @@ cmp_assert_eq( $io_exp['version'], 1, 'export: version' );
 cmp_assert( is_string( $io_exp['plugin'] ) && false !== strpos( $io_exp['plugin'], '1.1.1' ), 'export: plugin and its version' );
 cmp_assert( ! array_key_exists( 'exclude', $io_exp['appearance'] ), 'export: exclusions (they belong to the site) are never exported' );
 $io_want = $io_norm;
-unset( $io_want['exclude'], $io_want['image_id'] );
+unset( $io_want['exclude'], $io_want['image_id'], $io_want['logo_id'] );
 cmp_assert_eq( $io_exp['appearance'], $io_want, 'export: the normalized saved appearance, texts included' );
 cmp_assert_eq( $io_exp['appearance']['dark_selector'], '.night', 'export: dark_selector exported' );
 cmp_assert_eq( $io_exp['appearance']['custom_css'], '.cmp{--cmp-radius:6px}', 'export: custom_css exported' );
 $io_own = CMP_Appearance_IO::export( array( 'appearance' => array( 'style' => 'brand', 'image' => 'own', 'image_id' => 7, 'image_size' => 120 ) ), '1.2.0' );
 cmp_assert( 'none' === $io_own['appearance']['image'] && 120 === $io_own['appearance']['image_size'] && ! isset( $io_own['appearance']['image_id'] ), 'export: the own picture stays on its site, the other picture options go' );
 $io_defaults = array_keys( CMP_Appearance::defaults( 'brand' ) );
-cmp_assert_eq( array_values( array_diff( $io_defaults, array_keys( $io_exp['appearance'] ) ) ), array( 'image_id', 'exclude' ), 'export: every appearance key but exclude and the picture id is there (no other key carries site data)' );
+cmp_assert_eq( array_values( array_diff( $io_defaults, array_keys( $io_exp['appearance'] ) ) ), array( 'image_id', 'logo_id', 'exclude' ), 'export: every appearance key but exclude and the picture and logo ids is there (no other key carries site data)' );
 $io_json = json_encode( $io_exp, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT );
 foreach ( array( 'pagina-secreta', 'checkout', 'dpo@acme.test', 'ACME', 'example', 'http', '"12"', 'privacy_page_id', 'legal_meta', 'block_scripts' ) as $io_leak ) {
 	cmp_assert( false === strpos( $io_json, $io_leak ), "export: nothing about the site ($io_leak)" );

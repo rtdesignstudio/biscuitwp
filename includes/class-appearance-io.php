@@ -27,7 +27,7 @@ class CMP_Appearance_IO {
 	const MAX_DEPTH = 8;
 
 	/** Appearance keys that belong to the site, not to the look: never exported, never imported. */
-	const SITE_KEYS = array( 'exclude', 'image_id' );
+	const SITE_KEYS = array( 'exclude', 'image_id', 'logo_id' );
 
 	/**
 	 * The file content for the saved settings.
@@ -44,6 +44,9 @@ class CMP_Appearance_IO {
 		// The site's own picture stays on its site.
 		if ( 'own' === $a['image'] ) {
 			$a['image'] = 'none';
+		}
+		if ( isset( $a['logo'] ) && 'own' === $a['logo'] ) {
+			$a['logo'] = 'none';
 		}
 		foreach ( self::SITE_KEYS as $k ) {
 			unset( $a[ $k ] );

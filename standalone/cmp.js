@@ -744,6 +744,8 @@
 	};
 	var AP_DIM = { neutral: 55, warm: 50, dark: 60, egov: 60 };
 	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10], image: [48, 160] };
+	// The logo above the settings title (#727): as CMP_Appearance::LOGO_CSS.
+	var AP_LOGO = '.cmp__logo{display:block;width:auto;height:32px;max-width:160px;margin:0 0 16px;object-fit:contain;object-position:left center}';
 	var AP_MINIMAL = '@media (min-width:576px){.cmp--style-minimal .cmp__actions,.cmp--style-minimal .cmp__choices{flex-wrap:nowrap}.cmp--style-minimal .cmp__btn{white-space:nowrap}}';
 	var AP_DARK_SEL = '.dark, [data-theme="dark"], .is-dark-theme';
 	var AP_SCOPE = '.cmp,.cmp-light,.cmp-reopen,.cmp-embed';
@@ -770,6 +772,12 @@
 			phone: apPick(v.phone, ['small', 'none'], 'small'),
 			alt: typeof v.alt === 'string' ? v.alt.slice(0, 300) : ''
 		};
+	}
+	// The logo in the settings window: { src, alt }; src = a path or an http(s) address, as the picture.
+	function apLogo(v) {
+		var src = v && typeof v === 'object' && typeof v.src === 'string' ? v.src.trim() : '';
+		if (!/^(?:https?:\/\/|\/(?!\/)|\.{0,2}\/)?[^\s"'<>\\:]+$/.test(src)) { return null; }
+		return { src: src, alt: typeof v.alt === 'string' ? v.alt.slice(0, 300) : '' };
 	}
 	// Minimal: the short "Setări" unless the site wrote its own label (as banner-bottom.php).
 	function apMinimalTexts(a, texts, def, own) {
@@ -821,6 +829,7 @@
 			density: apPick(raw.density, ['compact', 'normal', 'comfortable'], 'normal'),
 			buttons: apPick(raw.buttons, ['solid', 'outline', 'text'], sd[2]),
 			image: apImage(raw.image),
+			logo: apLogo(raw.logo),
 			anim: apPick(raw.anim, ['none', 'fade', 'slide'], sd[3]),
 			delay: delay > 0 ? Math.round(Math.min(delay, 2) * 10) / 10 : 0,
 			reopen: apPick(raw.reopen, ['none', 'icon', 'text', 'both'], 'icon')
@@ -907,7 +916,7 @@
 		}
 		if (Object.prototype.hasOwnProperty.call(AP_DENSITY, a.density)) { css += AP_DENSITY[a.density]; }
 		if (a.style === 'minimal') { css += AP_MINIMAL; }
-		return css + apImageCss(a);
+		return css + apImageCss(a) + (a.logo ? AP_LOGO : '');
 	}
 
 	if (typeof document !== 'undefined') {
@@ -978,6 +987,7 @@
 				'</div>' +
 				'</div>' +
 				'<div class="cmp__prefs" data-cmp-view="prefs">' +
+				(cfg.appearance && cfg.appearance.logo ? '<img class="cmp__logo" src="' + escapeHtml(cfg.appearance.logo.src) + '" alt="' + escapeHtml(cfg.appearance.logo.alt) + '" loading="lazy" decoding="async">' : '') +
 				'<div class="cmp__prefs-header">' +
 				'<h2 id="cmp-prefs-title" class="cmp__title" tabindex="-1" data-cmp-prefs-title data-cmp-reconsent-title="' + escapeHtml(cfg.texts.reconsent_title || '') + '">' + escapeHtml(cfg.texts.prefs_title) + '</h2>' +
 				'<button type="button" class="cmp__collapse" data-cmp-action="back" aria-label="' + escapeHtml(cfg.texts.back) + '">' +
