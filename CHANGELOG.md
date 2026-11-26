@@ -2,7 +2,7 @@
 
 BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z – AAAA-LL-ZZ`; `bin/release.sh` ia de aici notele din manifestul de update (ultimele 5 versiuni, text simplu).
 
-## 1.2.0 – TBD
+## 1.2.0 – 2026-11-26
 
 - Biblioteca de servicii are două servicii noi: Google AdSense (marketing)
   și Cloudflare Turnstile (necesar).

@@ -3,7 +3,7 @@
  * Plugin Name: BiscuitWP
  * Plugin URI: https://biscuitwp.rt.md/
  * Description: Free and open-source GDPR cookie consent: a consent banner, the legal pages (Privacy Policy, Terms & Conditions, Cookie Policy) and a consent audit log. Multilingual (RO, RU, EN).
- * Version: 1.1.1
+ * Version: 1.2.0
  * Requires PHP: 7.4
  * Author: RT.md
  * Author URI: https://rt.md
