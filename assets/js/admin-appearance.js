@@ -265,7 +265,7 @@
 			if (palette) { palette.addEventListener('change', checkAccent); }
 			if (useBtn) {
 				useBtn.addEventListener('click', function () {
-					if (proposed) { accent.value = proposed; checkAccent(); accent.focus(); }
+					if (proposed) { accent.value = proposed; accent.dispatchEvent(new Event('input', { bubbles: true })); accent.focus(); }
 				});
 			}
 			checkAccent();
@@ -401,6 +401,7 @@
 				frame.on('select', function () {
 					var m = frame.state().get('selection').first().toJSON();
 					id.value = m.id;
+					id.dispatchEvent(new Event('change', { bubbles: true }));
 					thumb.src = m.sizes && m.sizes.thumbnail ? m.sizes.thumbnail.url : m.url;
 					thumb.hidden = false;
 				});
@@ -409,9 +410,118 @@
 		});
 	}
 
+	// The live preview (#727 step 4): 300 ms after a change, the server renders the
+	// banner of the unsaved form (cmp_preview_render); it goes into a frame without
+	// scripts, so nothing in it can write consent. The switches drive the frame.
+	function initLivePreview() {
+		var root = document.querySelector('[data-cmp-live]');
+		var form = document.querySelector('.cmp-ap-form');
+		if (!root || !form || !window.FormData || !('srcdoc' in document.createElement('iframe'))) { return; }
+		var frame = root.querySelector('[data-cmp-live-frame]'), stage = root.querySelector('[data-cmp-live-stage]');
+		var status = root.querySelector('[data-cmp-live-status]'), langSel = root.querySelector('[data-cmp-live-lang]');
+		var light = (document.querySelector('[data-cmp-ap]') || root).getAttribute('data-cmp-ap-mode') === 'light';
+		var st = { view: 'desktop', theme: 'light', pane: 'banner' }, SIZES = { desktop: [1280, 800], phone: [375, 667] };
+		var seq = 0, xhr = null, timer = null;
+		root.hidden = false;
+		if (light) {
+			var pg = root.querySelector('[data-cmp-live-pane]');
+			if (pg && pg.parentNode) { pg.parentNode.hidden = true; }
+		}
+
+		function fit() {
+			var sz = SIZES[st.view], w = (root.clientWidth - 34) || sz[0], h = Math.max(240, (window.innerHeight || 800) - 300), k = Math.min(1, w / sz[0], h / sz[1]);
+			frame.style.width = sz[0] + 'px';
+			frame.style.height = sz[1] + 'px';
+			frame.style.transform = 'scale(' + k + ')';
+			stage.style.height = Math.round(sz[1] * k) + 'px';
+			stage.style.width = Math.round(sz[0] * k) + 'px';
+			stage.style.maxWidth = '100%';
+		}
+		function apply() {
+			var d = frame.contentDocument;
+			if (!d || !d.body) { return; }
+			var b = d.querySelector('[data-cmp], [data-cmp-light]'), m = d.querySelector('[data-cmp-modal]');
+			d.body.className = st.theme === 'dark' ? 'dark' : '';
+			if (!b) { return; }
+			if (b.getAttribute('data-cmp-own-dark') === null) { b.setAttribute('data-cmp-own-dark', b.classList.contains('cmp--dark') ? '1' : '0'); }
+			b.hidden = false;
+			// As banner.js on the site: "light" never goes dark, "dark" always is; for
+			// auto / site the switch decides (the computer's own mode stays out).
+			var th = form.querySelector('[name*="[theme]"]:checked'), base = th ? th.value : 'light';
+			var dark = base === 'light' ? false : (base === 'dark' ? true : st.theme === 'dark');
+			b.classList.remove('cmp--theme-auto');
+			b.classList.toggle('cmp--dark', dark || b.getAttribute('data-cmp-own-dark') === '1');
+			d.body.className = dark ? 'dark' : '';
+			var tg = root.querySelector('[data-cmp-live-theme]');
+			if (tg && tg.parentNode) { tg.parentNode.hidden = base === 'light' || base === 'dark'; }
+			if (m) { m.classList.toggle('is-prefs-open', st.pane === 'prefs' && !light); }
+		}
+		function page(p) {
+			var lines = '';
+			for (var i = 0; i < 14; i++) { lines += '<i style="width:' + (55 + (i * 37) % 40) + '%"></i>'; }
+			return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+				'<link rel="stylesheet" href="' + String(p.bannerCss || '').replace(/"/g, '&quot;') + '">' + (p.css || '') +
+				'<style>html,body{margin:0;min-height:100%}body{background:#eef0f3;font:16px/1.5 system-ui,sans-serif}body.dark{background:#16181d}' +
+				'.fake{max-width:720px;margin:0 auto;padding:48px 24px}.fake b{display:block;height:28px;width:60%;margin:0 0 24px;background:#d5d9e0;border-radius:4px}' +
+				'.fake i{display:block;height:12px;margin:0 0 14px;background:#dde1e7;border-radius:4px}.dark .fake b,.dark .fake i{background:#2a2e36}' +
+				'.cmp,.cmp *,.cmp-light,.cmp-light *{animation:none!important;transition:none!important}</style></head>' +
+				'<body><div class="fake" aria-hidden="true"><b></b>' + lines + '</div>' + (p.html || '') + '</body></html>';
+		}
+		function request() {
+			var my = ++seq, fd = new FormData(form);
+			if (xhr) { xhr.abort(); }
+			fd.set('action', 'cmp_preview_render');
+			fd.set('nonce', root.getAttribute('data-cmp-live-nonce') || '');
+			fd.set('lang', langSel ? langSel.value : '');
+			status.textContent = root.getAttribute('data-cmp-live-busy') || '';
+			xhr = new XMLHttpRequest();
+			xhr.open('POST', root.getAttribute('data-cmp-live-ajax') || '', true);
+			xhr.onload = function () {
+				if (my !== seq) { return; }
+				var r = null;
+				try { r = JSON.parse(xhr.responseText); } catch (e) { r = null; }
+				if (!r || !r.success || !r.data) { status.textContent = root.getAttribute('data-cmp-live-error') || ''; return; }
+				status.textContent = '';
+				frame.srcdoc = page(r.data);
+			};
+			xhr.onerror = function () { if (my === seq) { status.textContent = root.getAttribute('data-cmp-live-error') || ''; } };
+			xhr.send(fd);
+		}
+		function later() {
+			clearTimeout(timer);
+			timer = setTimeout(request, 300);
+		}
+
+		frame.addEventListener('load', apply);
+		form.addEventListener('input', later);
+		form.addEventListener('change', later);
+		if (langSel) { langSel.addEventListener('change', request); }
+		// The texts tab opened (RO / RU / EN) is the language shown.
+		document.addEventListener('click', function (e) {
+			var tab = e.target && e.target.closest ? e.target.closest('[data-cmp-ap-tab]') : null;
+			if (tab && langSel) { langSel.value = tab.getAttribute('data-cmp-ap-tab'); request(); }
+		});
+		root.addEventListener('click', function (e) {
+			var b = e.target && e.target.closest ? e.target.closest('.cmp-live__sw') : null;
+			if (!b) { return; }
+			['view', 'theme', 'pane'].forEach(function (k) {
+				var v = b.getAttribute('data-cmp-live-' + k);
+				if (v === null) { return; }
+				st[k] = v;
+				root.querySelectorAll('[data-cmp-live-' + k + ']').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+			});
+			fit();
+			apply();
+		});
+		window.addEventListener('resize', fit);
+		fit();
+		request();
+	}
+
 	function initPickers() {
 		initPicker('image', 'imageTitle');
 		initPicker('logo', 'logoTitle');
+		initLivePreview();
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', initPickers);

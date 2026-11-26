@@ -68,6 +68,9 @@ function wp_parse_url( $u, $c = -1 ) {
 function admin_url( $p = '' ) {
 	return 'https://example.test/wp-admin/' . $p;
 }
+function wp_create_nonce( $a = -1 ) {
+	return 'nonce-' . $a;
+}
 function wp_nonce_field( $a = -1 ) {
 	echo '<input type="hidden" name="_wpnonce" value="x">';
 }

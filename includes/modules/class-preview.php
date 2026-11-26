@@ -39,6 +39,9 @@ class CMP_Preview {
 	/** The AJAX action (and its nonce action) that stores the form values. */
 	const AJAX = 'cmp_preview_store';
 
+	/** The live preview of the Aspect screen (#727 step 4): the AJAX action and its nonce action. */
+	const RENDER = 'cmp_preview_render';
+
 	/** Transient prefix (+ user id). */
 	const KEY = 'cmp_preview_';
 
@@ -53,6 +56,7 @@ class CMP_Preview {
 
 	public static function register() {
 		add_action( 'wp_ajax_' . self::AJAX, array( __CLASS__, 'ajax_store' ) );
+		add_action( 'wp_ajax_' . self::RENDER, array( __CLASS__, 'ajax_render' ) );
 		add_action( 'wp_body_open', array( __CLASS__, 'print_bar' ), 1 );
 		// Themes without wp_body_open: at the end of the page.
 		add_action( 'wp_footer', array( __CLASS__, 'print_bar' ), 1 );
@@ -237,5 +241,66 @@ class CMP_Preview {
 		self::store( get_current_user_id(), self::build( $raw, $old, CMP_Banner::multilingual() ) );
 		self::send_cookie( wp_create_nonce( self::PARAM ) );
 		wp_send_json_success( array( 'url' => self::url( home_url( '/' ) ) ) );
+	}
+
+	/** The locales of the panel's languages (the packs of CMP_Lang). */
+	const LOCALES = array( 'ro' => 'ro_RO', 'ru' => 'ru_RU', 'en' => 'en_US' );
+
+	/**
+	 * The banner of these settings as the site renders it, for the live preview:
+	 * the template's HTML (Pro or Light, as the stored mode; without the reopen
+	 * button) and the generated CSS. No script, no link.
+	 *
+	 * @param string $lang 'ro' | 'ru' | 'en', or '' for the site language. Ignored with WPML / Polylang.
+	 */
+	public static function render_parts( array $settings, array $categories, $lang ) {
+		$locale = isset( self::LOCALES[ $lang ] ) ? self::LOCALES[ $lang ] : ( function_exists( 'get_locale' ) ? get_locale() : 'ro_RO' );
+		// admin-ajax.php is an admin request: determine_locale() would give the admin's own language.
+		$force = function () use ( $locale ) {
+			return $locale;
+		};
+		add_filter( 'determine_locale', $force, PHP_INT_MAX );
+		// WPML / Polylang: read the translations, never register the unsaved texts.
+		$dry             = CMP_I18n::$dry;
+		CMP_I18n::$dry   = true;
+		$preset          = isset( $settings['preset'] ) ? $settings['preset'] : 'neutral';
+		$mode            = isset( $settings['mode'] ) ? $settings['mode'] : 'pro';
+		$cmp_a           = CMP_Banner::appearance( $settings );
+		$no_overlay      = false;
+		$level           = ob_get_level();
+		try {
+			ob_start();
+			include CMP_PATH . ( 'light' === $mode ? 'templates/banner-light.php' : 'templates/banner-bottom.php' );
+			$html = (string) ob_get_clean();
+			$used = CMP_Lang::current();
+		} finally {
+			while ( ob_get_level() > $level ) {
+				ob_end_clean();
+			}
+			CMP_I18n::$dry = $dry;
+			remove_filter( 'determine_locale', $force, PHP_INT_MAX );
+		}
+		return array(
+			'html' => $html,
+			'css'  => CMP_Banner::style_html( $cmp_a, CMP_Banner::theme_palette( $cmp_a ) ),
+			'lang' => $used,
+		);
+	}
+
+	/** wp_ajax_cmp_preview_render: the banner of the posted (unsaved) form. Writes nothing. */
+	public static function ajax_render() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_ajax_referer( self::RENDER, 'nonce', false ) ) {
+			wp_send_json_error( 'forbidden', 403 );
+		}
+		$raw  = isset( $_POST['cmp'] ) && is_array( $_POST['cmp'] ) ? wp_unslash( $_POST['cmp'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized in CMP_Sanitizer::aspect().
+		$lang = isset( $_POST['lang'] ) && is_string( $_POST['lang'] ) ? sanitize_text_field( wp_unslash( $_POST['lang'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- checked against LOCALES.
+		$old  = CMP_Consent::get_settings();
+		$old  = is_array( $old ) ? $old : array();
+		$cats = CMP_Consent::get_categories();
+		$set  = self::apply( $old, self::build( $raw, $old, CMP_Banner::multilingual() ) );
+		$out  = self::render_parts( $set, is_array( $cats ) ? $cats : array(), CMP_Banner::multilingual() ? '' : $lang );
+		$css  = CMP_Assets::src_or_min( 'assets/css/banner.css', defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG, CMP_PATH );
+		$out['bannerCss'] = add_query_arg( 'ver', CMP_Plugin::asset_ver( $css ), CMP_URL . $css );
+		wp_send_json_success( $out );
 	}
 }

@@ -61,6 +61,9 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
   biblioteca media, deasupra titlului, de 32 px înălțime. Oprit implicit. Doar
   imagini de pe site-ul tău, descărcate doar când vizitatorul deschide setările.
   Nu apare în Light.
+- Ecranul Aspect arată bannerul pe loc, lângă formular: desktop sau telefon,
+  temă deschisă sau întunecată, bannerul sau setările. Clicurile din
+  previzualizare nu salvează nimic.
 - Stilul Minimal: butonul de preferințe se numește „Setări”, iar pe ecranele
   de la 576 px în sus toate butoanele stau pe un singur rând. Pe site-urile
   cu Minimal bannerul arată puțin altfel după update. Un text propriu pentru

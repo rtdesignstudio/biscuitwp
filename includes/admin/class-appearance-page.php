@@ -326,7 +326,9 @@ class CMP_Appearance_Page {
 			<?php elseif ( $theme_check && '' !== $theme_check['primary'] && ! $theme_check['primary_ok'] ) : ?>
 				<div class="notice notice-warning inline cmp-ap-theme-warning"><p><?php echo esc_html( sprintf( /* translators: 1: the theme's colour (#rrggbb), 2: contrast ratio, 3: proposed colour (#rrggbb), 4: its contrast ratio */ __( 'Culoarea principală a temei (%1$s) are contrast %2$s:1, sub 4,5:1, așa că bannerul folosește culoarea paletei. Pentru o culoare apropiată de a temei, pune ca accent nuanța propusă: %3$s (%4$s:1).', 'biscuitwp' ), $theme_check['primary'], $theme_check['ratio'], $theme_check['suggest'], $theme_check['suggest_ratio'] ) ); ?></p></div>
 			<?php endif; ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<div class="cmp-ap-layout">
+			<?php echo self::live_preview_html( wp_create_nonce( CMP_Preview::RENDER ), admin_url( 'admin-ajax.php' ), $multilingual ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in live_preview_html(). ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cmp-ap-form">
 				<input type="hidden" name="action" value="cmp_save_appearance">
 				<?php wp_nonce_field( 'cmp_save_appearance' ); ?>
 				<table class="form-table" role="presentation">
@@ -648,6 +650,7 @@ class CMP_Appearance_Page {
 					<span class="cmp-ap-preview" data-cmp-preview-slot><?php do_action( 'cmp_appearance_actions', $s ); ?></span>
 				</p>
 			</form>
+			</div>
 			<?php echo self::io_section_html( admin_url( 'admin.php?page=' . self::SLUG ), admin_url( 'admin-post.php' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in io_section_html(). ?>
 		</div>
 		<?php
@@ -724,6 +727,40 @@ class CMP_Appearance_Page {
 			. esc_html__( 'Vezi pe site', 'biscuitwp' ) . ' <span aria-hidden="true">↗</span>'
 			. '<span class="screen-reader-text"> ' . esc_html__( '(se deschide într-o filă nouă, cu setările nesalvate)', 'biscuitwp' ) . '</span>'
 			. '</button> <span class="cmp-ap-preview__status" role="status" data-cmp-preview-status></span>';
+	}
+
+	/**
+	 * Pure: the live preview panel (#727 step 4). The banner of the unsaved form,
+	 * rendered by the server (CMP_Preview::ajax_render()) into a frame without
+	 * scripts; assets/js/admin-appearance.js shows the panel and drives it.
+	 * Without WPML / Polylang a language select (RO / RU / EN).
+	 */
+	public static function live_preview_html( $nonce, $ajax_url, $multilingual ) {
+		$sw = function ( $key, array $opts ) {
+			$h = '<span class="cmp-live__group" role="group">';
+			$i = 0;
+			foreach ( $opts as $v => $lbl ) {
+				$h .= '<button type="button" class="button cmp-live__sw" data-cmp-live-' . $key . '="' . esc_attr( $v ) . '" aria-pressed="' . ( 0 === $i++ ? 'true' : 'false' ) . '">' . esc_html( $lbl ) . '</button>';
+			}
+			return $h . '</span>';
+		};
+		$h  = '<details class="cmp-live" data-cmp-live open hidden'
+			. ' data-cmp-live-nonce="' . esc_attr( $nonce ) . '"'
+			. ' data-cmp-live-ajax="' . esc_url( $ajax_url ) . '"'
+			. ' data-cmp-live-error="' . esc_attr__( 'Previzualizarea nu s-a putut actualiza. Ultima variantă rămâne afișată.', 'biscuitwp' ) . '"'
+			. ' data-cmp-live-busy="' . esc_attr__( 'Se actualizează…', 'biscuitwp' ) . '">';
+		$h .= '<summary>' . esc_html__( 'Previzualizare', 'biscuitwp' ) . '</summary>';
+		$h .= '<div class="cmp-live__bar">';
+		$h .= $sw( 'view', array( 'desktop' => __( 'Desktop', 'biscuitwp' ), 'phone' => __( 'Telefon', 'biscuitwp' ) ) );
+		$h .= $sw( 'theme', array( 'light' => __( 'Deschisă', 'biscuitwp' ), 'dark' => __( 'Întunecată', 'biscuitwp' ) ) );
+		$h .= $sw( 'pane', array( 'banner' => __( 'Banner', 'biscuitwp' ), 'prefs' => __( 'Setări', 'biscuitwp' ) ) );
+		if ( ! $multilingual ) {
+			$h .= '<label class="cmp-live__lang">' . esc_html__( 'Limba', 'biscuitwp' ) . ' <select data-cmp-live-lang><option value="">' . esc_html__( 'a site-ului', 'biscuitwp' ) . '</option><option value="ro">RO</option><option value="ru">RU</option><option value="en">EN</option></select></label>';
+		}
+		$h .= '</div>';
+		$h .= '<div class="cmp-live__stage" data-cmp-live-stage><iframe class="cmp-live__frame" data-cmp-live-frame sandbox="allow-same-origin" title="' . esc_attr__( 'Previzualizarea bannerului', 'biscuitwp' ) . '"></iframe></div>';
+		$h .= '<p class="cmp-live__status" role="status" data-cmp-live-status></p>';
+		return $h . '</details>';
 	}
 
 	/** cmp_appearance_actions: the "Vezi pe site" button. */

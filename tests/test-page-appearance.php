@@ -69,6 +69,11 @@ if ( ! function_exists( 'disabled' ) ) {
 		return $r;
 	}
 }
+if ( ! function_exists( 'wp_create_nonce' ) ) {
+	function wp_create_nonce( $a = -1 ) {
+		return 'nonce-' . $a;
+	}
+}
 if ( ! function_exists( 'wp_nonce_field' ) ) {
 	function wp_nonce_field( $a = -1 ) {
 		echo '<input type="hidden" name="_wpnonce" value="x">';
