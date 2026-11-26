@@ -40,6 +40,7 @@
 					title: 'Informații despre cookie-uri',
 					intro: 'Folosim cookie-uri esențiale pentru funcționarea site-ului și, cu acordul tău, cookie-uri de analiză pentru a-l îmbunătăți. Poți accepta sau refuza cookie-urile opționale.',
 					prefs: 'Gestionează cookie-urile',
+					prefs_short: 'Setări',
 					reject: 'Doar cele necesare',
 					accept: 'Permite tot',
 					prefs_title: 'Alege ce cookie-uri accepți',
@@ -79,6 +80,7 @@
 					title: 'Информация о файлах cookie',
 					intro: 'Мы используем необходимые файлы cookie для работы сайта и, с вашего согласия, аналитические cookie для его улучшения. Вы можете принять или отклонить дополнительные cookie.',
 					prefs: 'Управление cookie',
+					prefs_short: 'Настройки',
 					reject: 'Только необходимые',
 					accept: 'Разрешить все',
 					prefs_title: 'Выберите, какие cookie принять',
@@ -118,6 +120,7 @@
 					title: 'Cookie information',
 					intro: 'We use essential cookies for the website to function and, with your consent, analytics cookies to improve it. You can accept or reject optional cookies.',
 					prefs: 'Manage cookies',
+					prefs_short: 'Settings',
 					reject: 'Necessary only',
 					accept: 'Accept all',
 					prefs_title: 'Choose which cookies to accept',
@@ -213,7 +216,7 @@
 			respectGPC: !!raw.respectGPC,
 			reopenButton: true === raw.reopenButton,
 			// B6: classes + CSS variables, delay, theme, reopen shape; null = today's look.
-			appearance: normAppearance(raw.appearance, raw.preset),
+			appearance: apMinimalTexts(normAppearance(raw.appearance, raw.preset), texts, defaultTexts, raw.texts),
 			reloadOnDecision: true === raw.reloadOnDecision,
 			cookieDays: cd,
 			// Re-consent (B4): {slug: [serviceIds]} written by hand; anything else = unknown.
@@ -741,6 +744,7 @@
 	};
 	var AP_DIM = { neutral: 55, warm: 50, dark: 60, egov: 60 };
 	var AP_RANGES = { radius: [0, 24], maxw: [360, 960], gap: [0, 40], dim: [0, 80], blur: [0, 10], image: [48, 160] };
+	var AP_MINIMAL = '@media (min-width:576px){.cmp--style-minimal .cmp__actions,.cmp--style-minimal .cmp__choices{flex-wrap:nowrap}.cmp--style-minimal .cmp__btn{white-space:nowrap}}';
 	var AP_DARK_SEL = '.dark, [data-theme="dark"], .is-dark-theme';
 	var AP_SCOPE = '.cmp,.cmp-light,.cmp-reopen,.cmp-embed';
 	// Density rules (CMP_Appearance::DENSITY_CSS): only for compact / comfortable; normal = none.
@@ -767,12 +771,17 @@
 			alt: typeof v.alt === 'string' ? v.alt.slice(0, 300) : ''
 		};
 	}
+	// Minimal: the short "Setări" unless the site wrote its own label (as banner-bottom.php).
+	function apMinimalTexts(a, texts, def, own) {
+		if (a && a.style === 'minimal' && !(own && typeof own === 'object' && typeof own.prefs === 'string')) { texts.prefs = def.prefs_short; }
+		return a;
+	}
 	// Pure: its rules, as CMP_Appearance::image_css().
 	function apImageCss(a) {
 		if (!a.image) { return ''; }
 		var z = a.image.size, e = a.image.side, ins = !a.image.out || a.position.indexOf('top') === 0, p = Math.min(z, 64);
 		return '.cmp__modal{position:relative}.cmp__img{position:absolute;z-index:1;top:' + (ins ? 20 : Math.min(0, 56 - z)) + 'px;' + e + ':24px;width:' + z + 'px;height:' + z + 'px;object-fit:contain;pointer-events:none}.cmp__modal.is-prefs-open .cmp__img{display:none}' +
-			'@media (min-width:576px){.cmp--fmt-bar .cmp__img{' + e + ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' + (ins ? ',.cmp__main .cmp__text' : '') + '{padding-' + e + ':' + (z + 12) + 'px}}' +
+			'@media (min-width:576px){.cmp--fmt-bar .cmp__img{' + e + ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' + (ins ? ',.cmp__main .cmp__text' : '') + '{padding-' + e + ':' + (z + 12) + 'px}' + (ins ? '.cmp__main .cmp__text{min-height:' + Math.max(0, z - 40) + 'px}' : '') + '}' +
 			'@media (max-width:575px){.cmp__img{' + (a.image.phone === 'none' ? 'display:none' : 'top:' + (14 - p) + 'px;' + e + ':16px;width:' + p + 'px;height:' + p + 'px') + '}}' +
 			'@media (max-width:359px),(max-height:480px){.cmp__img{display:none}}' +
 			'@media (min-height:481px){.cmp.cmp--no-overlay .cmp__modal:not(.is-prefs-open),.cmp.cmp--backdrop-none .cmp__modal:not(.is-prefs-open){overflow:visible}}';
@@ -897,6 +906,7 @@
 			if (a.theme === 'auto') { css += '@media (prefers-color-scheme:dark){.cmp--theme-auto{' + dv + '}}'; }
 		}
 		if (Object.prototype.hasOwnProperty.call(AP_DENSITY, a.density)) { css += AP_DENSITY[a.density]; }
+		if (a.style === 'minimal') { css += AP_MINIMAL; }
 		return css + apImageCss(a);
 	}
 

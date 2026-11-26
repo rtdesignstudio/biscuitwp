@@ -57,6 +57,10 @@ BiscuitWP (fost Consent Manager Pro). Fiecare versiune are o secțiune `## X.Y.Z
   imagine din biblioteca media, într-un colț de sus, ieșită puțin din banner.
   Oprită implicit. Nu acoperă textul sau butoanele, nu apare în preferințe și în
   Light și nu se descarcă pentru cine a decis deja.
+- Stilul Minimal: butonul de preferințe se numește „Setări”, iar pe ecranele
+  de la 576 px în sus toate butoanele stau pe un singur rând. Pe site-urile
+  cu Minimal bannerul arată puțin altfel după update. Un text propriu pentru
+  acest buton rămâne cum l-ai scris.
 - Nota despre WP Consent API spune când ai nevoie de el.
 - Politicile generate spun că, înainte de acord, pot porni și serviciile pe care
   instrumentul le arată așa (de exemplu harta, cât comutatorul e oprit).

@@ -42,7 +42,7 @@ $cmp_privacy_url = ( $cmp_privacy_id && 'publish' === get_post_status( $cmp_priv
 			<div class="cmp__actions">
 				<?php // Phones (<= 575 px): the intro is clamped to 2 lines; "Details" shows it all. First in the row, so the DOM order is the phone's visual order. ?>
 				<button type="button" class="cmp__more" data-cmp-action="details" aria-expanded="false" aria-controls="cmp-intro"><?php echo esc_html( CMP_Lang::text( 'details' ) ); ?></button>
-				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'prefs' ) ) ); ?><span class="cmp__chev" aria-hidden="true"> &#8250;</span></button>
+				<button type="button" class="cmp__btn cmp__btn--ghost" data-cmp-action="prefs"><?php echo esc_html( $cmp_text( 'prefs', CMP_Lang::text( 'minimal' === $cmp_a['style'] ? 'prefs_short' : 'prefs' ) ) ); ?><span class="cmp__chev" aria-hidden="true"> &#8250;</span></button>
 				<span class="cmp__spacer" aria-hidden="true"></span>
 				<!-- Equal weight: refusing is as easy and as visible as accepting. -->
 				<span class="cmp__choices">

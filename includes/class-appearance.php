@@ -362,8 +362,19 @@ class CMP_Appearance {
 		if ( isset( self::DENSITY_CSS[ $a['density'] ] ) ) {
 			$css .= self::DENSITY_CSS[ $a['density'] ];
 		}
+		if ( 'minimal' === $a['style'] ) {
+			$css .= self::MINIMAL_CSS;
+		}
 		return $css . self::image_css( $a );
 	}
+
+	/**
+	 * Minimal (#752 feedback): its buttons stay on one row on screens wider than a
+	 * phone (the settings button is the short "Setări" there, so they fit in 640px).
+	 * Printed only for Minimal: banner.css and every other banner stay as they are.
+	 * Mirrored in standalone/cmp.js (AP_MINIMAL).
+	 */
+	const MINIMAL_CSS = '@media (min-width:576px){.cmp--style-minimal .cmp__actions,.cmp--style-minimal .cmp__choices{flex-wrap:nowrap}.cmp--style-minimal .cmp__btn{white-space:nowrap}}';
 
 	/** The picture of the banner (#727): none, one of ours, or the site's own (image_id, from the media library). */
 	const IMAGES = array( 'none', 'shield', 'wp', 'own' );
@@ -372,7 +383,8 @@ class CMP_Appearance {
 	 * Pure: the rules of the banner picture, '' without one (so no other site gets a
 	 * byte). It sits on a top corner of the banner, outside it by default (the part
 	 * inside is at most 56px, beside the title, which makes room for it), inside at a
-	 * top position (nothing above the screen). Never on the preferences view, under
+	 * top position (nothing above the screen): there the title and the text make room
+	 * and the text reaches below the picture, so the buttons start under it. Never on the preferences view, under
 	 * 360px, or on a low screen. Where the banner scrolls by itself (no overlay) the
 	 * main view lets it out. Mirrored in standalone/cmp.js (image-parity.json).
 	 */
@@ -385,7 +397,7 @@ class CMP_Appearance {
 		$in   = ! $a['image_out'] || 0 === strpos( $a['position'], 'top' );
 		$p    = min( $z, 64 );
 		$css  = '.cmp__modal{position:relative}.cmp__img{position:absolute;z-index:1;top:' . ( $in ? 20 : min( 0, 56 - $z ) ) . 'px;' . $e . ':24px;width:' . $z . 'px;height:' . $z . 'px;object-fit:contain;pointer-events:none}.cmp__modal.is-prefs-open .cmp__img{display:none}';
-		$css .= '@media (min-width:576px){.cmp--fmt-bar .cmp__img{' . $e . ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' . ( $in ? ',.cmp__main .cmp__text' : '' ) . '{padding-' . $e . ':' . ( $z + 12 ) . 'px}}';
+		$css .= '@media (min-width:576px){.cmp--fmt-bar .cmp__img{' . $e . ':max(32px,calc(50% - 600px))}.cmp__main .cmp__title' . ( $in ? ',.cmp__main .cmp__text' : '' ) . '{padding-' . $e . ':' . ( $z + 12 ) . 'px}' . ( $in ? '.cmp__main .cmp__text{min-height:' . max( 0, $z - 40 ) . 'px}' : '' ) . '}';
 		$css .= '@media (max-width:575px){.cmp__img{' . ( 'none' === $a['image_phone'] ? 'display:none' : 'top:' . ( 14 - $p ) . 'px;' . $e . ':16px;width:' . $p . 'px;height:' . $p . 'px' ) . '}}';
 		$css .= '@media (max-width:359px),(max-height:480px){.cmp__img{display:none}}';
 		$css .= '@media (min-height:481px){.cmp.cmp--no-overlay .cmp__modal:not(.is-prefs-open),.cmp.cmp--backdrop-none .cmp__modal:not(.is-prefs-open){overflow:visible}}';
@@ -741,7 +753,7 @@ class CMP_Appearance {
 			case 'image_id':
 				return is_numeric( $v ) ? max( 0, (int) $v ) : $fallback;
 			case 'image_alt':
-				return is_scalar( $v ) ? substr( self::text( $v ), 0, 300 ) : $fallback;
+				return is_scalar( $v ) ? ( function_exists( 'mb_substr' ) ? mb_substr( self::text( $v ), 0, 300, 'UTF-8' ) : self::text( $v ) ) : $fallback;
 			case 'image_out':
 			case 'theme_colors':
 				return true === $v || 1 === $v || in_array( $v, array( '1', 'on', 'true', 'yes' ), true );

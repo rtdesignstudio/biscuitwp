@@ -28,6 +28,10 @@ foreach ( array( 'https://exemplu.md/u/a.png' => true, '/wp-content/a.png' => tr
 }
 cmp_assert_eq( CMP_Banner::image_html( $bi_d ), '', 'picture: no tag without it' );
 
+cmp_assert( false !== strpos( CMP_Appearance::inline_css( $bi( array( 'image' => 'wp', 'image_size' => 160, 'image_out' => '0' ) ) ), '.cmp__main .cmp__text{min-height:120px}' ), 'picture: inside, the text is as tall as the picture, so the buttons start below it' );
+cmp_assert( false === strpos( CMP_Appearance::inline_css( $bi( array( 'image' => 'wp', 'format' => 'bar' ) ) ), '.cmp__text{min-height' ), 'picture: outside, no extra height' );
+cmp_assert_eq( mb_strlen( $bi( array( 'image_alt' => str_repeat( 'ș', 400 ) ) )['image_alt'], 'UTF-8' ), 300, 'picture: alt text cut by letters, not bytes' );
+
 // Parity with the standalone bundle.
 $bi_cases = array(
 	array( 'image' => 'wp' ),

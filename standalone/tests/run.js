@@ -1429,7 +1429,7 @@ var AP_CASES = [
 	[{ style: 'minimal', palette: 'egov', format: 'card', position: 'top-left', radius: 0, gap: 10, dim: 30, blur: 0, font: 'inherit', backdrop: 'dim' },
 		['cmp--egov', 'cmp--style-minimal', 'cmp--fmt-card', 'cmp--pos-top-left', 'cmp--btn-outline', 'cmp--anim-fade', 'cmp--theme-light', 'cmp--backdrop-dim'],
 		['cmp--egov', 'cmp--style-minimal', 'cmp--anim-fade', 'cmp--theme-light'],
-		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:0px;--cmp-maxw:640px;--cmp-gap:10px;--cmp-blur:0px;--cmp-shadow:none;--cmp-dim:.3;font-family:inherit}'],
+		'.cmp,.cmp-light,.cmp-reopen,.cmp-embed{--cmp-radius:0px;--cmp-maxw:640px;--cmp-gap:10px;--cmp-blur:0px;--cmp-shadow:none;--cmp-dim:.3;font-family:inherit}@media (min-width:576px){.cmp--style-minimal .cmp__actions,.cmp--style-minimal .cmp__choices{flex-wrap:nowrap}.cmp--style-minimal .cmp__btn{white-space:nowrap}}'],
 	[{ palette: 'dark', accent: '#ffd400', theme: 'site', format: 'bar', position: 'top', maxw: 900, shadow: 'small', buttons: 'outline', anim: 'fade' },
 		['cmp--dark', 'cmp--style-brand', 'cmp--fmt-bar', 'cmp--pos-top', 'cmp--btn-outline', 'cmp--anim-fade', 'cmp--theme-site', 'cmp--backdrop-blur'],
 		['cmp--dark', 'cmp--style-brand', 'cmp--anim-fade', 'cmp--theme-site'],
