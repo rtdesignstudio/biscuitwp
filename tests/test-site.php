@@ -735,10 +735,10 @@ foreach ( array( 'index.html' => array( 'ro', '/', 'ro_RO' ), 'en/index.html' =>
 	cmp_assert( is_readable( $png ) && filesize( $png ) < 300 * 1024, "site/assets/og/og-{$og[0]}.png: under 300 KB" );
 }
 cmp_assert( is_executable( $cmp_site_root . '/bin/build-og.sh' ) && is_readable( $cmp_site_root . '/bin/build-og.php' ), 'bin/build-og.sh makes the preview pictures again' );
-// #728 lot 3: three screenshots from the plugin in #functii, and the 16 sites (a number only, no client names).
-foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 16 site-uri din Moldova' ), 'en/index.html' => array( 'en', 'Used on 16 sites in Moldova' ) ) as $page => $l3 ) {
+// #728 lot 3: three screenshots from the plugin in #functii, and the 18 sites (a number only, no client names).
+foreach ( array( 'index.html' => array( 'ro', 'Folosit pe 18 site-uri din Moldova' ), 'en/index.html' => array( 'en', 'Used on 18 sites in Moldova' ) ) as $page => $l3 ) {
 	$html = $cmp_site_read( $page );
-	cmp_assert( false !== strpos( $html, '<ul class="facts">' . "\n" . '<li>' . $l3[1] . '</li>' ), "{$page}: the first fact is the 16 sites" );
+	cmp_assert( false !== strpos( $html, '<ul class="facts">' . "\n" . '<li>' . $l3[1] . '</li>' ), "{$page}: the first fact is the 18 sites" );
 	$fn = 1 === preg_match( '#<section id="functii".*?</section>#s', $html, $fsm ) ? $fsm[0] : '';
 	preg_match_all( '#<figure class="shot shot-[a-z]+"><a href="/assets/shots/[a-z]+-([a-z0-9]+)\.webp"><img src="/assets/shots/([a-z]+)-([a-z0-9]+)\.webp" width="(\d+)" height="(\d+)" alt="([^"]{50,})" loading="lazy" decoding="async"></a><figcaption>[^<]{20,}</figcaption></figure>#', $fn, $shm, PREG_SET_ORDER );
 	cmp_assert_eq( array_map( function ( $m ) { return $m[1]; }, $shm ), array( 'aspect', 'stil1', 'stil2', 'stil3', 'gasite', 'registru', 'verificare' ), "{$page}: seven captioned screenshots with alt text in #functii" );
